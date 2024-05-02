@@ -1,0 +1,41 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>BarraSuperior.qml</file>
+        <file>MenuInicial.qml</file>
+        <file>TelaResultados1.qml</file>
+        <file>BarraInferior.qml</file>
+        <file>TelaCutOff.qml</file>
+        <file>TelaExportar.qml</file>
+        <file>Popupwell.qml</file>
+        <file>PopupCA.qml</file>
+        <file>PopupCP.qml</file>
+        <file>PopupCN.qml</file>
+        <file>PopupTelaCO.qml</file>
+        <file>PopupCQ.qml</file>
+        <file>TelaCQ.qml</file>
+        <file>PopupTelaCQ.qml</file>
+        <file>TelaResultados2.qml</file>
+        <file>TelaSplash.qml</file>
+        <file>images/boot.png</file>
+        <file>appState.js</file>
+        <file>images/network-config.bmp</file>
+        <file>BotoesLaterais.qml</file>
+        <file>images/connect.svg</file>
+        <file>images/readSamples.svg</file>
+        <file>images/randomRead.svg</file>
+        <file>TelaExperimentoGeral.qml</file>
+        <file>BarraSuperiorExperimento.qml</file>
+        <file>images/user.svg</file>
+        <file>images/settings.svg</file>
+        <file>images/midia.svg</file>
+        <file>images/exit.svg</file>
+        <file>images/tools.svg</file>
+        <file>BarraLateral.qml</file>
+        <file>BarraSuperiorPadrao.qml</file>
+        <file>TelaConfFiltros.qml</file>
+        <file>TelaLayout.qml</file>
+        <file>BotoesConectar.qml</file>
+        <file>images/plateInOut.svg</file>
+    </qresource>
+</RCC>

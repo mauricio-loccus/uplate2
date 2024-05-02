@@ -1,0 +1,23 @@
+
+
+
+#define BEEP_ON_BASE  10
+#define BEEP_OFF_BASE  10
+
+
+#ifndef _OUT_CTR_H
+#define _OUT_CTR_H
+
+
+//蜂鸣器参数定义
+typedef struct
+{
+    unsigned char  BeepOnTime;
+    unsigned char  BeepOffTime;
+    unsigned char  BeepCount;
+
+} BEEP_PRA;
+extern BEEP_PRA BeepPra;
+void SystemBeep(void);
+void BeepOnCount(unsigned char nb);
+#endif

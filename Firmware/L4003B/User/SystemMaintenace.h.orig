@@ -1,0 +1,33 @@
+//m_Zero
+#define  ZERO_MIN    1500
+#define   ZERO_MAX   8000
+
+
+
+#define  PLATE_SEL_WIDTH         75
+#define  DOOR_SEL_WIDTH          75
+
+#define  PASSWORD_START_X       (READINGS_START_X)
+#define  PASSWORD_START_Y       (READINGS_START_Y) 
+#define  PASSWORD_END_X           (READINGS_END_X)   
+#define  PASSWORD_END_Y           (READINGS_END_Y)
+
+#define  PASSWORD_R_START_X     (READINGS_R_START_X ) 
+#define  PASSWORD_R_START_Y     (READINGS_R_START_Y) 
+#define  PASSWORD_R_END_X         (READINGS_R_END_X ) 
+#define  PASSWORD_R_END_Y         (READINGS_R_END_Y )  
+
+
+#define  UPDATA_PASSWORD         "123456"
+#define  FORMAT_PASSWORD         "81828384"
+
+#ifndef  __MAINTENACE_H
+#define  __MAINTENACE_H
+
+void SystemMaintenace_Interface(void);
+void SystemMaintenace_Go(void);
+void SystemMaintenace_Scan(void);
+#endif
+
+
+

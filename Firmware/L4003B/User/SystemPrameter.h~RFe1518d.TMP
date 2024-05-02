@@ -1,0 +1,1250 @@
+
+//·µ»ØÖµ¶¨Òå
+#define RETURN_FALSE   0
+#define RETURN_TRUE    1
+//Ô­µã·¶Î§¶¨Òå
+#define START_STEP_MAX_NUM   11000
+#define START_STEP_MIN_NUM   2000
+//Îü¹â¶È·¶Î§¶¨Òå
+#define ABS_VAL_MAX    (6.0f)
+#define ABS_VAL_MIN    (-6.0f)
+//Õñ¶¯Ê±¼ä
+#define SHAKE_TIME_MAX  (599999)
+#define SHAKE_TIME_MIN  (0)
+//¶¯Á¦Ñ§¼ä¸ôÊ±¼ä
+#define KINETIC_INTERFAL_TIME_MAX (599999)
+//¶¨ÐÔ·ÖÎöÈõÑôÐÔ¶¨Òå
+#define WEAK_P_MAX       100
+#define WEAK_P_MIN       0
+
+
+
+#define COLOR_EXP_PICTURE_FRAME  0xe7a362 
+#define COLOR_EXP_PICTURE        0xf8e1c6
+
+#define COLOR_PICTURE           (COLOR_EXP_PICTURE_FRAME)
+
+//±³¾°¶¨Òå
+enum
+{
+	  BK_LOADING=0,
+	  BK_LOADING_HELP,
+	  BK_LOADING_LOGO,
+	  BK_LOADING_FILTER,
+	
+	  BK_LOADING_BK,
+	  BK_LOADING_UD,
+	  BK_LOADING_EP,
+	  BK_LOADING_NC,
+	  BK_LOADING_PC,
+	  BK_LOADING_SD,
+	  BK_LOADING_QC,
+};
+
+
+
+//KeyReturnValue
+enum {PROMPT_MENU_FREE=0,PROMPT_MENU_BUSY};
+
+//InterfaceStatus
+enum{PROMPT_MENU_RETURN_NO=0,PROMPT_MENU_RETURN_CANCEL,PROMPT_MENU_RETURN_ENTER};
+
+enum
+{
+	
+	PROMPT_RUN=1, ////ÒÑÓÃ,ÔËÐÐ×´Ì¬ÎÞ°´Å¥
+	
+
+	PROMPT_UART_ERR,    //ÒÑÓÃ(OK),ÎÞ´®¿Ú,ÌáÊ¾ÒÇÆ÷ÎÞÐÐ³ö´í
+  PROMPT_SYSTEM_ERR,   //ÒÑÓÃ(OK),
+	
+	//PROMPT_USB_DISK_ERR,  //debug ?
+	PROMPT_ANALYSIS_ERROR,
+	PROMPT_NO_USB_DISK,
+//	PROMPT_UPDATA_FILE_ERR,
+	
+	
+
+	PROMPT_FILTER_SAME ,  //ÒÑÓÃ(OK)
+	PROMPT_WARMING,       //ÒÑÓÃ(OK)
+	PROMPT_OK,            //ÒÑÓÃ(OK)
+	PROMPT_ERROR,         //ÒÑÓÃ(OK)
+	PROMPT_SAME_NAME,     //ÒÑÓÃ(OK)
+	PROMPT_STATUS,        //ÒÑÓÃ(OK)
+	PROMPT_CONFIRM,       //OKÇø·Ö±êÖ¾
+	
+	
+	
+	PROMPT_YES_NO,   //ÒÑÓÃ(Yes no)
+	
+	PROMPT_RESTORY_FACTORY,
+	PROMPT_SAVE_FACTORY,
+	PROMPT_SAVE_FILE,
+	
+};
+#define PROMPT_CHAR_MAX   100
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#define LANGUAGE_TYPES 2 //2014-8-10?
+#define LANGUAGE_CHAR_MAX 10 //2014-8-10?
+#define INTERPRETDLG_TITLE_CHAR_MAX 32
+#define TESTDLG_TITLE_CHAR_MAX 28
+#define ABSDLG_TITLE_CHAR_MAX 24
+#define PLATE_IN_OUT_CHAR_MAX 14//2014-8-10?
+#define KINETIC_SELECT_CHAR_MAX 20//2014-8-10?
+
+
+
+
+
+#define COPYRIGHT_START_X 175
+#define COPYRIGHT_START_Y 166
+#define COPYRIGHT_END_X COPYRIGHT_START_X + 449
+#define COPYRIGHT_END_Y COPYRIGHT_START_Y + 230
+//#define CALIBRATOR_ABS_MAX 10
+
+
+
+
+
+#define ABS_CHANNEL_MAX 8
+
+#define SECOND_COMMAND_MAX 14 //old 13
+#define COMMAND_HEAD_LENGTH 20
+
+#define FILE_NAME_MAX 12 //2014-8-10?
+#define ABC_CURSOR_HEIGHT 20 //2014-8-10?
+#define NUM_CURSOR_HEIGHT 20 //2014-8-10?
+#define EDIT_LINE_MAX 100 //2014-8-10?
+#define FILE_NUMBER_MAX 1000 //2014-8-10?
+#define FILE_NAME_NUMBER_MAX 200 //2014-8-10?
+
+#define SHAKE_HOUR_MAX 99 //2014-8-10?
+#define SHAKE_HOUR_MIN 0 //2014-8-10?
+#define SHAKE_MINUTE_MAX 59 //2014-8-10?
+#define SHAKE_MINUTE_MIN 0 //2014-8-10?
+#define SHAKE_SECOND_MAX 59 //2014-8-10?
+#define SHAKE_SECOND_MIN 0 //2014-8-10?
+#define SHAKE_HOUR_START 126 //2014-8-10?
+#define SHAKE_MINUTE_START 156 //2014-8-10?
+#define SHAKE_SECOND_START 184 //2014-8-10?
+//#define SHAKE_TIME_WIDTH 20 //2014-8-10?
+
+#define DATETIME_HOUR_MAX 23 //2014-8-10?
+#define DATETIME_HOUR_MIN 0 //2014-8-10?
+#define DATETIME_MINUTE_MAX 59 //2014-8-10?
+#define DATETIME_MINUTE_MIN 0 //2014-8-10?
+#define DATETIME_SECOND_MAX 59 //2014-8-10?
+#define DATETIME_SECOND_MIN 0 //2014-8-10?
+#define DATETIME_HOUR_START 126 //126
+#define DATETIME_MINUTE_START 156 //156
+#define DATETIME_SECOND_START 184 //2014-8-10?
+#define DATETIME_TIME_WIDTH 20 //2014-8-10?
+
+#define DATETIME_YEAR_MAX 2999 //2014-8-10?
+#define DATETIME_YEAR_MIN 2000 //2014-8-10?
+#define DATETIME_MONTH_MAX 12 //2014-8-10?
+#define DATETIME_MONTH_MIN 1 //2014-8-10?
+#define DATETIME_DAY_MAX 31 //2014-8-10?
+#define DATETIME_DAY_MIN 1 //2014-8-10?
+//#define DATETIME_MONTH_START 126 //2014-8-10?
+//#define DATETIME_DAY_START 156 //2014-8-10?
+//#define DATETIME_YEAR_START 184 //2014-8-10?
+#define DATETIME_YEAR_WIDTH 40 //2014-8-10?
+
+#define PROGRAM_PREPROCESS_START_X 530 //2014-8-10?
+#define PROGRAM_KINETIC_START_X 500 //2014-8-10?
+#define PROGRAM_CURVES_START_X 500 //2014-8-10?
+#define PROGRAM_FUNCTION_AREA_DX 15 //2014-8-10?
+#define PROGRAM_FUNCTION_AREA_DY 15 //2014-8-10?
+///#define CALCULATION_PARA_START_X 103 //2014-8-10?
+#define MEASUREMENT_FILTER1_MAX 8 //2014-8-10?
+#define MEASUREMENT_FILTER1_MIN 1 //2014-8-10?
+#define MEASUREMENT_FILTER2_MAX 8 //2014-8-10?
+#define MEASUREMENT_FILTER2_MIN 0 //2014-8-10?
+#define PRINT_REPORT_CHAR_MAX 25 //2014-8-10?
+#define FILTER_MAX 8 
+#define FILTER_NO (-1) 
+#define CHINESE 1 
+#define ENGLISH 0 
+#define SPAIN 2 
+#define JAPANESE 3 //2014-8-10?
+#define LANGUAGE_CHAR_MAX 10 //2014-8-10?
+#define INTERPRETDLG_TITLE_CHAR_MAX 32
+#define TESTDLG_TITLE_CHAR_MAX 28
+#define ABSDLG_TITLE_CHAR_MAX 24
+#define PLATE_IN_OUT_CHAR_MAX 14//2014-8-10?
+#define KINETIC_SELECT_CHAR_MAX 20//2014-8-10?
+//#define LANGUAGE_TYPES 4 //2014-8-10?
+//#define LANGUAGE_TYPES 2 //2014-8-10?
+#define DOOR_CHAR_MAX 10 //2014-8-10?
+#define DOOR_STATUS_MAX 2 //2014-8-10?
+#define BUTTON_BMP_MAX 100 //2015-2-13
+#define RAW_INTENSITY_CHAR_MAX 8 //2014-8-10?
+#define RAW_INTENSITY_STATUS_MAX 2 //2014-8-10?
+
+#define PASSWORD_SET_POS_START (320) //2014-8-10?
+#define PASSWORD_START 446 //2014-8-10?
+#define PASSWORD_WIDTH 62 //2014-8-10?
+
+#define FILTER_LUN_START_BIAS 7 //2014-8-10?
+//2015-3-16
+#define WAVELENGTH_MAX 780 //2014-8-10?
+//#define WAVELENGTH_MIN 380 //2014-8-10?
+#define WAVELENGTH_MIN 340 //2015-11-16?
+#define FILTER_TEXTBOX_START 5 //2014-8-10?
+#define FILTER_TEXTBOX_WIDTH (FILTER_TEXTBOX_START + 50) //2014-8-10?
+#define KINETIC_SET_POS_START (320) //2014-8-10?
+#define KINETIC_PARA_POS_START (300) //2014-8-10?
+#define KINETIC_PARA_BLANK_START (350) //2014-8-10?
+
+#define KINETIC_TIME_MIN (7) //2014-8-10?
+
+#define KINETIC_HOUR_MAX 99 //2014-8-10?
+#define KINETIC_HOUR_MIN 0 //2014-8-10?
+#define KINETIC_MINUTE_MAX 59 //2014-8-10?
+#define KINETIC_MINUTE_MIN 0 //2014-8-10?
+#define KINETIC_SECOND_MAX 59 //2014-8-10?
+#define KINETIC_SECOND_MIN 0 //2014-8-10?
+#define KINETIC_HOUR_START 126 //2014-8-10?
+#define KINETIC_READINGS_START 126 //2014-8-10?
+#define KINETIC_MINUTE_START 154 //2014-8-10?
+#define KINETIC_SECOND_START 182 //2014-8-10?
+#define KINETIC_TIME_WIDTH 20 //2014-8-10?
+//#define KINETIC_READINGS_WIDTH 30 //2014-8-10?
+#define KINETIC_READINGS_WIDTH 66 //2014-8-10?
+#define KINETIC_CHANGE_WIDTH 66 //2014-8-10?
+
+#define ORIGIN_READINGS_START 126 //2015-2-13
+#define ORIGIN_READINGS_WIDTH 70 //2015-2-13
+
+#define CALIBRATORS_MAX 12 //2014-8-10?
+#define CONTROLS_MAX 9 //2014-8-10?
+
+#define ANALYSIS_MODE_CHAR_MAX 25 //2014-8-19?
+
+#define NORMAL_ANALYSIS_WELL_SERIAL_NUMBER_START (EDIT_START_X+36) //2014-8-19?
+#define NORMAL_ANALYSIS_WELL_DATA_START_X (EDIT_START_X+27) //2014-8-19?
+#define NORMAL_ANALYSIS_WELL_DATA_START_Y (160) //2014-8-19?
+#define NORMAL_ANALYSIS_WELL_SERIAL_ALPHA_START (EDIT_START_X) //2014-8-19?
+#define NORMAL_ANALYSIS_WELL_WIDTH_DX (50) //2014-8-19?
+#define NORMAL_ANALYSIS_WELL_HEIGHT_DY (36)// (35) //2014-8-19?
+
+
+#define CALIBRATOR_CONCENTRATION_UNIT_MAX 7
+#define CALIBRATOR_CONCENTRATION_UNIT_CHAR_MAX 8
+
+#define ABS_UPPER_LIMIT 5.0f //2014-8-19?
+#define ABS_RANGE_MAX 4.0f
+#define ABS_RANGE_MIN 0.0f
+
+#define KINETIC_RAWDATA_SHIFT 10
+#define KINETIC_RAWDATA_SHIFT1 25
+
+#define ANALYSIS_FILTER_SELECT_START_X (MAIN_RET_START_X) //2014-8-19? 662
+#define ANALYSIS_FILTER_SELECT_END_X (MAIN_RET_START_X + 121) //2014-8-19? 783
+#define ANALYSIS_FILTER_SELECT_START_Y (MAIN_RET_START_Y - 230) //2014-8-19? 152
+#define ANALYSIS_FILTER_SELECT_END_Y (MAIN_RET_START_Y - 230 + 46) //2014-8-19? 198
+
+#define ANALYSIS_LOG_SELECT_START_X (MAIN_RET_START_X) //2014-8-19?
+#define ANALYSIS_LOG_SELECT_END_X (MAIN_RET_START_X + 121) //2014-8-19?
+#define ANALYSIS_LOG_SELECT_START_Y (MAIN_RET_START_Y - 170) //2014-8-19?
+#define ANALYSIS_LOG_SELECT_END_Y (MAIN_RET_START_Y - 170 + 46) //2014-8-19?
+
+
+#define FRUTE_BUTTON_2_START_X (FRUTE_BUTTON_3_START_X - 100) //2014-8-19?
+#define FRUTE_BUTTON_2_START_Y (FRUTE_BUTTON_3_START_Y)
+#define FRUTE_BUTTON_2_END_X (FRUTE_BUTTON_3_END_X - 100)
+#define FRUTE_BUTTON_2_END_Y (FRUTE_BUTTON_3_END_Y)
+
+#define FRUTE_BUTTON_1_START_X (FRUTE_BUTTON_3_START_X - 200) //2014-8-19?
+#define FRUTE_BUTTON_1_START_Y (FRUTE_BUTTON_3_START_Y)
+#define FRUTE_BUTTON_1_END_X (FRUTE_BUTTON_3_END_X - 200)
+#define FRUTE_BUTTON_1_END_Y (FRUTE_BUTTON_3_END_Y)
+
+#define FRUTE_BUTTON_0_START_X (FRUTE_BUTTON_3_START_X - 300) //2014-8-19?
+#define FRUTE_BUTTON_0_START_Y (FRUTE_BUTTON_3_START_Y)
+#define FRUTE_BUTTON_0_END_X (FRUTE_BUTTON_3_END_X - 300)
+#define FRUTE_BUTTON_0_END_Y (FRUTE_BUTTON_3_END_Y)
+
+#define FRUTE_BUTTON_A_START_X (FRUTE_BUTTON_3_START_X - 400) //2014-8-19?
+#define FRUTE_BUTTON_A_START_Y (FRUTE_BUTTON_3_START_Y)
+#define FRUTE_BUTTON_A_END_X (FRUTE_BUTTON_3_END_X - 400)
+#define FRUTE_BUTTON_A_END_Y (FRUTE_BUTTON_3_END_Y)
+
+#define NORMAL_ANLYSIS_RAWDATA_FILTER_SELECT_WIDTH 260 //230
+#define NORMAL_ANLYSIS_RAWDATA_FILTER_SELECT_UNIT_WIDTH 80 //70
+
+#define NORMAL_ANLYSIS_LOG_SELECT_WIDTH 470 //330 //2014-8-19?
+#define NORMAL_ANLYSIS_LOG_SELECT_UNIT_WIDTH 110 //2014-8-19?
+
+//#define CONCENTRATION_UNIT_SELECT_WIDTH 350 //2014-8-19?
+//#define CONCENTRATION_UNIT_SELECT_UNIT_WIDTH 50 //2014-8-19?
+
+#define CONCENTRATION_EDIT_TABLE_WIDTH 320 //2014-8-19?
+#define CONCENTRATION_EDIT_TABLE_HEIGHT 270 //2014-8-19?
+
+
+
+//??????????
+#define TABLE_CONCENTRATION_WIDTH 311                                //??????
+#define TABLE_CONCENTRATION_SELECT_WIDTH 278               //???????
+#define TABLE_CONCENTRATION_SELECT_HEIGHT 33                //???????
+#define TABLE_CONCENTRATION_ROW_HEIGHT 37                     //??????
+
+//#define TABLE_CONCENTRATION1_START_X        18                   //?????
+//#define TABLE_CONCENTRATION1_START_Y        154
+#define TABLE_CONCENTRATION1_COLUMN_NO  23                   //NO????X
+#define TABLE_CONCENTRATION1_COLUMN_CONCENTRATION  120 //??????X
+
+
+//#define TABLE_CONCENTRATION2_START_X         (TABLE_CONCENTRATION1_START_X + TABLE_CONCENTRATION_WIDTH)//2014-8-10?
+//#define TABLE_CONCENTRATION2_START_Y        154
+#define TABLE_CONCENTRATION2_COLUMN_NO  (TABLE_CONCENTRATION1_COLUMN_NO + TABLE_CONCENTRATION_WIDTH)//2014-8-10?
+#define TABLE_CONCENTRATION2_COLUMN_CONCENTRATION  (TABLE_CONCENTRATION1_COLUMN_CONCENTRATION + TABLE_CONCENTRATION_WIDTH)
+#define TABLE_CONCENTRATION_ROW_TITLE_START_Y  145//145// 154//2014-8-10?
+#define TABLE_CONCENTRATION_ROW_TITLE_END_Y  196//2014-8-10?
+
+#define TABLE_CONCENTRATION_TXT_OFFSET_Y  8  //?
+
+
+
+#define ANALYSIS_ERROR_CHAR_MAX 50
+#define FILE_ERROR_CHAR_MAX 50
+#define SYSTEM_ERROR_CHAR_MAX 50
+#define TEST_INFO_CHAR_MAX 50
+#define KINETIC_ANALYSIS_CHAR_MAX 15
+#define RUN_ERROR_CHAR_MAX 50
+#define RX_BUFFER_MAX 1000
+//#define ANALYSIS_ERROR 1
+#define ANALYSIS_CURVE_POINT_MAX 100
+
+
+//#define TABLE_ABS1_START_X      (TABLE_CONCENTRATION1_START_X)
+//#define TABLE_ABS1_START_Y      (TABLE_CONCENTRATION1_START_Y)
+//???????????
+#define TABLE_ABS1_COLUMN_NO                      TABLE_CONCENTRATION1_COLUMN_NO  
+#define TABLE_ABS1_COLUMN_CAL                     TABLE_ABS1_COLUMN_NO + 45  
+#define TABLE_ABS1_COLUMN_PRACTICAL        TABLE_ABS1_COLUMN_CAL + 90  
+#define TABLE_ABS1_COLUMN_ERROR               TABLE_ABS1_COLUMN_PRACTICAL + 85  
+#define TABLE_ABS2_COLUMN_NO                       TABLE_CONCENTRATION2_COLUMN_NO  
+#define TABLE_ABS2_COLUMN_CAL                      TABLE_ABS2_COLUMN_NO + 45  
+#define TABLE_ABS2_COLUMN_PRACTICAL          TABLE_ABS2_COLUMN_CAL + 90  
+#define TABLE_ABS2_COLUMN_ERROR                TABLE_ABS2_COLUMN_PRACTICAL + 85  
+
+
+#define EQUATION_SOLUTION_ERROR                 0.0001f
+#define CONCENTRATION_VALUE_MIN                  (1e-9)  //1e-9 (0.0000001f)//
+#define EQUATION_SOLUTION_ITERATE_MAX            1000
+#define CONCENTRATION_MAX                        (9.9e+9)  //9.999e+9 //99999999 //       
+#define INTERPRET_COEF_MAX                       (9.9e+9)    //9.99e+9   99999999 //      
+#define SPLINE_EXTEND_TIMES                              1.0f //2015-8-7
+
+#define MEASURE_TIMEOUT 60 //?????? 60 //2015-2-20
+#define SELFTEST_TIMEOUT 30 //?????? 80, ????10
+//#define SELFTEST_TIMEOUT 80 //?????? 80, ????10//
+#define PLATE_TIMEOUT 20 //???????
+#define CALIBRATE_TIMEOUT 20 //????????
+#define INTENSITY_TEST_TIMEOUT 200 //????????
+#define SAVE_TIMEOUT 5 //??????????
+#define SHAKE_TIMEOUT 20 //??????
+#define FILTER_TIMEOUT 5 //??????
+#define INIT_TIMEOUT 80 //????? 80, ????10
+
+
+
+
+
+
+
+#define QC_MAX 9 
+#define QC_COEF 2 
+//#define QC_PAGE_NUMBER 6
+#define QC_PAGE_NUMBER 5
+#define QC_PAGES 2
+
+#define INIT_PROGRESS_START_X 332
+#define INIT_PROGRESS_START_Y 358
+#define INIT_PROGRESS_START_DX 14
+#define INIT_PROGRESS_START_SIZE 11
+
+#define SYSSET_BK_START_X  0
+#define SYSSET_BK_START_Y  122
+#define SYSSET_BK_END_X    800
+#define SYSSET_BK_END_Y    436
+
+#define MACHINE_BUSY 1
+#define MACHINE_CONNECT_ALREADY 2
+#define MACHINE_NAK 3
+
+
+
+
+
+
+
+
+//gSystem.SystemErrCode
+enum{
+	//ERRCODE_E2P=1,
+	  ERRCODE_SPI_FLASH =0x0800,  //ÏÂÎ»»úÉÏ·¢´úÂëµ½0x0400
+	  ERRCODE_NAND_FLASH=0x1000,
+	  ERRCODE_UART=0x2000,
+	  ERRCODE_RTC=0x4000,
+    
+};
+
+
+
+
+
+//·ÖÎö³ö´í
+enum {ANALYSIS_SUCCESS = 0, ANALYSIS_ERROR_CALIBRATOR_NUMBER, ANALYSIS_ERROR_FITTING_FAIL
+    , ANALYSIS_ERROR_LOGX_FAIL, ANALYSIS_ERROR_LOGY_FAIL, ANALYSIS_ERROR_DISABLE_CONCENTRATION
+    , ANALYSIS_ERROR_DISABLE_LOG_CONCENTRATION, ANALYSIS_ERROR_LOG_CONCENTRATION, ANALYSIS_ERROR_ABS_NEGATIVE
+    , ANALYSIS_ERROR_NO_NC, ANALYSIS_ERROR_NO_PC, ANALYSIS_ERROR_NO_CONCENTRATION
+	, ANALYSIS_ERROR_NO_QC, ANALYSIS_ERROR_NO_QC_RESULT, ANALYSIS_ERROR_KINETIC_DATA, ANALYSIS_ERROR_MAX};
+
+
+	
+//??????
+enum {TEST_INFO_SCAN_DATA = 0, TEST_INFO_USB_ERROR, TEST_INFO_INTENSITY_DATA, TEST_INFO_MAX};
+//??????
+enum {SYSTEM_ERROR_WHEEL = 0, SYSTEM_ERROR_FRONT, SYSTEM_ERROR_REAR
+    , SYSTEM_ERROR_EEPROM, SYSTEM_ERROR_ORIGIN
+    , SYSTEM_ERROR_INTENSITY_WEAK, SYSTEM_ERROR_INTENSITY_WEAKER, SYSTEM_ERROR_INTENSITY_STRONG
+    , SYSTEM_ERROR_BACKGROUND_STRONG, SYSTEM_ERROR_FILTER_DATA, SYSTEM_ERROR_INTENSITY_DATA
+    , SYSTEM_ERROR_SPIFLASH,SYSTEM_ERROR_NANDFLASH, SYSTEM_ERROR_UART,SYSTEM_ERROR_RTC,
+      SYSTEM_ERROR_MAX};
+//????
+/*
+enum {ANALYSIS_SUCCESS = 0, ANALYSIS_ERROR_CALIBRATOR_NUMBER, ANALYSIS_ERROR_FITTING_FAIL
+    , ANALYSIS_ERROR_LOGX_FAIL, ANALYSIS_ERROR_LOGY_FAIL, ANALYSIS_ERROR_DISABLE_CONCENTRATION
+    , ANALYSIS_ERROR_DISABLE_LOG_CONCENTRATION, ANALYSIS_ERROR_LOG_CONCENTRATION, ANALYSIS_ERROR_ABS_NEGATIVE
+    , ANALYSIS_ERROR_NO_NC, ANALYSIS_ERROR_NO_PC, ANALYSIS_ERROR_NO_CONCENTRATION
+	, ANALYSIS_ERROR_NO_QC, ANALYSIS_ERROR_NO_QC_RESULT, ANALYSIS_ERROR_KINETIC_DATA, ANALYSIS_ERROR_MAX};
+*/
+//????
+enum {FILE_ERROR_OPEN = 0, FILE_ERROR_DELETE, FILE_ERROR_DISK, FILE_ERROR_IMPORT
+    , FILE_ERROR_EXPORT, FILE_ERROR_NO_DELETE, FILE_ERROR_NO_OPEN
+	, FILE_ERROR_DISK_MODE, FILE_ERROR_FLASH_MODE, FILE_ERROR_OVERWRITE, FILE_ERROR_SAVE,  FILE_ERROR_OPENED, FILE_ERROR_MAX};
+
+
+//????
+enum {RUN_MODE_IDLE = 0, RUN_MODE_PLATE_IN, RUN_MODE_PLATE_OUT, RUN_MODE_STOP, RUN_MODE_MEASURE, RUN_MODE_SHAKE
+    , RUN_MODE_SELFTEST, RUN_MODE_FILTER, RUN_MODE_CALIBRATE_ORIGIN, RUN_MODE_SAVE_ORIGIN, RUN_MODE_INTENSITY_TEST, RUN_MODE_MAX};
+
+//????
+
+enum {CPU_COMMAND_NONE = 0, CPU_COMMAND_MEASURE, CPU_COMMAND_INTENSITY_SET, CPU_COMMAND_FAN, CPU_COMMAND_STOP, CPU_COMMAND_PLATE_OUT = 4 //????????
+    , CPU_COMMAND_PLATE_IN, CPU_COMMAND_INCUBATION, CPU_COMMAND_READ_TEMP, CPU_COMMAND_SHAKE_NONE, CPU_COMMAND_EEPROM
+	, CPU_COMMAND_FILTER_ORIGIN, CPU_COMMAND_CALIBRATE_ORIGIN, CPU_COMMAND_SAVE_ORIGIN, CPU_COMMAND_SHAKE, CPU_COMMAND_SELFTEST
+	, CPU_COMMAND_FILTER, CPU_COMMAND_REPEAT, CPU_COMMAND_MAX};
+
+enum {CPU_RESPONSE_NONE = 0, CPU_RESPONSE_COMMAND, CPU_RESPONSE_TEMP, CPU_RESPONSE_INTENSITY_ONE, CPU_RESPONSE_INTENSITY_TWO //??????
+       , CPU_RESPONSE_END,CPU_RESPONSE_ORIGIN, CPU_RESPONSE_ERROR_CODE, CPU_RESPONSE_SCAN_DATA, CPU_RESPONSE_INTENSITY_DATA, CPU_RESPONSE_STOP_END, CPU_RESPONSE_MAX}; 
+
+
+
+
+	
+	
+	
+
+
+
+
+
+
+
+//#define TUBE_MAX          10              //96¿×°å
+
+
+//#define TUBE_MAX          8             //96¿×°
+//#define TUBE_MAX_PER_ROW       4
+//#define TUBE_MAX_PER_COL       2
+
+
+#define TUBE_MAX          96             //96¿×°
+#define TUBE_MAX_PER_ROW       12
+#define TUBE_MAX_PER_COL       8
+
+#define FILTER_PLATE_MAX  2               //ÂË¹âÆ¬×î¶àÎª2°å(Ë«Í¨µÀ)
+#define FILTER_MAX   8                    //8¸öÂË¹âÆ¬
+#define CHANNEL_MAX 9                     //9Í¨µÀ
+#define SCAN_CHANNEL_MAX  8               //É¨Ãè8Í¨µÀ
+#define ABS_CHANNEL_MAX 8                 //Îü¹â¶ÈÎª8Í¨µÀ
+
+#define CALIBRATOR_CONCENTRATION_MAX 12   //Å¨¶ÈÐ£×¼×î¶àÎª12×éÊý¾Ý
+#define  CALIBRATOR_ABS_MAX 12            //Îü¹â¶ÈÐ£×¼µÄ×éÊý
+
+
+
+#define PRINT_REPORT_CHAR_MAX 25          
+
+
+//#define KINETIC_READINGS_MAX (100)        //¶¯Á¦Ñ§¶ÁÊý×î¶àÎª100´Î
+
+#define KINETIC_READINGS_MAX (100)        //¶¯Á¦Ñ§¶ÁÊý×î¶àÎª100´Î
+#define KINETIC_READINGS_MIN (2)          
+
+
+
+
+
+//ÖÊ¿Ø²ÎÊý¶¨Òå
+#define QC_MAX 9
+
+
+#define QC_COEF 2 
+#define QC_PAGE_NUMBER 5
+#define QC_PAGES 2
+
+//ÓïÑÔ¶¨Òå
+enum{LANGUAGE_EN=0,LANGUAGE_CH};
+#define LANGUAGE_DEFAULT  (LANGUAGE_EN)
+
+
+
+
+//Õñ¶¯²ÎÊý¶¨Òå
+enum 
+{
+	SHAKE_SPEED_SLOW=0,  //Âý
+	SHAKE_SPEED_NORMAL,  //Õý³£
+	SHAKE_SPEED_FAST,    //¿ì
+};
+
+
+#define SEND_DELAY50MS  25// 25*2MS fmc161209 
+
+//1.2.???????
+enum MENU_INTERFACE
+{
+	MI_INIT = 0,
+	MI_TEST,
+	MI_PROTOCOL,
+	  
+
+		MI_PROTOCOL_MEASURE,
+		      
+		MI_PROTOCOL_SHAKE,
+		MI_PROTOCOL_INTER,
+		MI_PROTOCOL_LAYOUT,
+
+		MI_OPEN_FILE,
+		      MI_CONCENTRATION_SET,
+		MI_PROTOCOL_CALCULATE,
+		   MI_PROTOCOL_KINETIC,
+		MI_PROTOCOL_QUALITY,
+	MI_REPORT,
+	   MI_EXPORT_REPORT,
+
+	
+
+	MI_SET,
+	    
+		    MI_ADVANCE_PASSWORD,
+	    MI_SYSTEM_TIME,
+	    MI_LANGUAGE_SET,
+		MI_FILTER_SET,
+       MI_PRINTER_SET,
+	   MI_MAITENACE,
+	    MI_ABS_CALIBRATION,
+			MI_INSTRUMENT_UPDATE,
+
+	MI_HELP,
+}; //SystemInterface
+
+
+
+
+#ifndef __APP_GUI_H
+#define __APP_GUI_H
+
+
+
+union  FLOAT_VAL
+{
+	float  f_val;
+	unsigned char   c_val[4];
+};
+extern union  FLOAT_VAL FloatValue;
+
+
+typedef struct
+{
+	char InputStr[PROMPT_CHAR_MAX];
+	
+	
+	
+	unsigned char KeyReturnValue;
+	
+	
+	
+	unsigned  char    InterfaceStatus; 
+
+
+  
+	unsigned  char    InterfaceFlag;    
+}PROMPT_MENU;
+
+extern PROMPT_MENU  PromptMenu;
+
+
+//unsigned char CreateFlag;
+enum
+{
+	CREATE_PROGRAM=0,
+	CREATE_DATA,
+};
+
+
+
+typedef struct{
+	unsigned char  DoorStatus;                   //???
+	
+
+
+	unsigned int  SystemErrCode;              //????
+	unsigned short  nChannel;
+
+	//unsigned char  SystemInterface;		   //????
+	enum MENU_INTERFACE SystemInterface;
+
+
+
+	unsigned char MenuRefreshFlag;
+	unsigned char TitleUpdateFlag;
+	unsigned char ContentUpdateFlag;
+	unsigned char ToolsUpdateFlag;
+	unsigned char StatusUpdateFlag;
+
+	unsigned char TitleButtonEnable;
+	
+	unsigned char PasswordOpenFlag;
+	
+	unsigned char SecFlag;
+	unsigned char SysSec;
+	unsigned char MinFlag;
+	
+	unsigned char CreateFlag;
+	unsigned short ProgramMax;
+	unsigned short CurrBlock;    //ÔÚNandFlashÖÐµÄµ±Ç°¿éºÅ
+	unsigned short CurrBlockBack; //ÔÚNandFlashÖÐµÄµ±Ç°¿éºÅ±¸·Ý
+	
+	unsigned short UsbProgramMax;
+	
+	unsigned char SaveAsFlag;
+	unsigned char RunReqFlag;
+	unsigned char NewFlag;
+}SYSTEM_P;
+extern SYSTEM_P gSystem;
+
+
+
+//2.ÏµÍ³ÉèÖÃÄ£¿é
+//2.1)ÏµÍ³Ê±¼ä
+typedef struct
+{
+	signed short  Year;		//Äê
+	signed char   Month;		//ÔÂ
+	signed char   Day;		//ÈÕ
+	signed char   Hour;		//Ê±
+	signed char   Min;		//·Ö
+	signed char   Sec;		//Ãë
+	signed char   MilliSec;	//ºÁÃë
+}SYSTEM_TIME;
+//DateTimePra  
+
+extern SYSTEM_TIME  SystemTimePra;
+//extern SYSTEM_TIME  SystemTimePraBack;
+
+
+
+
+
+//3.³ÌÐò¹ÜÀíÄ£¿é
+#define PROGRAM_NAME_LENGTH   15//15						 //³ÌÐòÃû³¤¶È
+#define PROGRAM_MAX           1000					 //³ÌÐò×î´óÊý
+//3.1³ÌÐòÃû½á¹¹Ìå
+
+//unsigned char select_row;
+typedef struct PROGRAM_NAME
+{ 
+
+	char Name[PROGRAM_NAME_LENGTH+1];						  //³ÌÐòÃû
+	
+	unsigned char HasData; //2015-4-1           //¿ì½Ý±êÖ¾
+	SYSTEM_TIME   DateTime;								      //ÐÞ¸Ä»ò´´½¨Ê±¼ä
+	//unsigned char LockFlag;								    //Ëø¶¨±êÖ¾
+	//unsigned long CreatTime;//FMC161022
+	//PROGRAMNAME   *Next;   
+  unsigned short BlockAddr;                   //NandFlashÖÐµÄ¿éµØÖ·
+}PROGRAMNAME;
+
+extern PROGRAMNAME CurrProgramName;                     //µ±Ç°³ÌÐòÃû
+extern PROGRAMNAME ProgramName[];                       //100¸ö³ÌÐòÃûÎÄ¼þ 
+extern PROGRAMNAME UsbProgramName[];                       //100¸ö³ÌÐòÃûÎÄ¼þ 
+//extern PROGRAMNAME UsbProgramName[];  
+//extern unsigned char ProgramMax;
+
+
+
+
+
+
+
+
+typedef struct
+{
+	unsigned char Enable; //??????
+	unsigned char AbsFlag; //?????
+	float fCoef[3];
+	float fWeakPValue;
+	unsigned char GreatFlag; //???????
+
+	
+	
+	
+  int nTotalNC[3];
+	int nTotalPC[3];
+
+	float dReferenceNC[3];
+	float dReferencePC[3];
+	float dReference[3];
+
+	int nAnalysisResult[3];
+
+	unsigned char bWeakPos[3][TUBE_MAX];
+	unsigned char bPos[3][TUBE_MAX];
+} INTERPRET_PARA; 
+//extern INTERPRET_PARA InterpretPara;
+
+
+
+
+typedef struct
+{
+	unsigned char Enable; //??????
+	unsigned char AbsFlag; //?????,0????,1?????
+	
+	float dTarget[2][QC_MAX]; //???   ,0????,1?????
+	float dSD[2][QC_MAX]; //????
+  float dCV[2][QC_MAX]; //????
+	float dUpperLimit[2][QC_MAX];//??
+	float dLowerLimit[2][QC_MAX];//??
+} QUALITY_PARA;
+
+//extern QUALITY_PARA QualityParaBack;
+
+
+
+
+typedef struct
+{
+	//unsigned char Enable; //??????
+	//unsigned char AbsFlag; //?????
+	
+	//float dTarget[2][QC_MAX]; //???
+//	float dSD[3][QC_MAX]; //3?? ????
+ //   float dCV[3][QC_MAX]; //3??
+//	float dUpperLimit[2][QC_MAX];//??
+//	float dLowerLimit[2][QC_MAX];//??
+
+
+	//short nCurrentSelect;
+//	short nCurrentSelectPage;
+	//short nCurrentPage;
+
+
+	unsigned char  bFailed[3][QC_MAX];
+	int nTotalQC[3][QC_MAX];
+	int nTotal[3];
+	float dReferenceQC[3][QC_MAX];
+	unsigned char  bReferenceOK[3][QC_MAX]; 
+	int nAnalysisResult[3];
+
+	unsigned char nCurrentPageAnalysis;
+	unsigned char nPageTotalAnalysis;
+
+	 /*	int nCurrentSelect;
+	int nCurrentSelectPage;
+	int nCurrentPage;
+	int nCurrentPageAnalysis;
+	int nPageTotalAnalysis;*/
+} QUALITY_RESULT;
+
+//extern QUALITY_RESULT QualityResultBack;
+
+
+
+
+
+typedef struct
+{
+	float dAverageRate[TUBE_MAX];
+} KINETIC_AVERAGE_RATE;
+
+typedef struct
+{
+	float dMaxRate[TUBE_MAX];
+} KINETIC_MAX_RATE;
+
+typedef struct
+{
+	float dMaxWell[TUBE_MAX];
+} KINETIC_MAX_WELL;
+
+
+
+typedef struct
+{
+	int nTime[TUBE_MAX];
+	
+   unsigned char  NotUse[TUBE_MAX];
+	 unsigned char  NotUse2[TUBE_MAX];
+} KINETIC_TIME_MAX_RATE;
+
+typedef struct
+{
+	int nTime[TUBE_MAX];
+	unsigned char  bOK[TUBE_MAX];
+	
+	unsigned char  NotUse[TUBE_MAX];///
+} KINETIC_TIME_CHANGE;
+
+typedef struct
+{
+	int nTime[TUBE_MAX];
+	
+	unsigned char  NotUse[TUBE_MAX];
+	unsigned char  NotUse2[TUBE_MAX];
+} KINETIC_TIME_MAX;
+
+
+/*
+typedef struct
+{
+	unsigned char Enable; //??
+	signed char PreProcess; //???
+	signed char Curve; //??
+	unsigned char Readings;
+	unsigned long TimeInterval;
+
+	unsigned char kinetic_analysis_mode;
+	unsigned char FirstReadings;
+	unsigned char EndReadings;
+	unsigned char BaseLineSel;
+	unsigned char BaseLinePoint;
+	unsigned char Change;
+
+} KINETIC_CALCU;
+
+extern KINETIC_CALCU KineticCalcuBack;
+*/
+
+
+//°´Å¥½á¹¹Ìå¶¨Òå
+typedef struct {
+	int          xPos;
+	int          yPos;
+	int          xSize;
+	int          ySize;
+	const char * acLabelEn;									 //°´Å¥¶ÔÓ¦µÄ¼üÂë
+	const char * acLabelCh;
+} BUTTON_DATA;
+
+
+
+typedef struct
+{
+	//unsigned char i;
+	unsigned char Enable; //??bool bHasData;bTypeExpand;
+	signed char PreProcess; //Ô¤´¦Àí
+	signed char Curve; //ÇúÏß
+	unsigned char Readings;// ¶¯Á¦Ñ§¶ÁÊý unsigned char  kinetic_readings;
+	unsigned int TimeInterval;//¶¯Á¦Ñ§Ê±¼ä¼ä¸ô
+
+
+	unsigned char kinetic_analysis_mode;//¶¯Á¦Ñ§·ÖÎöÄ£Ê½
+	unsigned char FirstReadings;//unsigned char  kinetic_first_readings;
+	unsigned char EndReadings;//unsigned char  kinetic_last_readings;
+	unsigned char BaseLineSel;//bool bBeginning;
+	unsigned char BaseLinePoint;//int nPoints;
+	float Change;//float dChange;
+
+
+
+	unsigned char  kinetic_readings_practical;///////
+	unsigned char  kinetic_readings_analysis; //×ö¶¯Á¦Ñ§·ÖÎöÊ±ÓÃ×÷ÔÝ´æ±äÁ¿(µ±Ç°¶ÁÈ¡×÷¶¯Á¦Ñ§),±äÁ¿È¡×Ôkinetic_readings_practical
+	
+	unsigned char  kinetic_reading_current;   //µ±Ç°¶¯Á¦Ñ§¶ÁÊý
+	unsigned char  kinetic_time_current;
+	//unsigned char  kinetic_time_count;
+
+
+	signed short nCurrentSample;
+
+
+  //union
+	//{
+	   KINETIC_AVERAGE_RATE  KineticAverageRate[3];
+	   KINETIC_MAX_RATE      KineticMaxRate[3];
+	   KINETIC_TIME_MAX_RATE KineticTimeMaxRate[3];
+	   KINETIC_TIME_CHANGE   KineticTimeChange[3];
+	   KINETIC_MAX_WELL      KineticMaxWell[3];
+	   KINETIC_TIME_MAX      KineticTimeMax[3];
+	//}AnalysisType;
+	int nAnalysisResult[3];
+	unsigned char  bPreCalOK[TUBE_MAX];
+
+
+}KINETIC_PARA;
+extern KINETIC_PARA KineticPraBack;
+
+
+
+typedef struct
+{
+	unsigned char WellType[TUBE_MAX];
+	unsigned char Num[TUBE_MAX];  //SD?QC
+	//unsigned char CurrSelWell;    //???rcf
+}LAYOUT;
+
+
+typedef struct
+{
+
+	char    Name[PROGRAM_NAME_LENGTH+10];
+	//char    Filter_1[8];
+	//char    Filter_2[8];
+	//char    DetectMode[8];
+	//unsigned char DetectCount;
+	//char ShakeMode[8];
+	//char shakeEna[8];
+	//char  shakeTime[10];
+	/*
+	wchar_t calculateMode[10];
+
+	wchar_t shake_time_Hour[3];
+	wchar_t shake_time_Min[3];
+	wchar_t shake_time_Sec[3];
+	wchar_t curentKinetic[10];
+	wchar_t curentcurve[15]; //2014-8-12?
+	wchar_t curentCStringinter[10];
+	wchar_t curentCStringQc[10];
+	wchar_t curentCStringinter_cutoff[10];
+	
+	QUALITY quality;
+	CUTOFF cutoff;
+	unsigned int Id;
+	unsigned int upTemprature;
+	unsigned int DownTemprature;
+	unsigned int tempratureTime;
+	bool boardLock_Ena;
+	wchar_t nc_cut_off[8];
+	wchar_t pc_cut_off[8];
+	wchar_t fac_cut_off[8];
+	wchar_t nc_rang_down[8];
+	wchar_t nc_rang_up[8];
+	wchar_t pc_rang_down[8];
+	wchar_t pc_rang_up[8];
+	wchar_t nc_sco[8];
+	wchar_t pc_sco[8];
+	wchar_t ref_rang_sco_down[8];
+	wchar_t ref_rang_sco_up[8];
+	
+	wchar_t Filter_Set_1[8];
+	wchar_t Filter_Set_2[8];
+	wchar_t Filter_Set_3[8];
+	wchar_t Filter_Set_4[8];
+	wchar_t Filter_Set_5[8];
+	wchar_t Filter_Set_6[8];
+	wchar_t Filter_Set_7[8];
+	wchar_t Filter_Set_8[8];
+	int test;*/
+
+
+	LAYOUT Layout;
+
+
+
+
+	signed char Filter1Locate;
+	signed char Filter2Locate;
+	unsigned char DetectMode;
+
+	unsigned char ShakeEnable;
+	unsigned char ShakeSpeed;
+	unsigned int ShakeTime;
+	unsigned char ShakeMode;
+//	unsigned char Intepret;
+//	signed char PreCalculate;
+	//unsigned char KineticEnable;
+//	signed char Curve;
+	//unsigned char Quality;
+
+
+	
+
+	//KINETIC_CALC  KineticCalcu;
+
+	KINETIC_PARA KineticPara;
+
+	
+
+	//NORMAL_ANALYSIS normal_analysis; //2014-8-19?
+	//wchar_t wcCycles;
+	 unsigned char bHasData;
+	 unsigned char bHasRawData[FILTER_PLATE_MAX]; //2014-8-19?
+	 float dConcentration[CALIBRATOR_CONCENTRATION_MAX];
+	 unsigned char  wcCurrentUnit;
+	 INTERPRET_PARA InterpretPara;
+	 QUALITY_PARA QualityPara;
+	 QUALITY_RESULT QualityResult;
+	 
+	 SYSTEM_TIME   DateTime;								      //ÐÞ¸Ä»ò´´½¨Ê±¼ä
+}BOARD_INF;
+
+extern BOARD_INF BoardInf;
+extern BOARD_INF BoardInfBack;
+extern BOARD_INF BoardInfTemp;
+
+
+
+//Abs??
+typedef struct
+{
+	float dABS[CALIBRATOR_ABS_MAX];
+	float dABSPractical[CALIBRATOR_ABS_MAX];
+	float dABSError[CALIBRATOR_ABS_MAX];
+	unsigned char Count;
+} ABS_CAL;
+extern ABS_CAL AbsCali;
+
+typedef struct 
+{
+	float dABS[2][CALIBRATOR_ABS_MAX]; 
+	float dABSError[2][CALIBRATOR_ABS_MAX]; 
+	int nCount[2];//±ØÐëÊÇ´ø·ûºÅµÄ
+} ABS_CAL_PARA;
+extern ABS_CAL_PARA AbsCaliPara;
+
+
+
+typedef struct
+{
+	//unsigned char FilterCount;
+	//unsigned short FilterWavelength[FILTER_MAX];//FilterLun.Filter[i]
+
+	//bool bHeader;
+	//wchar_t wcHeader[PRINT_REPORT_CHAR_MAX + 1];
+	//wchar_t wcLanguage;
+	//bool bDoorOpen;
+	//QUALITY_PARA quality_para;
+	//int nOrigin;
+	//ABS_CAL abs_cal[ABS_CHANNEL_MAX];
+	//int nChannelCurrent;
+	//2015-2-2
+	//bool bNotCalibrate;
+	//2015-2-2
+	unsigned char PrintHeaderEnable;
+	//bool bHeader;
+	char StrPrintHeader[PRINT_REPORT_CHAR_MAX + 1];
+
+	//wchar_t wcLanguage;
+
+	unsigned char RawIntensity;
+	unsigned char DoorOpen;
+	//bool bDoorOpen;
+	//QUALITY_PARA quality_para;
+	int nOrigin;
+
+	unsigned char AbsCaliEnable;
+	unsigned char nChannelCurrent;
+	ABS_CAL AbsCali[ABS_CHANNEL_MAX];
+
+
+
+
+	//unsigned char    LockPasswordStatus;       		       //????? 1?????????  0??????????
+	//char             LockPassword[LOCK_PASSWORD_LENGTH];   //??????
+
+	unsigned char    ExhaustFanStatus;       			   //??????
+	unsigned char    LightingStatus;					   //?????
+	unsigned char    SystemLanguage;                       //????   
+
+	//SYSTEM_TIME      SystemTime;						   //????
+
+
+	//ADVANCE_PRAMETER  AdvancePra;
+	//QUALITY_PARA    QualityPara;
+} SYSTEM_PRAMETER;
+extern SYSTEM_PRAMETER SystemPrameter;
+extern SYSTEM_PRAMETER SystemPrameterBack;
+
+
+
+/*
+//uint8_t AppMallocCCM[64] __attribute__((at(0xC0000000)));      //Íâ²¿SDRAMÊý×é 64×Ö½Ú8Î»
+typedef struct //2014-8-19? 
+{
+  // int nIntensity[KINETIC_READINGS_MAX][FILTER_PLATE_MAX][TUBE_MAX+12];  //2015-09-08
+   //int nInputIntensity[FILTER_PLATE_MAX][CHANNEL_MAX]; //????
+   //int nBackgroundIntensity[FILTER_PLATE_MAX][CHANNEL_MAX]; //???
+	
+	 int nIntensity[KINETIC_READINGS_MAX][FILTER_PLATE_MAX][TUBE_MAX+12]__attribute__((at(0xC1000000)));      //Íâ²¿SDRAMÊý×é 64×Ö½Ú8Î»
+   int nInputIntensity[FILTER_PLATE_MAX][CHANNEL_MAX] __attribute__((at(0xC1000000)));      //Íâ²¿SDRAMÊý×é 64×Ö½Ú8Î»
+   int nBackgroundIntensity[FILTER_PLATE_MAX][CHANNEL_MAX] __attribute__((at(0xC2000000)));      //Íâ²¿SDRAMÊý×é 64×Ö½Ú8Î»
+}RAW_DATA;
+extern RAW_DATA  RawData;
+*/
+
+
+
+typedef struct
+{
+	float dSlope;
+	float dIntercept;
+	float dRR; //????
+} LINEAR_ANALYSIS;
+
+typedef struct
+{
+	unsigned char nRunMode; //????
+	int nTimeOut; //
+	unsigned char bHasData;  //ÔËÐÐ½á¹ûÊÇ·ñ´øÊý¾Ý
+	unsigned char bHasDataBack;//Ç°Ò»´ÎµÄÔËÐÐ½á¹ûÊÇ·ñ´øÊý¾Ý
+	unsigned char doorState;
+	unsigned char task_busy;
+} RUN_STATUS;
+extern RUN_STATUS run_status;
+
+typedef struct
+{
+	double dCoef[4];
+	float dRR; //????
+} LOGISTIC_ANALYSIS;
+
+typedef struct
+{
+	float dSlope;
+	float dRR; //????
+} FACTOR_ANALYSIS;
+
+typedef struct
+{
+	double dY[CALIBRATOR_CONCENTRATION_MAX]; //?????
+	double dX[CALIBRATOR_CONCENTRATION_MAX];
+} PTOP_ANALYSIS;
+
+typedef struct
+{
+	double dY[CALIBRATOR_CONCENTRATION_MAX];
+	double dX[CALIBRATOR_CONCENTRATION_MAX]; //????
+	double dM[CALIBRATOR_CONCENTRATION_MAX];
+	double dH[CALIBRATOR_CONCENTRATION_MAX];
+} SPLINE_ANALYSIS;
+
+
+typedef struct //2014-8-19?
+{
+	unsigned char  wcMode;
+	unsigned char wcModeBack;
+	unsigned char FilterCurrent; //2014-8-19?
+	unsigned char FilterCurrentBack; //2014-8-19?
+	float dPreCal[KINETIC_READINGS_MAX][TUBE_MAX];
+	unsigned char  bPreCalOK[KINETIC_READINGS_MAX][TUBE_MAX];
+	float dCalibratorABS[3][CALIBRATOR_CONCENTRATION_MAX];
+	unsigned char nCalibratorCount[3][CALIBRATOR_CONCENTRATION_MAX];
+	unsigned char nCalibratorCountTotal[3];
+	//bool bFilterSelect;
+	float dBlank[KINETIC_READINGS_MAX][FILTER_PLATE_MAX];
+	int nBlankCount[KINETIC_READINGS_MAX][FILTER_PLATE_MAX];
+
+	int nAnalysisResult[3];
+	LINEAR_ANALYSIS LinearAnalysis[3];
+	FACTOR_ANALYSIS FactorAnalysis[3];
+	LOGISTIC_ANALYSIS LogisticAnalysis[3];
+	PTOP_ANALYSIS PtopAnalysis[3];
+	SPLINE_ANALYSIS SplineAnalysis[3];
+
+	unsigned char bLogX;
+	unsigned char bLogY;
+	unsigned char LogSelect;
+    float dConcentration[3][TUBE_MAX];
+} NORMAL_ANALYSIS;
+extern NORMAL_ANALYSIS NormalAnalysis;
+
+
+
+
+//Æô¶¯½çÃæ
+typedef struct 
+{
+	unsigned char  TimeCount;
+	unsigned char  StartFlag;
+	unsigned char  EnableUsbCheck;
+	unsigned char  MouseMoveFlag;
+} STARTUP_PRA;
+extern STARTUP_PRA  StartUpPra;
+
+
+
+
+extern  int nIntensity[KINETIC_READINGS_MAX][FILTER_PLATE_MAX][TUBE_MAX+12];//__attribute__((at(SDRAM_INTENSITY_BUF)));      //Íâ²¿SDRAMÊý×é 64×Ö½Ú8Î»
+extern  int nInputIntensity[FILTER_PLATE_MAX][CHANNEL_MAX];// __attribute__((at(SDRAM_INPUT_INTENSITY_BUF)));      //Íâ²¿SDRAMÊý×é 64×Ö½Ú8Î»
+extern  int nBackgroundIntensity[FILTER_PLATE_MAX][CHANNEL_MAX];// __attribute__((at(SDRAM_BK_INTENSITY_BUF)));      //Íâ²¿SDRAMÊý×é 64×Ö½Ú8Î»
+ 
+
+
+extern float dABS[KINETIC_READINGS_MAX][FILTER_PLATE_MAX][TUBE_MAX];// __attribute__((at(SDRAM_ABS_BUF)));      //Íâ²¿SDRAMÊý×é 64×Ö½Ú8Î»
+extern float dABSInit[KINETIC_READINGS_MAX][FILTER_PLATE_MAX][TUBE_MAX];// __attribute__((at(SDRAM_ABS_INIT_BUF)));      //Íâ²¿SDRAMÊý×é 64×Ö½Ú8Î»
+extern float dABSBack[KINETIC_READINGS_MAX][FILTER_PLATE_MAX][TUBE_MAX];// __attribute__((at(SDRAM_ABS_BACK_BUF)));      //Íâ²¿SDRAMÊý×é 64×Ö½Ú8Î»
+//extern float dABSInitBack[TUBE_MAX];//__attribute__((at(SDRAM_ABS_INIT_BACK_BUF)));       //??ABS?
+
+
+
+
+
+
+extern const char STR_SAME_WAVELENGTH[LANGUAGE_TYPES][50];
+extern const char PARAMETER_FILE_NOT_REPORT[LANGUAGE_TYPES][50];
+extern const char TEST_INFO_MESSAGE[LANGUAGE_TYPES][TEST_INFO_MAX][50];
+extern const char SYSTEM_ERROR_MESSAGE[LANGUAGE_TYPES][SYSTEM_ERROR_MAX][50];
+extern const char ERROR_MESSAGE_CHANNEL[LANGUAGE_TYPES][KINETIC_SELECT_CHAR_MAX];
+extern const char STR_SEL_FILTER[LANGUAGE_TYPES][50];
+extern const char FILE_ERROR_MESSAGE[LANGUAGE_TYPES][FILE_ERROR_MAX][64];
+extern const char ANALYSIS_ERROR_MESSAGE[LANGUAGE_TYPES][ANALYSIS_ERROR_MAX][50];
+extern const char RUNNING_STATUS_MESSAGE[LANGUAGE_TYPES][RUN_MODE_MAX][50];
+
+
+
+
+
+void RefreshPromptMenu(void);
+void DeletePromptMenu(unsigned char waitflag);
+void  Prompt_Interface(unsigned char flag);
+
+
+#endif

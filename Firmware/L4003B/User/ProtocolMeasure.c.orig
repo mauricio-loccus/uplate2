@@ -1,0 +1,801 @@
+//注:此程序已自检完毕
+/*全局变量
+ Filter1Locate = BoardInf.Filter1Locate;
+	 Filter2Locate = BoardInf.Filter2Locate;
+	 DetectMode = BoardInf.DetectMode;
+*/
+#include "MainTask.h"
+
+const char STR_MEASURE_FILTER[LANGUAGE_TYPES][15] = {"  filter", "滤光片"};
+const char STR_MEASURE_MODE[LANGUAGE_TYPES][15] = {"Mode", "测量模式"};
+const char STR_MEASURE_FILTER1[LANGUAGE_TYPES][15] = {"Filter 1", "滤光片1"};
+const char STR_MEASURE_FILTER2[LANGUAGE_TYPES][15] = {"Filter 2", "滤光片2"};
+const char STR_MEASURE_TITLE[LANGUAGE_TYPES][30] = {"Measurement parameters", "测量参数"};
+
+
+
+const BUTTON_DATA _aButtonProtocolMeasure[] =
+{
+    { TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(3), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Ok", "确认" },
+    { TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(4), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Back", "返回" },
+
+};
+
+//ExpEnable的值定义
+enum
+{
+    EXP_FILTER1=1,
+    EXP_FILTER2,
+    EXP_MODE,
+};
+static unsigned char ExpEnable;
+static signed char Filter1Locate;               //第1个滤光片
+static signed char Filter2Locate;               //辐滤光片
+static unsigned char DetectMode;                //检测模式
+
+
+WM_HWIN ProtocolMeasureWin = NULL;       //检测窗体
+
+//显示滤片片1扩展
+void DisplayFilter1Expand(void)
+{
+    GUI_RECT rect;
+
+    unsigned char i;
+    short start_x, start_y, wide, high;
+    start_x = FILTER_1_EXPAND_START_X ;
+    start_y = FILTER_1_EXPAND_START_Y - TITLESBAR_HEIGHT;
+    wide = 39; //43  39+3=42
+    high = 11; //46
+    //GUI_DrawBitmap(&bmExpMenuRight_400_46, FILTER_1_EXPAND_START_X, FILTER_1_EXPAND_START_Y - TITLESBAR_HEIGHT);
+    GUI_SetColor(COLOR_EXP_PICTURE_FRAME);
+    GUI_DrawLine(start_x, start_y,start_x+380,start_y);
+    GUI_DrawLine(start_x, start_y+45,start_x+380,start_y+45);
+    GUI_SetColor(COLOR_EXP_PICTURE);
+    GUI_FillRect(start_x, start_y+1,start_x+380,start_y+44);
+    GUI_DrawBitmap(&bmExpMenuRight_20_46, start_x+380, start_y);
+
+    start_x += 3;
+    start_y += 31;
+
+    //字体
+    //if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+    //{
+    GUI_SetFont(GUI_FONT_SMALL);
+    //}
+    //else
+    //{
+    //		GUI_SetFont(GUI_FONT_SMALL_CH);
+    //}
+
+    for (i = 0; i<8; i++)
+    {
+        if (i == Filter1Locate  && FilterLun.Filter[i]!=0)  //选中的扩展项
+        {
+            //填充选中的底色
+            GUI_SetColor(COLOR_FILTER_SEL_BK);
+            GUI_FillRect(start_x, FILTER_1_EXPAND_START_Y + 3 - TITLESBAR_HEIGHT, start_x + wide, FILTER_1_EXPAND_START_Y + 43 - TITLESBAR_HEIGHT);
+
+            //填充选中的文字-白色
+            GUI_SetColor(COLOR_FILTER_SEL_TXT);
+            //最下方的数字
+            OneNumConvertStr(ConvertStr, i+1);
+            rect.x0 = start_x ;
+            rect.y0 = start_y-1;
+            rect.x1 = start_x + wide;
+            rect.y1 = start_y+15;
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+
+            //最上方的波长
+            rect.x0 = start_x;
+            rect.y0 = start_y - 25;
+            rect.x1 = start_x + wide;
+            rect.y1 = start_y - 25 + high;
+            FilterConvertStr(ConvertStr, FilterLun.Filter[i]);
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+            //中间nm
+            rect.y0 = start_y - 15;
+            rect.y1 = start_y - 15 + high;
+            GUI_DispStringInRect("nm", &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            start_x += 42;
+        }//if (i == BoardInf.Filter1Locate && SystemPrameter.FilterWavelength[i]!=0)  //选中的扩展项
+        else
+        {
+            //填充选中文字的底色
+            GUI_SetColor(COLOR_FILTER_NUM_BK);
+            GUI_FillRect(start_x, start_y, start_x + wide, start_y + high);
+
+            //填充最下方选中的文字
+            GUI_SetColor(COLOR_FILTER_NUM_TXT);
+            OneNumConvertStr(ConvertStr, i + 1);
+            rect.x0 = start_x;
+            rect.y0 = start_y;
+            rect.x1 = start_x + wide;
+            rect.y1 = start_y + high;
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+
+
+
+            GUI_SetColor(COLOR_FILTER_NUM_BK);
+            if (FilterLun.Filter[i] != 0)  //显示波长
+            {
+                rect.x0 = start_x;
+                rect.y0 = start_y-25;
+                rect.x1 = start_x + wide;
+                rect.y1 = start_y-25 + high;
+                FilterConvertStr(ConvertStr, FilterLun.Filter[i]);
+                GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+
+                rect.y0 = start_y - 15;
+                rect.y1 = start_y - 15 + high;
+                GUI_DispStringInRect("nm", &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+            }
+            else
+            {
+                rect.x0 = start_x;
+                rect.y0 = start_y - 25;
+                rect.x1 = start_x + wide;
+                rect.y1 = start_y - 25 + high;
+                if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+                {
+                    GUI_SetFont(GUI_FONT_SMALL);
+                }
+                else
+                {
+                    GUI_SetFont(GUI_FONT_SMALL_CH);
+                }
+                GUI_DispStringInRect(STR_OFF[SystemPrameter.SystemLanguage], &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);//"off"
+                GUI_SetFont(GUI_FONT_SMALL);
+            }
+            start_x += 42;
+        }
+    }
+
+    if (Filter1Locate>=0)  //有选中的滤光片,直接显示字
+    {
+        GUI_SetColor(COLOR_FILTER_SEL_BK);
+    }
+    else                  //无选中的滤光片，选画背景再显示字
+    {
+
+        GUI_SetColor(COLOR_FILTER_SEL_BK);
+        GUI_FillRect(start_x, FILTER_1_R_START_Y + 3 - TITLESBAR_HEIGHT, start_x + 39, FILTER_1_R_START_Y + 43 - TITLESBAR_HEIGHT);
+        GUI_SetColor(COLOR_FILTER_SEL_TXT);
+    }
+    if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+    {
+        GUI_SetFont(GUI_FONT_SMALL);
+    }
+    else
+    {
+        GUI_SetFont(GUI_FONT_SMALL_CH);
+    }
+    rect.x0 = start_x;
+    rect.x1 = start_x + wide;
+    rect.y0 = start_y-25;
+    rect.y1 = start_y + high-25;
+    GUI_DispStringInRect(STR_OFF[SystemPrameter.SystemLanguage], &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);           //"off"
+
+    rect.y0 = start_y + high-25;
+    rect.y1 = start_y + high * 2-25;
+    GUI_DispStringInRect(STR_MEASURE_FILTER[SystemPrameter.SystemLanguage], &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);//"filter"
+}
+
+//显示滤片片2扩展
+void DisplayFilter2Expand(void)
+{
+    GUI_RECT rect;
+
+    unsigned char i;
+    short start_x, start_y, wide, high;
+    start_x = FILTER_2_EXPAND_START_X ;
+    start_y = FILTER_2_EXPAND_START_Y - TITLESBAR_HEIGHT;
+    wide = 39; //43  39+3=42
+    high = 11; //46
+
+    //字体
+    //if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+    //{
+    GUI_SetFont(GUI_FONT_SMALL);
+    //}
+    //else
+    //{
+    //	GUI_SetFont(GUI_FONT_SMALL_CH);
+    //}
+
+
+    //GUI_DrawBitmap(&bmExpMenuRight_400_46, FILTER_2_EXPAND_START_X, FILTER_2_EXPAND_START_Y - TITLESBAR_HEIGHT);
+    GUI_SetColor(COLOR_EXP_PICTURE_FRAME);
+    GUI_DrawLine(start_x, start_y,start_x+380,start_y);
+    GUI_DrawLine(start_x, start_y+45,start_x+380,start_y+45);
+    GUI_SetColor(COLOR_EXP_PICTURE);
+    GUI_FillRect(start_x, start_y+1,start_x+380,start_y+44);
+    GUI_DrawBitmap(&bmExpMenuRight_20_46, start_x+380, start_y);
+
+    start_x += 3;
+    start_y += 31;
+
+    for (i = 0; i<8; i++)
+    {
+        if (i == Filter2Locate && FilterLun.Filter[i] != 0)  //选中的扩展项
+        {
+            //填充选中的底色
+            GUI_SetColor(COLOR_FILTER_SEL_BK);
+            GUI_FillRect(start_x, FILTER_2_EXPAND_START_Y + 3 - TITLESBAR_HEIGHT, start_x + wide, FILTER_2_EXPAND_START_Y + 43 - TITLESBAR_HEIGHT);
+
+
+            //填充选中的文字-白色
+            GUI_SetColor(COLOR_FILTER_SEL_TXT);
+            //最下方的数字
+            OneNumConvertStr(ConvertStr, i + 1);
+            rect.x0 = start_x;
+            rect.y0 = start_y - 1;
+            rect.x1 = start_x + wide;
+            rect.y1 = start_y + 15;
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+
+            //最上方的波长
+            rect.x0 = start_x;
+            rect.y0 = start_y - 25;
+            rect.x1 = start_x + wide;
+            rect.y1 = start_y - 25 + high;
+            FilterConvertStr(ConvertStr, FilterLun.Filter[i]);
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+            //中间nm
+            rect.y0 = start_y - 15;
+            rect.y1 = start_y - 15 + high;
+            GUI_DispStringInRect("nm", &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            start_x += 42;
+        }//if (i == BoardInf.Filter1Locate && SystemPrameter.FilterWavelength[i]!=0)  //选中的扩展项
+        else
+        {
+            //填充选中文字的底色
+            GUI_SetColor(0xe7a362);
+            GUI_FillRect(start_x, start_y, start_x + wide, start_y + high);
+
+            //填充最下方选中的文字
+            GUI_SetColor(0xf8e1c6);
+            OneNumConvertStr(ConvertStr, i + 1);
+            rect.x0 = start_x;
+            rect.y0 = start_y;
+            rect.x1 = start_x + wide;
+            rect.y1 = start_y + high;
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+
+
+
+            GUI_SetColor(0xe7a362);
+            if (FilterLun.Filter[i] != 0)  //显示波长
+            {
+                rect.x0 = start_x;
+                rect.y0 = start_y - 25;
+                rect.x1 = start_x + wide;
+                rect.y1 = start_y - 25 + high;
+                FilterConvertStr(ConvertStr, FilterLun.Filter[i]);
+                GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+
+                rect.y0 = start_y - 15;
+                rect.y1 = start_y - 15 + high;
+                GUI_DispStringInRect("nm", &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+            }
+            else
+            {
+                rect.x0 = start_x;
+                rect.y0 = start_y - 25;
+                rect.x1 = start_x + wide;
+                rect.y1 = start_y - 25 + high;
+
+                if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+                {
+                    GUI_SetFont(GUI_FONT_SMALL);
+                }
+                else
+                {
+                    GUI_SetFont(GUI_FONT_SMALL_CH);
+                }
+                GUI_DispStringInRect(STR_OFF[SystemPrameter.SystemLanguage], &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);//"off"
+                //if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+//	{
+                GUI_SetFont(GUI_FONT_SMALL);
+                //}
+                //else
+                //{
+                // GUI_SetFont(GUI_FONT_SMALL_CH);
+//	}
+            }
+            start_x += 42;
+        }
+    }
+
+
+    if (Filter2Locate >= 0)         //有选中的滤光片,直接显示字
+    {
+        GUI_SetColor(0xe7a362);
+    }
+    else                           //无选中的滤光片，选画背景再显示字
+    {
+
+        GUI_SetColor(0xe7a362);
+        GUI_FillRect(start_x, FILTER_2_R_START_Y + 3 - TITLESBAR_HEIGHT, start_x + 39, FILTER_2_R_START_Y + 43 - TITLESBAR_HEIGHT);
+        GUI_SetColor(0xffffff);
+    }
+    if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+    {
+        GUI_SetFont(GUI_FONT_SMALL);
+    }
+    else
+    {
+        GUI_SetFont(GUI_FONT_SMALL_CH);
+    }
+    rect.x0 = start_x;
+    rect.x1 = start_x + wide;
+    rect.y0 = start_y - 25;
+    rect.y1 = start_y + high - 25;
+    GUI_DispStringInRect(STR_OFF[SystemPrameter.SystemLanguage], &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);//"off"
+
+
+    rect.y0 = start_y + high - 25;
+    rect.y1 = start_y + high * 2 - 25;
+    GUI_DispStringInRect(STR_MEASURE_FILTER[SystemPrameter.SystemLanguage], &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);//"filter"
+}
+
+//模式扩展
+void DisplayModeExpand(void)
+{
+    GUI_RECT rect;
+    unsigned char i;
+
+    short start_x, start_y, wide, high;
+    start_x = MODE_EXPAND_START_X ;
+    start_y = MODE_EXPAND_START_Y - TITLESBAR_HEIGHT;
+
+    GUI_SetColor(COLOR_EXP_PICTURE_FRAME);
+    GUI_DrawLine(start_x, start_y,start_x+115,start_y);
+    GUI_DrawLine(start_x, start_y+45,start_x+115,start_y+45);
+    GUI_SetColor(COLOR_EXP_PICTURE);
+    GUI_FillRect(start_x, start_y+1,start_x+115,start_y+44);
+    GUI_DrawBitmap(&bmExpMenuRight_20_46, start_x+115, start_y);
+
+    start_x += 3;
+    start_y += 3;
+    //字体
+    if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+    {
+        GUI_SetFont(GUI_FONT_BIG);
+    }
+    else
+    {
+        GUI_SetFont(GUI_FONT_BIG_CH);
+    }
+
+    wide = MODE_EXPAND_WIDTH1;
+    high = 40;
+    for (i = 0; i<2; i++)
+    {
+        //填充选中的底色
+        GUI_SetColor(COLOR_MODE_SEL_BK);
+
+        if (i == 0)
+        {
+            strcpy(ConvertStr, STR_MODE_FAST[SystemPrameter.SystemLanguage]);//"Fast");
+        }
+        else
+        {
+            strcpy(ConvertStr, STR_MODE_NORMAL[SystemPrameter.SystemLanguage]);//"Normal");
+        }
+
+        //填充选中的文字-白色
+        if( ((DetectMode == MODE_NORMAL) && (i == 1)) || ((DetectMode == MODE_FAST) && (i == 0)))
+        {
+            GUI_FillRect(start_x, start_y, start_x + wide, start_y+high);
+            GUI_SetColor(COLOR_MODE_SEL_TXT);
+            //GUI_DrawCircle(RUNMENU_CIRCLE_POSX(i), RUNMENU_CIRCLE_POSY, RUNMENU_CIRCLE_RADIUS);
+        }
+
+        rect.x0 = start_x;
+        rect.y0 = start_y - 1;
+        rect.x1 = start_x + wide;
+        rect.y1 = start_y + high;
+
+        start_x += wide;
+        wide = MODE_EXPAND_WIDTH2;
+
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+    }
+}
+
+void _cbProtocolMeasure(WM_MESSAGE * pMsg)
+{
+    WM_HWIN hWin = pMsg->hWin;
+//	WM_HWIN hWinFocus;
+    BUTTON_Handle hbutton;
+    unsigned char i;
+    int        xSize;
+    int        ySize;
+    short NCode, Id;
+    GUI_RECT rect;
+
+//	hWinFocus = WM_GetFocussedWindow();
+    //IdWinFocus = WM_GetId(hWinFocus);
+
+    switch (pMsg->MsgId)
+    {
+    case WM_CREATE:
+    {
+        for (i = 0; i < GUI_COUNTOF(_aButtonProtocolMeasure); i++)
+        {
+            hbutton = BUTTON_CreateEx(_aButtonProtocolMeasure[i].xPos, _aButtonProtocolMeasure[i].yPos, _aButtonProtocolMeasure[i].xSize, _aButtonProtocolMeasure[i].ySize,
+                                      hWin, WM_CF_SHOW, 0, ID_MEASURE_BUTTON + i);
+            if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+            {
+                BUTTON_SetFont(hbutton, GUI_FONT_BIG);
+                BUTTON_SetText(hbutton, _aButtonProtocolMeasure[i].acLabelEn);
+            }
+            else
+            {
+                BUTTON_SetFont(hbutton, GUI_FONT_BIG_CH);
+                BUTTON_SetText(hbutton, _aButtonProtocolMeasure[i].acLabelCh);
+            }
+            BUTTON_SetTextAlign(hbutton, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            BUTTON_SetFocussable(hbutton, 0);
+        }
+        break;
+    }
+
+    //删除按钮
+    case WM_DELETE:
+        //WM_ShowWindow(ButtonZero[i]);
+        break;
+        //绘制背景
+    case WM_PAINT:
+        xSize = WM_GetWindowSizeX(hWin);
+        ySize = WM_GetWindowSizeY(hWin);
+        //上方第一行
+        GUI_SetColor(COLOR_TITLEBAR);
+        GUI_FillRect(0, 0, xSize - 1, CONTENTBAR_TITLE_HEIGHT - 1);
+        //左方内容栏
+        GUI_SetColor(COLOR_CONTENTBAR);
+        GUI_FillRect(0, CONTENTBAR_CONTENT_POSY, CONTENTBAR_CONTENT_WIDTH - 1, ySize - 1);
+        //右侧工具栏
+        GUI_SetColor(COLOR_TOOLSBAR);
+        GUI_FillRect(CONTENTBAR_CONTENT_WIDTH, CONTENTBAR_CONTENT_POSY, xSize - 1, ySize - 1);
+
+
+        //左侧背景图
+        GUI_DrawBitmap(&bmMenuLeft_101_46, FILTER_1_START_X, FILTER_1_START_Y - TITLESBAR_HEIGHT);
+        GUI_DrawBitmap(&bmMenuLeft_101_46, FILTER_2_START_X, FILTER_2_START_Y - TITLESBAR_HEIGHT);
+        GUI_DrawBitmap(&bmMenuLeft_101_46, MODE_START_X, MODE_START_Y - TITLESBAR_HEIGHT);
+        //右侧背景图
+        GUI_DrawBitmap(&bmMenuRight_90_46, FILTER_1_R_START_X, FILTER_1_R_START_Y - TITLESBAR_HEIGHT);
+        GUI_DrawBitmap(&bmMenuRight_90_46, FILTER_2_R_START_X, FILTER_2_R_START_Y - TITLESBAR_HEIGHT);
+        GUI_DrawBitmap(&bmMenuRight_90_46, MODE_R_START_X, MODE_START_Y - TITLESBAR_HEIGHT);
+
+        //文字透明
+        GUI_SetTextMode(GUI_TM_TRANS);
+        //文字色
+        GUI_SetColor(COLOR_PAINT_TXT);
+        //字体
+        if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+        {
+            GUI_SetFont(GUI_FONT_BIG);
+        }
+        else
+        {
+            GUI_SetFont(GUI_FONT_BIG_CH);
+        }
+        //标题
+        GUI_DispStringAt(STR_MEASURE_TITLE[SystemPrameter.SystemLanguage], CONTENTBAR_CAPTION_POSX, CONTENTBAR_CAPTION_POSY);//"Measurement parameters"
+
+        ////"Filter 1"
+        rect.x0 = FILTER_1_START_X+20;
+        rect.y0 = FILTER_1_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = FILTER_1_END_X;
+        rect.y1 = FILTER_1_END_Y - TITLESBAR_HEIGHT;
+        GUI_DispStringInRect(STR_MEASURE_FILTER1[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+
+        //"Filter 2"
+        rect.y0 = FILTER_2_START_Y - TITLESBAR_HEIGHT;
+        rect.y1 = FILTER_2_END_Y - TITLESBAR_HEIGHT;
+        GUI_DispStringInRect(STR_MEASURE_FILTER2[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+        //"Mode"
+        rect.y0 = MODE_START_Y - TITLESBAR_HEIGHT;
+        rect.y1 = MODE_END_Y - TITLESBAR_HEIGHT;
+        GUI_DispStringInRect(STR_MEASURE_MODE[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+
+        //滤光片1的选项
+        rect.x0 = FILTER_1_R_START_X + 10;
+        rect.y0 = FILTER_1_R_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = FILTER_1_R_END_X;
+        rect.y1 = FILTER_1_R_END_Y - TITLESBAR_HEIGHT;
+        //填充选中的文字
+        if(Filter1Locate == -1)  //滤光片1没有指定
+        {
+            GUI_DispStringInRect(STR_NO[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Off"
+        }
+        else if(FilterLun.Filter[Filter1Locate]==0)
+        {
+            GUI_DispStringInRect(STR_OFF[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Off"
+        }
+        else
+        {
+            FilterConvertStr(ConvertStr, FilterLun.Filter[Filter1Locate]);
+            strcat(ConvertStr,"nm");
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+        }
+
+        //滤光片2的选项
+        rect.y0 = FILTER_2_START_Y - TITLESBAR_HEIGHT;
+        rect.y1 = FILTER_2_END_Y - TITLESBAR_HEIGHT;
+        if (Filter2Locate == -1)
+        {
+            GUI_DispStringInRect(STR_OFF[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+        }
+        else if(FilterLun.Filter[Filter2Locate]==0)
+        {
+            GUI_DispStringInRect(STR_OFF[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Off"
+        }
+        else
+        {
+            FilterConvertStr(ConvertStr, FilterLun.Filter[Filter2Locate]);
+            strcat(ConvertStr,"nm");
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+        }
+
+        //模式的选项
+        rect.y0 = MODE_START_Y - TITLESBAR_HEIGHT;
+        rect.y1 = MODE_END_Y - TITLESBAR_HEIGHT;
+        if (DetectMode == MODE_NORMAL)
+        {
+            GUI_DispStringInRect(STR_MODE_NORMAL[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Normal"
+        }
+        else
+        {
+            GUI_DispStringInRect(STR_MODE_FAST[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Fast"
+        }
+        if (ExpEnable==EXP_FILTER1)
+        {
+            DisplayFilter1Expand();
+        }
+        else if (ExpEnable == EXP_FILTER2)
+        {
+            DisplayFilter2Expand();
+        }
+        else if (ExpEnable == EXP_MODE)
+        {
+            DisplayModeExpand();
+        }
+        break;
+
+    case WM_NOTIFY_PARENT:
+    {
+        Id = WM_GetId(pMsg->hWinSrc);       // Id of widget
+        NCode = pMsg->Data.v;               // Notification code
+        if(RemoteInfo_PC.RemoteFlag)
+        {
+            break;
+        }
+        if( (KeyPadAsc.UseFlag == KEYPAD_BUSY)||(KeyPadNum.UseFlag == KEYPAD_BUSY)||(PromptMenu.InterfaceStatus==PROMPT_MENU_BUSY) )
+        {
+            break;
+        }
+        if(TouchKey.KeyStatus)
+        {
+            break;
+        }
+        if (NCode == WM_NOTIFICATION_RELEASED)
+        {
+            if (Id == ID_MEASURE_BUTTON0)   //工具栏第4个按钮  Enter
+            {
+                if((BoardInf.Filter1Locate!=Filter1Locate)||(BoardInf.Filter2Locate!=Filter2Locate))
+                {
+                    if(BoardInf.bHasData)
+                    {
+                        ReportMenu.ReportReady=1;
+                    }
+                }
+                BoardInf.Filter1Locate = Filter1Locate;
+                BoardInf.Filter2Locate = Filter2Locate;
+                BoardInf.DetectMode = DetectMode;
+
+
+
+                // E2pSaveMeaurePra();           //注这里不用保存
+                gSystem.SystemInterface = MI_PROTOCOL;
+                gSystem.TitleButtonEnable = 1;   //标题栏开启
+                TouchKey.KeyStatus=1;
+								gSystem.MenuRefreshFlag = 1;
+								
+                WM_DeleteWindow(ProtocolMeasureWin);
+                WM_ShowWindow(ProtocolWin);
+
+            }
+            else if (Id == ID_MEASURE_BUTTON1)   //工具栏第5个按钮  Cancel
+            {
+
+                //BoardInf.Filter1Locate = Filter1Locate;
+                // BoardInf.Filter2Locate = Filter2Locate;
+                //BoardInf.DetectMode = DetectMode;
+                gSystem.SystemInterface = MI_PROTOCOL;
+                gSystem.TitleButtonEnable = 1;   //标题栏开启
+                TouchKey.KeyStatus=1;
+							  gSystem.MenuRefreshFlag = 1;
+							
+                WM_DeleteWindow(ProtocolMeasureWin);
+                WM_ShowWindow(ProtocolWin);
+            }
+        }
+        break;
+    }
+
+    default:
+        //		WM_DefaultProc(pMsg);
+        break;
+    }
+}
+
+
+void ProtocolMeasure_Scan(void)
+{
+    if(TouchKey.KeyStatus==0)
+    {
+        unsigned char i;
+        GUI_PID_STATE TouchState;
+        GUI_PID_GetState(&TouchState);
+
+        if(TouchState.Pressed)
+        {
+            if (ExpEnable==0)  //初使状态，没有弹出扩展项
+            {
+                if ((TouchState.x >= FILTER_1_R_START_X) && (TouchState.x <= FILTER_1_R_END_X) &&
+                        (TouchState.y >= FILTER_1_R_START_Y) && (TouchState.y <= FILTER_1_R_END_Y))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_FILTER1;
+                    WM_Invalidate(ProtocolMeasureWin);
+                }
+                else if ((TouchState.x >= FILTER_2_R_START_X) && (TouchState.x <= FILTER_2_R_END_X) &&
+                         (TouchState.y >= FILTER_2_R_START_Y) && (TouchState.y <= FILTER_2_R_END_Y))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_FILTER2;
+                    WM_Invalidate(ProtocolMeasureWin);
+                }
+                else if ((TouchState.x >= MODE_R_START_X) && (TouchState.x <= MODE_R_END_X) &&
+                         (TouchState.y >= MODE_R_START_Y) && (TouchState.y <= MODE_R_END_Y))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_MODE;
+                    WM_Invalidate(ProtocolMeasureWin);
+                }
+            }//if (ExpEnable==0)  //初使状态，没有弹出扩展项
+            else if (ExpEnable == EXP_FILTER1)//滤光片1扩展
+            {
+                if ((TouchState.x >= FILTER_1_EXPAND_START_X) && (TouchState.x <= FILTER_1_EXPAND_END_X) &&
+                        (TouchState.y >= FILTER_1_EXPAND_START_Y) && (TouchState.y <= FILTER_1_EXPAND_END_Y))
+                {
+                    for (i = 0; i<FILTER_MAX; i++)
+                    {
+                        if ((TouchState.x > FILTER_1_EXPAND_START_X + i*FILTER_SELECT_WIDTH) && (TouchState.x < FILTER_1_EXPAND_START_X + (i + 1)*FILTER_SELECT_WIDTH))
+                        {
+                            if ( FilterLun.Filter[i]>0)   //选中的扩展项
+                            {
+                                if(i!=Filter2Locate)        //不能与滤光片2相同
+                                {
+                                    Filter1Locate = i;       //有波长
+                                }
+                            }
+                            else
+                            {
+                                //Filter1Locate = -1;     //注滤光片1不能设空波长
+                            }
+                            break;
+                        }
+                    }//for (i = 0; i<FILTER_MAX; i++)
+                    //if (i == FILTER_MAX)
+                    //{
+                    //   Filter1Locate = -1;
+                    // }
+                }//if ((TouchState.x >= FILTER_1_EXPAND_START_X) && (TouchState.x <= FILTER_1_EXPAND_END_X) &&
+                //未选自动退出
+                ExpEnable = 0;
+                TouchKey.KeyStatus = 1;            //有键按下
+                WM_Invalidate(ProtocolMeasureWin);
+            }//else if (ExpEnable == EXP_FILTER1)//滤光片1扩展
+            else if (ExpEnable == EXP_FILTER2)   //滤光片2扩展
+            {
+                if ((TouchState.x >= FILTER_2_EXPAND_START_X) && (TouchState.x <= FILTER_2_EXPAND_END_X) &&
+                        (TouchState.y >= FILTER_2_EXPAND_START_Y) && (TouchState.y <= FILTER_2_EXPAND_END_Y))
+                {
+                    for (i = 0; i<FILTER_MAX; i++)
+                    {
+                        if ((TouchState.x > FILTER_2_EXPAND_START_X + i*FILTER_SELECT_WIDTH) && (TouchState.x < FILTER_2_EXPAND_START_X + (i+1)*FILTER_SELECT_WIDTH))
+                        {
+                            if (FilterLun.Filter[i]>0)                            //选中的扩展项
+                            {
+                                if ( (FilterLun.Filter[i]>0) &&(i!=Filter1Locate) ) //主滤光片不能关闭
+                                {
+                                    Filter2Locate = i;
+                                }
+                            }
+                            else
+                            {
+                                Filter2Locate = -1;
+                            }
+                            break;
+                        }
+                    }
+                    if (i == FILTER_MAX)  //空波长
+                    {
+                        Filter2Locate = -1;
+                    }
+                }
+                //未选自动退出
+                TouchKey.KeyStatus = 1;
+                ExpEnable = 0;
+                WM_Invalidate(ProtocolMeasureWin);
+            }//else if (ExpEnable == EXP_FILTER2)  //滤光片2扩展
+            else if (ExpEnable == EXP_MODE) //模式扩展
+            {
+                if ((TouchState.x >= MODE_EXPAND_START_X) && (TouchState.x <= MODE_EXPAND_END_X) &&
+                        (TouchState.y >= MODE_EXPAND_START_Y) && (TouchState.y <= MODE_EXPAND_END_Y))
+                {
+                    if ((TouchState.x >= MODE_EXPAND_START_X) && (TouchState.x < MODE_EXPAND_START_X + MODE_EXPAND_WIDTH1))  //正常
+                    {
+                        DetectMode = MODE_FAST;
+                    }
+                    else if ((TouchState.x >= MODE_EXPAND_START_X + MODE_EXPAND_WIDTH1) && (TouchState.x <= MODE_EXPAND_START_X + MODE_EXPAND_WIDTH1 + MODE_EXPAND_WIDTH2))
+                    {
+                        DetectMode = MODE_NORMAL;
+                    }
+                }
+                //未选自动退出
+                ExpEnable = 0;
+                TouchKey.KeyStatus = 1;
+                WM_Invalidate(ProtocolMeasureWin);
+
+            }//else if (ExpEnable == EXP_MODE) //模式扩展
+        }//if(TouchState.Pressed)
+    }
+}
+
+
+void ProtocolMeasure_Go(void)
+{
+    if(TouchKey.KeyStatus)
+    {
+        GUI_PID_STATE TouchState;
+        GUI_PID_GetState(&TouchState);
+
+        if (TouchState.Pressed == 0)
+        {
+            TouchKey.KeyPressDelay++;
+            if (TouchKey.KeyPressDelay > TOUCH_RELEASE_DELAY)
+            {
+                TouchKey.KeyPressDelay = 0;
+                TouchKey.KeyStatus = 0;
+            }
+        }
+    }
+}
+
+void ProtocolMeasure_Interface(void)
+{
+    ExpEnable = 0;
+    Filter1Locate = BoardInf.Filter1Locate;
+    Filter2Locate = BoardInf.Filter2Locate;
+    DetectMode = BoardInf.DetectMode;
+
+    ProtocolMeasureWin = WM_CreateWindowAsChild(CONTENTBAR_POSX, CONTENTBAR_POSY, CONTENTBAR_WIDTH, CONTENTBAR_HEIGHT, WM_HBKWIN, WM_CF_SHOW | WM_CF_STAYONTOP | WM_CF_MEMDEV, _cbProtocolMeasure, 0);
+    WM_BringToTop(ProtocolMeasureWin);
+}
+

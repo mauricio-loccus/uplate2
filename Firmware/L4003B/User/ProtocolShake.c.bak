@@ -1,0 +1,664 @@
+//注:此程序已自检完毕
+/*
+ BoardInf.ShakeEnable = ShakeEnable;
+ BoardInf.ShakeSpeed= ShakeSpeed;
+ BoardInf.ShakeTime = ShakeTime;
+*/
+
+#include "MainTask.h"
+
+const char  STR_SHAKE[LANGUAGE_TYPES][10] = {"Shake","振动"};
+const char  STR_SPEED[LANGUAGE_TYPES][10] = {"Speed","速度"};
+const char STR_TIME[LANGUAGE_TYPES][10] = {"Time","时间"};
+const char STR_SHAKE_TITLE[LANGUAGE_TYPES][30] = {"Shaking parameters","振动参数"};
+
+
+const BUTTON_DATA _aButtonProtocolShake[] =
+{
+	{ TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(3), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Ok", "确认" },
+	{ TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(4), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Back", "返回" },
+};
+
+
+enum
+{
+	EXP_SHAKE = 1,
+	EXP_SPEED,
+	EXP_TIME_HOUR,
+	EXP_TIME_MIN,
+	EXP_TIME_SEC,
+};
+static unsigned char ExpEnable;
+
+
+static unsigned char ShakeEnable;  //开启振动功能
+static unsigned char ShakeSpeed ;  //振动速度
+static unsigned long ShakeTime;    //振动时间
+
+WM_HWIN ProtocolShakeWin = NULL;                //数字键盘 
+
+
+//显示振动扩展项
+void DisplayShakeExpand(void)
+{
+	GUI_RECT rect;
+	unsigned char i;
+
+	short start_x, start_y, wide, high;
+
+  	//字体
+	if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+	{
+			 GUI_SetFont(GUI_FONT_BIG);
+	}
+	else
+	{
+			GUI_SetFont(GUI_FONT_BIG_CH);
+	}
+	
+	start_x = FILTER_1_EXPAND_START_X ;
+	start_y = FILTER_1_EXPAND_START_Y - TITLESBAR_HEIGHT;
+ 	wide = SHAKE_ENABLE_WIDTH;
+	high = 40;
+	
+	//GUI_DrawBitmap(&bmExpMenuRight_135_46, FILTER_1_EXPAND_START_X, FILTER_1_EXPAND_START_Y - TITLESBAR_HEIGHT);
+	GUI_SetColor(COLOR_EXP_PICTURE_FRAME);
+	GUI_DrawLine(start_x, start_y,start_x+115,start_y);
+	GUI_DrawLine(start_x, start_y+45,start_x+115,start_y+45);
+	GUI_SetColor(COLOR_EXP_PICTURE);
+	GUI_FillRect(start_x, start_y+1,start_x+115,start_y+44);
+	GUI_DrawBitmap(&bmExpMenuRight_20_46, start_x+115, start_y);
+	
+	start_x += 3;
+	start_y += 3;
+
+
+	
+	for (i = 0; i<2; i++)
+	{
+		//填充选中的底色
+		GUI_SetColor(COLOR_SHAKE_BK);
+		
+		//填充选中的文字-白色
+		if (((ShakeEnable == 0) && (i == 0)) || ((ShakeEnable) && (i == 1)))
+		{
+			GUI_FillRect(start_x, start_y, start_x + wide, start_y + high);
+			GUI_SetColor(COLOR_SHAKE_TXT);
+		}
+
+		if (i == 0)
+		{
+			strcpy(ConvertStr, STR_CLOSE[SystemPrameter.SystemLanguage]);//"Off");
+		}
+		else
+		{
+			strcpy(ConvertStr, STR_OPEN[SystemPrameter.SystemLanguage]);//"On");
+		}
+		rect.x0 = start_x;
+		rect.y0 = start_y - 1;
+		rect.x1 = start_x + wide;
+		rect.y1 = start_y + high;
+
+		start_x += wide;
+		wide = SHAKE_ENABLE_WIDTH;
+
+		GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+	}
+}
+
+
+void DisplaySpeedExpand(void)
+{
+	GUI_RECT rect;
+	unsigned char i;
+
+	short start_x, start_y, wide, high;
+
+	//字体
+	if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+	{
+			 GUI_SetFont(GUI_FONT_BIG);
+	}
+	else
+	{
+			GUI_SetFont(GUI_FONT_BIG_CH);
+	}
+	//背景图
+	start_x = SPEED_EXPAND_START_X ;
+	start_y = SPEED_EXPAND_START_Y  - TITLESBAR_HEIGHT;
+	wide = SHAKE_SPEED_WIDTH;
+	high = 40;
+	//GUI_DrawBitmap(&bmExpMenuRight_180_46, SPEED_EXPAND_START_X, SPEED_EXPAND_START_Y - TITLESBAR_HEIGHT);
+	GUI_SetColor(COLOR_EXP_PICTURE_FRAME);
+	GUI_DrawLine(start_x, start_y,start_x+180,start_y);
+	GUI_DrawLine(start_x, start_y+45,start_x+180,start_y+45);
+	GUI_SetColor(COLOR_EXP_PICTURE);
+	GUI_FillRect(start_x, start_y+1,start_x+180,start_y+44);
+	GUI_DrawBitmap(&bmExpMenuRight_20_46, start_x+180, start_y);
+	
+	start_x +=3;
+	start_y += 3;
+	for (i = 0; i < 3; i++)
+	{
+		if (i == 1)
+		{
+			 wide = SHAKE_SPEED_WIDTH1;
+		}
+		else
+		{
+			 wide = SHAKE_SPEED_WIDTH;
+		}
+
+		//填充选中的底色
+		GUI_SetColor(COLOR_SHAKE_BK);
+		
+		//填充选中的文字-白色
+		if (ShakeSpeed == i)
+		{
+			GUI_FillRect(start_x, start_y, start_x + wide, start_y + high);
+			GUI_SetColor(COLOR_SHAKE_TXT);
+		}
+
+		if (i == 0)
+		{
+			strcpy(ConvertStr, STR_SHAKE_SPEED_SLOW[SystemPrameter.SystemLanguage]);//"Off");
+		}
+		else if(i==1)
+		{
+			strcpy(ConvertStr, STR_SHAKE_SPEED_NORMAL[SystemPrameter.SystemLanguage]);//"On");
+		}
+		else
+		{
+			strcpy(ConvertStr, STR_SHAKE_SPEED_FAST[SystemPrameter.SystemLanguage]);//"On");
+		}
+		rect.x0 = start_x;
+		rect.y0 = start_y - 1;
+		rect.x1 = start_x + wide;
+		rect.y1 = start_y + high;
+
+		start_x += wide;
+    GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+	}
+}
+
+
+
+//显示振动时间
+void DisplayShakeTime(void)
+{
+	short start_x, stary_y, wide, high;
+	unsigned char i;
+
+	GUI_RECT rect;
+
+
+	start_x = TIMESHAKE_R_START_X;
+	stary_y = TIMESHAKE_R_START_Y +3 - TITLESBAR_HEIGHT;
+	wide = 35;
+	high = 40;
+	for (i = 0; i < 3; i++)
+	{
+		if (ShakeEnable)
+		{
+			GUI_SetColor(COLOR_PAINT_TXT);
+		}
+		else
+		{
+			GUI_SetColor(COLOR_TXT_DISABLE);//灰色
+		}
+
+		if (((ExpEnable == EXP_TIME_HOUR) && (i == 0)) ||
+			((ExpEnable == EXP_TIME_MIN) && (i == 1)) ||
+			((ExpEnable == EXP_TIME_SEC) && (i == 2)))
+		{
+			GUI_SetColor(COLOR_SHAKE_TIME_BK);
+			GUI_FillRect(start_x + 3, stary_y, start_x + wide - 3, stary_y + high);
+			GUI_SetColor(GUI_WHITE);
+		}
+		if (i == 0)
+		{
+			TwoNum2ConvertStr(ConvertStr, ShakeTime / 3600);
+
+		}
+		else if (i == 1)
+		{
+			TwoNum2ConvertStr(ConvertStr,ShakeTime % 3600 / 60);
+		}
+		else
+		{
+			TwoNum2ConvertStr(ConvertStr, ShakeTime % 60);
+		}
+		rect.x0 = start_x;
+		rect.x1 = start_x + wide;
+		rect.y0 = stary_y;
+		rect.y1 = stary_y + high;
+		GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+		//显示":"
+		if (i < 2)
+		{
+		   rect.x0 = rect.x1;
+		   rect.x1 = rect.x0 + 5;
+		   GUI_DispStringInRect(":", &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+		}
+		start_x += SHAKE_TIME_WIDTH;
+	}
+}
+
+	
+void _cbProtocolShake(WM_MESSAGE * pMsg)
+{
+	WM_HWIN hWin = pMsg->hWin;
+	WM_HWIN hWinFocus;
+	BUTTON_Handle hbutton;
+	unsigned char i;
+	short  xSize;
+	short  ySize;
+	short  NCode, Id;
+	GUI_RECT rect;
+
+	hWinFocus = WM_GetFocussedWindow();
+	//IdWinFocus = WM_GetId(hWinFocus);
+
+	switch (pMsg->MsgId)
+	{
+		//case WM_INIT_DIALOG:
+		//创建所耐的按钮
+
+	case WM_CREATE:
+	{
+					  for (i = 0; i < GUI_COUNTOF(_aButtonProtocolShake); i++)
+					  {
+						   hbutton = BUTTON_CreateEx(_aButtonProtocolShake[i].xPos, _aButtonProtocolShake[i].yPos, _aButtonProtocolShake[i].xSize, _aButtonProtocolShake[i].ySize,
+							            hWin, WM_CF_SHOW, 0, ID_SHAKE_BUTTON + i);
+						 
+						   if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+				       {
+					        BUTTON_SetFont(hbutton, GUI_FONT_BIG);
+							    BUTTON_SetText(hbutton, _aButtonProtocolShake[i].acLabelEn);
+				       }
+				       else
+				       {
+					        BUTTON_SetFont(hbutton, GUI_FONT_BIG_CH);
+							    BUTTON_SetText(hbutton, _aButtonProtocolShake[i].acLabelCh);
+				       }		
+						   BUTTON_SetTextAlign(hbutton, GUI_TA_HCENTER | GUI_TA_VCENTER);
+						   BUTTON_SetFocussable(hbutton, 0);
+					  }
+					  break;
+	}
+		//删除按钮
+	case WM_DELETE:
+
+
+		break;
+		//绘制背景
+	case WM_PAINT:
+
+		//	GUI_SetColor(COLOR_SYSTEMTIME_LINE);
+		//GUI_DrawHLine(LINE_SYSTEMTIME_POSY, LINE_SYSTEMTIME_STARTX, LINE_SYSTEMTIME_ENDX);
+		xSize = WM_GetWindowSizeX(hWin);
+		ySize = WM_GetWindowSizeY(hWin);
+
+		GUI_SetTextMode(GUI_TM_TRANS);
+		//GUI_SetFont(GUI_FONT_BIG);
+
+		//上方第一行
+		GUI_SetColor(COLOR_TITLEBAR);
+		GUI_FillRect(0, 0, xSize - 1, CONTENTBAR_TITLE_HEIGHT - 1);
+		//左方内容栏
+		GUI_SetColor(COLOR_CONTENTBAR);
+		GUI_FillRect(0, CONTENTBAR_CONTENT_POSY, CONTENTBAR_CONTENT_WIDTH - 1, ySize - 1);
+		//右侧工具栏
+		GUI_SetColor(COLOR_TOOLSBAR);
+		GUI_FillRect(CONTENTBAR_CONTENT_WIDTH, CONTENTBAR_CONTENT_POSY, xSize - 1, ySize - 1);
+
+
+
+		GUI_DrawBitmap(&bmMenuLeft_101_46, FILTER_1_START_X, FILTER_1_START_Y - TITLESBAR_HEIGHT);
+		GUI_DrawBitmap(&bmMenuLeft_101_46, FILTER_2_START_X, FILTER_2_START_Y - TITLESBAR_HEIGHT);
+		GUI_DrawBitmap(&bmMenuLeft_101_46, MODE_START_X, MODE_START_Y - TITLESBAR_HEIGHT);
+
+		GUI_DrawBitmap(&bmMenuRight_90_46, FILTER_1_R_START_X, FILTER_1_R_START_Y - TITLESBAR_HEIGHT);
+		GUI_DrawBitmap(&bmMenuRight_90_46, FILTER_2_R_START_X, FILTER_2_R_START_Y - TITLESBAR_HEIGHT);
+		//GUI_DrawBitmap(&bmMenuRight_120_46, TIMESHAKE_R_START_X, TIMESHAKE_R_START_Y - TITLESBAR_HEIGHT);
+    GUI_SetColor(COLOR_PICTURE);
+	  GUI_FillRect(TIMESHAKE_R_START_X, TIMESHAKE_R_START_Y- TITLESBAR_HEIGHT,TIMESHAKE_R_START_X+120, TIMESHAKE_R_START_Y- TITLESBAR_HEIGHT+45);
+	  GUI_DrawBitmap(&bmMenuRight_20_46, TIMESHAKE_R_START_X+120, TIMESHAKE_R_START_Y- TITLESBAR_HEIGHT);
+
+
+
+		GUI_SetColor(COLOR_PAINT_TXT);
+			//字体
+	  if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+	  {
+			 GUI_SetFont(GUI_FONT_BIG);
+	  }
+	  else
+	  {
+			GUI_SetFont(GUI_FONT_BIG_CH);
+	  }
+		
+		GUI_DispStringAt(STR_SHAKE_TITLE[SystemPrameter.SystemLanguage], CONTENTBAR_CAPTION_POSX, CONTENTBAR_CAPTION_POSY);//"Shaking parameters"
+		//GUI_SetFont(GUI_FONT_SMALL);
+
+
+		GUI_SetTextMode(GUI_TM_TRANS);
+		rect.x0 = FILTER_1_START_X + 20;
+		rect.y0 = FILTER_1_START_Y - TITLESBAR_HEIGHT;
+		rect.x1 = FILTER_1_END_X;
+		rect.y1 = FILTER_1_END_Y - TITLESBAR_HEIGHT;
+		GUI_DispStringInRect(STR_SHAKE[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Shake"
+	
+
+		if (ShakeEnable == 0)
+		{
+			 GUI_SetColor(COLOR_TXT_DISABLE);//灰色
+		}
+		rect.y0 = FILTER_2_START_Y - TITLESBAR_HEIGHT;
+		rect.y1 = FILTER_2_END_Y - TITLESBAR_HEIGHT;
+		GUI_DispStringInRect(STR_SPEED[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Speed"
+
+		rect.y0 = MODE_START_Y - TITLESBAR_HEIGHT;
+		rect.y1 = MODE_END_Y - TITLESBAR_HEIGHT;
+		GUI_DispStringInRect(STR_TIME[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Time"
+
+	
+		GUI_SetColor(COLOR_PAINT_TXT);
+		rect.x0 = FILTER_1_R_START_X + 10;
+		rect.y0 = FILTER_1_R_START_Y - TITLESBAR_HEIGHT;
+		rect.x1 = FILTER_1_R_END_X;
+		rect.y1 = FILTER_1_R_END_Y - TITLESBAR_HEIGHT;
+		//填充选中的文字
+		if (ShakeEnable) 
+		{
+			GUI_DispStringInRect(STR_OPEN[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"on"
+		}
+		else
+		{
+			GUI_DispStringInRect(STR_CLOSE[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"off"
+		}
+		if (ShakeEnable)
+		{
+			GUI_SetColor(COLOR_PAINT_TXT);
+		}
+		else
+		{
+			GUI_SetColor(COLOR_TXT_DISABLE);//灰色
+		}
+		
+
+		rect.y0 = FILTER_2_START_Y - TITLESBAR_HEIGHT;
+		rect.y1 = FILTER_2_END_Y - TITLESBAR_HEIGHT;
+		//填充选中的文字
+		//if (ShakeEnable)
+		//{
+
+			//if (BoardInf.ShakeSpeed == SHAKE_SPEED_LOW)
+			//{
+			if(ShakeSpeed==SHAKE_SPEED_SLOW)
+			{
+				strcpy(ConvertStr, STR_SHAKE_SPEED_SLOW[SystemPrameter.SystemLanguage]);//slow
+			}
+			else if(ShakeSpeed==SHAKE_SPEED_NORMAL)
+			{
+				strcpy(ConvertStr, STR_SHAKE_SPEED_NORMAL[SystemPrameter.SystemLanguage]);//slow
+			}
+			else if(ShakeSpeed==SHAKE_SPEED_FAST)
+			{
+				strcpy(ConvertStr, STR_SHAKE_SPEED_FAST[SystemPrameter.SystemLanguage]);//slow
+			}
+			
+			//}
+			//GUI_DispStringAt(ConvertStr, FILTER_1_START_X + 105, FILTER_2_START_Y + 12 - TITLESBAR_HEIGHT);
+		//}
+		//else
+		//{
+		//	strcpy(ConvertStr, STR_CLOSE[SystemPrameter.SystemLanguage]);//"Off");
+		//}
+		GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+	   
+		DisplayShakeTime();
+
+
+		if (ExpEnable == EXP_SHAKE)
+		{
+			 DisplayShakeExpand();
+		}
+		else if (ExpEnable == EXP_SPEED)
+		{
+			 DisplaySpeedExpand();
+		}
+		break;
+
+	case WM_NOTIFY_PARENT:
+	{
+							 Id = WM_GetId(pMsg->hWinSrc);    // Id of widget 
+							 NCode = pMsg->Data.v;               // Notification code 
+		            if( (KeyPadAsc.UseFlag == KEYPAD_BUSY)||(KeyPadNum.UseFlag == KEYPAD_BUSY)||(PromptMenu.InterfaceStatus==PROMPT_MENU_BUSY) )
+			       {
+				        break;
+			       }
+						 if(TouchKey.KeyStatus)
+						 {
+							  break;
+						 }
+							 if (NCode == WM_NOTIFICATION_RELEASED)
+							 {
+								 if (Id == ID_SHAKE_BUTTON0)   //工具栏第5个按钮  Cancel
+								 {
+									 BoardInf.ShakeEnable = ShakeEnable;
+									 BoardInf.ShakeSpeed= ShakeSpeed;
+									 BoardInf.ShakeTime = ShakeTime;
+									 
+								//	 BoardInf.ShakeEnable = ShakeEnable;
+									// BoardInf.ShakeSpeed= ShakeSpeed;
+								//	 BoardInf.ShakeTime = ShakeTime;
+                 //  E2pSaveShakePra();    //这里不用保存
+							
+									 gSystem.SystemInterface = MI_PROTOCOL;
+									 gSystem.TitleButtonEnable = 1;
+									 TouchKey.KeyStatus=1;
+									 WM_DeleteWindow(ProtocolShakeWin);
+									 WM_ShowWindow(ProtocolWin); 
+								 }
+								 else if (Id == ID_SHAKE_BUTTON1)   //工具栏第5个按钮  Cancel
+								 {
+									  gSystem.SystemInterface = MI_PROTOCOL;
+									  gSystem.TitleButtonEnable = 1;
+									 TouchKey.KeyStatus=1;
+									  WM_DeleteWindow(ProtocolShakeWin);
+									  WM_ShowWindow(ProtocolWin);
+								 }
+							 }
+							 break;
+	}
+
+	default:
+		//		WM_DefaultProc(pMsg);
+		break;
+	}
+}
+
+
+
+
+
+
+void ProtocolShake_Scan(void)
+{
+	if(TouchKey.KeyStatus==0)
+	{
+	  GUI_PID_STATE TouchState;
+	
+	  GUI_PID_GetState(&TouchState);
+	  if (TouchState.Pressed)
+	  {
+		  if (ExpEnable == 0)  //初使状态，没有弹出扩展项
+		  {
+				if ((TouchState.x >= FILTER_1_R_START_X) && (TouchState.x <= FILTER_1_R_END_X) &&
+					 (TouchState.y >= FILTER_1_R_START_Y) && (TouchState.y <= FILTER_1_R_END_Y))
+				{
+					 TouchKey.KeyStatus = 1;
+					 ExpEnable = EXP_SHAKE;
+					 WM_Invalidate(ProtocolShakeWin);
+				}
+				else if ((TouchState.x >= FILTER_2_R_START_X) && (TouchState.x <= FILTER_2_R_END_X) &&
+					  (TouchState.y >= FILTER_2_R_START_Y) && (TouchState.y <= FILTER_2_R_END_Y))
+				{
+						if (ShakeEnable)
+						{
+							TouchKey.KeyStatus = 1;
+							ExpEnable = EXP_SPEED;
+							WM_Invalidate(ProtocolShakeWin);
+						}
+				
+				}
+				else if ((TouchState.x >= TIMESHAKE_R_START_X) && (TouchState.x <= TIMESHAKE_R_END_X) &&
+						(TouchState.y >= TIMESHAKE_R_START_Y) && (TouchState.y <= TIMESHAKE_R_END_Y) && (ShakeEnable))
+				{
+						if ((TouchState.x >= TIMESHAKE_R_START_X) && (TouchState.x < TIMESHAKE_R_START_X + SHAKE_TIME_WIDTH))
+						{
+							 ExpEnable = EXP_TIME_HOUR;
+							 TouchKey.KeyStatus = 1;
+							 WM_Invalidate(ProtocolShakeWin);
+						}
+				    else if ((TouchState.x >= TIMESHAKE_R_START_X + SHAKE_TIME_WIDTH) && (TouchState.x < TIMESHAKE_R_START_X + SHAKE_TIME_WIDTH * 2))
+				    {
+						   ExpEnable = EXP_TIME_MIN;
+						   TouchKey.KeyStatus = 1;
+						   WM_Invalidate(ProtocolShakeWin);
+				    }
+				    else if ((TouchState.x >= TIMESHAKE_R_START_X + SHAKE_TIME_WIDTH * 2) && (TouchState.x < TIMESHAKE_R_START_X + SHAKE_TIME_WIDTH * 3))
+				    {
+							ExpEnable = EXP_TIME_SEC;
+							TouchKey.KeyStatus = 1;
+							WM_Invalidate(ProtocolShakeWin);
+				    }
+			   }
+		  }//if (ExpEnable == 0)  //初使状态，没有弹出扩展项
+		  else if (ExpEnable == EXP_SHAKE)
+		  {
+			    ExpEnable = 0;
+			    if ((TouchState.x >= FILTER_1_EXPAND_START_X) && (TouchState.x <= FILTER_1_EXPAND_START_X + SHAKE_ENABLE_WIDTH) &&
+				     (TouchState.y >= FILTER_1_EXPAND_START_Y) && (TouchState.y <= FILTER_1_EXPAND_END_Y))
+			   {
+				    //关闭振动
+				    ShakeEnable = 0;
+			   }
+			   else if ((TouchState.x >= FILTER_1_EXPAND_START_X + SHAKE_ENABLE_WIDTH) && (TouchState.x <= FILTER_1_EXPAND_START_X + SHAKE_ENABLE_WIDTH * 2) &&
+				         (TouchState.y >= FILTER_1_EXPAND_START_Y) && (TouchState.y <= FILTER_1_EXPAND_END_Y))
+			   {
+				    //开启振动
+				    ShakeEnable = 1;
+			   }
+		     TouchKey.KeyStatus = 1;
+			   WM_Invalidate(ProtocolShakeWin);
+		  }//else if (ExpEnable == EXP_SHAKE)
+		  else if (ExpEnable == EXP_SPEED)
+		  {
+			   ExpEnable = 0;
+			   if ((TouchState.x >= FILTER_2_EXPAND_START_X) && (TouchState.x <= SPEED_EXPAND_START_X + SHAKE_SPEED_WIDTH * 2 + SHAKE_SPEED_WIDTH1) &&
+				    (TouchState.y >= FILTER_2_EXPAND_START_Y) && (TouchState.y <= FILTER_2_EXPAND_END_Y))
+			   {
+				     if ((TouchState.x >= SPEED_EXPAND_START_X) && (TouchState.x < SPEED_EXPAND_START_X + SHAKE_SPEED_WIDTH))
+				     {
+							   ShakeSpeed = SHAKE_SPEED_SLOW;
+						 }
+						 else if ((TouchState.x >= SPEED_EXPAND_START_X + SHAKE_SPEED_WIDTH) && (TouchState.x < SPEED_EXPAND_START_X + SHAKE_SPEED_WIDTH + SHAKE_SPEED_WIDTH1))
+						 {
+							   ShakeSpeed = SHAKE_SPEED_NORMAL;
+						 }
+						 else if ((TouchState.x >= SPEED_EXPAND_START_X + SHAKE_SPEED_WIDTH + SHAKE_SPEED_WIDTH1) && (TouchState.x < SPEED_EXPAND_START_X + SHAKE_SPEED_WIDTH * 2 + SHAKE_SPEED_WIDTH1))
+						 {
+								 ShakeSpeed = SHAKE_SPEED_FAST;
+						 }
+				 }
+			   TouchKey.KeyStatus = 1;
+			   WM_Invalidate(ProtocolShakeWin);
+		 }//else if (ExpEnable == EXP_SPEED)
+	 }//if (TouchState.Pressed)
+ }//if(TouchKey.KeyStatus==0)
+}
+
+void ProtocolShake_Go(void)
+{
+  unsigned long time_val;
+	if(TouchKey.KeyStatus)
+	{
+		 
+		 GUI_PID_STATE TouchState;
+	   GUI_PID_GetState(&TouchState);
+	
+		 if (TouchState.Pressed == 0)
+		 {
+			  TouchKey.KeyPressDelay++;
+			  if (TouchKey.KeyPressDelay > TOUCH_RELEASE_DELAY)
+			  {
+				  TouchKey.KeyPressDelay = 0;
+				  TouchKey.KeyStatus = 0;
+			  }
+		 }
+	}
+
+		if (ExpEnable==EXP_TIME_HOUR)
+		{
+			 TouchKey.KeyStatus = 1;
+			
+			 TwoNum2ConvertStr(KeyPadNum.InputValueStr, ShakeTime / 3600);
+			 KeyPadNum_Interface(NUM_MENUFLAG_2NUM);
+			 if (KeyPadNum.ReturnKey == KEYPAD_NUM_RETURN_ENTER)
+			 {
+						  time_val=atoi(KeyPadNum.InputValueStr);
+						  if(time_val>99)time_val=99;
+              ShakeTime=ShakeTime%3600+(long)time_val*3600;
+			 }
+			 ExpEnable = 0;
+			 TouchKey.KeyStatus = 1;
+			 WM_Invalidate(ProtocolShakeWin);
+		}//if (ExpEnable==EXP_TIME_HOUR)
+					
+		else if (ExpEnable==EXP_TIME_MIN)
+		{
+					TwoNum2ConvertStr(KeyPadNum.InputValueStr, ShakeTime % 3600/60);
+					KeyPadNum_Interface(NUM_MENUFLAG_2NUM);
+
+					if (KeyPadNum.ReturnKey == KEYPAD_NUM_RETURN_ENTER)
+					{
+						 time_val=atoi(KeyPadNum.InputValueStr);
+						 if(time_val>59)time_val=59;
+             ShakeTime=ShakeTime/3600*3600+(long)time_val*60+ShakeTime%60;
+					}
+
+					ExpEnable = 0;
+					TouchKey.KeyStatus = 1;
+					WM_Invalidate(ProtocolShakeWin);
+		 }//else if (ExpEnable==EXP_TIME_MIN)
+		 else if (ExpEnable == EXP_TIME_SEC)
+		 {
+					TwoNum2ConvertStr(KeyPadNum.InputValueStr, ShakeTime % 60);
+					KeyPadNum_Interface(NUM_MENUFLAG_2NUM);
+
+					if (KeyPadNum.ReturnKey == KEYPAD_NUM_RETURN_ENTER)
+					{
+						   time_val=atoi(KeyPadNum.InputValueStr);
+						   if(time_val>59)time_val=59;
+               ShakeTime=ShakeTime/60*60+time_val;
+					}
+
+					ExpEnable = 0;
+					TouchKey.KeyStatus = 1;
+					WM_Invalidate(ProtocolShakeWin);
+		 }//else if (ExpEnable == EXP_TIME_SEC)
+}
+
+void ProtocolShake_Interface(void)
+{
+	ExpEnable = 0;
+	ShakeEnable = BoardInf.ShakeEnable;
+	ShakeSpeed = BoardInf.ShakeSpeed;
+	ShakeTime = BoardInf.ShakeTime;
+	
+	ProtocolShakeWin = WM_CreateWindowAsChild(CONTENTBAR_POSX, CONTENTBAR_POSY, CONTENTBAR_WIDTH, CONTENTBAR_HEIGHT, WM_HBKWIN, WM_CF_SHOW | WM_CF_STAYONTOP | WM_CF_MEMDEV, _cbProtocolShake, 0);
+	WM_BringToTop(ProtocolShakeWin);
+}

@@ -1,0 +1,1343 @@
+//程序已自检
+#include "MainTask.h"
+
+extern GUI_MEMDEV_Handle    hBKMempic;
+extern GUI_MEMDEV_Handle    hUDMempic;
+extern GUI_MEMDEV_Handle    hEPMempic;
+extern GUI_MEMDEV_Handle    hNCMempic;
+extern GUI_MEMDEV_Handle    hPCMempic;
+extern GUI_MEMDEV_Handle    hSDMempic;
+extern GUI_MEMDEV_Handle    hQCMempic;
+
+/*
+#define WELLS_TYPE_NO   -1
+enum
+{
+	WELLS_TYPE_PC = 0,
+	WELLS_TYPE_NC,
+	WELLS_TYPE_BK,
+	WELLS_TYPE_SD,
+	WELLS_TYPE_QC,
+	WELLS_TYPE_UD,
+	WELLS_TYPE_EP,
+};
+i=0-95
+BoardInfTemp.Layout.WellType[i] =WELLS_TYPE_UD;
+BoardInfTemp.Layout.Num[i] =QC   SD;
+*/
+
+
+
+const char STR_DELETE_ALL[LANGUAGE_TYPES][20] = {"Delete all", "Limpar"};
+const char STR_LAYOUT_CONCENTRATION[LANGUAGE_TYPES][20] = {"Concentration", "Concentração"};
+const char STR_LAYOUT_TITLE[LANGUAGE_TYPES][20] = {"Plate layout", "Layout da Placa"};
+const char STR_WELL_TITLE[LANGUAGE_TYPES][10] = {"Well:", "Poço"};
+const char STR_LAYOUT_NAME_TITLE[LANGUAGE_TYPES][30] = {"Plate : 96 wells", "Placa: 96 poços"};
+
+const BUTTON_DATA _aButtonLayout[] =
+{
+    { TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(0), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Concentration", "Concentração" },
+    { TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(2), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Delete all", "Limpar"},
+    { TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(3), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Ok", "OK" },
+    { TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(4), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Back", "Voltar" },
+};
+
+
+
+
+
+enum
+{
+    BIG_WELL_SEL_PC=0,
+    BIG_WELL_SEL_NC,
+    BIG_WELL_SEL_BK,
+    BIG_WELL_SEL_SD,
+    BIG_WELL_SEL_QC,
+    BIG_WELL_SEL_UD,
+    BIG_WELL_SEL_EP,
+};
+
+
+
+
+const char WELLS_TYPE[WELLS_TYPE_MAX] = { WELLS_TYPE_PC, WELLS_TYPE_NC, WELLS_TYPE_BK, WELLS_TYPE_SD, WELLS_TYPE_QC, WELLS_TYPE_UD, WELLS_TYPE_EP };
+const char WELLS_TYPE_STR[WELLS_TYPE_MAX][3] =    { "PC", "NC","BK", "SD","QC","UD","EP" };
+const char WELLS_TYPE_STR_PT[WELLS_TYPE_MAX][3] = { "CP", "CN","BR", "SD","CQ","DC","VZ" };
+
+
+enum
+{
+    EXP_SD = 1,
+    EXP_QC,
+    EXP_UD,
+};
+
+
+enum
+{
+    PRESS_NO=0,
+    PRESS_DOWN,
+    PRESS_MOVE,
+    PRESS_UP,
+};
+typedef struct
+{
+    unsigned char MoveFlag;
+    signed char StartWellX;
+    signed char StartWellY;
+    signed char EndWellX;
+    signed char EndWellY;
+
+    signed char TempWellX;
+    signed char TempWellY;
+} MOVE_WELL;
+MOVE_WELL MoveWell;
+
+
+WM_HWIN ProtocolLayoutWin = NULL;
+
+
+
+static unsigned short CurrWell;
+static unsigned char  CurrQc;
+static unsigned char  CurrSd;
+static unsigned short CurrUd;
+
+static unsigned char BigWellSel;
+static unsigned char ExpEnable;
+
+
+void DisplaySdExpand(void)
+{
+    GUI_RECT rect;
+    unsigned char  i;
+    short start_x, stary_y, wide, high;
+
+    start_x = SD_EXPAND_START_X + 27; //2014-8-18项
+    stary_y = SD_EXPAND_START_Y + 31-TITLESBAR_HEIGHT;
+    wide = 39;
+    high = 13;
+    GUI_DrawBitmap(&bmExpSD_586_48, SD_EXPAND_START_X+1, SD_EXPAND_START_Y - TITLESBAR_HEIGHT);
+    for (i = 0; i<CALIBRATORS_MAX; i++)//
+    {
+        if (i == CurrSd)  //选中的扩展项
+        {
+            //填充选中的底色
+            GUI_SetColor(0xffffff);
+            GUI_FillRect(start_x, stary_y-2, start_x + wide, stary_y + high);
+        }
+        else
+        {
+            //填充选中的底色
+           GUI_SetColor(0X1D51F6);// GUI_SetColor(0X00FF99);
+            GUI_FillRect(start_x, stary_y-2, start_x + wide, stary_y + high);
+        }
+
+        //填充选中的文字-白色
+       //;GUI_SetColor(0xb5e3cd);
+				 GUI_SetColor(GUI_BLACK);
+        TwoNumConvertStr(ConvertStr, i + 1);
+
+        //GUI_DrawCircle(RUNMENU_CIRCLE_POSX(i), RUNMENU_CIRCLE_POSY, RUNMENU_CIRCLE_RADIUS);
+        rect.x0 = start_x;
+        rect.y0 = stary_y - 4;  //-1
+        rect.x1 = start_x + wide;
+        rect.y1 = stary_y + 15; //+15
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+
+        GUI_SetColor(0X1D51F6);
+        rect.x0 = start_x;
+        rect.y0 = stary_y - 25; //-20
+        rect.x1 = start_x + wide;
+        rect.y1 = stary_y-5 ;//start_y
+				if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+				{ 	
+					GUI_DispStringInRect("SD", &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+				}
+				else
+				{
+					GUI_DispStringInRect("PD", &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+				}
+        start_x += 42;
+    }
+}
+
+
+
+
+void DisplayQcExpand(void)
+{
+    GUI_RECT rect;
+    unsigned char i;
+    short start_x, stary_y, wide, high;
+
+    start_x = QC_EXPAND_START_X + 22;
+    stary_y = QC_EXPAND_START_Y + 31 -TITLESBAR_HEIGHT;
+    wide = 39;
+    high = 13;
+
+    GUI_DrawBitmap(&bmExpQC, QC_EXPAND_START_X+1, QC_EXPAND_START_Y - TITLESBAR_HEIGHT);
+//	GUI_DrawBitmap(&bmExpMenuQC_400_46, FILTER_1_EXPAND_START_X, FILTER_1_EXPAND_START_Y - TITLESBAR_HEIGHT);
+    for ( i = 0; i<9; i++)
+    {
+        if (i == CurrQc)  //选中的扩展项
+        {
+            //填充选中的底色
+            GUI_SetColor(0xffffff);
+            GUI_FillRect(start_x, stary_y-2, start_x + wide, stary_y + high);
+        }
+        else
+        {
+
+            //填充选中的底色
+            GUI_SetColor(0X00FF99);//GUI_SetColor(0X1D51F6);
+            GUI_FillRect(start_x, stary_y-2, start_x + wide, stary_y + high);
+        }
+
+        //填充选中的文字-白色
+        GUI_SetColor(GUI_BLACK);
+        TwoNumConvertStr(ConvertStr, i + 1);
+
+        //GUI_DrawCircle(RUNMENU_CIRCLE_POSX(i), RUNMENU_CIRCLE_POSY, RUNMENU_CIRCLE_RADIUS);
+        rect.x0 = start_x;
+        rect.y0 = stary_y - 4;
+        rect.x1 = start_x + wide;
+        rect.y1 = stary_y + 15;
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+
+        GUI_SetColor(0X00FF99);//GUI_SetColor(0X1D51F6);
+        rect.x0 = start_x;
+        rect.y0 = stary_y - 25;
+        rect.x1 = start_x + wide;
+        rect.y1 = stary_y-5;
+       
+				if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+				{ 	
+					GUI_DispStringInRect("QC", &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+				}
+				else
+				{
+					GUI_DispStringInRect("CQ", &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+				}
+        start_x += 42;
+    }
+}
+
+void _cbProtocolLayout(WM_MESSAGE * pMsg)
+{
+    WM_HWIN hWin = pMsg->hWin;
+    WM_HWIN hWinFocus;
+    BUTTON_Handle hbutton;
+    unsigned char i;
+    short j, k;
+    short xSize;
+    short ySize;
+    short NCode, Id;
+    short x, y;
+    GUI_RECT rect;
+
+
+    hWinFocus = WM_GetFocussedWindow();
+//	IdWinFocus = WM_GetId(hWinFocus);
+
+    switch (pMsg->MsgId)
+    {
+    case WM_CREATE:
+    {
+        for (i = 0; i < GUI_COUNTOF(_aButtonLayout); i++)
+        {
+            hbutton = BUTTON_CreateEx(_aButtonLayout[i].xPos, _aButtonLayout[i].yPos, _aButtonLayout[i].xSize, _aButtonLayout[i].ySize,
+                                      hWin, WM_CF_SHOW, 0, ID_LAYOUT_BUTTON + i);
+            if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+            {
+                BUTTON_SetFont(hbutton, GUI_FONT_BIG);
+                BUTTON_SetText(hbutton, _aButtonLayout[i].acLabelEn);
+            }
+            else
+            {
+                BUTTON_SetFont(hbutton, GUI_FONT_BIG_CH);
+                BUTTON_SetText(hbutton, _aButtonLayout[i].acLabelCh);
+            }
+            BUTTON_SetTextAlign(hbutton, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            BUTTON_SetFocussable(hbutton, 0);
+        }
+        break;
+    }
+    case WM_INIT_DIALOG:
+        //	 hMemLayout = GUI_MEMDEV_Create(0, CONTENTBAR_CONTENT_POSY, 496 - 1, CONTENTBAR_HEIGHT - 1);
+        break;
+        //删除按钮
+    case WM_DELETE:
+
+//    GUI_MEMDEV_Delete(hMemLayout);
+        break;
+        //绘制背景
+    case WM_PAINT:
+        xSize = WM_GetWindowSizeX(hWin);
+        ySize = WM_GetWindowSizeY(hWin);
+
+        //定义字体
+        if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+        {
+            GUI_SetFont(GUI_FONT_BIG);
+        }
+        else
+        {
+            GUI_SetFont(GUI_FONT_BIG_CH);
+        }
+        //文本透明
+        GUI_SetTextMode(GUI_TM_TRANS);
+
+        if (MoveWell.MoveFlag != PRESS_MOVE)
+        {
+            //上方第一行
+            GUI_SetColor(COLOR_TITLEBAR);
+            GUI_FillRect(0, 0, xSize - 1, CONTENTBAR_TITLE_HEIGHT - 1);
+					GUI_SetColor(GUI_GRAY);
+				GUI_DrawLine(0,0, xSize - 1,0);
+				GUI_DrawLine(0,CONTENTBAR_TITLE_HEIGHT - 1, xSize - 1,CONTENTBAR_TITLE_HEIGHT - 1);
+        }
+
+        //标题栏的文字色
+        GUI_SetColor(0xffffff);
+
+        rect.x0 = CONTENTBAR_CAPTION_POSX;
+        rect.y0 = CONTENTBAR_CAPTION_POSY;
+        rect.x1 = rect.x0 + 150;
+        rect.y1 = rect.y0 + 25;
+
+        if (MoveWell.MoveFlag != PRESS_MOVE)
+        {
+            strcpy(ConvertStr, STR_LAYOUT_TITLE[SystemPrameter.SystemLanguage]);//"Plate Layout"
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+            strcpy(ConvertStr, STR_WELL_TITLE[SystemPrameter.SystemLanguage]);//"Well: "
+            GUI_DispStringAt(ConvertStr, CONTENTBAR_CAPTION_POSX + 450, CONTENTBAR_CAPTION_POSY);
+            WellNumConvertStr(ConvertStr, CurrWell);
+            GUI_DispStringAt(ConvertStr, CONTENTBAR_CAPTION_POSX+500, CONTENTBAR_CAPTION_POSY);
+
+            strcpy(ConvertStr, STR_LAYOUT_NAME_TITLE[SystemPrameter.SystemLanguage]);//"Plate: 96 wells"
+            GUI_DispStringAt(ConvertStr, CONTENTBAR_CAPTION_POSX+620, CONTENTBAR_CAPTION_POSY);
+
+        }
+
+
+        //左方内容栏
+        GUI_SetColor(COLOR_CONTENTBAR);
+        GUI_FillRect(0, CONTENTBAR_CONTENT_POSY, 496 - 1, ySize - 1);//638-142
+        if (MoveWell.MoveFlag != PRESS_MOVE)
+        {
+            //左方内容栏
+          GUI_SetColor(0x3e302b);//  GUI_SetColor(0xf8e100);
+            GUI_FillRect(496, CONTENTBAR_CONTENT_POSY, CONTENTBAR_CONTENT_WIDTH - 1, ySize - 1);
+
+            //右侧工具栏
+            GUI_SetColor(COLOR_TOOLSBAR);
+            GUI_FillRect(CONTENTBAR_CONTENT_WIDTH, CONTENTBAR_CONTENT_POSY, xSize - 1, ySize - 1);
+        }
+
+        //GUI_SetColor(0xffffff);
+        //GUI_FillCircle(LAY_BLANK_POS_X,LAY_BLANK_POS_Y-TITLESBAR_HEIGHT,LAY_BIG_RADIUS);
+
+        GUI_SetColor(0xaaaaaa);
+
+        if (MoveWell.MoveFlag != PRESS_MOVE)
+        {
+					#ifndef SOFTWARE_DN
+					 // GUI_DrawBitmap(&bmBigQC, LAY_QC_START_X, LAY_QC_START_Y - TITLESBAR_HEIGHT);
+					 // GUI_DrawBitmap(&bmBigNC, LAY_NC_START_X, LAY_NC_START_Y - TITLESBAR_HEIGHT);
+           // GUI_DrawBitmap(&bmBigPC, LAY_PC_START_X, LAY_PC_START_Y - TITLESBAR_HEIGHT);
+//========================================================================================
+//												CIRCULO QC - CQ
+//========================================================================================
+					  GUI_SetColor(0x00ff99);// GUI_SetColor(0x21b573);
+					  GUI_FillCircle(LAY_QC_POS_X, LAY_QC_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS);					
+
+					GUI_SetColor(0x148D56);// GUI_SetColor(0x21b573);
+					  GUI_FillCircle(LAY_QC_POS_X, LAY_QC_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS-1);
+//					  GUI_SetColor(0xf7dec5);
+//					 GUI_DrawCircle(LAY_QC_POS_X, LAY_QC_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS);
+//========================================================================================
+//												CIRCULO NC - CN
+//========================================================================================					
+					  GUI_SetColor(0XFB00C2);//GUI_SetColor(0xe6528c);
+					  GUI_FillCircle(LAY_NC_POS_X, LAY_NC_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS);
+										  GUI_SetColor(0X920c6b);//GUI_SetColor(0xe6528c);
+					  GUI_FillCircle(LAY_NC_POS_X, LAY_NC_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS-1);
+//					 GUI_SetColor(0xf7dec5);
+//					GUI_DrawCircle(LAY_NC_POS_X, LAY_NC_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS);
+//========================================================================================
+//												CIRCULO PC - CP
+//========================================================================================
+					  GUI_SetColor(0X00E1FF);// GUI_SetColor(0x52adff);
+					  GUI_FillCircle(LAY_PC_POS_X, LAY_PC_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS);
+						GUI_SetColor(0X147d8a);// GUI_SetColor(0x52adff);
+					  GUI_FillCircle(LAY_PC_POS_X, LAY_PC_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS-1);
+//					GUI_SetColor(0xf7dec5);
+//					GUI_DrawCircle(LAY_PC_POS_X, LAY_PC_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS);
+					#endif
+            //GUI_DrawBitmap(&bmBigBK, LAY_BLANK_START_X, LAY_BLANK_START_Y - TITLESBAR_HEIGHT);
+				
+           // GUI_DrawBitmap(&bmBigSD, LAY_SD_START_X, LAY_SD_START_Y - TITLESBAR_HEIGHT);
+            
+            //GUI_DrawBitmap(&bmBigUD, LAY_UD_START_X, LAY_UD_START_Y - TITLESBAR_HEIGHT);
+            //GUI_DrawBitmap(&bmBigEP, LAY_EP_START_X, LAY_EP_START_Y - TITLESBAR_HEIGHT);
+//========================================================================================
+//												CIRCULO BK - BR 
+//========================================================================================
+
+					  GUI_SetColor(GUI_WHITE);
+					  GUI_FillCircle(LAY_BLANK_POS_X, LAY_BLANK_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS);
+						GUI_SetColor(0x958d8a);// GUI_SetColor(0xffffff);
+					  GUI_FillCircle(LAY_BLANK_POS_X, LAY_BLANK_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS-1);
+//========================================================================================
+//												CIRCULO SD - PD
+//========================================================================================						
+					 GUI_SetColor(0X1D51F6);//GUI_SetColor(0xd6945a);
+						GUI_FillCircle(LAY_SD_POS_X, LAY_SD_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS);
+						GUI_SetColor(0X233585);//GUI_SetColor(0x088400);
+					  GUI_FillCircle(LAY_SD_POS_X, LAY_SD_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS-1);
+//						GUI_SetColor(0xf7dec5);
+//						GUI_DrawCircle(LAY_SD_POS_X, LAY_SD_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS);
+//========================================================================================
+//												CIRCULO UD - DC
+//========================================================================================
+						GUI_SetColor(0X6F3FE8);//GUI_SetColor(0xd6945a);
+            GUI_FillCircle(LAY_UD_POS_X, LAY_UD_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS);				
+						
+						GUI_SetColor(0X4c2c7e);//GUI_SetColor(0xd6945a);
+            GUI_FillCircle(LAY_UD_POS_X, LAY_UD_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS-1);
+//						GUI_SetColor(0xf7dec5);
+//						GUI_DrawCircle(LAY_UD_POS_X, LAY_UD_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS);
+
+
+//========================================================================================
+//												CIRCULO EP - VZ 
+//========================================================================================
+						GUI_SetColor(0x958D8A);//GUI_SetColor(0xdede73);
+            GUI_FillCircle(LAY_EP_POS_X, LAY_EP_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS);
+						GUI_SetColor(0X291913);
+						GUI_FillCircle(LAY_EP_POS_X, LAY_EP_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS-1);
+					
+          
+        }
+        //GUI_FillCircle(LAY_SD_POS_X, LAY_SD_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS);
+        
+        //GUI_FillCircle(LAY_UD_POS_X, LAY_UD_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS);
+        //GUI_FillCircle(LAY_EP_POS_X, LAY_EP_POS_Y - TITLESBAR_HEIGHT, LAY_BIG_RADIUS);
+        //
+        //
+
+
+
+
+       //GUI_SetColor(GUI_BLUE);
+
+        x = LAY_SMALL_START_X + LAY_SMALL_RADIUS; //2014-8-17项
+        y = LAY_SMALL_START_Y+ LAY_SMALL_RADIUS;
+        for (j = 0; j<8; j++)
+        {
+            for (i = 0; i<12; i++)
+            {
+
+                //GUI_PNG_Draw(_acpngSmallUD, sizeof(_acpngSmallUD), x, y - TITLESBAR_HEIGHT);
+                //GUI_SetColor(GUI_BLUE);
+                //	GUI_FillCircle(x, y- TITLESBAR_HEIGHT, LAY_SMALL_RADIUS-1);
+                //if (j * 12 + i == CurrWell)
+                //{
+                //	GUI_DrawRect(x - LAY_SMALL_RADIUS, y - LAY_SMALL_RADIUS - TITLESBAR_HEIGHT, x + LAY_SMALL_RADIUS, y + LAY_SMALL_RADIUS - TITLESBAR_HEIGHT);
+                //}
+
+
+                GUI_SetColor(0xffffff);
+							 //GUI_SetColor(0xff0000);
+                for (k = 0; k < WELLS_TYPE_MAX; k++)
+                {
+                    if (BoardInfTemp.Layout.WellType[j * 12 + i] == WELLS_TYPE[k])
+                    {
+                        if (BoardInfTemp.Layout.WellType[j * 12 + i] == WELLS_TYPE_SD)
+                        {
+                            //GUI_MEMDEV_WriteAt(hSDMempic,x-LAY_SMALL_RADIUS,y - LAY_SMALL_RADIUS);
+                            //GUI_DrawBitmap(&bmSmallSD, x-LAY_SMALL_RADIUS,y - LAY_SMALL_RADIUS-TITLESBAR_HEIGHT);
+													  //GUI_SetColor(0xff00);/////
+													
+														GUI_SetColor(0X1D51F6);//GUI_SetColor(0xd6945a);
+														GUI_FillCircle(x, y- TITLESBAR_HEIGHT, LAY_SMALL_RADIUS);
+														GUI_SetColor(0X233585);//GUI_SetColor(0x088400);
+														GUI_FillCircle(x, y- TITLESBAR_HEIGHT, LAY_SMALL_RADIUS-1);
+							
+                            sprintf(ConvertStr, "%02d", BoardInfTemp.Layout.Num[j * 12 + i]+1);
+                            //strcpy(ConvertStr, "01");
+                        }
+                        else if (BoardInfTemp.Layout.WellType[j * 12 + i] == WELLS_TYPE_QC)
+                        {
+                           // GUI_MEMDEV_WriteAt(hQCMempic,x-LAY_SMALL_RADIUS,y - LAY_SMALL_RADIUS);
+                            //GUI_DrawBitmap(&bmSmallQC, x-LAY_SMALL_RADIUS,y - LAY_SMALL_RADIUS-TITLESBAR_HEIGHT);
+													GUI_SetColor(0x00ff99);// GUI_SetColor(0x21b573);
+													GUI_FillCircle(x, y- TITLESBAR_HEIGHT, LAY_SMALL_RADIUS);
+													GUI_SetColor(0x148D56);// GUI_SetColor(0x21b573);
+													GUI_FillCircle(x, y- TITLESBAR_HEIGHT, LAY_SMALL_RADIUS-1);
+                            sprintf(ConvertStr, "%02d", BoardInfTemp.Layout.Num[j * 12 + i]+1);//CurrQc + 1);
+                            //	strcpy(ConvertStr, "02");
+                        }
+#ifdef SOFTWARE_DN
+                        else if (BoardInfTemp.Layout.WellType[j * 12 + i] == WELLS_TYPE_UD)
+                        {
+                            GUI_MEMDEV_WriteAt(hUDMempic,x-LAY_SMALL_RADIUS,y - LAY_SMALL_RADIUS);
+
+                            //GUI_DrawBitmap(&bmSmallQC, x-LAY_SMALL_RADIUS,y - LAY_SMALL_RADIUS-TITLESBAR_HEIGHT);
+													 
+                            sprintf(ConvertStr, "%03d", BoardInfTemp.Layout.Num[j * 12 + i]);//CurrQc + 1);
+                            //	strcpy(ConvertStr, "02");
+
+                        }
+#endif
+                        else
+                        {
+                            if (BoardInfTemp.Layout.WellType[j * 12 + i] == WELLS_TYPE_BK)
+                            {
+                                //GUI_MEMDEV_WriteAt(hBKMempic,x-LAY_SMALL_RADIUS,y - LAY_SMALL_RADIUS);
+                                // GUI_DrawBitmap(&bmSmallBK, x-LAY_SMALL_RADIUS,y - LAY_SMALL_RADIUS-TITLESBAR_HEIGHT);
+																GUI_SetColor(GUI_WHITE);// GUI_SetColor(0xffffff);
+																GUI_FillCircle(x, y- TITLESBAR_HEIGHT, LAY_SMALL_RADIUS);																
+																GUI_SetColor(0x958d8a);
+																GUI_FillCircle(x, y- TITLESBAR_HEIGHT, LAY_SMALL_RADIUS-1);
+                            }
+#ifndef SOFTWARE_DN
+                            else if (BoardInfTemp.Layout.WellType[j * 12 + i] == WELLS_TYPE_UD)
+                            {
+														GUI_SetColor(0X6F3FE8);//GUI_SetColor(0xd6945a);
+														GUI_FillCircle(x, y- TITLESBAR_HEIGHT, LAY_SMALL_RADIUS);
+														GUI_SetColor(0X4c2c7e);//GUI_SetColor(0xd6945a);
+														GUI_FillCircle(x, y- TITLESBAR_HEIGHT, LAY_SMALL_RADIUS-1);
+
+                            }
+#endif
+                            else if (BoardInfTemp.Layout.WellType[j * 12 + i] == WELLS_TYPE_EP)
+                            {
+															
+														GUI_SetColor(0x958D8A);//GUI_SetColor(0xd6945a);
+														GUI_FillCircle(x, y- TITLESBAR_HEIGHT, LAY_SMALL_RADIUS);
+														GUI_SetColor(0X291913);//GUI_SetColor(0xd6945a);
+														GUI_FillCircle(x, y- TITLESBAR_HEIGHT, LAY_SMALL_RADIUS-1);
+
+                            }
+                            else if (BoardInfTemp.Layout.WellType[j * 12 + i] == WELLS_TYPE_NC)
+                            {
+                              //  GUI_MEMDEV_WriteAt(hNCMempic,x-LAY_SMALL_RADIUS,y - LAY_SMALL_RADIUS);
+                                //GUI_DrawBitmap(&bmSmallNC, x-LAY_SMALL_RADIUS,y - LAY_SMALL_RADIUS-TITLESBAR_HEIGHT);
+															
+										          GUI_SetColor(0X920c6b);//GUI_SetColor(0xe6528c);
+													     GUI_FillCircle(x, y- TITLESBAR_HEIGHT, LAY_SMALL_RADIUS);
+															GUI_SetColor(0XFB00C2);//GUI_SetColor(0xe6528c);
+													     GUI_DrawCircle(x, y- TITLESBAR_HEIGHT, LAY_SMALL_RADIUS);
+
+                            }
+                            else if (BoardInfTemp.Layout.WellType[j * 12 + i] == WELLS_TYPE_PC)
+                            {
+                              //  GUI_MEMDEV_WriteAt(hPCMempic,x-LAY_SMALL_RADIUS,y - LAY_SMALL_RADIUS);
+                                //GUI_DrawBitmap(&bmSmallPC, x-LAY_SMALL_RADIUS,y - LAY_SMALL_RADIUS-TITLESBAR_HEIGHT);
+															
+															
+												GUI_SetColor(0X00E1FF);// GUI_SetColor(0x52adff);
+												GUI_FillCircle(x, y- TITLESBAR_HEIGHT, LAY_SMALL_RADIUS);
+												GUI_SetColor(0X147d8a);// GUI_SetColor(0x52adff);
+												GUI_FillCircle(x, y- TITLESBAR_HEIGHT, LAY_SMALL_RADIUS-1);									
+															
+													     
+                            }
+														if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+														{ 	
+														 strcpy(ConvertStr, WELLS_TYPE_STR[k]);
+														}
+														else
+														{
+														strcpy(ConvertStr, WELLS_TYPE_STR_PT[k]);
+														}
+                        }
+												
+												
+												GUI_SetColor(0xffffff);/////
+												//GUI_FillCircle(x, y- TITLESBAR_HEIGHT, LAY_SMALL_RADIUS);//////////////
+												
+                        rect.x0 = x - LAY_SMALL_RADIUS;
+                        rect.y0 = y - LAY_SMALL_RADIUS - TITLESBAR_HEIGHT;
+                        rect.x1 = x + LAY_SMALL_RADIUS;
+                        rect.y1 = y + LAY_SMALL_RADIUS - TITLESBAR_HEIGHT;
+#ifdef SOFTWARE_DN
+                        if( BoardInfTemp.Layout.WellType[j * 12 + i] != WELLS_TYPE_EP)
+                        {
+                            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+                        }
+#else
+                        if( (BoardInfTemp.Layout.WellType[j * 12 + i] != WELLS_TYPE_EP)
+                                &&(BoardInfTemp.Layout.WellType[j * 12 + i] != WELLS_TYPE_UD) )
+                        {
+                            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+                        }
+#endif
+                        break;
+                    }
+                }
+                if (MoveWell.MoveFlag != PRESS_MOVE)
+                {
+                    GUI_SetColor(GUI_BLUE);
+                    if (j * 12 + i == CurrWell)
+                    {
+                        GUI_DrawRect(x - LAY_SMALL_RADIUS, y - LAY_SMALL_RADIUS - TITLESBAR_HEIGHT, x + LAY_SMALL_RADIUS, y + LAY_SMALL_RADIUS - TITLESBAR_HEIGHT);
+                    }
+                }
+                x += 36;
+            }
+            y += 36;
+            x = 45 + LAY_SMALL_RADIUS;
+        }
+
+
+        if (MoveWell.MoveFlag == PRESS_MOVE)
+        {
+            GUI_SetColor(GUI_BLUE);
+            x = 45 + LAY_SMALL_RADIUS; //2014-8-17项
+            y = 145 + LAY_SMALL_RADIUS;
+            if(MoveWell.EndWellX>=MoveWell.StartWellX)
+            {
+                rect.x0 = x - LAY_SMALL_RADIUS + MoveWell.StartWellX*LAY_SMALL_DIS;
+                rect.x1 = x + LAY_SMALL_RADIUS + MoveWell.EndWellX*LAY_SMALL_DIS;
+            }
+            else
+            {
+                rect.x1 = x + LAY_SMALL_RADIUS + MoveWell.StartWellX*LAY_SMALL_DIS;
+                rect.x0 = x - LAY_SMALL_RADIUS + MoveWell.EndWellX*LAY_SMALL_DIS;
+            }
+
+            if(MoveWell.EndWellY>=MoveWell.StartWellY)
+            {
+                rect.y0 = y - LAY_SMALL_RADIUS - TITLESBAR_HEIGHT + MoveWell.StartWellY*LAY_SMALL_DIS;
+                rect.y1 = y + LAY_SMALL_RADIUS - TITLESBAR_HEIGHT + MoveWell.EndWellY*LAY_SMALL_DIS;
+            }
+            else
+            {
+                rect.y1 = y + LAY_SMALL_RADIUS - TITLESBAR_HEIGHT + MoveWell.StartWellY*LAY_SMALL_DIS;
+                rect.y0 = y - LAY_SMALL_RADIUS - TITLESBAR_HEIGHT + MoveWell.EndWellY*LAY_SMALL_DIS;
+            }
+            GUI_DrawRect(rect.x0, rect.y0, rect.x1, rect.y1);
+        }
+
+
+
+
+        if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+        {
+            GUI_SetFont(GUI_FONT_BIG);
+        }
+        else
+        {
+            GUI_SetFont(GUI_FONT_BIG_CH);
+        }
+
+        //定义色
+        GUI_SetColor(0xFFFFFF);
+
+        rect.x0 = 52;
+        rect.y0 = 125-TITLESBAR_HEIGHT;
+        rect.x1 = rect.x0 + 18;
+        rect.y1 = rect.y0 + 16;
+        for (i = 0; i < 12; i++)
+        {
+            TwoNumConvertStr(ConvertStr, i+1);
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            rect.x0 +=36;
+            rect.x1 += 36;
+        }
+
+
+        rect.x0 = 25;
+        rect.y0 = 155 - TITLESBAR_HEIGHT;
+        rect.x1 = rect.x0 + 18;
+        rect.y1 = rect.y0 + 16;
+        for (i = 0; i <8; i++)
+        {
+            ConvertStr[0] = 'A' + i;
+            ConvertStr[1] = 0;
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            rect.y0 += 36;
+            rect.y1 += 36;
+        }
+
+
+
+
+        GUI_SetColor(0xFFFFFF);
+        GUI_SetFont(GUI_FONT_BIG);
+        if (MoveWell.MoveFlag != PRESS_MOVE)
+        {
+            rect.x0 = LAY_BLANK_START_X;
+            rect.y0 = LAY_BLANK_START_Y - TITLESBAR_HEIGHT;
+            rect.x1 = LAY_BLANK_END_X;
+            rect.y1 = LAY_BLANK_END_Y - TITLESBAR_HEIGHT;
+					if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+				{ 	
+					  strcpy(ConvertStr, "BK");
+				}
+				else
+				{
+					  strcpy(ConvertStr, "BR");
+				}
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            if (BigWellSel==BIG_WELL_SEL_BK)
+            {
+                GUI_SetColor(0xfcf8e3);
+                GUI_DrawRect(rect.x0, rect.y0, rect.x1, rect.y1);
+            }
+
+            //显示SD 1
+           // GUI_SetColor(0xf7f1ef);
+						GUI_SetColor(0xffffff);
+            GUI_SetFont(GUI_FONT_BIG);
+            rect.x0 = LAY_SD_START_X;
+            rect.y0 = LAY_SD_START_Y +3- TITLESBAR_HEIGHT;
+            rect.x1 = LAY_SD_END_X;
+            rect.y1 = rect.y0 + LAY_BIG_RADIUS;
+						if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+						{ 	
+								strcpy(ConvertStr, "SD");
+						}
+						else
+						{
+								strcpy(ConvertStr, "PD");
+						}
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+
+            rect.y0 = rect.y1;
+            rect.y1 = LAY_SD_END_Y -3- TITLESBAR_HEIGHT;
+            TwoNumConvertStr(ConvertStr, CurrSd+1);
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            if (BigWellSel == BIG_WELL_SEL_SD)
+            {
+                GUI_SetColor(0xfcf8e3);
+                GUI_DrawRect(LAY_SD_START_X, LAY_SD_START_Y-TITLESBAR_HEIGHT, LAY_SD_END_X, LAY_SD_END_Y-TITLESBAR_HEIGHT);
+            }
+            #ifndef SOFTWARE_DN
+            //显示QC 1
+            GUI_SetColor(0xf7f1ef);
+            rect.x0 = LAY_QC_START_X;
+            rect.y0 = LAY_QC_START_Y+3 - TITLESBAR_HEIGHT;
+            rect.x1 = LAY_SD_END_X;
+            rect.y1 = rect.y0 + LAY_BIG_RADIUS;
+						if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+						{ 	
+								strcpy(ConvertStr, "QC");
+						}
+						else
+						{
+								strcpy(ConvertStr, "CQ");
+						}
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            if (BigWellSel == BIG_WELL_SEL_QC)
+            {
+                GUI_SetColor(0xfcf8e3);
+                GUI_DrawRect(LAY_QC_START_X, LAY_QC_START_Y-TITLESBAR_HEIGHT, LAY_QC_END_X, LAY_QC_END_Y-TITLESBAR_HEIGHT);
+            }
+
+
+
+            rect.y0 = rect.y1;
+            rect.y1 = LAY_QC_END_Y - 3 - TITLESBAR_HEIGHT;
+            TwoNumConvertStr(ConvertStr, CurrQc+1);
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            #endif
+
+
+#ifdef SOFTWARE_DN
+            //显示UD 000
+            GUI_SetColor(0xf7f1ef);
+            rect.x0 = LAY_UD_START_X;
+            rect.y0 = LAY_UD_START_Y +3- TITLESBAR_HEIGHT;
+            rect.x1 = LAY_UD_END_X;
+            rect.y1 = rect.y0 + LAY_BIG_RADIUS;
+						if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+						{ 	
+								strcpy(ConvertStr, "UD");
+						}
+						else
+						{
+								strcpy(ConvertStr, "DC");
+						}
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+
+            rect.y0 = rect.y1;
+            rect.y1 = LAY_UD_END_Y -3- TITLESBAR_HEIGHT;
+            sprintf(ConvertStr,"%03d",CurrUd);
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            if (BigWellSel == BIG_WELL_SEL_UD)
+            {
+                GUI_SetColor(0xfcf8e3);
+                GUI_DrawRect(LAY_UD_START_X, LAY_UD_START_Y-TITLESBAR_HEIGHT, LAY_UD_END_X, LAY_UD_END_Y-TITLESBAR_HEIGHT);
+            }
+#else
+            //UD不用显示
+            rect.x0 = LAY_UD_START_X;
+            rect.y0 = LAY_UD_START_Y - TITLESBAR_HEIGHT;
+            rect.x1 = LAY_UD_END_X;
+            rect.y1 = LAY_UD_END_Y - TITLESBAR_HEIGHT;
+           if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+						{ 	
+								strcpy(ConvertStr, "UD");
+						}
+						else
+						{
+								strcpy(ConvertStr, "DC");
+						}
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            if (BigWellSel == BIG_WELL_SEL_UD)
+            {
+                GUI_SetColor(0xfcf8e3);
+                GUI_DrawRect(rect.x0, rect.y0, rect.x1, rect.y1);
+            }
+#endif
+            //显示EP
+            rect.x0 = LAY_EP_START_X;
+            rect.y0 = LAY_EP_START_Y - TITLESBAR_HEIGHT;
+            rect.x1 = LAY_EP_END_X;
+            rect.y1 = LAY_EP_END_Y - TITLESBAR_HEIGHT;
+						if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+						{ 	
+								strcpy(ConvertStr, "EP");
+						}
+						else
+						{
+								strcpy(ConvertStr, "VZ");
+						}
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            if (BigWellSel == BIG_WELL_SEL_EP)
+            {
+                GUI_SetColor(0xfcf8e3);
+                GUI_DrawRect(rect.x0, rect.y0, rect.x1, rect.y1);
+            }
+
+#ifndef SOFTWARE_DN
+            //显示NC
+            rect.x0 = LAY_NC_START_X;
+            rect.y0 = LAY_NC_START_Y - TITLESBAR_HEIGHT;
+            rect.x1 = LAY_NC_END_X;
+            rect.y1 = LAY_NC_END_Y - TITLESBAR_HEIGHT;
+						if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+						{ 	
+								strcpy(ConvertStr, "NC");
+						}
+						else
+						{
+								strcpy(ConvertStr, "CN");
+						}
+						GUI_SetColor(0xffffff);
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            if (BigWellSel == BIG_WELL_SEL_NC)
+            {
+                GUI_SetColor(0xfcf8e3);
+                GUI_DrawRect(rect.x0, rect.y0, rect.x1, rect.y1);
+            }
+
+
+						GUI_SetColor(0xffffff);
+            GUI_SetFont(GUI_FONT_BIG);
+            rect.x0 = LAY_PC_START_X;
+            rect.y0 = LAY_PC_START_Y-TITLESBAR_HEIGHT;
+            rect.x1 = LAY_PC_END_X;
+            rect.y1 = LAY_PC_END_Y - TITLESBAR_HEIGHT;
+				   if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+						{ 	
+								strcpy(ConvertStr, "PC");
+						}
+						else
+						{
+								strcpy(ConvertStr, "CP");
+						}
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            if (BigWellSel == BIG_WELL_SEL_PC)
+            {
+                GUI_SetColor(0xfcf8e3);
+                GUI_DrawRect(rect.x0, rect.y0, rect.x1, rect.y1);
+            }
+#endif
+            if (ExpEnable == EXP_SD)
+            {
+                DisplaySdExpand();
+            }
+#ifndef SOFTWARE_DN
+            else if (ExpEnable==EXP_QC)
+            {
+                DisplayQcExpand();
+            }
+#endif
+        }
+        break;
+
+    case WM_NOTIFY_PARENT:
+    {
+        Id = WM_GetId(pMsg->hWinSrc);    // Id of widget
+        NCode = pMsg->Data.v;               // Notification code
+        if(RemoteInfo_PC.RemoteFlag)
+        {
+            break;
+        }
+        if( (KeyPadAsc.UseFlag == KEYPAD_BUSY)||(KeyPadNum.UseFlag == KEYPAD_BUSY)||(PromptMenu.InterfaceStatus==PROMPT_MENU_BUSY) )
+        {
+            break;
+        }
+        if(TouchKey.KeyStatus)
+        {
+            break;
+        }
+        if (NCode == WM_NOTIFICATION_RELEASED)
+        {
+            if (Id == ID_LAYOUT_BUTTON)   //工具栏第1个按钮  Concentration
+            {
+                gSystem.SystemInterface = MI_CONCENTRATION_SET;//进入浓度设置界面
+                ConcentrationSet_Interface();
+            }
+            else if (Id == ID_LAYOUT_BUTTON+1)   //工具栏第2个按钮 Delete all
+            {
+                for(i=0; i<TUBE_MAX; i++)
+                {
+                    BoardInfTemp.Layout.WellType[i]=WELLS_TYPE_EP;//这里由UD改为EP
+                    BoardInfTemp.Layout.Num[i]=0;
+                }
+                WM_Paint(hWin);
+            }
+            else if (Id == ID_LAYOUT_BUTTON+2)   //工具栏第2个按钮 Ok
+            {
+                if(memcmp(&BoardInf,&BoardInfTemp, sizeof(BOARD_INF)))   //
+                {
+                    memcpy(&BoardInf, &BoardInfTemp,sizeof(BOARD_INF));  //
+                    if(BoardInfTemp.bHasData)
+                    {
+                        ReportMenu.ReportReady=1;
+                    }
+                }
+                //这里不用保存布局参数
+                WM_DeleteWindow(ProtocolLayoutWin);
+                WM_ShowWindow(ProtocolWin);
+
+                gSystem.SystemInterface = MI_PROTOCOL;
+                gSystem.TitleButtonEnable = 1;
+                TouchKey.KeyStatus=1;
+                gSystem.MenuRefreshFlag = 1;
+
+            }
+            else if (Id == ID_LAYOUT_BUTTON + 3)   //工具栏第5个按钮  Cancel
+            {
+                WM_DeleteWindow(ProtocolLayoutWin);
+                WM_ShowWindow(ProtocolWin);
+
+                gSystem.SystemInterface = MI_PROTOCOL;
+                gSystem.TitleButtonEnable = 1;
+                TouchKey.KeyStatus=1;
+                gSystem.MenuRefreshFlag = 1;
+            }
+        }
+        break;
+    }
+
+    default:
+        //		WM_DefaultProc(pMsg);
+        break;
+    }
+}
+
+
+
+
+
+void ProtocolLayout_Scan(void)
+{
+    if(TouchKey.KeyStatus==0)
+    {
+        unsigned char i;
+        short j, k, well_num;
+        GUI_PID_STATE TouchState;
+
+        GUI_PID_GetState(&TouchState);
+
+        if (TouchState.Pressed)
+        {
+            if (ExpEnable)
+            {
+                if (ExpEnable == EXP_SD)
+                {
+                    if ((TouchState.x >= SD_EXPAND_START_X) && (TouchState.x <= SD_EXPAND_END_X - 30) &&
+                            (TouchState.y >= SD_EXPAND_START_Y) && (TouchState.y <= SD_EXPAND_END_Y))
+                    {
+                        for (i = 0; i<SD_MAX; i++)
+                        {
+                            if ((TouchState.x > SD_EXPAND_START_X + 27+ i*SD_SELECT_WIDTH) && (TouchState.x < SD_EXPAND_START_X + 27 + (i + 1)*SD_SELECT_WIDTH))
+                            {
+                                CurrSd = i;
+                                break;
+                            }
+                        }
+                    }
+                    ExpEnable = 0;
+                    TouchKey.KeyStatus = 1;
+                    WM_Invalidate(ProtocolLayoutWin);
+                }//if (ExpEnable == EXP_SD)
+								
+								#ifndef SOFTWARE_DN
+                else if (ExpEnable == EXP_QC)
+                {
+                    if ((TouchState.x >= QC_EXPAND_START_X) && (TouchState.x <= QC_EXPAND_END_X - 30) &&
+                            (TouchState.y >= QC_EXPAND_START_Y) && (TouchState.y <= QC_EXPAND_END_Y))
+                    {
+                        for (i = 0; i<QC_MAX; i++)
+                        {
+                            if ((TouchState.x > QC_EXPAND_START_X + 22+ i*QC_SELECT_WIDTH) && (TouchState.x < QC_EXPAND_START_X +22+ (i + 1)*QC_SELECT_WIDTH))
+                            {
+                                CurrQc = i;
+                                break;
+                            }
+                        }
+                    }
+                    ExpEnable = 0;
+                    TouchKey.KeyStatus = 1;
+                    WM_Invalidate(ProtocolLayoutWin);
+                }//else if (ExpEnable == EXP_QC)
+                #endif
+
+            }//if (ExpEnable)
+            else //if (ExpEnable == 0)
+            {
+                if ((TouchState.x >= LAY_BIG_START_X) && (TouchState.x <= LAY_BIG_END_X) &&
+                        (TouchState.y >= LAY_BIG_START_Y) && (TouchState.y <= LAY_BIG_END_Y))
+                {
+                    MoveWell.MoveFlag = 0;
+
+                    if ((TouchState.x >= LAY_BLANK_START_X) && (TouchState.x <= LAY_BLANK_END_X) &&
+                            (TouchState.y >= LAY_BLANK_START_Y) && (TouchState.y <= LAY_BLANK_END_Y))
+                    {
+                        if (BigWellSel != BIG_WELL_SEL_BK)
+                        {
+                            BigWellSel = BIG_WELL_SEL_BK;
+                            TouchKey.KeyStatus = 1;
+                            WM_Invalidate(ProtocolLayoutWin);
+                        }
+                    }
+                    else if ((TouchState.x >= LAY_SD_START_X) && (TouchState.x <= LAY_SD_END_X) &&
+                             (TouchState.y >= LAY_SD_START_Y) && (TouchState.y <= LAY_SD_END_Y))
+                    {
+                        TouchKey.KeyStatus = 1;
+                        if (BigWellSel != BIG_WELL_SEL_SD)
+                        {
+                            BigWellSel = BIG_WELL_SEL_SD;
+                            WM_Invalidate(ProtocolLayoutWin);
+                        }
+                        else// if (BigWellSel != BIG_WELL_SEL_SD)
+                        {
+                            ExpEnable = EXP_SD;
+                            WM_Invalidate(ProtocolLayoutWin);
+                        }
+                    }
+										#ifndef SOFTWARE_DN
+                    else if ((TouchState.x >= LAY_QC_START_X) && (TouchState.x <= LAY_QC_END_X) &&
+                             (TouchState.y >= LAY_QC_START_Y) && (TouchState.y <= LAY_QC_END_Y))
+                    {
+                        TouchKey.KeyStatus = 1;
+                        if (BigWellSel != BIG_WELL_SEL_QC)
+                        {
+                            BigWellSel = BIG_WELL_SEL_QC;
+                            WM_Invalidate(ProtocolLayoutWin);
+                        }
+                        else// if (BigWellSel != BIG_WELL_SEL_SD)
+                        {
+                            ExpEnable = EXP_QC;
+                            WM_Invalidate(ProtocolLayoutWin);
+                        }
+                    }
+										#endif
+                    else if ((TouchState.x >= LAY_UD_START_X) && (TouchState.x <= LAY_UD_END_X) &&
+                             (TouchState.y >= LAY_UD_START_Y) && (TouchState.y <= LAY_UD_END_Y))
+                    {
+                        if (BigWellSel != BIG_WELL_SEL_UD)
+                        {
+                            TouchKey.KeyStatus = 1;
+                            BigWellSel = BIG_WELL_SEL_UD;
+                            WM_Invalidate(ProtocolLayoutWin);
+                        }
+#ifdef SOFTWARE_DN
+                        else
+                        {
+                            ExpEnable = EXP_UD;
+                            WM_Invalidate(ProtocolLayoutWin);
+                        }
+#endif
+                    }
+                    else if ((TouchState.x >= LAY_EP_START_X) && (TouchState.x <= LAY_EP_END_X) &&
+                             (TouchState.y >= LAY_EP_START_Y) && (TouchState.y <= LAY_EP_END_Y))
+                    {
+                        if (BigWellSel != BIG_WELL_SEL_EP)
+                        {
+                            TouchKey.KeyStatus = 1;
+                            BigWellSel = BIG_WELL_SEL_EP;
+                            WM_Invalidate(ProtocolLayoutWin);
+                        }
+                    }
+                    #ifndef SOFTWARE_DN
+                    else if ((TouchState.x >= LAY_NC_START_X) && (TouchState.x <= LAY_NC_END_X) &&
+                             (TouchState.y >= LAY_NC_START_Y) && (TouchState.y <= LAY_NC_END_Y))
+                    {
+                        if (BigWellSel != BIG_WELL_SEL_NC)
+                        {
+                            TouchKey.KeyStatus = 1;
+                            BigWellSel = BIG_WELL_SEL_NC;
+                            WM_Invalidate(ProtocolLayoutWin);
+                        }
+                    }
+                    else if ((TouchState.x >= LAY_PC_START_X) && (TouchState.x <= LAY_PC_END_X) &&
+                             (TouchState.y >= LAY_PC_START_Y) && (TouchState.y <= LAY_PC_END_Y))
+                    {
+                        if (BigWellSel != BIG_WELL_SEL_PC)
+                        {
+                            TouchKey.KeyStatus = 1;
+                            BigWellSel = BIG_WELL_SEL_PC;
+                            WM_Invalidate(ProtocolLayoutWin);
+                        }
+                    }
+                    #endif
+										
+                    else if ((TouchState.x >= LAY_PC_START_X) && (TouchState.x <= LAY_PC_END_X) &&
+                             (TouchState.y >= LAY_PC_START_Y) && (TouchState.y <= LAY_PC_END_Y))
+                    {
+                        if (BigWellSel != BIG_WELL_SEL_PC)
+                        {
+                            TouchKey.KeyStatus = 1;
+                            BigWellSel = BIG_WELL_SEL_PC;
+                            WM_Invalidate(ProtocolLayoutWin);
+                        }
+                    }
+                }//if ((TouchState.x >= LAY_BIG_START_X) && (TouchState.x <= LAY_BIG_END_X) &&(TouchState.y >= LAY_BIG_START_Y) && (TouchState.y <= LAY_BIG_END_Y))
+                else if ((TouchState.x >= LAY_SMALL_START_X) && (TouchState.x <= LAY_SMALL_END_X) &&
+                         (TouchState.y >= LAY_SMALL_START_Y) && (TouchState.y <= LAY_SMALL_END_Y))
+                {
+                    j = ((TouchState.y - LAY_SMALL_START_Y) / LAY_SMALL_DIS);
+                    k = ((TouchState.x - LAY_SMALL_START_X) / LAY_SMALL_DIS);
+
+                    if (MoveWell.MoveFlag == PRESS_NO)
+                    {
+                        TouchKey.KeyStatus = 1;
+                        MoveWell.MoveFlag = PRESS_DOWN;
+                        StartUpPra.MouseMoveFlag=0;
+                        MoveWell.StartWellX = k;
+                        MoveWell.StartWellY = j;
+
+                        MoveWell.TempWellX = k;
+                        MoveWell.TempWellY = j;
+
+                        well_num = (j * 12) + k;
+                        BoardInfTemp.Layout.WellType[well_num] = BigWellSel;
+                        CurrWell = well_num;
+                        if (BigWellSel == BIG_WELL_SEL_SD)
+                        {
+                            BoardInfTemp.Layout.Num[well_num] = CurrSd;
+                        }
+												#ifndef SOFTWARE_DN
+                        else if (BigWellSel == BIG_WELL_SEL_QC)
+                        {
+                            BoardInfTemp.Layout.Num[well_num] = CurrQc;
+                        }
+												#endif
+                        else if (BigWellSel == BIG_WELL_SEL_UD)
+                        {
+                            BoardInfTemp.Layout.Num[well_num] = CurrUd;
+                        }
+                        WM_Invalidate(ProtocolLayoutWin);
+
+                    }
+                }//else if ((TouchState.x >= LAY_SMALL_START_X) && (TouchState.x <= LAY_SMALL_END_X) &&
+            }//else //if (ExpEnable == 0)
+
+        }//if (TouchState.Pressed)
+    }
+
+
+}
+
+
+
+void ProtocolLayout_Go(void)
+{
+    if(TouchKey.KeyStatus)
+    {
+        short j, k, well_num;
+
+        GUI_RECT rect;
+
+        GUI_PID_STATE TouchState;
+        GUI_PID_GetState(&TouchState);
+
+        if (TouchState.Pressed == 0)
+        {
+            TouchKey.KeyPressDelay++;
+            if (TouchKey.KeyPressDelay > 0)//TOUCH_RELEASE_DELAY)
+            {
+                TouchKey.KeyPressDelay = 0;
+                TouchKey.KeyStatus = 0;
+                if (MoveWell.MoveFlag==PRESS_MOVE)
+                {
+                    if(MoveWell.StartWellY>MoveWell.EndWellY)
+                    {
+                        j=MoveWell.EndWellY;
+                        MoveWell.EndWellY=MoveWell.StartWellY;
+                        MoveWell.StartWellY=j;
+                    }
+                    if(MoveWell.StartWellX>MoveWell.EndWellX)
+                    {
+                        j=MoveWell.EndWellX;
+                        MoveWell.EndWellX=MoveWell.StartWellX;
+                        MoveWell.StartWellX=j;
+                    }
+
+                    for (j = MoveWell.StartWellY; j <= MoveWell.EndWellY; j++)
+                    {
+                        for (k = MoveWell.StartWellX; k <= MoveWell.EndWellX; k++)
+                        {
+                            well_num = (j * 12) + k;
+													 
+                            BoardInfTemp.Layout.WellType[well_num] = BigWellSel;
+                            if (BigWellSel == BIG_WELL_SEL_SD)
+                            {
+                                BoardInfTemp.Layout.Num[well_num] = CurrSd;
+                            }
+														#ifndef SOFTWARE_DN
+                            else if (BigWellSel == BIG_WELL_SEL_QC)
+                            {
+                                BoardInfTemp.Layout.Num[well_num] = CurrQc;
+                            }
+														#endif
+														#ifdef SOFTWARE_DN   //迪恩软件UD自动编号
+                            else if (BigWellSel == BIG_WELL_SEL_UD)
+                            {
+                                 BoardInfTemp.Layout.Num[well_num] = CurrUd+(k-MoveWell.StartWellX)*(MoveWell.EndWellY-MoveWell.StartWellY+1)+(j - MoveWell.StartWellY);
+															  if(BoardInfTemp.Layout.Num[well_num]>UD_MAX)BoardInfTemp.Layout.Num[well_num]=UD_MAX;
+															  
+                            }
+													  #else               //奥盛软件UD不变
+														else if (BigWellSel == BIG_WELL_SEL_UD)
+                            {
+                                BoardInfTemp.Layout.Num[well_num] = CurrUd;
+                            }
+														#endif
+                        }
+                    }
+										#ifdef SOFTWARE_DN   //迪恩软件UD自动编号,CurrUd自动变为最大值
+                            if (BigWellSel == BIG_WELL_SEL_UD)
+                            {
+															  if(CurrUd<BoardInfTemp.Layout.Num[well_num])CurrUd=BoardInfTemp.Layout.Num[well_num];
+															  
+															  CurrWell=well_num;//自动编号，保持不变
+															  if(CurrWell>UD_MAX)CurrWell=UD_MAX;
+                            }
+										#endif
+                    WM_Invalidate(ProtocolLayoutWin);
+                    /*rect.x0=0;
+                    	     rect.x1=CONTENTBAR_CONTENT_POSY;
+                    	     rect.x1=496 - 1;
+                    	     rect.y1=CONTENTBAR_HEIGHT-1;
+                    WM_InvalidateRect(ProtocolLayoutWin,&rect);*/
+                }
+                MoveWell.MoveFlag = 0;
+                StartUpPra.MouseMoveFlag=0;
+            }//if (TouchKey.KeyPressDelay > TOUCH_RELEASE_DELAY)
+        }//if (TouchState.Pressed == 0)
+
+        else if(ExpEnable==0)//if (TouchState.Pressed)
+        {
+            if ((TouchState.x >= LAY_SMALL_START_X) && (TouchState.x <= LAY_SMALL_END_X) &&
+                    (TouchState.y >= LAY_SMALL_START_Y) && (TouchState.y <= LAY_SMALL_END_Y))
+            {
+                j = ((TouchState.y - LAY_SMALL_START_Y) / LAY_SMALL_DIS);
+                k = ((TouchState.x - LAY_SMALL_START_X) / LAY_SMALL_DIS);
+                if (  (MoveWell.MoveFlag == PRESS_DOWN) && ((MoveWell.TempWellX != k) || (MoveWell.TempWellY != j)) )
+                {
+                    MoveWell.MoveFlag = PRESS_MOVE;
+                    StartUpPra.MouseMoveFlag=1;
+                    // GUI_MEMDEV_CopyFromLCD(hMemLayout);////
+                }
+                MoveWell.EndWellX = k;
+                MoveWell.EndWellY = j;
+
+                MoveWell.TempWellX = k;
+                MoveWell.TempWellY = j;
+
+                /*
+                rect.x0=0;
+                	rect.x1=CONTENTBAR_CONTENT_POSY;
+                	rect.x1=496 - 1;
+                	rect.y1=CONTENTBAR_HEIGHT-1;
+                WM_InvalidateRect(ProtocolLayoutWin,&rect);*/
+                WM_Paint(ProtocolLayoutWin);
+            }//if ((TouchState.x >= LAY_SMALL_START_X) && (TouchState.x <= LAY_SMALL_END_X) &&
+        }//else //if (TouchState.Pressed)
+    }//if(TouchKey.KeyStatus)
+
+#ifdef SOFTWARE_DN
+    if(ExpEnable == EXP_UD)
+    {
+        sprintf(KeyPadNum.InputValueStr,"%03d",CurrUd);
+        KeyPadNum_Interface(NUM_MENUFLAG_3NUM);
+
+        if ( (KeyPadNum.ReturnKey == KEYPAD_NUM_RETURN_ENTER)&&(KeyPadNum.InputValueStr[0]!=0) )
+        {
+            CurrUd=atoi(KeyPadNum.InputValueStr);
+            if(CurrUd>UD_MAX)CurrUd=UD_MAX;
+            else if(CurrUd<UD_MIN)CurrUd=UD_MIN;
+        }
+
+        ExpEnable = 0;
+        TouchKey.KeyStatus = 1;
+        WM_Invalidate(ProtocolLayoutWin);
+    }//else if (ExpEnable == EXP_TIME_SEC)
+#endif
+}
+
+
+
+void ProtocolLayout_Interface(void)
+{
+    unsigned short i;
+    MoveWell.MoveFlag = 0;
+
+    /*
+    	//板布局
+    //测试用 lgj171123 modify start
+    for(i=0;i<TUBE_MAX;i++)
+    {
+    	   if(BoardInfTemp.Layout.WellType[i]>=WELLS_TYPE_MAX)
+    	   {
+    			  BoardInfTemp.Layout.WellType[i]=WELLS_TYPE_UD;     //出错时用于修正
+    			 //lgj171123 modify question
+    	   }
+    }
+    //modify end
+
+     for(i=0;i<TUBE_MAX;i++)
+     {
+    			BoardInfTemp.Layout.WellType[i]=BoardInfTemp.Layout.WellType[i];
+        BoardInfTemp.Layout.Num[i]=BoardInfTemp.Layout.Num[i];
+     }
+    */
+    CurrWell=0;
+    CurrUd=0;
+    CurrQc=0;
+    CurrSd=0;
+    ExpEnable=0;
+    StartUpPra.MouseMoveFlag=0;//
+    BigWellSel = BIG_WELL_SEL_UD;
+    memcpy(&BoardInfTemp,&BoardInf, sizeof(BOARD_INF));  //
+    //memcpy(&BoardInfTemp.Layout,&BoardInfTemp.Layout, sizeof(LAYOUT) ); //保存质控参数
+
+    ProtocolLayoutWin = WM_CreateWindowAsChild(CONTENTBAR_POSX, CONTENTBAR_POSY, CONTENTBAR_WIDTH, CONTENTBAR_HEIGHT, WM_HBKWIN, WM_CF_SHOW | WM_CF_STAYONTOP | WM_CF_MEMDEV, _cbProtocolLayout, 0);
+    WM_BringToTop(ProtocolLayoutWin);
+}
+

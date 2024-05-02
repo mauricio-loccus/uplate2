@@ -1,0 +1,1687 @@
+// c0531.cpp : Defines the entry point for the console application.
+//
+
+//#include "stdafx.h"
+//#include "suanfa.h"
+
+//#include <stdio.h>
+///#include <stdlib.h>
+//#include <math.h>
+//#include <limits.h>
+//#include <windows.h>
+#include  "includes.h"
+#include  "MainTask.h"
+
+CALCU_PARA CalcuPara __attribute__((at(SDRAM_CALCU_BUF)));
+
+
+
+
+/*
+
+//线性方程,x,y和Total
+double aa[LINEAR_EQUATION_VARIABLE_MAX][LINEAR_EQUATION_VARIABLE_MAX];
+double bb[LINEAR_EQUATION_VARIABLE_MAX];
+int N;
+
+//LeastSquareMethod begin
+//double* m_pXLsm;
+//double* m_pYLsm;
+double m_pXLsm[SD_MAX];//12
+double m_pYLsm[SD_MAX];
+int m_nTotal;
+
+
+
+//四参数开始
+	double a, b, c, d;
+	double a_lm, b_lm, c_lm, d_lm;
+	double m_dA[4][4];
+	double m_dB[4];
+	double m_pX[SD_MAX];
+	double m_pY[SD_MAX]; //double*
+	double m_pXInit[SD_MAX]; //获取a、b、c、d初值x、y变换值
+	double m_pYInit[SD_MAX];
+	int m_nSerial[4]; //最大4个误差
+	double m_dRR;
+	double m_dRRBack;
+	double m_dYAverage;
+	double m_dYMax;
+	double m_dYMin;
+	double rss, tss;
+    double* r2;
+
+    double* J;
+	double* H;
+    double* dc;
+    double* ycal_lm;
+    double* dc_lm;
+//四参数结束
+
+
+//三次样条开始
+	double m_pXSpline[SD_MAX];
+	double m_pYSpline[SD_MAX];
+//	int m_nTotal;
+	double m_dDerivative[SPLINE_POINT_MAX];
+	double m_dH[SPLINE_POINT_MAX];
+	double m_dM[SPLINE_POINT_MAX];
+	double m_dD[SPLINE_POINT_MAX];
+	double m_dMiu[SPLINE_POINT_MAX];
+	double m_dLamda[SPLINE_POINT_MAX];
+	double m_dAB[SPLINE_POINT_MAX * SPLINE_POINT_MAX];
+	int loopCount;
+//三次样条结束
+
+*/
+
+
+
+int GaussianElimination(int n)
+{
+    int nStart = CalcuPara.N - n,i,j;
+    double dMax = CalcuPara.aa[0][nStart];
+    int nMax = 0;
+
+    for(i = 0; i < n; i++) //找出最大系数
+    {
+        if(dMax < CalcuPara.aa[i][nStart])
+        {
+            dMax = CalcuPara.aa[i][nStart];
+            nMax = i;
+        }
+    }
+
+    if(nMax != n - 1) //交换
+    {
+        double dTemp;
+        for(i = nStart; i < CalcuPara.N; i++)
+        {
+            dTemp = CalcuPara.aa[nMax][i];
+            CalcuPara.aa[nMax][i] = CalcuPara.aa[n - 1][i];
+            CalcuPara.aa[n - 1][i] = dTemp;
+        }
+
+        dTemp = CalcuPara.bb[nMax];
+        CalcuPara.bb[nMax] = CalcuPara.bb[n - 1];
+        CalcuPara.bb[n - 1] = dTemp;
+    }
+
+    for(i = 0; i < n - 1; i++) //消去
+    {
+        double dTemp = CalcuPara.aa[i][nStart];
+        if(CalcuPara.aa[n - 1][nStart] == 0.0f)
+        {
+            return ANALYSIS_ERROR;
+        }
+        for(j = nStart; j < CalcuPara.N; j++)
+        {
+            CalcuPara.aa[i][j] -= CalcuPara.aa[n - 1][j] / CalcuPara.aa[n - 1][nStart] * dTemp;
+        }
+
+        CalcuPara.bb[i] -= CalcuPara.bb[n - 1] / CalcuPara.aa[n - 1][nStart] * dTemp;
+    }
+
+    if(n > 2) //递归
+    {
+        return GaussianElimination(n - 1);
+    }
+    else
+    {
+        return ANALYSIS_SUCCESS;
+    }
+}
+
+
+
+
+
+//创建线性方程，得到x,y，及Total
+int LinearEquationCreate(double* a1, double* b1, int N1)
+{
+    int i;
+    if(NULL == a1 || NULL == b1 || N1<2)
+    {
+        return ANALYSIS_ERROR;
+    }
+
+    CalcuPara.N = N1;
+    if(CalcuPara.N > 1)
+    {
+        for(i = 0; i < CalcuPara.N; i++)
+        {
+            memcpy(CalcuPara.aa[i], a1 + (i * CalcuPara.N), sizeof(double) * CalcuPara.N);
+        }
+        memcpy(CalcuPara.bb, b1, sizeof(double) * CalcuPara.N);
+
+        return GaussianElimination(CalcuPara.N);
+    }
+
+    return ANALYSIS_ERROR;
+}
+
+int LinearEquationGetSolution(double* x1)
+{
+    int i,j;
+    double dTemp;
+    for(i = 0; i < CalcuPara.N; i++)
+    {
+        if(i == 0)
+        {
+            if(CalcuPara.aa[i][CalcuPara.N - 1] == 0.0f)
+            {
+                return ANALYSIS_ERROR;
+            }
+            x1[CalcuPara.N - 1] = CalcuPara.bb[i] / CalcuPara.aa[i][CalcuPara.N - 1];
+            continue;
+        }
+        dTemp = CalcuPara.bb[i];
+        for(j = CalcuPara.N - 1; j > CalcuPara.N -1 - i; j--)
+        {
+            dTemp -= (CalcuPara.aa[i][j] * x1[j]);
+        }
+
+        if(CalcuPara.aa[i][CalcuPara.N - 1 - i] == 0.0f)
+        {
+            return ANALYSIS_ERROR;
+        }
+        x1[CalcuPara.N - 1 - i] = dTemp / CalcuPara.aa[i][CalcuPara.N - 1 - i];
+    }
+
+    return ANALYSIS_SUCCESS;
+}
+
+
+//矩阵函数开始
+double *GetComplement(double *val,double *a2, int n, int nx, int ny)
+{
+    //double *d_tmp1  = new double[(n-1) * (n-1)];
+    // double *d_tmp1= (double *)malloc(sizeof(double) *(n-1) * (n-1));
+    double *d_tmp1;
+    int i,j;
+
+    d_tmp1=val;
+    if(a2 == NULL || nx > n || ny > n || nx <1 || ny<1)
+    {
+        return NULL;
+    }
+
+
+    for(i=0; i<(nx-1); i++ )
+    {
+        for(j=0; j<(ny-1); j++)
+            d_tmp1[i*(n-1)+j] = a2[i*n + j];
+        for(j=(ny-1); j<(n-1); j++)
+            d_tmp1[i*(n-1) + j] = a2[i*n + j+1];
+    }
+
+    for(i=(nx-1); i<(n-1); i++ )
+    {
+        for(j=0; j<(ny-1); j++)
+            d_tmp1[i*(n-1) + j] = a2[(i+1)*n + j];
+        for(j=(ny-1); j<(n-1); j++)
+            d_tmp1[i*(n-1) + j] = a2[(i+1)*n + j + 1];
+    }
+    return CalcuPara.d_tmp1;
+}
+
+double CalculateDeterminantN(double *a2, int n)
+{
+    double ret = 0;
+
+    // double *a3 = new double[(n-1)*(n-1)];
+    //double *a3 = (double *)malloc(sizeof(double) * (n-1)*(n-1));
+    int i;
+
+    if(a2 == NULL ||  n<2 )
+    {
+        //return NULL;
+        return 0;//lgj170729
+    }
+
+
+    if(n == 2)
+    {
+        //	double ret1;
+        //ret1 = a2[0][0]*a2[1][1] - a2[0][1]*a2[1][0];
+        //ret1=a2[0]*a2[3]-ret-a2[1]*a2[2];
+        //ret1=a2[0]*a2[3];
+        ret=a2[0]*a2[3]-a2[1]*a2[2];
+        //ret = a2[0]*a2[3] - a2[1]*a2[2];
+        return (ret);
+    }
+    else if(n> 2)
+    {
+        double a3[3*3];
+        //double *a3 = new double[(n-1)*(n-1)];
+        for(i=0; i<n; i++)
+        {
+            //Log.e("wenqg", "i= " + i +", n is " + n);
+            GetComplement(a3,a2, n, 1, i+1);//lgj171202,CalcuPara.a5
+            ret += a2[i] *pow(-1.0, (1+i+1)) * CalculateDeterminantN(a3, n-1);//CalcuPara.a5
+            //Log.e("wenqg", "n= " + n +", ret n is "+ ret);
+        }
+        //Log.e("wenqg", "total return is " + ret );
+        return ret;
+    }
+    else
+        return ret;
+}
+
+double *getInverseMatrix(double *val,double *a2, int n)//逆矩阵
+{
+    double *p;
+    double d1 = 0;
+
+    // double a4[4*4];
+    //double *a5 = (double *)malloc(sizeof(double) * 2*2);
+    //	double *a3 = (double *)malloc(sizeof(double) * n*n);
+    //double *a4 = (double *)malloc(sizeof(double) * (n-1)*(n-1));
+
+
+    //double *a5 = new double[2*2];
+    //double *a3 = new double[n * n];
+    //double *a4 = new double[(n-1)*(n-1)];
+    int i,j;
+    p=val;
+    if(a2 == NULL ||  n<2 )
+    {
+        return NULL;
+    }
+
+
+    if(2 == n)
+    {
+        d1 = CalculateDeterminantN(a2, n);
+
+        if(0 == d1)
+        {
+            return NULL;
+        }
+
+        //double *a5 = new double[2*2];
+        p[0] = a2[3];
+        p[1] = -a2[1];
+        p[2] = -a2[2];
+        p[3] = a2[0];
+
+        for(i=0; i<2; i++)
+        {
+            for(j=0; j<2; j++)
+            {
+                p[i*2+j] /= d1;
+            }
+        }
+        //memcpy(p,a5,2*2);
+        //free(a4);
+        return p;
+    }
+
+    //double *a3 = new double[n * n];
+    //double *a4 = new double[(n-1)*(n-1)];
+    d1=CalculateDeterminantN(a2, n);
+    if(0 == d1)
+    {
+        return NULL;
+    }
+
+    for(i=0; i<n; i++)
+    {
+        for(j=0; j<n; j++)
+        {
+            GetComplement(CalcuPara.a4,a2, n, j+1, i+1);
+            p[i*n+j] = pow(-1.0, i+1+j+1) * CalculateDeterminantN(CalcuPara.a4, n-1);
+            p[i*n+j] /= d1;
+        }
+    }
+
+
+    return p;
+}
+
+//Matrix: mxn; Matrix: nxk
+double *MatrixMulty(double* val, double* a1, int m, int n, double* b1, int k)
+{
+    //	double* d1 = new double[m * k];
+    double *d1;
+
+    //double *d1= (double *)malloc(sizeof(double) * m*k);
+    int i,l,j;
+
+    d1=val;
+    if(NULL == a1 || NULL == b1 || m<1 || n<1 || k<1 )
+    {
+        return NULL;
+    }
+
+
+    for(i=0; i<m; i++)
+    {
+        for(j=0; j<k; j++)
+        {   d1[i*k + j] = 0.0;
+            for(l=0; l<n; l++)
+            {
+                d1[i*k + j] += a1[i*n+l] * b1[l*k+j];
+            }
+        }
+    }
+    return d1;
+}
+
+double *MatrixReverse(double *val,double* a1, int m, int n)
+{
+    double *d2;
+
+    int i,j;
+
+    d2=val;
+    //double* d2 = new double[n * m];
+    // double *d2= (double *)malloc(sizeof(double) * n*m);
+    if(NULL == a1 || m<1 || n<1)
+    {
+        return NULL;
+    }
+
+
+    for(i=0; i<n; i++)
+    {
+        for(j=0; j<m; j++)
+            d2[i*m + j] = a1[i + j*n];
+    }
+    return d2;
+}
+//矩阵函数结束
+
+/*
+int LinearViaZeroCreate(double *pX, double *pY, int number)
+	{
+		if(number < 2 || pX == NULL || pY == NULL)
+		{
+			return -1;
+		}
+		CalcuPara.m_nTotal = number;
+	  memcpy(CalcuPara.m_pXLsm, pX, nTotal * sizeof(double));
+	  memcpy(CalcuPara.m_pYLsm, pY, nTotal * sizeof(double));
+
+		return 0;
+	}
+*/
+double LinearViaZeroCalculateK(int* nErrorCode)
+{
+    double 	dxx = 0, dxy = 0;
+    short i;
+    for(i = 0; i < CalcuPara.m_nTotal; i++)
+    {
+        dxx += CalcuPara.m_pXLsm[i] * CalcuPara.m_pXLsm[i];
+        dxy += CalcuPara.m_pXLsm[i] * CalcuPara.m_pYLsm[i];
+    }
+    *nErrorCode = ANALYSIS_SUCCESS;
+    if(dxx!=0)
+    {
+        CalcuPara.resultK=dxy/dxx;
+        return(CalcuPara.resultK);
+    }
+    else
+    {
+        *nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;
+
+    }
+    return(0);
+}
+
+
+double LinearViaZeroGetRR(int* nErrorCode)
+{
+    double dTemp = 0.0;
+    double dTemp1 = 0.0;
+    short i;
+
+    double m_dYAverage = 0;
+    for(i = 0; i < CalcuPara.m_nTotal; i++)
+    {
+        m_dYAverage += CalcuPara.m_pYLsm[i];
+    }
+    if(CalcuPara.m_nTotal>0)
+    {
+        m_dYAverage /= CalcuPara.m_nTotal;
+    }
+    else
+    {
+        *nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;
+        return 0;//dRR;
+    }
+    for(i = 0; i < CalcuPara.m_nTotal; i++)
+    {
+        dTemp += ((CalcuPara.m_pYLsm[i] - CalcuPara.resultK * CalcuPara.m_pXLsm[i]) * (CalcuPara.m_pYLsm[i] - CalcuPara.resultK * CalcuPara.m_pXLsm[i]));
+        dTemp1 += ((CalcuPara.m_pYLsm[i] - m_dYAverage) * (CalcuPara.m_pYLsm[i] - m_dYAverage));
+    }
+
+    *nErrorCode = ANALYSIS_SUCCESS;
+    if(dTemp1 != 0.0f)
+    {
+        return(1 - dTemp / dTemp1);
+    }
+    else
+    {
+        *nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;
+    }
+    return 0;//dRR;
+}
+
+
+
+
+//最小二乘法开始
+int LsmCreate(double* pX, double* pY, int nTotal)
+{
+    //m_pXLsm = NULL;
+    //m_pYLsm = NULL;
+    CalcuPara.m_nTotal = 0;
+
+    if(NULL == pX || NULL == pY || nTotal<2)
+    {
+        return -1;
+    }
+
+    //m_pXLsm = new double[nTotal];
+    //m_pYLsm = new double[nTotal];
+    {
+//	    m_pXLsm= (double *)malloc(sizeof(double) *nTotal);
+        //  m_pYLsm= (double *)malloc(sizeof(double) *nTotal);
+    }
+
+    CalcuPara.m_nTotal = nTotal;
+    memcpy(CalcuPara.m_pXLsm, pX, nTotal * sizeof(double));
+    memcpy(CalcuPara.m_pYLsm, pY, nTotal * sizeof(double));
+    return 0;
+}
+
+double GetAverageX(void)
+{
+    double dAverage = 0.0;
+    int i;
+
+    for(i = 0; i < CalcuPara.m_nTotal; i++)
+    {
+        dAverage += CalcuPara.m_pXLsm[i];
+    }
+
+    return (dAverage / (double)CalcuPara.m_nTotal);
+}
+
+double GetAverageY(void)
+{
+    double dAverage = 0.0f;
+    int i;
+
+    for(i = 0; i < CalcuPara.m_nTotal; i++)
+    {
+        dAverage += CalcuPara.m_pYLsm[i];
+    }
+
+    return (dAverage / (double)CalcuPara.m_nTotal);
+}
+
+double GetAverageXX(void)
+{
+    int i;
+    double dAverage = 0.0;
+
+    for(i = 0; i < CalcuPara.m_nTotal; i++)
+    {
+        dAverage += (CalcuPara.m_pXLsm[i] * CalcuPara.m_pXLsm[i]);
+    }
+
+    return (dAverage / (double)CalcuPara.m_nTotal);
+}
+
+double GetAverageYY(void)
+{
+    int i;
+    double dAverage = 0.0;
+
+    for(i = 0; i < CalcuPara.m_nTotal; i++)
+    {
+        dAverage += (CalcuPara.m_pYLsm[i] * CalcuPara.m_pYLsm[i]);
+    }
+
+    return (dAverage / (double)CalcuPara.m_nTotal);
+}
+
+double GetAverageXY(void)
+{
+    double dAverage = 0.0;
+    int i;
+
+    for(i = 0; i < CalcuPara.m_nTotal; i++)
+    {
+        dAverage += (CalcuPara.m_pYLsm[i] * CalcuPara.m_pXLsm[i]);
+    }
+
+    return (dAverage / (double)CalcuPara.m_nTotal);
+}
+
+double LsmGetRR(int* nErrorCode) //相关系数
+{
+    double dTemp, dTemp1;
+    dTemp = GetAverageXY() - GetAverageX() * GetAverageY();
+    dTemp *= dTemp;
+    dTemp1 = ((GetAverageXX() - GetAverageX() * GetAverageX()) * (GetAverageYY() - GetAverageY() * GetAverageY()));
+
+    *nErrorCode = ANALYSIS_SUCCESS;
+    if(dTemp1 != 0.0f)
+    {
+        dTemp /= dTemp1;
+    }
+    else
+    {
+        *nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;
+    }
+
+    return dTemp;
+}
+
+double LsmGetSlope(int* nErrorCode) //斜率
+{
+    double dTemp, dTemp1;
+    dTemp = GetAverageXY() - GetAverageX() * GetAverageY();
+    dTemp1 = (GetAverageXX() - GetAverageX() * GetAverageX());
+    *nErrorCode = ANALYSIS_SUCCESS;
+    if(dTemp1 != 0.0f)
+    {
+        dTemp /= dTemp1;
+    }
+    else
+    {
+        *nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;
+    }
+    return dTemp;
+}
+
+double LsmGetIntercept(int* nErrorCode) //截距
+{
+    return GetAverageY() - LsmGetSlope(nErrorCode) * GetAverageX();
+}
+//最小二乘法结束
+
+
+
+//四参数开始
+void GetCoef(double* dCoef)
+{
+    dCoef[0] = CalcuPara.a;
+    dCoef[1] = CalcuPara.b;
+    dCoef[2] = CalcuPara.c;
+    dCoef[3] = CalcuPara.d;
+}
+
+double GetY(double dX)
+{
+    double dTemp = pow((dX / CalcuPara.c), CalcuPara.b);
+    return (CalcuPara.d + (CalcuPara.a - CalcuPara.d) / (1 + dTemp));
+}
+
+//void LogisticGetRR(double *dRR)
+double LogisticGetRR(void)
+{
+    double dTemp = 0.0f;
+    double dTemp1 = 0.0f;
+    int i;
+    for(i = 0; i < CalcuPara.m_nTotal; i++)
+    {
+        dTemp += ((CalcuPara.m_pY[i] - GetY(CalcuPara.m_pX[i])) * (CalcuPara.m_pY[i] - GetY(CalcuPara.m_pX[i])));
+        dTemp1 += ((CalcuPara.m_pY[i] - CalcuPara.m_dYAverage) * (CalcuPara.m_pY[i] - CalcuPara.m_dYAverage));
+    }
+
+    return (1 - dTemp / dTemp1);
+}
+
+
+
+double GetDYDA(double dX)
+{
+    double dTemp = pow((dX / CalcuPara.c), CalcuPara.b);
+    return (1.0f / (1 + dTemp));
+}
+
+void SetYMin(double dYMin)
+{
+    CalcuPara.m_dYMin = dYMin;
+}
+
+void SetYMax(double dYMax)
+{
+    CalcuPara.m_dYMax = dYMax;
+}
+
+double GetDYDD(double dX)
+{
+    double dTemp = pow((dX / CalcuPara.c), CalcuPara.b);
+    return (1.0f - 1.0f / (1 + dTemp));
+}
+
+double GetDYDC(double dX)
+{
+    double dTemp = pow((dX / CalcuPara.c), CalcuPara.b);
+    return ((CalcuPara.b / CalcuPara.c) * ((CalcuPara.a - CalcuPara.d) / ((1 + dTemp) * (1 + dTemp))) * dTemp);
+}
+
+double GetDYDB(double dX)
+{
+    double dTemp = pow((dX / CalcuPara.c), CalcuPara.b);
+    return -((dTemp) * (log(dX / CalcuPara.c)) * ((CalcuPara.a - CalcuPara.d) / ((1 + dTemp) * (1 + dTemp))));
+}
+
+unsigned char GetInitBC()
+{
+    int i;
+    int nErrorCode;
+    double dTemp;
+
+    for(i = 0; i < CalcuPara.m_nTotal; i++)
+    {
+        CalcuPara.m_pXInit[i] = log10(CalcuPara.m_pX[i]);
+        CalcuPara.m_pYInit[i] = log10((CalcuPara.m_pY[i] - CalcuPara.a) / (CalcuPara.d - CalcuPara.m_pY[i]));
+    }
+
+//	CLeastSquareMethod* pLSM = new CLeastSquareMethod;
+    LsmCreate(CalcuPara.m_pXInit, CalcuPara.m_pYInit, CalcuPara.m_nTotal);
+
+    CalcuPara.b = LsmGetSlope(&nErrorCode);
+    if(nErrorCode != ANALYSIS_SUCCESS)
+    {   //printf("GetInitBC return 111!\n");
+        // return false;
+        return ANALYSIS_ERROR;
+    }
+
+    dTemp = LsmGetIntercept(&nErrorCode);
+    if(nErrorCode != ANALYSIS_SUCCESS)
+    {
+        //	printf("GetInitBC return 222!\n");
+        //  return false;
+        return ANALYSIS_ERROR;
+    }
+
+    CalcuPara.c = pow(10.0, -dTemp / CalcuPara.b);
+    //return true;
+    return ANALYSIS_SUCCESS;
+}
+
+unsigned char InitPara(void)
+{
+    // 	double *JReserve=(double *)malloc(sizeof(double) *CalcuPara.m_nTotal*4);
+
+    // double* H = (double *)malloc(sizeof(double) *4*4);
+
+    // double *H_lm= (double *)malloc(sizeof(double) *4*4);
+    // double *a2= (double *)malloc(sizeof(double) *4*4);
+    // double *a3=(double *)malloc(sizeof(double) *m_nTotal*4);
+    // double *dp=(double *)malloc(sizeof(double) *4);
+
+//	     unsigned char bFlag;
+    double dcol;
+    double  ck = 1;
+    int zk;
+    //double value[8];// = new double[8];
+    int i,j,col;
+    //{
+    double lamda = 0.01;//设定搜索方向的变化量
+//        int Ndata = m_nTotal;
+//        int Nparams = 4;
+    int upJ = 1;//是否更新雅克比矩阵的标志位
+    double rr2 = 0;
+    double std = 0;
+    int re = 0;//重复次数
+    int xs = 1;//下山法的偏移量
+    int it;
+    double row = 0;
+    double dTemp;
+    //J= (double *)malloc(sizeof(double) *m_nTotal*4);
+    //  dc= (double *)malloc(sizeof(double) *m_nTotal*1);
+    //  ycal_lm= (double *)malloc(sizeof(double) *m_nTotal);
+    // dc_lm= (double *)malloc(sizeof(double) *m_nTotal);
+
+
+    //查找y的最大/最小值
+    CalcuPara.m_dYAverage = 0.0;
+    for(i = 0; i < CalcuPara.m_nTotal; i++)
+    {
+        CalcuPara.m_dYAverage += CalcuPara.m_pY[i];
+    }
+    CalcuPara.m_dYAverage /= CalcuPara.m_nTotal;//Y的均值
+
+    CalcuPara.d = (CalcuPara.m_dYMax + CalcuPara.m_dYMin) / 2 + (CalcuPara.m_dYMax - CalcuPara.m_dYMin) * 1.1f / 2;//d的初值
+    CalcuPara.a = CalcuPara.m_dYMin -  CalcuPara.m_dYMin * 0.1f;//a的初值
+    if(GetInitBC()!=ANALYSIS_SUCCESS)
+//	if(bFlag==0)
+    {
+        //printf("InitPara return 000!\n");
+        //Sleep(2000);
+        //return false;
+        return ANALYSIS_ERROR;
+    }
+
+
+
+
+    for (it = 1; it < 2200; it++)
+    {
+        if (upJ == 1)
+        {
+            for (i = 0; i < CalcuPara.m_nTotal; i++)
+            {
+                CalcuPara.J[i*4 + 0] = 0;//将雅克比矩阵初始化
+                CalcuPara.J[i*4 + 1] = 0;
+                CalcuPara.J[i*4 + 2] = 0;
+                CalcuPara.J[i*4 + 3] = 0;
+            }
+
+            for (i = 0; i < CalcuPara.m_nTotal; i++)
+            {
+                CalcuPara.J[i*4 + 0] = GetDYDA(CalcuPara.m_pX[i]);//四个偏导参数值
+                //if (_isnan(J[i*4 + 0]))
+                if(abs(CalcuPara.J[i*4 + 0]) >= INT_MAX)
+                    CalcuPara.J[i*4 + 0] = 0;
+
+                CalcuPara.J[i*4 + 1] = GetDYDB(CalcuPara.m_pX[i]);
+                //				if (_isnan(J[i*4 + 1]))
+                if(abs(CalcuPara.J[i*4 + 1]) >= INT_MAX)
+                    CalcuPara.J[i*4 + 1] = 0;
+
+                CalcuPara.J[i*4 + 2] = GetDYDC(CalcuPara.m_pX[i]);
+                //if (_isnan(J[i*4 + 2]))
+                if(abs(CalcuPara.J[i*4 + 2]) >= INT_MAX)
+                    CalcuPara.J[i*4 + 2] = 0;
+                CalcuPara.J[i*4 + 3] = GetDYDD(CalcuPara.m_pX[i]);
+//                    if (_isnan(J[i*4 + 3]))
+                if(abs(CalcuPara.J[i*4 + 3]) >= INT_MAX)
+                    CalcuPara.J[i*4 + 3] = 0;
+            }//for (i = 0; i < m_nTotal; i++)
+
+            for (i = 0; i < CalcuPara.m_nTotal; i++)
+                CalcuPara.dc[i*1+0] = CalcuPara.m_pY[i] - GetY(CalcuPara.m_pX[i]);//Y的差值
+        }
+
+
+        if(MatrixReverse(CalcuPara.JReserve,CalcuPara.J, CalcuPara.m_nTotal, 4)==NULL)//转置
+            //if(NULL == JReserve)
+        {
+            return ANALYSIS_ERROR;
+        }
+
+        if(MatrixMulty(CalcuPara.H,CalcuPara.JReserve, 4, CalcuPara.m_nTotal, CalcuPara.J, 4)==NULL) //J的转置*J
+        {
+            return ANALYSIS_ERROR;
+        }
+        //H_lm= (double *)malloc(sizeof(double) *4*4);
+
+
+        for (i = 0; i < 4; i++)
+        {
+            for (j = 0; j < 4; j++)
+            {
+                if (i == j)
+                    CalcuPara.H_lm[i*4+j] = CalcuPara.H[i*4+j] + lamda;
+                else
+                    CalcuPara.H_lm[i*4+j] = CalcuPara.H[i*4+j];
+            }
+        }
+
+
+
+        // if(getInverseMatrix(CalcuPara.a2,(double *)CalcuPara.H_lm, 4)==NULL)//逆
+        if(getInverseMatrix(CalcuPara.a2,CalcuPara.H_lm, 4)==NULL)//逆
+        {
+            return ANALYSIS_ERROR;
+        }
+        if(MatrixMulty(CalcuPara.a3,CalcuPara.a2, 4, 4, CalcuPara.JReserve,CalcuPara. m_nTotal)==NULL)//矩阵相乘
+        {
+            return ANALYSIS_ERROR;
+        }
+        if(MatrixMulty(CalcuPara.dp,CalcuPara.a3, 4, CalcuPara.m_nTotal,CalcuPara.dc, 1)==NULL)//矩阵相乘
+        {
+            return ANALYSIS_ERROR;
+        }
+
+        for (i = 0; i < 4; i++)
+        {
+            CalcuPara.value[i + 1] = CalcuPara.dp[i*1+0];
+        }
+
+				
+        ck=1;
+        //r2= (double *)malloc(sizeof(double) *xs);
+        // r2 = new double[xs];
+        for (zk = 0; zk < xs; zk++)
+        {
+            double rss = 0;
+            double tss = 0;
+
+            CalcuPara.a_lm = CalcuPara.a + ck * CalcuPara.value[1];
+            CalcuPara.b_lm = CalcuPara.b + ck * CalcuPara.value[2];
+            CalcuPara.c_lm = CalcuPara.c + ck * CalcuPara.value[3];
+            CalcuPara.d_lm = CalcuPara.d + ck * CalcuPara.value[4];
+
+
+            for (i = 0; i < CalcuPara.m_nTotal; i++)
+            {
+                dTemp = pow((CalcuPara.m_pX[i] / CalcuPara.c_lm), CalcuPara.b_lm);
+                CalcuPara.ycal_lm[i] = CalcuPara.d_lm + (CalcuPara.a_lm - CalcuPara.d_lm) / (1 + dTemp);
+            }
+
+            for (i = 0; i < CalcuPara.m_nTotal; i++)
+            {
+                rss += (pow((CalcuPara.m_pY[i] - CalcuPara.ycal_lm[i]), 2));
+                tss += (pow((CalcuPara.m_pY[i] - CalcuPara.m_dYAverage), 2));
+            }
+            if (tss == 0)
+                CalcuPara.r2[zk] = 0;
+            else if (rss == 0)
+                CalcuPara.r2[zk] = 1;
+            else
+                CalcuPara.r2[zk] = 1 - rss / tss;
+
+            ck = ck / 2;
+        }//for (zk = 0; zk < xs; zk++)
+
+
+        col = 0;
+
+        row = CalcuPara.r2[0];
+        for (i = 1; i < xs; i++)
+        {
+            if (row < CalcuPara.r2[i])
+            {
+                row = CalcuPara.r2[i];
+                col = i;
+            }
+        }//for (i = 1; i < xs; i++)
+
+        dcol = pow(2.0, col);
+
+        CalcuPara.a_lm = CalcuPara.a + CalcuPara.value[1] * (1 / dcol);
+        CalcuPara.b_lm = CalcuPara.b + CalcuPara.value[2] * (1 / dcol);
+        CalcuPara.c_lm = CalcuPara.c + CalcuPara.value[3] * (1 / dcol);
+        CalcuPara.d_lm = CalcuPara.d + CalcuPara.value[4] * (1 / dcol);
+
+        for (i = 0; i < CalcuPara.m_nTotal; i++)
+            CalcuPara.dc_lm[i] = CalcuPara.m_pY[i] - CalcuPara.ycal_lm[i];//Y的差值
+
+        if (row > rr2)
+        {
+            lamda = lamda / 4;
+            rr2 = row;
+            CalcuPara.a = CalcuPara.a_lm;
+            CalcuPara.b = CalcuPara.b_lm;
+            CalcuPara.c = CalcuPara.c_lm;
+            CalcuPara.d = CalcuPara.d_lm;
+            upJ = 1;
+        }
+        else
+        {
+            upJ = 0;
+            lamda = lamda * 4;
+        }
+
+        if ((lamda > 10000000000) || (lamda < 0.0000000001))
+        {
+            break;
+        }
+        if (rr2 == 1)
+        {
+            break;
+        }
+        //if ((fabs(std - row) < 0.0000001f) && (row != 0))
+        if ((fabs(std - row) < 0.0000001f) && (row != 0))
+            re = re + 1;
+        else
+            re = 0;
+
+        if (re == 6)
+            break;
+
+        std = row;
+        if (it > 500)
+        {
+            xs = 10;
+        }
+    }
+    return ANALYSIS_SUCCESS;
+}
+
+unsigned char LogisticCreate(double* pX, double* pY, int nTotal)
+{
+
+    int min;
+    double d_tmp;
+    int i,j;
+    double Min , Max;
+
+    //   m_pX= (double *)malloc(sizeof(double) *nTotal);
+    //  m_pY= (double *)malloc(sizeof(double) *nTotal);
+    // m_pXInit= (double *)malloc(sizeof(double) *nTotal);
+    //   m_pYInit= (double *)malloc(sizeof(double) *nTotal);
+
+    CalcuPara.m_nTotal = nTotal;
+
+
+    if(nTotal <= 4)
+    {
+        return ANALYSIS_ERROR;
+    }
+
+
+
+    /*
+
+    		for(i = 0; i < CalcuPara.m_nTotal; i++)
+    		{
+    			min = i;
+    			for(j = i+1; j < CalcuPara.m_nTotal; j++)
+    			{
+    				if(pX[j] < pX[min])
+    				{
+    					min = j;
+    				}
+    			}
+
+    			if(min == i)
+    			{
+    				continue;
+    			}
+
+    			d_tmp = pX[i];
+    			pX[i] = pX[min];
+    			pX[min] = d_tmp;
+
+    			d_tmp = pY[i];
+    			pY[i] = pY[min];
+    			pY[min] = d_tmp;
+    		}//for(i = 0; i < m_nTotal; i++)
+    	*/
+    memcpy(CalcuPara.m_pX, pX, nTotal * sizeof(double));
+    memcpy(CalcuPara.m_pY, pY, nTotal * sizeof(double));
+
+
+    Min = CalcuPara.m_pY[0], Max = CalcuPara.m_pY[0];
+
+    for(i = 1; i < CalcuPara.m_nTotal; i++)
+    {
+        if(Min > CalcuPara.m_pY[i])
+        {
+            Min = CalcuPara.m_pY[i];
+        }
+
+        if(Max < CalcuPara.m_pY[i])
+        {
+            Max = CalcuPara.m_pY[i];
+        }
+    }
+
+    if(Min <= 0)
+    {
+        return ANALYSIS_ERROR;//false;
+    }
+
+//IMPORTANT NOTE:
+//wenqg, 20170306 16:30
+    if(CalcuPara.m_pX[0] == 0)
+    {
+        CalcuPara.m_pX[0] = CalcuPara.m_pX[1] * 0.001f;
+    }
+//add end
+
+    SetYMin(Min);
+    SetYMax(Max);
+
+    return InitPara();
+    //}
+}
+
+double LogisticCalculateXValue(double f)
+{
+    double d_t1 = (f - CalcuPara.a) / (CalcuPara.d - f);
+    double t1 = log10(d_t1) / CalcuPara.b + log10(CalcuPara.c);
+    t1 = pow(10.0, t1);
+    return t1;
+}
+//四参数结束
+
+
+
+
+//三次样条开始
+unsigned char InitSplinePara(void)
+{
+    int i,j,k;
+    for(i = 0; i < CalcuPara.m_nTotal - 1; i++)
+    {
+        CalcuPara.m_dH[i] = CalcuPara.m_pXSpline[i + 1] - CalcuPara.m_pXSpline[i];
+        if(CalcuPara.m_dH[i]==0) //modify 20180211
+        {
+            return (ANALYSIS_ERROR_FITTING_FAIL);
+        }
+        CalcuPara.m_dDerivative[i] = (CalcuPara.m_pYSpline[i + 1] - CalcuPara.m_pYSpline[i]) / CalcuPara.m_dH[i];
+    }
+    CalcuPara.m_dH[ CalcuPara.m_nTotal - 1] = 0;
+
+    for(i = 1; i < CalcuPara.m_nTotal -1; i++)
+    {
+        if(CalcuPara.m_dH[i -1] + CalcuPara.m_dH[i]==0) //modify 20180211
+        {
+            return (ANALYSIS_ERROR_FITTING_FAIL);
+        }
+        CalcuPara.m_dMiu[i] = CalcuPara.m_dH[i - 1] / (CalcuPara.m_dH[i -1] + CalcuPara.m_dH[i]);
+        CalcuPara.m_dLamda[i] = CalcuPara.m_dH[i] / (CalcuPara.m_dH[i -1] + CalcuPara.m_dH[i]);
+        if(CalcuPara.m_pXSpline[i + 1] - CalcuPara.m_pXSpline[i - 1]==0) //modify 20180211
+        {
+            return (ANALYSIS_ERROR_FITTING_FAIL);
+        }
+        CalcuPara.m_dD[i - 1] = 6.0f * (CalcuPara.m_dDerivative[i] - CalcuPara.m_dDerivative[i - 1]) / (CalcuPara.m_pXSpline[i + 1] - CalcuPara.m_pXSpline[i - 1]);
+    }
+
+    CalcuPara.m_dM[0] = 0.0f;
+    CalcuPara.m_dM[CalcuPara.m_nTotal - 1] = 0.0f;
+    if(CalcuPara.m_nTotal == 3)
+    {
+        CalcuPara.m_dM[1] = CalcuPara.m_dD[0] / 2.0f;
+    }
+    else //4个以上点需解方程
+    {
+        for(i = 0; i < CalcuPara.m_nTotal - 2; i ++)
+        {
+            for(j = 0; j < CalcuPara.m_nTotal - 2; j++)
+            {
+                k = i * (CalcuPara.m_nTotal - 2) + j;
+                CalcuPara.m_dAB[k] = 0.0;
+                if(i == 0)
+                {
+                    if(j == 0)
+                    {
+                        CalcuPara.m_dAB[k] = 2.0;
+                    } //if(j == 0)
+                    else if(j == 1)
+                    {
+                        CalcuPara.m_dAB[k] = CalcuPara.m_dLamda[1];
+                    } //else if(j == 1)
+                } //if(i == 0)
+                else if(i == CalcuPara.m_nTotal - 3)
+                {
+                    if(j == CalcuPara.m_nTotal - 3)
+                    {
+                        CalcuPara.m_dAB[k] = 2.0f;
+                    } //if(j == m_nTotal - 3)
+                    else if(j == CalcuPara.m_nTotal - 4)
+                    {
+                        CalcuPara.m_dAB[k] = CalcuPara.m_dMiu[CalcuPara.m_nTotal - 2];
+                    } //else if(j == m_nTotal - 4)
+                } //else if(i == m_nTotal - 3)
+                else
+                {
+                    if(j == i - 1)
+                    {
+                        CalcuPara.m_dAB[k] = CalcuPara.m_dMiu[i + 1];
+                    } //if(j == i - 1)
+                    else if(j == i)
+                    {
+                        CalcuPara.m_dAB[k] = 2.0f;
+                    } //else if(j == i)
+                    else if(j == i + 1)
+                    {
+                        CalcuPara.m_dAB[k] = CalcuPara.m_dLamda[i + 1];
+                    } //else if(j == i + 1)
+                } //else if(i == m_nTotal - 3)
+            } //for(int j = 0; j < m_nTotal - 2; j++)
+        } //for(int i = 0; i < m_nTotal - 2; i ++)
+
+//		CLinearEquation* p_LE = new CLinearEquation;
+        if(LinearEquationCreate(CalcuPara.m_dAB, CalcuPara.m_dD, CalcuPara.m_nTotal - 2))
+        {
+//			delete p_LE;
+            return ANALYSIS_ERROR;//false;
+        }
+        else
+        {
+            int tmp = LinearEquationGetSolution((double*)(CalcuPara.m_dM + 1));
+            if(0 != tmp)
+            {
+//				delete p_LE;
+                return ANALYSIS_ERROR;//false;
+            }
+//			delete p_LE;
+        }
+    } //if(m_nTotal == 3)
+
+    return ANALYSIS_SUCCESS;//true;
+}
+
+void GetM(double* dM)
+{
+    if(NULL == dM)
+    {
+        return;
+    }
+    memcpy(dM, CalcuPara.m_dM, sizeof(double) * SPLINE_POINT_MAX);
+}
+
+void GetH(double* dH)
+{
+    if(NULL == dH)
+    {
+        return;
+    }
+    memcpy(dH, CalcuPara.m_dH, sizeof(double) * SPLINE_POINT_MAX);
+}
+
+unsigned char SplineCreate(double* pX, double* pY, int nTotal)
+{
+    if(NULL == pX || NULL==pY || nTotal<3)
+    {
+        return ANALYSIS_ERROR;//false;
+    }
+    {
+        int min;
+        double d_tmp;
+        int i,j;
+			  unsigned char  bFlag;
+        //m_pXSpline= (double *)malloc(sizeof(double) *nTotal);
+        //	m_pYSpline= (double *)malloc(sizeof(double) *nTotal);
+        //m_pXSpline = new double[nTotal];
+        //m_pYSpline = new double[nTotal];
+        CalcuPara.m_nTotal = nTotal;
+        CalcuPara.loopCount = 30;
+
+
+
+
+
+
+        for(i = 0; i < CalcuPara.m_nTotal; i++)
+        {
+            min = i;
+            for(j = i+1; j < CalcuPara.m_nTotal; j++)
+            {
+                if(pX[j] < pX[min])
+                {
+                    min = j;
+                }
+            }
+
+            if(min == i)
+            {
+                continue;
+            }
+
+            d_tmp = pX[i];
+            pX[i] = pX[min];
+            pX[min] = d_tmp;
+
+            d_tmp = pY[i];
+            pY[i] = pY[min];
+            pY[min] = d_tmp;
+        }
+				
+				
+        CalcuPara.upDownFlag = 0;
+				bFlag=1;
+				j=0;
+				for(j = 0; j < (CalcuPara.m_nTotal-1); j++)
+				{
+					if((CalcuPara.m_pYSpline[j]-CalcuPara.m_pYSpline[j+1])*(CalcuPara.m_pYSpline[j+1]-CalcuPara.m_pYSpline[j+2]) < 0)
+					{
+						bFlag = 0;
+						break;
+					}
+				}
+				if(bFlag==0)
+				{
+					CalcuPara.upDownFlag = 0;
+				}
+				else
+				{
+					if(CalcuPara.m_pYSpline[j] < CalcuPara.m_pYSpline[j+1])
+					{
+						CalcuPara.upDownFlag = 1;
+					}
+					else if(CalcuPara.m_pYSpline[j] > CalcuPara.m_pYSpline[j+1])
+					{
+						CalcuPara.upDownFlag = 2;
+					}
+					else
+						CalcuPara.upDownFlag = 0;
+				}
+
+        memcpy(CalcuPara.m_pXSpline, pX, nTotal * sizeof(double));
+        memcpy(CalcuPara.m_pYSpline, pY, nTotal * sizeof(double));
+    }
+    return InitSplinePara();
+}
+
+float SplineCalculateYValue(float dx)
+{
+    int j=0,i= -1;
+    float h = 0.0;
+    float res = 0.0;
+    for(j=0; j<(CalcuPara.m_nTotal-1); j++)
+    {
+        if(CalcuPara.m_pXSpline[j] <= dx && CalcuPara.m_pXSpline[j+1] >= dx)
+        {
+					  i=j;
+            break;
+        }
+    }
+		if(i < 0)
+		{
+			if(dx < CalcuPara.m_pXSpline[0])
+			{
+				i = 0;
+			}
+			else if(dx > CalcuPara.m_pXSpline[CalcuPara.m_nTotal-1])
+			{
+				i = CalcuPara.m_nTotal-2;
+			}
+		}
+
+    //Log.e("wenqg", "i is " +i);
+   // if(i < (CalcuPara.m_nTotal-1))
+    //{
+        h = CalcuPara.m_pXSpline[i+1] - CalcuPara.m_pXSpline[i];
+        res = (CalcuPara.m_pXSpline[i+1] - dx)*(CalcuPara.m_pXSpline[i+1] - dx)*(CalcuPara.m_pXSpline[i+1] -dx)*CalcuPara.m_dM[i]/6/h;
+        res -= (CalcuPara.m_pXSpline[i] - dx)*(CalcuPara.m_pXSpline[i] - dx)*(CalcuPara.m_pXSpline[i] - dx)*CalcuPara.m_dM[i+1]/6/h;
+        res += (CalcuPara.m_pYSpline[i] - h*h*CalcuPara.m_dM[i]/6)*(CalcuPara.m_pXSpline[i+1] -dx)/h;
+        res -= (CalcuPara.m_pYSpline[i+1] - h*h*CalcuPara.m_dM[i+1]/6)*(CalcuPara.m_pXSpline[i] -dx)/h;
+        //Log.e("wenqg", "res is " + res);
+        return res;
+  //  }
+   // return 0;
+}
+
+float  ErFenFa_CalculateXValue(float dy, int *nErrorCode)
+{
+    //找d值的区间
+	  float x1 = 0, x2 = 0;
+	 
+    signed char pos = -1; //int flag = -1;
+    signed char i;
+    for(i=0; i<(CalcuPara.m_nTotal-1); i++)
+    {
+        if((dy -CalcuPara.m_pYSpline[i])* (dy - CalcuPara.m_pYSpline[i+1]) < 0)
+        {
+            pos = i;
+            break;
+        }
+    }
+		 *nErrorCode = ANALYSIS_SUCCESS;
+		
+		x1=0.0;//
+	  x2=0.0;//
+    if(pos < 0)
+    {
+			  if(CalcuPara.upDownFlag==1)//单调增
+				{
+					 if(dy < CalcuPara.m_pYSpline[0])
+					 {
+						x1 =  CalcuPara.m_pXSpline[0];
+						x2 =  CalcuPara.m_pXSpline[1];
+					 }
+					 else if(dy > CalcuPara.m_pYSpline[CalcuPara.m_nTotal-1])
+					 {
+						x1 =  CalcuPara.m_pXSpline[CalcuPara.m_nTotal-2];
+						x2 =  CalcuPara.m_pXSpline[CalcuPara.m_nTotal-1];
+					 }
+		    }
+				 else if(CalcuPara.upDownFlag == 2)//单调减
+				 {
+					if(dy > CalcuPara.m_pYSpline[0])
+					 {
+						x1 =  CalcuPara.m_pXSpline[0];
+						x2 =  CalcuPara.m_pXSpline[1];
+					 }
+					 else if(dy < CalcuPara.m_pYSpline[CalcuPara.m_nTotal-1])
+					 {
+						x1 =  CalcuPara.m_pXSpline[CalcuPara.m_nTotal-2];
+						x2 =  CalcuPara.m_pXSpline[CalcuPara.m_nTotal-1];
+					 }
+				 }
+				 else
+				 {
+					    *nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;//ANALYSIS_SUCCESS;
+             return 0;
+				 }
+    }
+		else
+	  {
+		  x1 =  CalcuPara.m_pXSpline[pos];
+		  x2 =  CalcuPara.m_pXSpline[pos+1];
+	  }
+	 
+
+    {
+    //    double x1 =  CalcuPara.m_pXSpline[pos];
+      //  double x2 =  CalcuPara.m_pXSpline[pos+1];
+        float dMid = 0;
+       float x = 0;
+        float dFa = 0, dFb = 0;
+        signed short Count = 0;
+       // CalcuPara.x=0.0;
+        for(Count=0; Count < CalcuPara.loopCount; Count++)
+        {
+            x = (x1+x2)/2;
+            dMid = SplineCalculateYValue((float)x);
+            if(abs(dy-dMid) < pow(10.0, -6))
+            {
+			         // if(x==0){*nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;}
+							  break;
+            }
+
+            dFa = SplineCalculateYValue((float)x1);
+            dFb = SplineCalculateYValue((float)x2);
+            if((dFa - dy) * (dMid - dy) < 0)
+            {
+                x2 = x;
+            }
+            else if((dFb - dy) * (dMid - dy) < 0)
+            {
+                x1 = x;
+            }
+            else
+            {
+							   *nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;//ANALYSIS_SUCCESS;
+                x = 0;
+                break;
+            }
+        }
+
+//	 Log.e("wenqg", "ErFenFa: x is " + x +", loopCount is " + Count);
+        return x;
+    }
+}
+
+
+float calculateDerivative(float dx)
+{
+
+    int j = 0, i = -1; 
+	  float dTemp;
+	
+		for(j=0; j<(CalcuPara.m_nTotal-1); j++)
+		{
+			if(CalcuPara.m_pXSpline[j] <= dx && CalcuPara.m_pXSpline[j+1] >= dx)				
+			{
+				i = j;
+				break;
+			}
+		}
+		if(i < 0)
+		{
+			if(dx < CalcuPara.m_pXSpline[0])
+			{
+				i = 0;
+			}
+			else if(dx > CalcuPara.m_pXSpline[CalcuPara.m_nTotal-1])
+			{
+				i = CalcuPara.m_nTotal-2;
+			}
+		}
+		dTemp = 0;
+    //if(i < (CalcuPara.m_nTotal-1))
+   // {
+        dTemp -= (CalcuPara.m_pXSpline[i+1] -dx) * (CalcuPara.m_pXSpline[i+1] -dx) *CalcuPara.m_dM[i]/2/CalcuPara.m_dH[i];
+        dTemp += (CalcuPara.m_pXSpline[i] -dx) * (CalcuPara.m_pXSpline[i] -dx) *CalcuPara.m_dM[i+1]/2/CalcuPara.m_dH[i];
+        dTemp += (CalcuPara.m_dH[i] * CalcuPara.m_dM[i]/6 - CalcuPara.m_pYSpline[i]/CalcuPara.m_dH[i]);
+        dTemp += (CalcuPara.m_pYSpline[i+1]/CalcuPara.m_dH[i] - CalcuPara.m_dH[i] * CalcuPara.m_dM[i+1]/6);
+   // }
+    return dTemp;
+}
+
+
+float NewTonCalculateXValue(float dy, int *nErrorCode)
+{
+    int i;
+    float p0 = 0;
+    //找d值的区间
+    int pos = -1; //int flag = -1;
+    for(i=0; i<(CalcuPara.m_nTotal-1); i++)
+    {
+        if((dy -CalcuPara.m_pYSpline[i])* (dy - CalcuPara.m_pYSpline[i+1]) < 0)
+        {
+            pos = i;
+            break;
+        }
+    }
+    if(pos < 0)
+    {
+        if(CalcuPara.upDownFlag==1)//单调增
+				{
+					 if(dy < CalcuPara.m_pYSpline[0])
+					 {
+						  p0 =  CalcuPara.m_pXSpline[0];
+					 }
+					 else if(dy > CalcuPara.m_pYSpline[CalcuPara.m_nTotal-1])
+					 {
+						  p0 =  CalcuPara.m_pXSpline[CalcuPara.m_nTotal-1];
+					 }
+		    }
+				 else if(CalcuPara.upDownFlag == 2)//单调减
+				 {
+					if(dy > CalcuPara.m_pYSpline[0])
+					 {
+						p0 =  CalcuPara.m_pXSpline[0];
+					
+					 }
+					 else if(dy < CalcuPara.m_pYSpline[CalcuPara.m_nTotal-1])
+					 {
+						
+						p0 =  CalcuPara.m_pXSpline[CalcuPara.m_nTotal-1];
+					 }
+				 }
+				 else
+				 {
+					  *nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;
+            return 0;
+				 }
+    }
+		else
+	  {
+		  p0 =  CalcuPara.m_pXSpline[pos];
+	  }
+		
+    {
+        //double p0 = CalcuPara.m_pXSpline[pos], 
+				float p = 0, dTemp = 0;
+        int Count = 0;
+
+        for(Count=0; Count < CalcuPara.loopCount; Count++)
+        {
+            dTemp = calculateDerivative(p0);
+            if(0 == dTemp)
+            {
+							  *nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;
+                p = 0;
+                break;
+            }
+
+            p = p0 - (SplineCalculateYValue(p0)-dy)/calculateDerivative(p0);
+            if(abs((p-p0)/p) < pow(10.0, -6))
+            {
+                break;
+            }
+            else
+                p0 = p;
+        }
+
+//	 Log.e("wenqg", "NewTon: x is " + p +", loopCount is " + Count);
+        return p;
+    }
+}
+
+float GeXianFaCalculateXValue(float dy, int *nErrorCode)
+{
+	  float p0 = 0, p1 = 0;
+    //找d值的区间
+    int pos = -1,i;
+    for(i=0; i<(CalcuPara.m_nTotal-1); i++)
+    {
+        if((dy -CalcuPara.m_pYSpline[i])* (dy - CalcuPara.m_pYSpline[i+1]) < 0)
+        {
+            pos = i;
+            break;
+        }
+    }
+    if(pos < 0)
+    {
+        if(CalcuPara.upDownFlag==1)//单调增
+				{
+					 if(dy < CalcuPara.m_pYSpline[0])
+					 {
+						p0 =  CalcuPara.m_pXSpline[0];
+						p1 =  CalcuPara.m_pXSpline[1];
+					 }
+					 else if(dy > CalcuPara.m_pYSpline[CalcuPara.m_nTotal-1])
+					 {
+						p0 =  CalcuPara.m_pXSpline[CalcuPara.m_nTotal-2];
+						p1 =  CalcuPara.m_pXSpline[CalcuPara.m_nTotal-1];
+					 }
+		    }
+				 else if(CalcuPara.upDownFlag == 2)//单调减
+				 {
+					if(dy > CalcuPara.m_pYSpline[0])
+					 {
+						p0 =  CalcuPara.m_pXSpline[0];
+						p1 =  CalcuPara.m_pXSpline[1];
+					 }
+					 else if(dy < CalcuPara.m_pYSpline[CalcuPara.m_nTotal-1])
+					 {
+						p0 =  CalcuPara.m_pXSpline[CalcuPara.m_nTotal-2];
+						p1 =  CalcuPara.m_pXSpline[CalcuPara.m_nTotal-1];
+					 }
+				 }
+				 else
+				 {
+					 *nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;
+           return 0;
+				 }
+    }
+		else
+	  {
+		  p0 =  CalcuPara.m_pXSpline[pos];
+		  p1 =  CalcuPara.m_pXSpline[pos+1];
+	  }
+
+    {
+       // double p0 = CalcuPara.m_pXSpline[pos], p1 = CalcuPara.m_pXSpline[pos+1], q0 = 0, q1 = 0, p = 0;
+        float q0 = 0, q1 = 0, p = 0;
+			  int Count = 0;
+
+        q0 = SplineCalculateYValue(p0) - dy;
+        q1 = SplineCalculateYValue(p1) - dy;
+
+        for(Count=0; Count < CalcuPara.loopCount; Count++)
+        {
+            if(q1 == q0)
+            {
+							  *nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;
+                p = 0;
+                break;
+            }
+
+            p = p1 - q1*(p1-p0)/(q1-q0);
+            if(abs((p-p1)) < pow(10.0, -6))
+            {
+                break;
+            }
+            else
+            {
+                p0 = p1;
+                q0 = q1;
+                p1 = p;
+                q1 = SplineCalculateYValue(p) - dy;
+            }
+        }
+
+        return p;
+    }
+}
+
+
+/*
+void setLoopCount(int value)
+{
+    if(value <= 30)
+    {
+        CalcuPara.loopCount = 30;
+    }
+    else
+    {
+        CalcuPara.loopCount = value;
+    }
+}
+
+
+
+
+
+int _tmain(int argc, _TCHAR* argv[])
+{
+double ret = 0;
+//double *aa = (double *)malloc(sizeof(double) * 9);
+//   aa[0] = 1;  aa[1] = 2;  aa[2] = 3;
+//   aa[3] = 4;  aa[4] = 1;  aa[5] = 0;
+//   aa[6] = -1;  aa[7] = 3;  aa[8] = 2;
+//   ret = CalculateDeterminantN(aa, 3);
+//   printf( "ret 1111 is %f ",  ret);
+//Sleep(5000);
+
+double *valueX = (double *)malloc(sizeof(double) * 8);
+double *valueY = (double *)malloc(sizeof(double) * 8);
+valueX[0] = 1.0;valueX[1] = 2.0;valueX[2] = 3.0;valueX[3] = 4.0; valueX[4] = 5.0;
+valueY[0] = 10; valueY[1] = 12; valueY[2] = 23; valueY[3] = 50.0;valueY[4] = 62.0;
+
+//	bool b1 = LogisticCreate(valueX, valueY, 5);
+//	if(!b1)
+//	{
+//		printf( "LogisticCreate return false ");
+//		Sleep(2000);
+//		return 0;
+//	}
+//
+double *result = (double *)malloc(sizeof(double) * 8);
+//	GetCoef(result);
+//	printf("a is %f ", result[0]);
+//	printf("b is %f ", result[1]);
+//	printf("c is %f ", result[2]);
+//	printf("d is %f ", result[3]);
+//	ret = LogisticGetRR();
+//	printf("rr is %f", ret);
+//Sleep(5000);
+
+bool b1 = SplineCreate(valueX, valueY, 5);
+if(!b1)
+{
+	printf( "SplineCreate return false ");
+	Sleep(2000);
+	return 0;
+}
+
+GetM(result);
+for(int i=0; i<5; i++)
+{
+	printf( " M+%d is %f  ", i, result[i]);
+}
+printf("\n");
+GetH(result);
+for(int i=0; i<5; i++)
+{
+	printf( " H+%d is %f  ", i, result[i]);
+}
+printf("\n");
+
+ret = ErFenFa_CalculateXValue(15);
+printf( "15 ret is %f  ", ret);
+ret = ErFenFa_CalculateXValue(25);
+printf( "25 ret is %f  ", ret);
+
+Sleep(10000);
+return 0;
+}
+*/

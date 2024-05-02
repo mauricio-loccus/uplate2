@@ -1,0 +1,835 @@
+
+//#define LEVEL_ADJUST_ZERO_OFFSET   1800  //1孔到3孔的距离  lgj160926			  
+#define LEVEL_ADJUST_ZERO_OFFSET   0  //1孔到3孔的距离  lgj160926
+//SystemPrameter.h
+
+//1.宏定义
+#define LOCK_PASSWORD_LENGTH  3
+#define TEMP_CHANNEL_NUM      8
+#define TEMP_CHANNEL_NUM_AS153    4
+
+enum{TYPE_AS153=1,TYPE_AS154,TYPE_AS155,TYPE_AS156};//fmc161013
+extern unsigned char InstrumentType;
+
+
+//通讯命令
+#define  CMD_CHECK                   1
+#define  CMD_READ_VERSION            2
+#define  CMD_RELEASE_MOTOR           3
+#define  CMD_MOTOR_ZERO_CHECK        4
+#define  CMD_MOTOR_ZERO              5
+#define  CMD_MOTOR_HOLE              6
+#define  CMD_MATO_ZERO_OFFSET        7
+#define  CMD_TEMPERATURE_CHECK_START 8
+#define  CMD_TEMPERATURE_CHECKOK     9
+#define  CMD_UVLIGHT      10
+#define  CMD_LIGHT        11
+#define  CMD_EXHAULT_FAN  12
+#define  CMD_ADVICE_PRA   13
+#define  CMD_STEP_PRA     14
+#define  CMD_STOP         15
+#define  CMD_PAUSE        16
+#define  CMD_CONTINUE     17
+#define  CMD_READ_STATUS  18
+#define  CMD_UPLOAD_TEMPERATURE 19
+#define  CMD_TEMPERFAN    20
+#define  CMD_MOTOR_DIS_HOLE     21
+//#define  CMD_UPDATE     99//FMC160922
+
+#define  CMD_UPDATE           50//FMC160923S
+#define  CMD_UPDATE_START     51
+#define  CMD_UPDATE_SEND      52
+#define  CMD_UPDATE_END       53//FMC160923E
+//1.1.故障报警宏定义
+enum ERRCODE                  //故障代码列表
+{
+	ERRCODE_E2P = 0x0001,       //E2PROM故障
+	
+	ERRCODE_RTC = 0x0002,          //RTC故障
+	ERRCODE_NANDFLASH = 0x0004,  //NANDFLASH故障
+	ERRCODE_SDRAM = 0x0008,       //SDRAM故障
+	ERRCODE_UART = 0x0010,         //UART故障
+
+	ERRCODE_MOTOR_LEVEL = 0x0100,         //水平电机故障
+	ERRCODE_MOTOR_MAGNETIC = 0x0200,         //磁棒故障
+	ERRCODE_MOTOR_MAGNETIC_ROD = 0x0400,    //磁棒套故障
+
+	ERRCODE_ADVANCE = 0x0800,      //高级参数丢失故障
+	ERRCODE_PROGRAM = 0x1000,         //程序文件损坏
+	ERRCODE_TEMP_FAN = 0x2000,    //冷却风扇驱动电路损坏
+	ERRCODE_SHAKE_LOCK=0x4000,    //刹车锁电路损坏
+	ERRCODE_EXHAUST_FAN = 0x8000,    //排气风扇驱动电路损坏
+	
+	
+	//ERRCODE_ADVANCE=0x00010000,          //高级参数丢失
+  ERRCODE_UART_CMD=0x00020000,         //串口命令响应失败
+	ERRCODE_UART_ACTTION=0x00040000,     //串口动作响应失败
+	ERRCODE_ADJ_TEMP=0x00080000,         //校温参数丢失
+};
+
+#define ERRCODE_T1  0x0000000f
+#define ERRCODE_T2  0x000000f0
+#define ERRCODE_T3  0x00000f00
+#define ERRCODE_T4  0x0000f000
+#define ERRCODE_T5  0x000f0000
+#define ERRCODE_T6  0x00f00000
+#define ERRCODE_T7  0x0f000000
+#define ERRCODE_T8  0xf0000000
+enum ERRCODE_TEMP            //温度类故障代码列表
+{
+	ERRCODE_T1_OPEN = 0x000001,       //T1温度传感器开路
+	ERRCODE_T1_SHORT = 0x000002,       //T1温度传感器短路
+	ERRCODE_T1_OVER = 0x000004,       //T1温度传感器超温
+	ERRCODE_T1_HEAT = 0x000008,       //T1加热驱动电路损坏
+
+	ERRCODE_T2_OPEN = 0x000010,       //T2温度传感器开路
+	ERRCODE_T2_SHORT = 0x000020,       //T2温度传感器短路
+	ERRCODE_T2_OVER = 0x000040,       //T2温度传感器超温
+	ERRCODE_T2_HEAT = 0x000080,       //T2加热驱动电路损坏
+
+	ERRCODE_T3_OPEN = 0x001000,       //T3温度传感器开路
+	ERRCODE_T3_SHORT = 0x002000,       //T3温度传感器短路
+	ERRCODE_T3_OVER = 0x004000,       //T3温度传感器超温
+	ERRCODE_T3_HEAT = 0x008000,       //T3加热驱动电路损坏
+
+	ERRCODE_T4_OPEN = 0x001000,       //T4温度传感器开路
+	ERRCODE_T4_SHORT = 0x002000,       //T4温度传感器短路
+	ERRCODE_T4_OVER = 0x004000,       //T4温度传感器超温
+	ERRCODE_T4_HEAT = 0x008000,       //T4加热驱动电路损坏
+
+	ERRCODE_T5_OPEN = 0x010000,       //T5温度传感器开路
+	ERRCODE_T5_SHORT = 0x020000,       //T5温度传感器短路
+	ERRCODE_T5_OVER = 0x040000,       //T5温度传感器超温
+	ERRCODE_T5_HEAT = 0x080000,       //T5加热驱动电路损坏
+
+
+	ERRCODE_T6_OPEN = 0x100000,       //T6温度传感器开路
+	ERRCODE_T6_SHORT = 0x200000,       //T6温度传感器短路
+	ERRCODE_T6_OVER = 0x400000,       //T6温度传感器超温
+	ERRCODE_T6_HEAT = 0x800000,       //T6加热驱动电路损坏
+
+
+	ERRCODE_T7_OPEN = 0x01000000,       //T7温度传感器开路
+	ERRCODE_T7_SHORT =0x02000000,       //T7温度传感器短路
+	ERRCODE_T7_OVER = 0x04000000,       //T7温度传感器超温
+	ERRCODE_T7_HEAT = 0x08000000,     //T7加热驱动电路损坏
+
+
+	ERRCODE_T8_OPEN = 0x10000000,       //T8温度传感器开路
+	ERRCODE_T8_SHORT = 0x20000000,       //T8温度传感器短路
+	ERRCODE_T8_OVER = 0x40000000,       //T8温度传感器超温
+	ERRCODE_T8_HEAT = 0x80000000,      //T8加热驱动电路损坏
+};
+
+//1.2.系统界面宏定义
+enum MENU_INTERFACE
+{
+	MI_INIT = 0,
+	MI_TEST_SELF,
+	MI_RUN,
+	    MI_RUN_VIEW,
+	    MI_RUN_OPTION,
+		MI_RUN_MENU,  //运行界面
+	MI_MANAGE,
+	  // MI_MANAGE_CREATE,
+	   MI_MANAGE_EDIT,
+	   MI_MANAGE_OPTION,
+
+	MI_SYSTEM,
+	    MI_ADVANCE_PRAMETER,
+		    MI_ADVANCE_PASSWORD,
+	    MI_SYSTEM_TIME,
+	    MI_LANGUAGE_SET,
+	    MI_FAN_SET,
+	    MI_INPUT_EXPORT,
+	    MI_INPUT_EXPORT_SELECT,    //fmc160818
+	    MI_INSTRUMENT_UPDATE,
+	    MI_LIGHTING_SET,
+			MI_VERSION_SET,//FMC161012
+	MI_UVLIGHT,
+	MI_HELP,
+}; //SystemInterface
+
+
+//管理界面-快捷键
+enum 
+{
+	SHORTCUT_OPEN = 0,
+	SHORTCUT_CLOSE,
+};
+//管理界面-锁
+enum                            //密码锁状态
+{
+	LOCK_OPEN = 0,                //禁止
+	LOCK_CLOSE                    //启用
+
+};
+
+
+//3.系统设置模块
+//宏定义
+/*
+//1)门状态检测模块
+enum  DOOR_STATUS					 //门状态
+{
+	DOOR_OPEN = 0,					 //门打开
+	DOOR_CLOSE					     //门关上
+};*/
+//2)密码锁状态,程序管理锁定
+//enum  LOCK_STATUS                    //密码锁状态
+//{
+	//LOCK_DISABLE = 0,                //禁止
+	//LOCK_ENABLE                      //启用
+
+//};
+//3)排气风扇
+enum  EXHAUST_FAN_STATUS            //排气风扇状态
+{
+	EXHAUST_FAN_OFF = 0,        //关闭
+	EXHAUST_FAN_ON              //启用
+};
+//3)降温风扇
+enum  FAN_STATUS            //排气风扇状态
+{
+	
+	FAN_ON=0,              //启用
+	FAN_OFF ,        //关闭
+};
+
+//4)照明灯
+enum  LIGHTING_STATUS			    //照明灯状态
+{
+	LIGHTING_OFF = 0,           //禁止
+	LIGHTING_ON                 //启用
+};
+//5)高级参数-运动参数
+#define SPPED_MAX           200      //速度最大值200mm/s
+#define SPEED_MIN            1       //速度最小值1mm/s
+//水平移动速度宏定义
+#define LEVEL_SPEED_MAX     SPPED_MAX
+#define LEVEL_SPEED_MIN     SPEED_MIN
+//磁棒移动速度宏定义
+#define MAGNETIC_SPEED_MAX   SPPED_MAX
+#define MAGNETIC_SPEED_MIN    SPEED_MIN
+//磁棒套移动速度宏定义
+#define MAGNETIC_ROD_SPEED_MAX    SPPED_MAX
+#define MAGNETIC_ROD_SPEED_MIN     SPEED_MIN
+
+
+
+
+//
+enum RUN_SHORTCUT
+{
+	RUN_SHORTCUT = 0,
+	RUN_TABLE,
+};  // RunShortcutFlag;
+
+enum UVLIGHT
+{
+	UVLIGHT_OFF=0,
+	UVLIGHT_ON ,
+	
+};  // RunShortcutFlag;
+
+
+
+
+//试剂盒孔位置定义
+#define HOLE_MAX_AS153  9
+#define HOLE_MAX_AS154  6
+#define HOLE_MAX_AS155  7
+enum HOLE_POSITION
+{
+	POSITION_HOLE_2 = 0,
+	POSITION_HOLE_3,
+	POSITION_HOLE_4,
+	POSITION_HOLE_5,
+	POSITION_HOLE_6,
+	POSITION_HOLE_7,
+	POSITION_HOLE_8,
+	POSITION_HOLE_9,
+};
+
+
+#ifndef __APP_GUI_H
+#define __APP_GUI_H
+
+  #define TEMP_EN_VAL      37
+                            
+extern unsigned short const REAGENT_BOX_POSITION_AS153[HOLE_MAX_AS153 - 1];  //AS153孔位置
+//extern unsigned char const  HOLE_STATUS_AS153[HOLE_MAX_AS153]; //FMC-2016-08-03 
+//extern float const  REAGENT_BOX_POSITION_AS154[HOLE_MAX_AS154 - 1];   
+extern unsigned short const  REAGENT_BOX_POSITION_AS154[HOLE_MAX_AS154 - 1];   //AS154孔位置//FMC-2016-08-03 
+//extern unsigned char const  HOLE_STATUS_AS154[HOLE_MAX_AS154]; //FMC-2016-08-03 
+//float const  REAGENT_BOX_POSITION_AS155[HOLE_MAX_AS155 - 1];             //AS155孔位置
+
+extern unsigned short const REAGENT_BOX_POSITION_AS155[HOLE_MAX_AS155 - 1];  //AS153孔位置
+//extern unsigned char const  HOLE_STATUS_AS155[HOLE_MAX_AS155]; //FMC-2016-08-03
+
+enum {FLAG_TEMP=0,FLAG_MIX_POSITION,FLAG_START_MIX,FLAG_MAGNETIC_POSITION,
+      FLAG_START_MAGNETIC,FLAG_WAIT_POSITION,FLAG_START_WAIT};//FMC-2016-08-03        //AS155孔位置
+
+#define TEMP_CHANNEL_1    0
+#define TEMP_CHANNEL_2    1
+#define TEMP_CHANNEL_3    2
+#define TEMP_CHANNEL_4    3
+#define TEMP_CHANNEL_5    4
+#define TEMP_CHANNEL_6    5
+#define TEMP_CHANNEL_7    6
+#define TEMP_CHANNEL_8    7
+
+//float const  REAGENT_BOX_POSITON_AS153[HOLE_MAX_AS153 - 1] = { 13.5, 14.75, 10.5, 10.5, 10.5, 10.5, 10.5, 14.75 };  //AS153孔位置
+//float const  REAGENT_BOX_POSITION_AS154[HOLE_MAX_AS154 - 1] = { 13.5, 14.75, 10.5, 10.5, 10.5 };                   //AS154孔位置
+//float const  REAGENT_BOX_POSITION_AS155[HOLE_MAX_AS155 - 1] = { 13.5, 14.75, 10.5, 10.5, 10.5, 10.5 };             //AS155孔位置
+//1.系统公用变量
+#define RUN_SHORTCUT_MAX   8
+typedef struct{
+//	unsigned char  DoorStatus;                   //门状态
+//	unsigned short PraTemp[TEMP_CHANNEL_NUM];   //实时温度
+
+
+	unsigned long  SystemErrCode;              //故障代码
+	unsigned long  SystemErrCodeTemp;          //温度类故障代码
+
+	//unsigned char  SystemInterface;		  
+	enum MENU_INTERFACE SystemInterface;        //系统界面
+	enum MENU_INTERFACE MainSystemInterface;  //主界面的5个按钮
+	enum MENU_INTERFACE SystemInterfaceBack;  //系统界面标志备份
+	enum RUN_SHORTCUT RunShortcutFlag;		   //运行界面快捷标志=0为快捷界面，=1为列表界面
+
+	//unsigned char ShortCutNum;
+	//unsigned char ShortCutMax;			      //选中的快捷图标数量
+//	char         *pShortCutText[RUN_SHORTCUT_MAX];
+	//unsigned char  RunShortcutFlag;	      //运行界面快捷标志=0为快捷界面，=1为列表界面
+
+	unsigned char MenuRefreshFlag;
+	unsigned char TitleUpdateFlag;
+	unsigned char ContentUpdateFlag;
+	unsigned char ToolsUpdateFlag;
+	unsigned char StatusUpdateFlag;
+	//unsigned char  RunShortcutFlag;		  //运行界面快捷标志=0为快捷界面，=1为列表界面
+	
+	
+	unsigned char MinFlag;
+	unsigned char SecFlag;
+	unsigned char SysSec;
+	
+	unsigned char FactoryPraFlag;
+}SYSTEM_P;
+extern SYSTEM_P gSystem;
+
+
+
+//2.系统设置模块
+//2.1)系统时间
+typedef struct
+{
+	signed short  Year;		//年
+	signed char   Month;		//月
+	signed char   Day;		//日
+	signed char   Hour;		//时
+	signed char   Min;		//分
+	signed char   Sec;		//秒
+	signed char   MilliSec;	//毫秒
+}SYSTEM_TIME;
+//DateTimePra  
+
+extern SYSTEM_TIME  SystemTimePra;
+extern SYSTEM_TIME  SystemTimePraBack;
+
+//2.2)运动参数
+typedef struct
+{
+	unsigned char    LevelSpeedMax;         	//水平移动速度
+	unsigned char    MagneticUpDownSpeedMax;    //磁棒升降速度
+	unsigned char    RodUpDownSpeedMax;         //磁棒套升降速度
+	unsigned char    MagneticSpeed;             //吸磁速度
+	unsigned short   MixSpeedMax;               //混合频率(hz) MagneticRod
+}MOTION_PRAMETER;
+
+#define ZERO_ADJ_MAX    100
+#define ZERO_ADJ_MIN    0
+typedef struct                                 //fmc-2016-08-03
+{
+	 signed  char    LevelOffset;         	  //水平电机零位偏移量
+	 signed  char    MagneticUpDownOffset;    //磁棒电机零位偏移量
+	 signed  char    RodUpDownOffset;         //磁棒套电机零位偏移量
+}ZERO_OFFSET;
+extern ZERO_OFFSET  Zero_Offset;
+
+//加热裂解孔位定义
+#define AS153_HEAT_CRACK_HOLE    1
+#define AS153_HEAT_CRACK_HOLE2   2
+
+#define AS154_HEAT_CRACK_HOLE    1
+//#define AS153_HEAT_CRACK_HOLE2   2
+
+#define AS155_HEAT_CRACK_HOLE    1
+//加热裂解孔位定义
+#define AS153_HEAT_WASH_HOLE    9
+#define AS154_HEAT_WASH_HOLE    6   //4,5
+#define AS155_HEAT_WASH_HOLE    7
+
+
+//MotionPrameter
+#define ADVANCE_MOTION_MAX  200
+#define ADVANCE_MOTION_MIN  1
+#define ADVANCE_MOTION_DEFAULT  50
+//MixSpeedMax
+#define ADVANCE_MIX_SPEED_MAX  1500   //15.00
+#define ADVANCE_MIX_SPEED_MIN  1
+#define ADVANCE_MIX_SPEED_DEFAULT  50
+
+//温度校准参数 TempAdjLow[TEMP_CHANNEL_NUM];  TempAdjHigh[TEMP_CHANNEL_NUM]; 
+#define TEMP_ADJ_LOW    400
+#define TEMP_ADJ_HIGH   1000
+
+#define TEMP_ADJ_HIGH_MAX  (TEMP_ADJ_HIGH+100)
+#define TEMP_ADJ_HIGH_MIN  (TEMP_ADJ_HIGH-100)
+#define TEMP_ADJ_LOW_MAX   (TEMP_ADJ_LOW+100)
+#define TEMP_ADJ_LOW_MIN   (TEMP_ADJ_LOW-100)
+//lgj160926 start
+//LevelZeroOffset
+#define LEVEL_ZERO_OFFSET_MAX      3722
+#define LEVEL_ZERO_OFFSET_MIN      1722
+#define LEVEL_ZERO_OFFSET_DEFAULT  2722   //3孔 9.22+18  lgj160926
+
+
+//#define LEVEL_ZERO_OFFSET_MAX      2922
+//#define LEVEL_ZERO_OFFSET_MIN      1922
+//#define LEVEL_ZERO_OFFSET_DEFAULT  922   //3孔 9.22+18  lgj160926
+
+
+//AS154
+//MagneticRodZeroOffSet
+#define ROD_ZERO_OFFSET_MAX  5100
+#define ROD_ZERO_OFFSET_MIN  3100
+#define ROD_ZERO_OFFSET_DEFAULT  4100
+//MagneticZeroOffset
+#define MAGNETIC_ZERO_OFFSET_MAX  9900
+#define MAGNETIC_ZERO_OFFSET_MIN  7900
+#define MAGNETIC_ZERO_OFFSET_DEFAULT  8900
+
+
+//AS153
+//MagneticRodZeroOffSet
+#define AS153_LEVEL_ZERO_OFFSET_MAX      4050
+#define AS153_LEVEL_ZERO_OFFSET_MIN      2050
+#define AS153_LEVEL_ZERO_OFFSET_DEFAULT  3050   //3孔 9.22+18  lgj160926
+
+#define AS153_ROD_ZERO_OFFSET_MAX  5100
+#define AS153_ROD_ZERO_OFFSET_MIN  3100
+#define AS153_ROD_ZERO_OFFSET_DEFAULT  4800
+//MagneticZeroOffset
+#define AS153_MAGNETIC_ZERO_OFFSET_MAX  10700
+#define AS153_MAGNETIC_ZERO_OFFSET_MIN  8700
+#define AS153_MAGNETIC_ZERO_OFFSET_DEFAULT  9700
+//lgj160926 end
+//LevelSetValue   LevelPraValue
+
+
+//AS155
+#define AS155_LEVEL_ZERO_OFFSET_MAX      (3722+1800)
+#define AS155_LEVEL_ZERO_OFFSET_MIN      (1722+1800)
+#define AS155_LEVEL_ZERO_OFFSET_DEFAULT  (2722+1800)   //3孔 9.22+18  lgj160926
+
+#define AS155_ROD_ZERO_OFFSET_MAX  5100
+#define AS155_ROD_ZERO_OFFSET_MIN  3100
+#define AS155_ROD_ZERO_OFFSET_DEFAULT  4800
+//MagneticZeroOffset
+#define AS155_MAGNETIC_ZERO_OFFSET_MAX  10700
+#define AS155_MAGNETIC_ZERO_OFFSET_MIN  8700
+#define AS155_MAGNETIC_ZERO_OFFSET_DEFAULT  9700
+
+
+
+
+
+
+//LevelSetValue   LevelPraValue
+#define LEVEL_SET_VALUE  4500   //50.00
+#define LEVEL_PRA_VALUE_MAX  4800
+#define LEVEL_PRA_VALUE_MIN  4200
+//lgj160926 end
+//LevelSetValue   LevelPraValue
+
+
+
+
+
+//HeatCrackHole
+#define HEAT_CRACK_HOLE_MAX   1
+#define HEAT_CRACK_HOLE_MIN   1
+#define HEAT_CRACK_HOLE_DEFAULT   1
+
+//HeatWashHole
+#define HEAT_WASH_HOLE_MAX       6
+#define HEAT_WASH_HOLE_MIN       4
+#define HEAT_WASH_HOLE_DEFAULT   6
+
+#define AS153_HEAT_WASH_HOLE_MAX       9
+#define AS153_HEAT_WASH_HOLE_MIN       4
+#define AS153_HEAT_WASH_HOLE_DEFAULT   9
+
+#define AS155_HEAT_WASH_HOLE_MAX       7
+#define AS155_HEAT_WASH_HOLE_MIN       4
+#define AS155_HEAT_WASH_HOLE_DEFAULT   7
+
+//OemFlag
+enum{OEM_AOSHENG=0,OEM_NEUTRAL,OEM_OTHER};
+#define OEM_DEFAULT  OEM_NEUTRAL
+
+//2.2)运动参数
+typedef struct
+{
+	MOTION_PRAMETER  MotionPrameter;					             //运动参数
+	//温度校准参数
+	unsigned short  TempAdjLow[TEMP_CHANNEL_NUM];          //40度温度校准
+	unsigned short  TempAdjHigh[TEMP_CHANNEL_NUM];         //100度温度校准
+	//零位校准参数
+	unsigned short  LevelZeroOffset;								       //水平电机零位校准偏移量   
+	unsigned short  MagneticZeroOffset;							       //磁棒电机零位校准偏移量
+	unsigned short  MagneticRodZeroOffSet;						     //磁棒套电机零位校准偏移量
+	//行程校准
+	unsigned short  LevelSetValue;								       //行程理论值
+	unsigned short LevelPraValue;								   //行程实际值
+	//加热孔位
+	unsigned char HeatCrackHole;						   //加热裂解孔位  AS153=1、2孔,AS154=1孔,AS155=1、2、3孔
+	unsigned char HeatWashHole;							   //加热洗脱孔位  AS153=9孔，AS154=4、5、6孔可选,AS155=7孔
+
+	//OEM标志
+	unsigned char  OemFlag;                               //0表示ALLSHENG，1表示中性
+}ADVANCE_PRAMETER;
+//ADVANCE_PRAMETER
+extern ADVANCE_PRAMETER  AdvancePra;
+extern ADVANCE_PRAMETER  AdvancePraBack;
+
+
+
+enum{Flag_No_Key=0,          //无Ascii键盘
+	   Flag_Wait_Saveas,       //Ascii输入文件名-等待弹出
+	   Flag_Saveas,            //Ascii输入文件名-弹出键盘获取文件名
+	   Flag_New,              //新增文件
+	   Flag_listview_end,      //步骤编缉获取步骤     
+	   Flag_listview_wait,     //步骤编缉弹出步骤
+	//   Flag_Edit_Insert_wait,       
+	   Flag_Edit_Insert,   //插入一行步骤标志
+     };
+
+		 
+		 
+	 
+enum{LANGUAGE_CH=0,LANGUAGE_EN};
+#define LANGUAGE_DEFAULT  (LANGUAGE_CH)
+//2.系统设置模块-总览
+typedef struct
+{
+	unsigned char    LockPasswordStatus;       		       //锁密码状态 1表示开锁要输入密码  0表示开锁不用输入密码
+	char             LockPassword[LOCK_PASSWORD_LENGTH];   //磁棒升降速度
+
+	unsigned char    ExhaustFanStatus;       			   //排气风扇状态
+	unsigned char    LightingStatus;					   //照明灯状态
+	unsigned char    SystemLanguage;                       //系统语言   
+
+	//SYSTEM_TIME      SystemTime;						   //系统时间
+
+
+	//ADVANCE_PRAMETER  AdvancePra;         //和上面 ，分开存，
+	
+
+	
+	//unsigned short PraTemp[TEMP_CHANNEL_NUM];
+}SYSTEM_PRAMETER;
+extern SYSTEM_PRAMETER SystemPrameter;
+extern SYSTEM_PRAMETER SystemPrameterBack;
+
+extern int  Curr_Step_Row,Curr_program_Row;
+
+//3.程序管理模块
+#define PROGRAM_NAME_LENGTH   20						 //程序名长度
+#define PROGRAM_MAX           100						 //程序最大数
+//3.1程序名结构体
+
+//unsigned char select_row;
+typedef struct PROGRAM_NAME
+{ 
+	// unsigned char   ID;		  //fmc160823 不要 不能放这里放最后
+	char Name[PROGRAM_NAME_LENGTH];						//程序名
+	SYSTEM_TIME   DateTime;								//修改或创建时间
+	unsigned char ShortCutFlag; //2015-4-1              //快捷标志
+	unsigned char LockFlag;								//锁定标志
+	unsigned long CreatTime;//FMC161022
+	//PROGRAMNAME   *Next;                              //指向下一个程序
+}PROGRAMNAME;
+
+extern PROGRAMNAME CurrProgramName;                     //当前程序名
+extern PROGRAMNAME ProgramName[];                       //100个程序名文件 
+extern PROGRAMNAME UsbProgramName[];  //fmc160823
+extern unsigned char ProgramMax;
+//3.2. 程序步骤结构体
+#define STEP_NAME_LENGTH        10					   //步骤名长度
+#define STEPNODE_MAX            100				       //步骤节点最大值
+typedef struct PROGRAM_STEP
+{
+	char            Name[STEP_NAME_LENGTH];           // 步骤名
+	unsigned char   Holes;							  // 孔位
+	unsigned  int   MixingTime;						  //混合时间
+	unsigned  int   MagneticTime;					  //吸磁时间
+	unsigned  int   WaitTime;					      //等待时间
+	unsigned  int   Volume;							  //容量
+	unsigned char   MixingSpeed;				      //混合速度
+	int             Temperature;				      //温度
+	//float           MixingPosition;				      //混合速度  4*5
+	//float           MixingAmplitude;                  // 混合幅度
+	//float           MagneticPosition;				  //吸磁位置
+	//float           MagneticSpeedUpDown;				  //向下吸磁速度
+	//float           MagneticFludeTime;				  //向上吸磁速度
+	unsigned char           MixingPosition;				      //混合速度  4*5
+	unsigned char           MixingAmplitude;                  // 混合幅度
+	unsigned char           MagneticPosition;				  //吸磁位置
+	unsigned char           MagneticSpeedUpDown;				  //向下吸磁速度
+	unsigned char           MagneticFludeTime;				  //向上吸磁速度
+	
+//	PROGRAMSTEP     *next;
+}PROGRAMSTEP;
+extern PROGRAMSTEP ProgramStep[];
+extern char New_File_Name[PROGRAM_NAME_LENGTH];
+extern PROGRAMSTEP CurrProgramStep;
+//3.3程序选项
+//3.3.1程序选项-宏定义
+//1)加热方式宏定义
+enum HEAT_TYPE
+{
+	HEATING_ACTION = 0,     //加热动作同步
+	FIRST_HEATING,        //先加热后动作
+	HEATION_LOW_DESTNATION, //加热到低于目标温度
+	//HEATING_PREVIOUS_STEP, //加热提前的步骤数
+};
+//2)冷却参数宏定义
+enum COOLING_TYPE
+{
+	COOLING_ACTION,      //降温动作同步
+	FIRST_COOLING,      //先降温再动作
+	COOLING_HIGH_DESTNATION, //降温到目标温度开始动作
+};
+//3)吸磁方式
+enum MAGNATIC_TYPE
+{
+	HOVER,              //悬停吸磁
+	ROCIPROCATE,        //往复吸磁
+	SEGMENTATION,       //分段吸磁
+};
+
+//3.3.2程序选项-变量定义
+//1)加热参数
+typedef struct HEATING_PRA
+{
+	unsigned char  Type;                   //加热方式
+	unsigned short DestnationTemper;       //目标温度lgj160921
+	unsigned short LowerTemper;            //低于目标温度数(精度为1度)
+	
+	unsigned char  HeatingPreviousStepEn;  //使能加热提前的步数
+	unsigned char  HeatingPreviousStep;    //加热提前的步数
+}HEATINGPRA;
+                       
+//2)冷却参数
+typedef struct COOLING_PRA
+{
+	unsigned char   FanEnable;             //降渐风扇是否启用
+	unsigned char   Type;                  //降温类型
+	unsigned short  DestnationTemper;      //降温目标温度   lgj160921
+  unsigned char  HighTemper;             //降温高于目标温度(精度为1度)
+}COOLINGPRA;      
+
+//3)吸磁方式设置
+typedef struct MAGNATIC_PRA
+{
+	unsigned char  Type;				           //吸磁方式
+	unsigned char  SegNum;				         //往复吸磁时的分段数
+}MAGNATICPRA;
+//extern MAGNATICPRA MagnaticPra;        //吸磁参数 
+
+//3.3程序选项结构体-总览
+typedef struct PROGRAM_OPTION
+{
+	char              HeatEnable[TEMP_CHANNEL_NUM];    // 加热是否开启 
+	HEATINGPRA        HeatPra;                         // 升温参数
+	COOLINGPRA        CoolingPra;                      // 降温参数
+	MAGNATICPRA       MagnaticPra;                     // 吸磁参数
+}PROGRAMOPTION;
+extern PROGRAMOPTION ProgramOption;
+extern PROGRAMOPTION ProgramOption_back;
+//3.程序管理模块-总览
+typedef struct PROGRAM_FILE
+{
+	//PROGRAMNAME     *Name;              //程序名
+	
+	unsigned char    ProgramEndStep;    //程序的总步数
+	//PROGRAMSTEP     *Step;              //程序节
+
+	//PROGRAMOPTION   *Option;            //程序选项
+}PROGRAMFILE;
+extern PROGRAMFILE ProgramFile;
+
+
+//4. 程序运行模块
+//4.1) 运行界面快捷键图标结构体(最多8个） 
+//extern GUI_CONST_STORAGE GUI_BITMAP bmTitleUVLight;
+
+/*
+typedef struct
+{
+	//const GUI_BITMAP * pBitmap;
+	char       * pText[RUN_SHORTCUT_MAX];
+} RUN_SHORTCUT_ITEM;
+extern RUN_SHORTCUT_ITEM RunShortCutItem;*/
+
+/*
+//系统运行界面中
+static const BITMAP_ITEM _aBitmapItem[] =
+{
+{ &bmIdea, "RGBLED" },
+{ &bmMusic, "Music" },
+{ &bmSiri, "Recorder" },
+{ &bmWeather, "Weather" },
+
+{ &bmCompass, "Compass" },
+{ &bmClock, "Clock" },
+{ &bmSafari, "Safari" },
+{ &bmCamera, "Camera" },
+
+{ &bmPhone, "Phone" },
+{ &bmMessages, "Messages" },
+{ &bmPhotos, "Picture" },
+{ &bmUSB, "USB" },
+{ &bmCalculator, "Calculator" },
+};*/
+
+enum RUN_STATUS
+{
+	RUN_STATUS_STOP=0,
+	RUN_STATUS_RUN_READY,
+	RUN_STATUS_RUNNING,
+	RUN_STATUS_PAUSE,
+	
+	RUN_STATUS_OVER_WAIT,
+	RUN_STATUS_STOP_WAIT,
+	RUN_STATUS_OVER,
+};
+//运行状态下的详细
+enum RUN_STATUS_DETAIL
+{
+	RUNNING_INIT=0,
+	RUNNING_INIT_CMD,
+	RUNNING_INIT_OK,
+	RUNNING_TEMPER_START,
+	//RUNNING_TEMPER_START_CMD,
+	RUNNING_TEMPER,
+	RUNNING_TEMPER_CMD,
+	RUNNING_MOVETO_MIXING,
+	RUNNING_MOVETO_MIXING_CMD,
+	RUNNING_MOVETO_MIXING_OK,
+	RUNNING_MIXING,
+	RUNNING_MIXING_CMD,  //0x0a
+	RUNNING_MOVETO_MAGNETIC,
+	RUNNING_MOVETO_MAGNETIC_CMD,
+	RUNNING_MOVETO_MAGNETIC_OK,
+	RUNNING_MAGNETIC,
+	RUNNING_MAGNETIC_CMD,  //0x0a0f
+	RUNNING_MOVETO_WAIT,
+	RUNNING_MOVETO_WAIT_CMD,
+	RUNNING_MOVETO_WAIT_OK,
+	RUNNING_WAIT,
+	RUNNING_OVER,
+};
+
+enum{ TEMP_CTR_OK =0,TEMP_CTR_NOTOK};
+enum{
+	TEMP_INIT = 0, TEMP_HEATING, TEMP_COOLING, TEMP_OK,TEMP_OVER
+};
+//4.2.)运行模块-总览
+typedef struct RUN_FILE
+{
+    unsigned char   BmOnOffFlag;       //图片开关标志
+	unsigned char   CurrStep;          //当前步骤
+	//unsigned char   SumStep;           //总步骤
+	unsigned short  CurrMixingTime;    //混合时间
+	unsigned short  CurrMagneticTime;  //吸磁时间
+	unsigned short  CurrWaitTime;      //等待时间
+
+	unsigned long   RemainTime;        //当前运行时间
+	unsigned char   RunStatus;         //运行状态
+	unsigned  char  StatusDetail;   //状态  
+	unsigned  char  TemperFlag;      //控温标志 
+	unsigned  char  PreHeatCoolFlag;      //预加热标志 lgj160921
+	unsigned  char  PreHeatCoolHole;     //lgj160921
+	unsigned  char  TempHeatWash;
+	unsigned char RunRestoreFlag;
+//	unsigned char StopOverWaitFlag;
+	//unsigned char OverWaitFlag;
+	int SetTemp[TEMP_CHANNEL_NUM];
+	int PraTemp[TEMP_CHANNEL_NUM];
+}RUNFILE;
+extern RUNFILE RunPra;
+
+
+#define UVLIGHT_TIME_MAX     5999   //紫外灯时间最大值  (99小时59分)
+#define UVLIGHT_TIME_MIN     1      //紫外灯时间最小值  (1分)
+#define UVLIGHT_TIME_DEFAULT 30      //紫外灯时间最小值  (1分)
+
+
+#define SET_TEMP10(settemp)  ((int)(settemp)*10)
+#define SET_TEMP10_UP(settemp)  ((int)(settemp)*10+20)
+#define SET_TEMP10_LOW(settemp)  ((int)(settemp)*10-20)
+	
+
+//5.紫外灯
+#define UVLIGHT_CONFIRM_TIME 3
+typedef struct
+{
+	unsigned  char   Status;   //状态  
+	unsigned  char   PauseFlag;
+	unsigned  short  SetTime; //设置时间
+	unsigned  short  RemainTime;//剩余时间
+	
+	
+	signed char   ConfirmTime;  //紫外灯参数改变后的自动确认时间
+	unsigned char SetTimeChangeFlag;  //设置时间改变标志
+	
+}UVLIGHT_PRA;
+extern UVLIGHT_PRA  UVLight;
+
+
+/*
+typedef struct
+{
+	unsigned  char   Status;   //状态  
+	
+	unsigned  short  SetTime; //设置时间
+	unsigned  short  RemainTime;//剩余时间
+}LIGHT_PRA;
+extern LIGHT_PRA  Light;
+
+*/
+enum{ TEMPER_FAN_OFF = 0,TEMPER_FAN_ON };
+//5.降温风扇
+typedef struct
+{
+	unsigned  char   Status;   //状态  
+
+}TEMPER_FAN;
+extern TEMPER_FAN  TemperFan;
+
+
+//lgj160928 start
+extern unsigned char SMLanguageChangFlag;
+extern unsigned char LVLanguageChangFlag;
+//lgj160928 end
+
+extern char Str_Version103[20];
+extern unsigned char UartActiveData[];
+extern unsigned char UartActiveDataBack[];
+
+
+#endif

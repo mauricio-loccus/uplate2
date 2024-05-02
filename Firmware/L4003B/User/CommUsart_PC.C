@@ -1,0 +1,175 @@
+/**********************************************************************************
+1.文件功能描述
+本程序实现串口数据收发,端口:(引脚:PA0 PA1)
+2.具体函数
+  2.1私有函数
+
+
+  2.2公有函数
+
+
+3.IO说明
+  1)PA0: TXD
+  2)PA1: RXD
+4. 创建日期-版本-姓名
+   2017/01/23-V3.00-陆国金 void CAS112_V10Dlg::comReceiveproFromPc(void)
+*************************************************************************************/
+
+
+#include "CommUsart_PC.h"
+#include "CommStack_PC.h"
+#include  "includes.h"
+//#include  "MainTask.h"
+
+
+/*************************通讯头定义*******************************************/
+
+const uint8 CONST_COMMAND_HEAD[COMM_SLA_LEN_PC] = {0xfa, 0xfb, 0xfc, 0xfd};
+const uint16 CONST_MAIN_COMMAND[COMM_MAIN_COMMAND_LEN_PC] = {0x70,0x00};//AMR-100的主命令为0x7000
+
+/****************************************************************************************/
+COMM_USART_PC CommUsart_PC;             //
+
+
+
+//-----------------------------------------------------------------//
+//	功    能:PC通道串口变量初使化
+//	入口参数:
+//	出口参数:
+//	全局变量:
+//	输    出:
+//-----------------------------------------------------------------//
+void CommUsartInit_PC(void)
+{
+    uint16 i;
+
+    CommUsart_PC.RecPtr=0;
+    for(i=0; i<COMM_UART_LEN_MAX_PC; i++)
+    {
+        CommUsart_PC.RecBuffer[i]=0;
+    }
+}
+/******************************************************************************
+ *	函 数 名: CommSendCommand_PC
+ *	功能说明: 串口发送数据
+ *	形    参:
+ *	返 回 值:
+*******************************************************************************/
+void CommSendCommand_PC(uint8 *dat, uint16 len)
+{
+    /* To avoid the first byte missing issue */
+    USART_ClearFlag(UART4, USART_FLAG_TC);
+
+    while(len-- != 0)
+    {
+        USART_SendData(UART4, *dat++);
+        while(USART_GetFlagStatus(UART4, USART_FLAG_TC)==RESET);
+    }
+}
+/*
+void CommSendCommand_PC(void)
+{
+	unsigned char i;
+
+	UartSendData[0] = UART_SEND_SLA;//0x55
+	UartSendData[1] = CPU_COMMAND_REPEAT;
+	//校验和
+	UartSendData[2]=0;
+	for(i = 0; i < 2; i++)
+	{
+		UartSendData[2] += UartSendData[i];
+	}
+
+	for(i=0;i<3;i++)
+	{
+		  USART_SendData(USART1, UartSendData[i]);
+	    while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);
+	}
+
+	run_status.nRunMode = RUN_MODE_INTENSITY_TEST;
+	run_status.nTimeOut = INTENSITY_TEST_TIMEOUT;
+}
+*/
+
+//-----------------------------------------------------------------//
+//	功    能:
+//	入口参数:
+//	出口参数:
+//	全局变量:
+//	备    注:波特率:9600
+//-----------------------------------------------------------------//
+void FrameReceived_PC(unsigned char c)
+{
+    // unsigned char len=0;
+
+    //UartInfoPC.Start=1;
+    //UartInfoPC.Sec=0;
+
+    if(CommUsart_PC.RecPtr<COMM_SUB_COMMAND_POS_PC)          //标记位+区分字段+主命令长度
+    {
+        if(CommUsart_PC.RecPtr<COMM_SLA_LEN_PC)       //标记位
+        {
+            if(c==CONST_COMMAND_HEAD[CommUsart_PC.RecPtr])	  //标记位一致
+            {
+                CommUsart_PC.RecBuffer[CommUsart_PC.RecPtr++] = c;
+            }
+            else                                      //标记位不同,出错
+            {
+                CommUsart_PC.RecPtr=0;
+            }
+        }
+        else if(CommUsart_PC.RecPtr<COMM_SLA_LEN_PC+COMM_DIVITION_LEN_PC) //区分字段
+        {
+            CommUsart_PC.RecBuffer[CommUsart_PC.RecPtr++] = c;
+        }
+        else                                                             //主命令字段
+        {
+            if(c==CONST_MAIN_COMMAND[CommUsart_PC.RecPtr-(COMM_SLA_LEN_PC+COMM_DIVITION_LEN_PC)])//主命令一致
+            {
+                CommUsart_PC.RecBuffer[CommUsart_PC.RecPtr++] = c;
+            }
+            else                                                         //主命令不同,出错
+            {
+                CommUsart_PC.RecPtr=0;
+            }
+        }
+    }//if(CommUsart_PC.RecPtr<COMM_HEAD_LEN_PC)          //标记位+区分字段+主命令长度
+    else if(CommUsart_PC.RecPtr<COMM_DATA_LEN_POS_PC)     //子命令长度为2
+    {
+        //接收子命令
+        CommUsart_PC.RecBuffer[CommUsart_PC.RecPtr++] = c;
+    }//else if(UartInfoPC.TempLen<REV_HEAD_LEN_PC+2) //子命令长度为2
+
+    else if(CommUsart_PC.RecPtr<COMM_DATA_POS_PC) //数据段长度 4字节
+    {
+        CommUsart_PC.RecBuffer[CommUsart_PC.RecPtr++] = c;
+        if(CommUsart_PC.RecPtr==COMM_DATA_POS_PC)
+        {
+            CommUsart_PC.DataLen=((uint16)CommUsart_PC.RecBuffer[COMM_DATA_LEN_POS_PC+2]<<8)+(uint16)CommUsart_PC.RecBuffer[COMM_DATA_LEN_POS_PC+3];
+            if(CommUsart_PC.DataLen>COMM_UART_DATA_LEN_MAX_PC )
+            {
+                CommUsart_PC.RecPtr=0;
+            }
+        }
+    }//else if(CommUsart_PC.RecPtr<COMM_DATA_POS_PC) //数据段长度 2字节
+
+    else if(CommUsart_PC.RecPtr<COMM_DATA_POS_PC+CommUsart_PC.DataLen)	//+COMM_CRC_LEN_PC
+    {
+        CommUsart_PC.RecBuffer[CommUsart_PC.RecPtr++] = c;
+        if(CommUsart_PC.RecPtr==COMM_DATA_POS_PC+CommUsart_PC.DataLen)	//+COMM_CRC_LEN_PC
+        {
+            //复位
+            CommUsart_PC.RecPtr=0;
+            // Copy to FIFO
+            FIFO_RxDataPut_PC(CommUsart_PC.RecBuffer, &FIFO_RxData_PC);
+        }
+    }
+    else
+    {
+        CommUsart_PC.RecPtr=0;
+    }
+}
+
+
+
+

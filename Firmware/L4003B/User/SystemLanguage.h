@@ -1,0 +1,21 @@
+#ifndef __LANGUAGE_H
+#define __LANGUAGE_H
+
+
+typedef struct
+{
+    unsigned char Title;
+    unsigned char Protocol;
+    unsigned char Report;
+    unsigned char Setting;
+    unsigned char Help;
+} LANGUAGE_CHANGE;
+
+extern LANGUAGE_CHANGE LanguageChange;
+
+
+
+void SystemLanguage_Interface(void);
+void SystemLanguage_Go(void);
+void SystemLanguage_Scan(void);
+#endif

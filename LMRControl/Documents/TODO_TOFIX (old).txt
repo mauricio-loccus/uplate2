@@ -1,0 +1,34 @@
+- LRMCONTROL
+
+- Na tabela dos unknowns eliminar a posição e mostrar somente o resultado da média entre as réplicas.
+	- Mostrar a coluna com as concentrações (já calculado)
+	- Trocar o header da coluna ID por "Unknown #".
+
+- As células de tipo "Branco", "Controle Positivo" e "Controle Negativo" não devem ser enumeradas e não devem ser
+  consideradas réplicas.
+ 
+- Modificar os parâmetros dos algoritimos de fitting para varrerem a matriz da de células da placa.
+
+
+- No algoritmo da linear, para determinar a faixa de construção do gráfico, alterar para varrer de 0 a valor máximo e não a partir do mínimo pois
+será extrapolação do gráfico, que pode resultar em x negativo e assim o log dá exceção
+
+- Omitir filtros "OFF" da lista de filtros instalados
+
+- Mostrar status do processamento dos filtros, como nos outros casos...
+
+- Entender o motivo da saída do modo de controle remoto.
+
+- Corrigir algoritimo "Linear Fit Cross Zero"
+
+TODO: 09/08
+
+- Adicinar a árvore de experimento uma sub-categoria:
+	- Resultados
+		- Absorbância
+		_ Concentração
+		_ Qualitativo
+
+- Na aba dos resultados, o tipo do poço não está numerado. Por exemplo, se temos 3 réplicas de padrão no Plate, na aba de resultados só mostra STD mas não mostra seu número
+
+- Ver o que acontece com as abas se vc adicionar muitas placas... Talvez seja mais interessante usar a mesma ideia que criamos nos resultados para as placas a medida que adicionarmos... assim, o número de abas fica controlado. E finalmente mudamos o nome da aba para Layout. -- DONE

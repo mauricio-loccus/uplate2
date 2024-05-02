@@ -1,0 +1,1244 @@
+
+
+//注:此程序已自检完毕
+/*
+BoardInf.InterpretPara.Enable; //允许定性分析interpret_para.bOpened
+BoardInf.InterpretPara.AbsFlag; //采用吸光度
+BoardInf.InterpretPara.fCoef[3];   //dCoef[3]
+BoardInf.InterpretPara.fWeakPValue;  // interpret_para.dGreyValue
+BoardInf.InterpretPara.GreatFlag; //采用大于号判定  interpret_para.bGreater
+*/
+
+
+#include "MainTask.h"
+
+
+const char STR_INTERPRET_TITLE[LANGUAGE_TYPES][30] = {"Interpretation", "定性分析参数"};
+//const char STR_INTERPRET[LANGUAGE_TYPES][20] = {"Interpret", "定性分析"};
+
+const char STR_INTERPRET_POS[LANGUAGE_TYPES][20] = {"Positive:", "阳性条件："};
+const char STR_INTERPRET_WEAK_POS[LANGUAGE_TYPES][40] = {"Weak P: (+/- Cutoff%)", "弱阳性：(+/- 临界值%)"};
+
+
+
+const char STR_INTERPRET_SOURCE[LANGUAGE_TYPES][15] = {"Source", "数据源"};
+const char STR_INTERPRET_CUTOFF[LANGUAGE_TYPES][15] = {"Cutoff:", "临界值："};
+
+
+
+
+const char STR_INTERPRET_POS_DN[LANGUAGE_TYPES][20] = {"Positive: > ", "阳性：> "};  //DN增加
+const char STR_INTERPRET_WEAK_POS_DN[LANGUAGE_TYPES][40] = {"Weak P: > ", "弱阳性：> "};//DN增加
+const char STR_INTERPRET_LIMIT_DN[LANGUAGE_TYPES][20] = {"Limit: > ", "极限：> "};//DN增加
+
+const char STR_INTER_MODE[LANGUAGE_TYPES][2][15] = {{"Normal","Special"},{"普通", "特殊"}};//DN增加
+
+//DN软件增加
+
+
+enum
+{
+	DISPLAY_HEAD=0, //只显示特别页面的头MODE
+	DISPLAY_ALL     //全显示
+};
+
+WM_HWIN ProtocolInterWin = NULL;                //数字键盘
+
+
+enum
+{
+    EXP_INTER = 1,
+    EXP_CONC_ABS,
+    EXP_CUTOFF_NC,
+    EXP_CUTOFF_PC,
+    EXP_CUTOFF_COEF,
+    EXP_WEAK_P,
+	
+	  EXP_INTER_MODE,//ABS时无Mode,Conc下有Mode选项
+	  EXP_LIMIT,
+	  EXP_POS,
+	  EXP_WEAK_POS,
+};
+static unsigned char ExpEnable;
+//static unsigned char InterMode;
+
+const BUTTON_DATA _aButtonProtocolInter[] =
+{
+    { TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(3), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Ok", "确认" },
+    { TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(4), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Back", "返回" },
+};
+
+
+
+
+void DisplayInterExpand(void)
+{
+    unsigned char i;
+    short start_x, start_y, wide, high;
+    GUI_RECT rect;
+
+	
+    start_x = INTERPRET_EXPAND1_START_X ;
+    start_y = INTERPRET_EXPAND1_START_Y - TITLESBAR_HEIGHT;
+
+    //GUI_DrawBitmap(&bmExpMenuRight_135_46, INTERPRET_EXPAND1_START_X, INTERPRET_EXPAND1_START_Y - TITLESBAR_HEIGHT);
+    GUI_SetColor(COLOR_EXP_PICTURE_FRAME);
+    GUI_DrawLine(start_x, start_y,start_x+125,start_y);
+    GUI_DrawLine(start_x, start_y+45,start_x+125,start_y+45);
+    GUI_SetColor(COLOR_EXP_PICTURE);
+    GUI_FillRect(start_x, start_y+1,start_x+125,start_y+44);
+    GUI_DrawBitmap(&bmExpMenuRight_20_46, start_x+125, start_y);
+
+    start_x += 3;
+    start_y += 3;
+
+
+    wide = INTER_SEL_WIDTH;
+    high = 40;
+    for (i = 0; i<2; i++)
+    {
+        //填充选中的底色
+        GUI_SetColor(COLOR_SHAKE_BK);
+        if (i == 0)
+        {
+            strcpy(ConvertStr, STR_CLOSE[SystemPrameter.SystemLanguage]);//"Off");
+        }
+        else
+        {
+            strcpy(ConvertStr, STR_OPEN[SystemPrameter.SystemLanguage]);//"On");
+        }
+
+        //填充选中的文字-白色
+        if (((BoardInfTemp.InterpretPara.Enable == 0) && (i == 0)) || ((BoardInfTemp.InterpretPara.Enable) && (i == 1)))
+        {
+            GUI_FillRect(start_x, start_y, start_x + wide, start_y + high);
+            GUI_SetColor(COLOR_SHAKE_TXT);
+        }
+
+        rect.x0 = start_x;
+        rect.y0 = start_y - 1;
+        rect.x1 = start_x + wide;
+        rect.y1 = start_y + high;
+
+        start_x += wide;
+        wide = INTER_SEL_WIDTH;
+
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+    }
+}
+
+
+void DisplayConcAbsExpand(void)
+{
+    unsigned char i;
+    //char str[10];
+    GUI_RECT rect;
+
+    int start_x, start_y, wide, high;
+
+    start_x = INTERPRET_EXPAND2_START_X ;
+    start_y = INTERPRET_EXPAND2_START_Y - TITLESBAR_HEIGHT;
+    //GUI_DrawBitmap(&bmExpMenuRight_135_46, INTERPRET_EXPAND2_START_X, INTERPRET_EXPAND2_START_Y - TITLESBAR_HEIGHT);
+    GUI_SetColor(COLOR_EXP_PICTURE_FRAME);
+    GUI_DrawLine(start_x, start_y,start_x+125,start_y);
+    GUI_DrawLine(start_x, start_y+45,start_x+125,start_y+45);
+    GUI_SetColor(COLOR_EXP_PICTURE);
+    GUI_FillRect(start_x, start_y+1,start_x+125,start_y+44);
+    GUI_DrawBitmap(&bmExpMenuRight_20_46, start_x+125, start_y);
+
+    start_x += 3;
+    start_y += 3;
+
+    wide = INTER_SEL_WIDTH;
+    high = 40;
+    for (i = 0; i<2; i++)
+    {
+        //填充选中的底色
+        GUI_SetColor(COLOR_SHAKE_BK);
+        if (i == 0)
+        {
+            strcpy(ConvertStr, STR_ABS[SystemPrameter.SystemLanguage]);//"ABS");
+        }
+        else
+        {
+            strcpy(ConvertStr,STR_CONC[SystemPrameter.SystemLanguage]);// "Conc.");
+        }
+
+        //填充选中的文字-白色
+        if (((BoardInfTemp.InterpretPara.AbsFlag) && (i == 0)) || ((BoardInfTemp.InterpretPara.AbsFlag==0) && (i == 1)))//注:这里i==0为吸光度
+        {
+            GUI_FillRect(start_x, start_y, start_x + wide, start_y + high);
+            GUI_SetColor(COLOR_SHAKE_TXT);
+        }
+
+        rect.x0 = start_x;
+        rect.y0 = start_y - 1;
+        rect.x1 = start_x + wide;
+        rect.y1 = start_y + high;
+
+        start_x += wide;
+        wide = INTER_SEL_WIDTH;
+
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+    }
+}
+
+
+//显示定性模式扩展
+void DisplayInterModeExpand(void)
+{
+    GUI_RECT rect;
+    short i;
+    short start_x, start_y, wide, high;
+
+    start_x=SPEED_EXPAND_START_X  +KINETIC_PARA_POS_START;
+    start_y = INTERPRET_2_R_START_Y - TITLESBAR_HEIGHT;
+    wide = INTER_MODE_EXPAND_WIDTH1;
+    high = 40;
+    GUI_SetColor(COLOR_EXP_PICTURE_FRAME);
+    GUI_DrawLine(start_x, start_y,start_x+INTER_MODE_EXPAND_WIDTH,start_y);
+    GUI_DrawLine(start_x, start_y+45,start_x+INTER_MODE_EXPAND_WIDTH,start_y+45);
+    GUI_SetColor(COLOR_EXP_PICTURE);
+    GUI_FillRect(start_x, start_y+1,start_x+INTER_MODE_EXPAND_WIDTH,start_y+44);
+    GUI_DrawBitmap(&bmExpMenuRight_20_46, start_x+INTER_MODE_EXPAND_WIDTH, start_y);
+
+    start_x += 3;
+    start_y += 3;
+    for (i = 0; i<2; i++)
+    {
+        //填充选中的底色
+        GUI_SetColor(COLOR_MODE_SEL_BK);
+        if (i == 0)
+        {
+            strcpy(ConvertStr, STR_INTER_MODE[SystemPrameter.SystemLanguage][0]);//"普通"
+        }
+        else
+        {
+            strcpy(ConvertStr,STR_INTER_MODE[SystemPrameter.SystemLanguage][1] );//"特殊"
+        }
+
+        //填充选中的文字-白色
+        //填充选中的文字-白色
+        if (((BoardInfTemp.InterpretPara.Mode == INTER_NORMAL) && (i == 0)) || ((BoardInfTemp.InterpretPara.Mode == INTER_SPECIAL) && (i == 1)))
+        {
+            GUI_FillRect(start_x+3, start_y+3, start_x +3+ wide, start_y-3+high);
+            GUI_SetColor(COLOR_MODE_SEL_TXT);
+            //GUI_DrawCircle(RUNMENU_CIRCLE_POSX(i), RUNMENU_CIRCLE_POSY, RUNMENU_CIRCLE_RADIUS);
+        }
+
+        rect.x0 = start_x;
+        rect.y0 = start_y - 1;
+        rect.x1 = start_x + wide;
+        rect.y1 = start_y + high;
+
+        start_x += wide;
+        wide = INTER_MODE_EXPAND_WIDTH2;
+
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+    }
+
+
+}
+
+//flag==DISPLAY_HEAD只显示Mode,DISPLAY_ALL为显示所有
+void DisplayInterDN(unsigned char flag)
+{
+	    GUI_RECT rect;
+			float f_temp;
+	
+	    
+	    GUI_DrawBitmap(&bmMenuLeft_101_46, FILTER_2_START_X+KINETIC_PARA_POS_START, INTERPRET_2_R_START_Y - TITLESBAR_HEIGHT);//定性模式
+      GUI_DrawBitmap(&bmMenuRight_90_46, FILTER_2_R_START_X+KINETIC_PARA_POS_START, INTERPRET_2_R_START_Y - TITLESBAR_HEIGHT);
+	
+
+        if (BoardInfTemp.InterpretPara.Enable)
+        {
+            GUI_SetColor(COLOR_PAINT_TXT);
+        }
+        else
+        {
+            GUI_SetColor(COLOR_TXT_DISABLE);//灰色
+        }
+				
+	    //定性模式左侧项
+       rect.x0 = FILTER_2_START_X+20+KINETIC_PARA_POS_START;
+       rect.y0 = INTERPRET_2_R_START_Y - TITLESBAR_HEIGHT;
+       rect.x1 = FILTER_2_END_X+KINETIC_PARA_POS_START;
+       rect.y1 = INTERPRET_2_R_END_Y - TITLESBAR_HEIGHT;
+       strcpy(ConvertStr,STR_MODE[SystemPrameter.SystemLanguage]);//定性模式
+       GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+	
+			  //定性模式右侧项
+        rect.x0 = FILTER_2_START_X+110+KINETIC_PARA_POS_START;
+        rect.y0 = INTERPRET_2_R_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = FILTER_2_END_X+110+KINETIC_PARA_POS_START;
+        rect.y1 = INTERPRET_2_R_END_Y - TITLESBAR_HEIGHT;
+        strcpy(ConvertStr,STR_INTER_MODE[SystemPrameter.SystemLanguage][BoardInfTemp.InterpretPara.Mode]);
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+				
+				
+		if(flag==DISPLAY_ALL)
+		{
+				//颜色
+        if (ExpEnable == EXP_LIMIT)
+        {
+            GUI_SetColor(0x000000);
+        }
+        else
+        {
+            GUI_SetColor(COLOR_TITLEBAR);
+        }
+        GUI_FillRect(INTERPRET_EDIT_COEF1_START_X_DN, INTERPRET_EDIT_COEF1_START_Y_DN - TITLESBAR_HEIGHT, INTERPRET_EDIT_COEF1_END_X_DN, INTERPRET_EDIT_COEF1_END_Y_DN - TITLESBAR_HEIGHT);
+
+
+
+        if (ExpEnable == EXP_POS)
+        {
+            GUI_SetColor(0x000000);
+        }
+        else
+        {
+            GUI_SetColor(COLOR_TITLEBAR);
+        }
+        GUI_FillRect(INTERPRET_EDIT_COEF2_START_X_DN, INTERPRET_EDIT_COEF2_START_Y_DN - TITLESBAR_HEIGHT, INTERPRET_EDIT_COEF2_END_X_DN, INTERPRET_EDIT_COEF2_END_Y_DN - TITLESBAR_HEIGHT);
+
+
+				if (ExpEnable == EXP_WEAK_POS)
+        {
+            GUI_SetColor(0x000000);
+        }
+        else
+        {
+            GUI_SetColor(COLOR_TITLEBAR);
+        }
+        GUI_FillRect(INTERPRET_EDIT_COEF3_START_X_DN, INTERPRET_EDIT_COEF3_START_Y_DN - TITLESBAR_HEIGHT, INTERPRET_EDIT_COEF3_END_X_DN, INTERPRET_EDIT_COEF3_END_Y_DN - TITLESBAR_HEIGHT);
+
+				
+				GUI_SetColor(GUI_BLACK);      //黑色
+				rect.x0 = 20;
+        rect.y0 = INTERPRET_EDIT_COEF1_START_Y_DN - TITLESBAR_HEIGHT;
+        rect.x1 = INTERPRET_EDIT_COEF1_START_X_DN-5;
+        rect.y1 = INTERPRET_EDIT_COEF1_END_Y_DN - TITLESBAR_HEIGHT;
+        GUI_DispStringInRect(STR_INTERPRET_LIMIT_DN[SystemPrameter.SystemLanguage], &rect, GUI_TA_RIGHT | GUI_TA_VCENTER);
+				
+				
+				rect.y0 = INTERPRET_EDIT_COEF2_START_Y_DN - TITLESBAR_HEIGHT;
+				rect.y1 = INTERPRET_EDIT_COEF2_END_Y_DN - TITLESBAR_HEIGHT;
+				GUI_DispStringInRect(STR_INTERPRET_POS_DN[SystemPrameter.SystemLanguage], &rect, GUI_TA_RIGHT | GUI_TA_VCENTER);
+				
+				
+				rect.y0 = INTERPRET_EDIT_COEF3_START_Y_DN - TITLESBAR_HEIGHT;
+				rect.y1 = INTERPRET_EDIT_COEF3_END_Y_DN - TITLESBAR_HEIGHT;
+				GUI_DispStringInRect(STR_INTERPRET_WEAK_POS_DN[SystemPrameter.SystemLanguage], &rect, GUI_TA_RIGHT | GUI_TA_VCENTER);
+				
+      
+				//颜色定义
+				if (BoardInfTemp.InterpretPara.Enable)
+        {
+            GUI_SetColor(COLOR_PAINT_TXT);  
+        }
+        else
+        {
+            GUI_SetColor(COLOR_TXT_DISABLE);//灰色
+        }
+				
+				
+        //定性显示1
+				f_temp = BoardInfTemp.InterpretPara.fCoef_DN[0];
+        if (f_temp > 1000)
+        {
+            sprintf(ConvertStr,"%.2e",f_temp);
+            EConvert(ConvertStr);
+        }
+        else
+        {
+            sprintf(ConvertStr, "%.2f", f_temp);
+        }
+
+        rect.x0 = INTERPRET_EDIT_COEF1_START_X_DN;
+        rect.y0 = INTERPRET_EDIT_COEF1_START_Y_DN - TITLESBAR_HEIGHT;
+        rect.x1 = INTERPRET_EDIT_COEF1_END_X_DN-5;
+        rect.y1 = INTERPRET_EDIT_COEF1_END_Y_DN - TITLESBAR_HEIGHT;
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_RIGHT | GUI_TA_VCENTER);
+
+				//定性显示2
+				f_temp = BoardInfTemp.InterpretPara.fCoef_DN[1];
+        if (f_temp > 1000)
+        {
+            sprintf(ConvertStr,"%.2e",f_temp);
+            EConvert(ConvertStr);
+        }
+        else
+        {
+            sprintf(ConvertStr, "%.2f", f_temp);
+        }
+
+        rect.x0 = INTERPRET_EDIT_COEF2_START_X_DN;
+        rect.y0 = INTERPRET_EDIT_COEF2_START_Y_DN - TITLESBAR_HEIGHT;
+        rect.x1 = INTERPRET_EDIT_COEF2_END_X_DN-5;
+        rect.y1 = INTERPRET_EDIT_COEF2_END_Y_DN - TITLESBAR_HEIGHT;
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_RIGHT | GUI_TA_VCENTER);
+				
+				//定性显示3
+				f_temp = BoardInfTemp.InterpretPara.fCoef_DN[2];
+        if (f_temp > 1000)
+        {
+            sprintf(ConvertStr,"%.2e",f_temp);
+            EConvert(ConvertStr);
+        }
+        else
+        {
+            sprintf(ConvertStr, "%.2f", f_temp);
+        }
+
+        rect.x0 = INTERPRET_EDIT_COEF3_START_X_DN;
+        rect.y0 = INTERPRET_EDIT_COEF3_START_Y_DN - TITLESBAR_HEIGHT;
+        rect.x1 = INTERPRET_EDIT_COEF3_END_X_DN-5;
+        rect.y1 = INTERPRET_EDIT_COEF3_END_Y_DN - TITLESBAR_HEIGHT;
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_RIGHT | GUI_TA_VCENTER);
+		}				   
+}
+
+void DisplayInterNormal(void)
+{
+				GUI_RECT rect;
+				float f_temp;
+				//颜色
+        if (ExpEnable == EXP_CUTOFF_NC)
+        {
+            GUI_SetColor(0x000000);
+        }
+        else
+        {
+            GUI_SetColor(COLOR_TITLEBAR);
+        }
+        GUI_FillRect(INTERPRET_EDIT_COEF1_START_X, INTERPRET_EDIT_COEF1_START_Y - TITLESBAR_HEIGHT, INTERPRET_EDIT_COEF1_END_X, INTERPRET_EDIT_COEF1_END_Y - TITLESBAR_HEIGHT);
+
+
+
+        if (ExpEnable == EXP_CUTOFF_PC)
+        {
+            GUI_SetColor(0x000000);
+        }
+        else
+        {
+            GUI_SetColor(COLOR_TITLEBAR);
+        }
+        GUI_FillRect(INTERPRET_EDIT_COEF2_START_X, INTERPRET_EDIT_COEF2_START_Y - TITLESBAR_HEIGHT, INTERPRET_EDIT_COEF2_END_X, INTERPRET_EDIT_COEF2_END_Y - TITLESBAR_HEIGHT);
+        if (ExpEnable == EXP_CUTOFF_COEF)
+        {
+            GUI_SetColor(0x000000);
+        }
+        else
+        {
+            GUI_SetColor(COLOR_TITLEBAR);
+        }
+        GUI_FillRect(INTERPRET_EDIT_COEF3_START_X, INTERPRET_EDIT_COEF3_START_Y - TITLESBAR_HEIGHT, INTERPRET_EDIT_COEF3_END_X, INTERPRET_EDIT_COEF3_END_Y - TITLESBAR_HEIGHT);
+        if (ExpEnable == EXP_WEAK_P)
+        {
+            GUI_SetColor(0x000000);
+        }
+        else
+        {
+            GUI_SetColor(COLOR_TITLEBAR);
+        }
+        GUI_FillRect(INTERPRET_EDIT_COEF4_START_X, INTERPRET_EDIT_COEF4_START_Y - TITLESBAR_HEIGHT, INTERPRET_EDIT_COEF4_END_X, INTERPRET_EDIT_COEF4_END_Y - TITLESBAR_HEIGHT);
+
+        GUI_SetColor(COLOR_TITLEBAR);
+        GUI_FillRect(INTERPRET_EDIT_COEF5_START_X, INTERPRET_EDIT_COEF5_START_Y - TITLESBAR_HEIGHT, INTERPRET_EDIT_COEF5_END_X, INTERPRET_EDIT_COEF5_END_Y - TITLESBAR_HEIGHT);
+
+
+
+
+        //GUI_DrawBitmap(&bmMenuLeft_101_46, INTERPRET_1_START_X, INTERPRET_1_START_Y - TITLESBAR_HEIGHT);
+        //GUI_DrawBitmap(&bmMenuLeft_101_46, INTERPRET_2_START_X, INTERPRET_2_START_Y - TITLESBAR_HEIGHT);
+       
+
+        //GUI_DrawBitmap(&bmMenuRight_90_46, INTERPRET_1_R_START_X, INTERPRET_1_R_START_Y - TITLESBAR_HEIGHT);
+       // GUI_DrawBitmap(&bmMenuRight_90_46, INTERPRET_2_R_START_X, INTERPRET_2_R_START_Y - TITLESBAR_HEIGHT);
+
+
+
+
+
+        GUI_SetColor(GUI_BLACK);      //黑色
+        GUI_DispStringAt(STR_INTERPRET_CUTOFF[SystemPrameter.SystemLanguage], INTERPRET_1_START_X + 15, INTERPRET_EDIT_COEF1_START_Y + 2-TITLESBAR_HEIGHT);//"Cutoff:"
+        GUI_DispStringAt("*NC +", INTERPRET_EDIT_COEF1_END_X + 5, INTERPRET_EDIT_COEF1_START_Y + 2 - TITLESBAR_HEIGHT);
+        GUI_DispStringAt("*PC +", INTERPRET_EDIT_COEF2_END_X + 5, INTERPRET_EDIT_COEF2_START_Y + 2 - TITLESBAR_HEIGHT);
+        GUI_DispStringAt(STR_INTERPRET_WEAK_POS[SystemPrameter.SystemLanguage], INTERPRET_1_START_X + 15, INTERPRET_EDIT_COEF4_START_Y + 2 - TITLESBAR_HEIGHT);//"Weak P:(+/- Cutoff%)"
+        GUI_DispStringAt(STR_INTERPRET_POS[SystemPrameter.SystemLanguage], INTERPRET_1_START_X + 15, INTERPRET_EDIT_COEF5_START_Y + 2 - TITLESBAR_HEIGHT);//"Positive:"
+        GUI_DispStringAt(STR_CUTOFF[SystemPrameter.SystemLanguage], INTERPRET_EDIT_COEF5_END_X + 5, INTERPRET_EDIT_COEF5_START_Y + 2 - TITLESBAR_HEIGHT);//"Cutoff"
+
+        GUI_SetColor(COLOR_PAINT_TXT);//灰色
+/*
+        
+        GUI_DispStringAt(STR_INTERPRET_TITLE[SystemPrameter.SystemLanguage], CONTENTBAR_CAPTION_POSX, CONTENTBAR_CAPTION_POSY);//"Interpretation"
+
+        rect.x0 = INTERPRET_1_START_X + 20;
+        rect.y0 = INTERPRET_1_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = INTERPRET_1_END_X;
+        rect.y1 = INTERPRET_1_END_Y - TITLESBAR_HEIGHT;
+        GUI_DispStringInRect(STR_INTERPRET[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Interpret"
+
+
+        rect.x0 = INTERPRET_1_R_START_X + 20;
+        rect.x1 = INTERPRET_1_R_END_X;
+        if (BoardInfTemp.InterpretPara.Enable)
+        {
+            GUI_DispStringInRect(STR_OPEN[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"On"
+        }
+        else
+        {
+            GUI_DispStringInRect(STR_CLOSE[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Off"
+            GUI_SetColor(COLOR_TXT_DISABLE);//灰色
+        }
+
+
+
+
+        rect.x0 = INTERPRET_2_START_X + 20;
+        rect.y0 = INTERPRET_2_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = INTERPRET_2_END_X;
+        rect.y1 = INTERPRET_2_END_Y - TITLESBAR_HEIGHT;
+        GUI_DispStringInRect(STR_INTERPRET_SOURCE[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Source"
+
+
+        rect.x0 = INTERPRET_2_R_START_X + 20;
+        rect.x1 = INTERPRET_2_R_END_X;
+        if (BoardInfTemp.InterpretPara.AbsFlag)
+        {
+            GUI_DispStringInRect(STR_ABS[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"ABS"
+        }
+        else
+        {
+            GUI_DispStringInRect(STR_CONC[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Conc."
+        }
+*/
+
+
+
+        f_temp = BoardInfTemp.InterpretPara.fCoef[0];
+        if (f_temp > 1000)
+        {
+            sprintf(ConvertStr,"%.2e",f_temp);
+            EConvert(ConvertStr);
+        }
+        else
+        {
+            sprintf(ConvertStr, "%.2f", f_temp);
+        }
+
+        rect.x0 = INTERPRET_EDIT_COEF1_START_X;
+        rect.y0 = INTERPRET_EDIT_COEF1_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = INTERPRET_EDIT_COEF1_END_X-5;
+        rect.y1 = INTERPRET_EDIT_COEF1_END_Y - TITLESBAR_HEIGHT;
+        //sprintf(str, "%02d", InterpretParaBack.fCoef[0]);
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_RIGHT | GUI_TA_VCENTER);
+
+
+        f_temp = BoardInfTemp.InterpretPara.fCoef[1];
+        if (f_temp > 1000)
+        {
+            //floatConvertE(ConvertStr,f_temp);
+            sprintf(ConvertStr,"%.2e",f_temp);
+            EConvert(ConvertStr);
+        }
+        else
+        {
+            sprintf(ConvertStr, "%.2f", f_temp);
+        }
+
+        rect.x0 = INTERPRET_EDIT_COEF2_START_X;
+        rect.y0 = INTERPRET_EDIT_COEF2_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = INTERPRET_EDIT_COEF2_END_X - 5;
+        rect.y1 = INTERPRET_EDIT_COEF2_END_Y - TITLESBAR_HEIGHT;
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_RIGHT | GUI_TA_VCENTER);
+
+        f_temp = BoardInfTemp.InterpretPara.fCoef[2];
+        if (f_temp > 1000)
+        {
+            //floatConvertE(ConvertStr,f_temp);
+            sprintf(ConvertStr,"%.2e",f_temp);
+            EConvert(ConvertStr);
+        }
+        else
+        {
+            sprintf(ConvertStr, "%.2f", f_temp);
+        }
+
+        rect.x0 = INTERPRET_EDIT_COEF3_START_X;
+        rect.y0 = INTERPRET_EDIT_COEF3_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = INTERPRET_EDIT_COEF3_END_X - 5;
+        rect.y1 = INTERPRET_EDIT_COEF3_END_Y - TITLESBAR_HEIGHT;
+        //sprintf(str, "%02d", InterpretParaBack.fCoef[0]);
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_RIGHT | GUI_TA_VCENTER);
+
+
+        f_temp = BoardInfTemp.InterpretPara.fWeakPValue;
+        if (f_temp > 1000)
+        {
+            //floatConvertE(ConvertStr,f_temp);
+            sprintf(ConvertStr,"%.2e",f_temp);
+            EConvert(ConvertStr);
+        }
+        else
+        {
+            sprintf(ConvertStr, "%.2f", f_temp);
+        }
+
+        rect.x0 = INTERPRET_EDIT_COEF4_START_X;
+        rect.y0 = INTERPRET_EDIT_COEF4_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = INTERPRET_EDIT_COEF4_END_X - 5;
+        rect.y1 = INTERPRET_EDIT_COEF4_END_Y - TITLESBAR_HEIGHT;
+        //sprintf(str, "%02d", InterpretParaBack.fCoef[0]);
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_RIGHT | GUI_TA_VCENTER);
+
+
+        if(BoardInfTemp.InterpretPara.GreatFlag)
+        {
+            strcpy(ConvertStr, ">");
+        }
+        else
+        {
+            strcpy(ConvertStr, "<");
+        }
+
+        rect.x0 = INTERPRET_EDIT_COEF5_START_X;
+        rect.y0 = INTERPRET_EDIT_COEF5_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = INTERPRET_EDIT_COEF5_END_X;
+        rect.y1 = INTERPRET_EDIT_COEF5_END_Y - TITLESBAR_HEIGHT;
+        //sprintf(str, "%02d", InterpretParaBack.fCoef[0]);
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+}
+
+
+void _cbProtocolInter(WM_MESSAGE * pMsg)
+{
+    //char str[10];
+    WM_HWIN hWin = pMsg->hWin;
+//	WM_HWIN hWinFocus;
+    BUTTON_Handle hbutton;
+    unsigned char i;
+    short     xSize;
+    short     ySize;
+    float f_temp;
+    short NCode, Id;
+    GUI_RECT rect;
+
+
+
+//	hWinFocus = WM_GetFocussedWindow();
+//	IdWinFocus = WM_GetId(hWinFocus);
+
+    switch (pMsg->MsgId)
+    {
+        //case WM_INIT_DIALOG:
+        //创建所耐的按钮
+
+    case WM_CREATE:
+    {
+        for (i = 0; i < GUI_COUNTOF(_aButtonProtocolInter); i++)
+        {
+            hbutton = BUTTON_CreateEx(_aButtonProtocolInter[i].xPos, _aButtonProtocolInter[i].yPos, _aButtonProtocolInter[i].xSize, _aButtonProtocolInter[i].ySize,
+                                      hWin, WM_CF_SHOW, 0, ID_INTER_BUTTON + i);
+            BUTTON_SetText(hbutton, _aButtonProtocolInter[i].acLabelEn);
+
+            if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+            {
+                BUTTON_SetFont(hbutton, GUI_FONT_BIG);
+                BUTTON_SetText(hbutton, _aButtonProtocolInter[i].acLabelEn);
+            }
+            else
+            {
+                BUTTON_SetFont(hbutton, GUI_FONT_BIG_CH);
+                BUTTON_SetText(hbutton, _aButtonProtocolInter[i].acLabelCh);
+            }
+            BUTTON_SetTextAlign(hbutton, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            BUTTON_SetFocussable(hbutton, 0);
+        }
+        break;
+    }
+    //删除按钮
+    case WM_DELETE:
+
+
+        break;
+        //绘制背景
+    case WM_PAINT:
+        xSize = WM_GetWindowSizeX(hWin);
+        ySize = WM_GetWindowSizeY(hWin);
+        GUI_SetTextMode(GUI_TM_TRANS);
+
+
+        //上方第一行
+        GUI_SetColor(COLOR_TITLEBAR);
+        GUI_FillRect(0, 0, xSize - 1, CONTENTBAR_TITLE_HEIGHT - 1);
+        //左方内容栏
+        GUI_SetColor(COLOR_CONTENTBAR);
+        GUI_FillRect(0, CONTENTBAR_CONTENT_POSY, CONTENTBAR_CONTENT_WIDTH - 1, ySize - 1);
+        //右侧工具栏
+        GUI_SetColor(COLOR_TOOLSBAR);
+        GUI_FillRect(CONTENTBAR_CONTENT_WIDTH, CONTENTBAR_CONTENT_POSY, xSize - 1, ySize - 1);
+
+        //字体
+        if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+        {
+            GUI_SetFont(GUI_FONT_BIG);
+        }
+        else
+        {
+            GUI_SetFont(GUI_FONT_BIG_CH);
+        }
+        //文字透明
+        GUI_SetTextMode(GUI_TM_TRANS);
+				
+				
+       
+        GUI_DrawBitmap(&bmMenuLeft_101_46, INTERPRET_1_START_X, INTERPRET_1_START_Y - TITLESBAR_HEIGHT);
+        GUI_DrawBitmap(&bmMenuLeft_101_46, INTERPRET_2_START_X, INTERPRET_2_START_Y - TITLESBAR_HEIGHT);
+       
+        GUI_DrawBitmap(&bmMenuRight_90_46, INTERPRET_1_R_START_X, INTERPRET_1_R_START_Y - TITLESBAR_HEIGHT);
+        GUI_DrawBitmap(&bmMenuRight_90_46, INTERPRET_2_R_START_X, INTERPRET_2_R_START_Y - TITLESBAR_HEIGHT);
+
+
+        GUI_SetColor(COLOR_PAINT_TXT);//灰色
+        GUI_DispStringAt(STR_INTERPRET_TITLE[SystemPrameter.SystemLanguage], CONTENTBAR_CAPTION_POSX, CONTENTBAR_CAPTION_POSY);//"Interpretation"
+
+        rect.x0 = INTERPRET_1_START_X + 20;
+        rect.y0 = INTERPRET_1_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = INTERPRET_1_END_X;
+        rect.y1 = INTERPRET_1_END_Y - TITLESBAR_HEIGHT;
+        GUI_DispStringInRect(STR_INTERPRET[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Interpret"
+
+
+        rect.x0 = INTERPRET_1_R_START_X + 20;
+        rect.x1 = INTERPRET_1_R_END_X;
+        if (BoardInfTemp.InterpretPara.Enable)
+        {
+            GUI_DispStringInRect(STR_OPEN[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"On"
+        }
+        else
+        {
+            GUI_DispStringInRect(STR_CLOSE[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Off"
+            GUI_SetColor(COLOR_TXT_DISABLE);//灰色
+        }
+
+
+
+
+        rect.x0 = INTERPRET_2_START_X + 20;
+        rect.y0 = INTERPRET_2_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = INTERPRET_2_END_X;
+        rect.y1 = INTERPRET_2_END_Y - TITLESBAR_HEIGHT;
+        GUI_DispStringInRect(STR_INTERPRET_SOURCE[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Source"
+
+
+        rect.x0 = INTERPRET_2_R_START_X + 20;
+        rect.x1 = INTERPRET_2_R_END_X;
+        if (BoardInfTemp.InterpretPara.AbsFlag)
+        {
+            GUI_DispStringInRect(STR_ABS[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"ABS"
+        }
+        else
+        {
+            GUI_DispStringInRect(STR_CONC[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Conc."
+        }
+        
+				#ifdef SOFTWARE_DN
+				   if (BoardInfTemp.InterpretPara.AbsFlag)
+					 {
+						   DisplayInterNormal();
+					 }
+					 else 
+					 {
+						   if(BoardInfTemp.InterpretPara.Mode == INTER_NORMAL)
+							 {
+								    DisplayInterDN(DISPLAY_HEAD);
+								    DisplayInterNormal();
+							 }
+						   else //if(BoardInfTemp.InterpretPara.Mode == INTER_SPECIAL)
+							 {
+				           DisplayInterDN(DISPLAY_ALL);
+							 }
+							 
+					 }
+				#else
+				   DisplayInterNormal();
+				#endif
+
+        if (ExpEnable == EXP_INTER)
+        {
+            DisplayInterExpand();
+        }
+        else if (ExpEnable == EXP_CONC_ABS)
+        {
+            DisplayConcAbsExpand();
+        }
+				#ifdef SOFTWARE_DN
+				else if (ExpEnable == EXP_INTER_MODE)
+				   DisplayInterModeExpand();
+				#endif
+        break;
+
+    case WM_NOTIFY_PARENT:
+    {
+        Id = WM_GetId(pMsg->hWinSrc);       // Id of widget
+        NCode = pMsg->Data.v;               // Notification code
+        if(RemoteInfo_PC.RemoteFlag)
+        {
+            break;
+        }
+        if( (KeyPadAsc.UseFlag == KEYPAD_BUSY)||(KeyPadNum.UseFlag == KEYPAD_BUSY)||(PromptMenu.InterfaceStatus==PROMPT_MENU_BUSY) )
+        {
+            break;
+        }
+        if (NCode == WM_NOTIFICATION_RELEASED)
+        {
+            if (Id == ID_INTER_BUTTON)   //工具栏第5个按钮  Enter
+            {
+                /*
+                	BoardInf.InterpretPara.Enable=BoardInfTemp.InterpretPara.Enable; //允许定性分析
+                BoardInf.InterpretPara.AbsFlag=BoardInfTemp.InterpretPara.AbsFlag; //采用吸光度
+                for(i=0;i<3;i++)
+                {
+                BoardInf.InterpretPara.fCoef[i]=BoardInfTemp.InterpretPara.fCoef[i];   //dCoef[3]
+                }
+                BoardInf.InterpretPara.fWeakPValue=BoardInfTemp.InterpretPara.fWeakPValue;  // interpret_para.dGreyValue
+                BoardInf.InterpretPara.GreatFlag=BoardInfTemp.InterpretPara.GreatFlag; //采用大于号判定  interpret_para.bGreater
+                //   E2pSaveInterPra();  //注不用保存
+                */
+
+                if(memcmp(&BoardInf,&BoardInfTemp, sizeof(BOARD_INF)))   //
+                {
+                    memcpy(&BoardInf, &BoardInfTemp,sizeof(BOARD_INF));  //
+
+                    if(BoardInf.bHasData)
+                    {
+                        ReportMenu.ReportReady=1;
+                        LanguageChange.Report=1;
+                    }
+                }
+
+                gSystem.SystemInterface = MI_PROTOCOL;
+                gSystem.TitleButtonEnable = 1;
+                TouchKey.KeyStatus=1;
+								gSystem.MenuRefreshFlag = 1;
+								
+                WM_DeleteWindow(ProtocolInterWin);
+                WM_ShowWindow(ProtocolWin);
+            }
+            else if (Id == ID_INTER_BUTTON + 1)   //工具栏第5个按钮  Cancel
+            {
+                /*
+                	BoardInfTemp.InterpretPara.Enable=BoardInf.InterpretPara.Enable;   //允许定性分析interpret_para.bOpened
+                BoardInfTemp.InterpretPara.AbsFlag=BoardInf.InterpretPara.AbsFlag; //采用吸光度
+                for(i=0;i<3;i++)
+                {
+                BoardInfTemp.InterpretPara.fCoef[i]=BoardInf.InterpretPara.fCoef[i];   //dCoef[3]
+                }
+                BoardInfTemp.InterpretPara.fWeakPValue=BoardInf.InterpretPara.fWeakPValue;  // interpret_para.dGreyValue
+                BoardInfTemp.InterpretPara.GreatFlag=BoardInf.InterpretPara.GreatFlag; //采用大于号判定  interpret_para.bGreater
+                */
+
+
+                gSystem.SystemInterface = MI_PROTOCOL;
+                gSystem.TitleButtonEnable = 1;
+                TouchKey.KeyStatus=1;
+							  gSystem.MenuRefreshFlag = 1;
+							
+                WM_DeleteWindow(ProtocolInterWin);
+                WM_ShowWindow(ProtocolWin);
+            }
+        }
+        break;
+    }
+
+    default:
+        //		WM_DefaultProc(pMsg);
+        break;
+    }
+}
+
+
+
+
+void ProtocolInter_Interface(void)
+{
+    unsigned char i;
+
+    ExpEnable = 0;
+	  
+	  //InterMode=0;
+    /*
+    BoardInfTemp.InterpretPara.Enable=BoardInf.InterpretPara.Enable;   //允许定性分析interpret_para.bOpened
+    BoardInfTemp.InterpretPara.AbsFlag=BoardInf.InterpretPara.AbsFlag; //采用吸光度
+    for(i=0;i<3;i++)
+    {
+         BoardInfTemp.InterpretPara.fCoef[i]=BoardInf.InterpretPara.fCoef[i];   //dCoef[3]
+    }
+    BoardInfTemp.InterpretPara.fWeakPValue=BoardInf.InterpretPara.fWeakPValue;  // interpret_para.dGreyValue
+    BoardInfTemp.InterpretPara.GreatFlag=BoardInf.InterpretPara.GreatFlag; //采用大于号判定  interpret_para.bGreater
+    */
+    memcpy(&BoardInfTemp,&BoardInf,sizeof(BOARD_INF));  //
+    if( (BoardInfTemp.InterpretPara.Mode!=INTER_NORMAL)&&(BoardInfTemp.InterpretPara.Mode!=INTER_SPECIAL) )
+		{
+			  BoardInfTemp.InterpretPara.Mode=INTER_NORMAL;
+		}
+	  ProtocolInterWin = WM_CreateWindowAsChild(CONTENTBAR_POSX, CONTENTBAR_POSY, CONTENTBAR_WIDTH, CONTENTBAR_HEIGHT, WM_HBKWIN, WM_CF_SHOW | WM_CF_STAYONTOP | WM_CF_MEMDEV, _cbProtocolInter, 0);
+    WM_BringToTop(ProtocolInterWin);
+}
+//吸光度界面位置扫描
+void ScanAbsPos(int x ,int y)
+{
+                if ((x >= INTERPRET_EDIT_COEF1_START_X) && (x <= INTERPRET_EDIT_COEF1_END_X) &&
+                         (y >= INTERPRET_EDIT_COEF1_START_Y) && (y <= INTERPRET_EDIT_COEF1_END_Y) && (BoardInfTemp.InterpretPara.Enable))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_CUTOFF_NC;
+                    WM_Invalidate(ProtocolInterWin);
+                }
+                else if ((x >= INTERPRET_EDIT_COEF2_START_X) && (x <= INTERPRET_EDIT_COEF2_END_X) &&
+                         (y >= INTERPRET_EDIT_COEF2_START_Y) && (y <= INTERPRET_EDIT_COEF2_END_Y) && (BoardInfTemp.InterpretPara.Enable))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_CUTOFF_PC;
+                    WM_Invalidate(ProtocolInterWin);
+                }
+                else if ((x >= INTERPRET_EDIT_COEF3_START_X) && (x <= INTERPRET_EDIT_COEF3_END_X) &&
+                         (y >= INTERPRET_EDIT_COEF3_START_Y) && (y <= INTERPRET_EDIT_COEF3_END_Y) && (BoardInfTemp.InterpretPara.Enable))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_CUTOFF_COEF;
+                    WM_Invalidate(ProtocolInterWin);
+                }
+                else if ((x >= INTERPRET_EDIT_COEF4_START_X) && (x <= INTERPRET_EDIT_COEF4_END_X) &&
+                         (y >= INTERPRET_EDIT_COEF4_START_Y) && (y <= INTERPRET_EDIT_COEF4_END_Y) && (BoardInfTemp.InterpretPara.Enable))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_WEAK_P;
+                    WM_Invalidate(ProtocolInterWin);
+                }
+                else if ((x >= INTERPRET_EDIT_COEF5_START_X) && (x <= INTERPRET_EDIT_COEF5_END_X) &&
+                         (y >= INTERPRET_EDIT_COEF5_START_Y) && (y <= INTERPRET_EDIT_COEF5_END_Y) && (BoardInfTemp.InterpretPara.Enable))
+                {
+                    TouchKey.KeyStatus = 1;
+                    if (BoardInfTemp.InterpretPara.GreatFlag)
+                    {
+                        BoardInfTemp.InterpretPara.GreatFlag = 0;
+                    }
+                    else
+                    {
+                        BoardInfTemp.InterpretPara.GreatFlag = 1;
+                    }
+                    WM_Invalidate(ProtocolInterWin);
+                }
+}							
+								
+//浓度界面位置扫描,DN要求
+void ScanConcPos(int x ,int y)
+{
+                if ((x >= INTERPRET_EDIT_COEF1_START_X_DN) && (x <= INTERPRET_EDIT_COEF1_END_X_DN) &&
+                         (y >= INTERPRET_EDIT_COEF1_START_Y_DN) && (y <= INTERPRET_EDIT_COEF1_END_Y_DN) && (BoardInfTemp.InterpretPara.Enable))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_LIMIT;
+                    WM_Invalidate(ProtocolInterWin);
+                }
+                else if ((x >= INTERPRET_EDIT_COEF2_START_X_DN) && (x <= INTERPRET_EDIT_COEF2_END_X_DN) &&
+                         (y >= INTERPRET_EDIT_COEF2_START_Y_DN) && (y <= INTERPRET_EDIT_COEF2_END_Y_DN) && (BoardInfTemp.InterpretPara.Enable))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_POS;
+                    WM_Invalidate(ProtocolInterWin);
+                }
+                else if ((x >= INTERPRET_EDIT_COEF3_START_X_DN) && (x <= INTERPRET_EDIT_COEF3_END_X_DN) &&
+                         (y >= INTERPRET_EDIT_COEF3_START_Y_DN) && (y <= INTERPRET_EDIT_COEF3_END_Y_DN) && (BoardInfTemp.InterpretPara.Enable))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_WEAK_POS;
+                    WM_Invalidate(ProtocolInterWin);
+                }
+								else if ((x >= FILTER_2_R_START_X+KINETIC_PARA_POS_START) && (x <= FILTER_2_R_END_X+KINETIC_PARA_POS_START) &&
+                         (y >= INTERPRET_2_START_Y) && (y <= INTERPRET_2_END_Y) && (BoardInfTemp.InterpretPara.Enable))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_INTER_MODE;
+                    WM_Invalidate(ProtocolInterWin);
+                }
+								
+}	
+void ProtocolInter_Scan(void)
+{
+    if(TouchKey.KeyStatus==0)
+    {
+        GUI_PID_STATE TouchState;
+        GUI_PID_GetState(&TouchState);
+
+        if (TouchState.Pressed)
+        {
+            if (ExpEnable == 0)  //初使状态，没有弹出扩展项
+            {
+							  if ((TouchState.x >= INTERPRET_1_R_START_X) && (TouchState.x <= INTERPRET_1_R_END_X) &&
+                        (TouchState.y >= INTERPRET_1_R_START_Y) && (TouchState.y <= INTERPRET_1_R_END_Y))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_INTER;
+                    WM_Invalidate(ProtocolInterWin);
+                }
+                else if ((TouchState.x >= INTERPRET_2_R_START_X) && (TouchState.x <= INTERPRET_2_R_END_X) &&
+                         (TouchState.y >= INTERPRET_2_R_START_Y) && (TouchState.y <= INTERPRET_2_R_END_Y)&&(BoardInfTemp.InterpretPara.Enable))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_CONC_ABS;
+                    WM_Invalidate(ProtocolInterWin);
+
+                }
+								else
+								{
+							  #ifdef SOFTWARE_DN
+							  if (BoardInfTemp.InterpretPara.AbsFlag)
+								{
+									    ScanAbsPos(TouchState.x ,TouchState.y);  
+								}
+								else
+								{
+									    ScanConcPos(TouchState.x ,TouchState.y);
+								}
+							  #else
+                      ScanConcPos(TouchState.x ,TouchState.y);
+              /*  else if ((TouchState.x >= INTERPRET_EDIT_COEF1_START_X) && (TouchState.x <= INTERPRET_EDIT_COEF1_END_X) &&
+                         (TouchState.y >= INTERPRET_EDIT_COEF1_START_Y) && (TouchState.y <= INTERPRET_EDIT_COEF1_END_Y) && (BoardInfTemp.InterpretPara.Enable))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_CUTOFF_NC;
+                    WM_Invalidate(ProtocolInterWin);
+                }
+                else if ((TouchState.x >= INTERPRET_EDIT_COEF2_START_X) && (TouchState.x <= INTERPRET_EDIT_COEF2_END_X) &&
+                         (TouchState.y >= INTERPRET_EDIT_COEF2_START_Y) && (TouchState.y <= INTERPRET_EDIT_COEF2_END_Y) && (BoardInfTemp.InterpretPara.Enable))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_CUTOFF_PC;
+                    WM_Invalidate(ProtocolInterWin);
+                }
+                else if ((TouchState.x >= INTERPRET_EDIT_COEF3_START_X) && (TouchState.x <= INTERPRET_EDIT_COEF3_END_X) &&
+                         (TouchState.y >= INTERPRET_EDIT_COEF3_START_Y) && (TouchState.y <= INTERPRET_EDIT_COEF3_END_Y) && (BoardInfTemp.InterpretPara.Enable))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_CUTOFF_COEF;
+                    WM_Invalidate(ProtocolInterWin);
+                }
+                else if ((TouchState.x >= INTERPRET_EDIT_COEF4_START_X) && (TouchState.x <= INTERPRET_EDIT_COEF4_END_X) &&
+                         (TouchState.y >= INTERPRET_EDIT_COEF4_START_Y) && (TouchState.y <= INTERPRET_EDIT_COEF4_END_Y) && (BoardInfTemp.InterpretPara.Enable))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_WEAK_P;
+                    WM_Invalidate(ProtocolInterWin);
+                }
+                else if ((TouchState.x >= INTERPRET_EDIT_COEF5_START_X) && (TouchState.x <= INTERPRET_EDIT_COEF5_END_X) &&
+                         (TouchState.y >= INTERPRET_EDIT_COEF5_START_Y) && (TouchState.y <= INTERPRET_EDIT_COEF5_END_Y) && (BoardInfTemp.InterpretPara.Enable))
+                {
+                    TouchKey.KeyStatus = 1;
+                    if (BoardInfTemp.InterpretPara.GreatFlag)
+                    {
+                        BoardInfTemp.InterpretPara.GreatFlag = 0;
+                    }
+                    else
+                    {
+                        BoardInfTemp.InterpretPara.GreatFlag = 1;
+                    }
+                    WM_Invalidate(ProtocolInterWin);
+                }*/
+								#endif
+							}
+            }//if (ExpEnable == 0)  //初使状态，没有弹出扩展项
+            else if (ExpEnable == EXP_INTER)
+            {
+                ExpEnable = 0;
+                if ((TouchState.x >= INTERPRET_EXPAND1_START_X) && (TouchState.x <= INTERPRET_EXPAND1_START_X + INTER_SEL_WIDTH) &&
+                        (TouchState.y >= INTERPRET_EXPAND1_START_Y) && (TouchState.y <= INTERPRET_EXPAND1_END_Y))
+                {
+                    //关闭
+                    BoardInfTemp.InterpretPara.Enable = 0;
+                }
+                else if ((TouchState.x >= INTERPRET_EXPAND1_START_X + INTER_SEL_WIDTH) && (TouchState.x <= INTERPRET_EXPAND1_START_X + INTER_SEL_WIDTH*2) &&
+                         (TouchState.y >= INTERPRET_EXPAND1_START_Y) && (TouchState.y <= INTERPRET_EXPAND1_END_Y))
+                {
+                    //开启振动
+                    BoardInfTemp.InterpretPara.Enable = 1;
+                }
+
+                TouchKey.KeyStatus = 1;
+                WM_Invalidate(ProtocolInterWin);
+
+            }//else if (ExpEnable == EXP_INTER)
+            else if (ExpEnable == EXP_CONC_ABS)
+            {
+                ExpEnable = 0;
+                if ((TouchState.x >= INTERPRET_EXPAND2_START_X) && (TouchState.x <= INTERPRET_EXPAND2_START_X + INTER_SEL_WIDTH) &&
+                        (TouchState.y >= INTERPRET_EXPAND2_START_Y) && (TouchState.y <= INTERPRET_EXPAND2_END_Y))
+                {
+                    //关闭
+                    BoardInfTemp.InterpretPara.AbsFlag = 1;
+                }
+                else if ((TouchState.x >= INTERPRET_EXPAND2_START_X + INTER_SEL_WIDTH) && (TouchState.x <= INTERPRET_EXPAND1_START_X + INTER_SEL_WIDTH * 2) &&
+                         (TouchState.y >= INTERPRET_EXPAND2_START_Y) && (TouchState.y <= INTERPRET_EXPAND2_END_Y))
+                {
+                    //开启
+                    BoardInfTemp.InterpretPara.AbsFlag = 0;
+                }
+
+                TouchKey.KeyStatus = 1;
+                WM_Invalidate(ProtocolInterWin);
+            }//else if (ExpEnable == EXP_CONC_ABS)
+						
+						#ifdef SOFTWARE_DN
+						 else if (ExpEnable == EXP_INTER_MODE)
+            {
+                ExpEnable = 0;                                                   
+                if ((TouchState.x >= INTERPRET_EXPAND2_START_X+KINETIC_PARA_POS_START) && (TouchState.x <= INTERPRET_EXPAND2_START_X+KINETIC_PARA_POS_START + INTER_MODE_EXPAND_WIDTH1) &&
+                        (TouchState.y >= INTERPRET_EXPAND2_START_Y) && (TouchState.y <= INTERPRET_EXPAND2_END_Y))
+                {
+                    //关闭
+									
+                    BoardInfTemp.InterpretPara.Mode = INTER_NORMAL;//正常
+                }
+                else if ((TouchState.x >= INTERPRET_EXPAND2_START_X+KINETIC_PARA_POS_START + INTER_MODE_EXPAND_WIDTH1) && (TouchState.x <= INTERPRET_EXPAND1_START_X+KINETIC_PARA_POS_START + INTER_MODE_EXPAND_WIDTH) &&
+                         (TouchState.y >= INTERPRET_EXPAND2_START_Y) && (TouchState.y <= INTERPRET_EXPAND2_END_Y))
+                {
+                    //开启
+                    BoardInfTemp.InterpretPara.Mode = INTER_SPECIAL;
+                }
+
+                TouchKey.KeyStatus = 1;
+                WM_Invalidate(ProtocolInterWin);
+            }//else if (ExpEnable == EXP_CONC_ABS)
+						#endif
+        }//if (TouchState.Pressed)
+    }//if(TouchKey.KeyStatus==0)
+}
+
+void ProtocolInter_Go(void)
+{
+    if(TouchKey.KeyStatus)
+    {
+        GUI_PID_STATE TouchState;
+        GUI_PID_GetState(&TouchState);
+
+        if (TouchState.Pressed == 0)
+        {
+            TouchKey.KeyPressDelay++;
+            if (TouchKey.KeyPressDelay > TOUCH_RELEASE_DELAY)
+            {
+                TouchKey.KeyPressDelay = 0;
+                TouchKey.KeyStatus = 0;
+            }
+        }
+    }//if(TouchKey.KeyStatus)
+
+    if (ExpEnable == EXP_CUTOFF_NC)  //初使状态，没有弹出扩展项
+    {
+        sprintf(KeyPadNum.InputValueStr,"%.2f",BoardInfTemp.InterpretPara.fCoef[0]);
+        KeyPadNum_Interface(POINT_MENU_FLAG);
+        BoardInfTemp.InterpretPara.fCoef[0]=atof(KeyPadNum.InputValueStr);
+
+        if(BoardInfTemp.InterpretPara.fCoef[0] > INTERPRET_COEF_MAX)
+        {
+            BoardInfTemp.InterpretPara.fCoef[0] = INTERPRET_COEF_MAX;
+        }
+        else if(BoardInfTemp.InterpretPara.fCoef[0] < 0)
+        {
+            BoardInfTemp.InterpretPara.fCoef[0]=0;
+        }
+        ExpEnable =0;
+        TouchKey.KeyStatus = 1;
+        WM_Invalidate(ProtocolInterWin);
+    }//if (ExpEnable == EXP_CUTOFF_NC)
+    else if (ExpEnable == EXP_CUTOFF_PC)
+    {
+        sprintf(KeyPadNum.InputValueStr,"%.2f",BoardInfTemp.InterpretPara.fCoef[1]);
+        KeyPadNum_Interface(POINT_MENU_FLAG);
+        if ( (KeyPadNum.ReturnKey == KEYPAD_NUM_RETURN_ENTER)&&(KeyPadNum.InputValueStr[0]!=0) )
+        {
+            BoardInfTemp.InterpretPara.fCoef[1]=atof(KeyPadNum.InputValueStr);
+
+            if(BoardInfTemp.InterpretPara.fCoef[1] > INTERPRET_COEF_MAX)
+            {
+                BoardInfTemp.InterpretPara.fCoef[1] = INTERPRET_COEF_MAX;
+            }
+            else if(BoardInfTemp.InterpretPara.fCoef[1] < 0)
+            {
+                BoardInfTemp.InterpretPara.fCoef[1]=0;
+            }
+        }
+        ExpEnable =0;
+        TouchKey.KeyStatus = 1;
+        WM_Invalidate(ProtocolInterWin);
+    }//else if (ExpEnable == EXP_CUTOFF_PC)
+    else if (ExpEnable == EXP_CUTOFF_COEF)
+    {
+        sprintf(KeyPadNum.InputValueStr,"%.2f",BoardInfTemp.InterpretPara.fCoef[2]);
+        KeyPadNum_Interface(POINT_MENU_FLAG);
+        if ( (KeyPadNum.ReturnKey == KEYPAD_NUM_RETURN_ENTER)&&(KeyPadNum.InputValueStr[0]!=0) )
+        {
+            BoardInfTemp.InterpretPara.fCoef[2]=atof(KeyPadNum.InputValueStr);
+
+            if(BoardInfTemp.InterpretPara.fCoef[2] > INTERPRET_COEF_MAX)
+            {
+                BoardInfTemp.InterpretPara.fCoef[2] = INTERPRET_COEF_MAX;
+            }
+            else if(BoardInfTemp.InterpretPara.fCoef[2] < 0)
+            {
+                BoardInfTemp.InterpretPara.fCoef[2]=0;
+            }
+        }
+        ExpEnable =0;
+        TouchKey.KeyStatus = 1;
+        WM_Invalidate(ProtocolInterWin);
+    }//else if (ExpEnable == EXP_CUTOFF_COEF)
+    else if (ExpEnable == EXP_WEAK_P)
+    {
+        sprintf(KeyPadNum.InputValueStr,"%.2f",BoardInfTemp.InterpretPara.fWeakPValue);
+        KeyPadNum_Interface(POINT_MENU_FLAG);
+        if ( (KeyPadNum.ReturnKey == KEYPAD_NUM_RETURN_ENTER)&&(KeyPadNum.InputValueStr[0]!=0) )
+        {
+            BoardInfTemp.InterpretPara.fWeakPValue=atof(KeyPadNum.InputValueStr);
+
+            if(BoardInfTemp.InterpretPara.fWeakPValue > WEAK_P_MAX)
+            {
+                BoardInfTemp.InterpretPara.fWeakPValue = WEAK_P_MAX;
+            }
+            else if(BoardInfTemp.InterpretPara.fWeakPValue < WEAK_P_MIN)
+            {
+                BoardInfTemp.InterpretPara.fWeakPValue = WEAK_P_MIN;
+            }
+        }
+        ExpEnable =0;
+        TouchKey.KeyStatus = 1;
+        WM_Invalidate(ProtocolInterWin);
+    }//else if (ExpEnable == EXP_WEAK_P)
+		
+		
+		#ifdef SOFTWARE_DN
+		else if ( (ExpEnable == EXP_LIMIT)||(ExpEnable == EXP_POS)||(ExpEnable == EXP_WEAK_POS) )
+    {
+        sprintf(KeyPadNum.InputValueStr,"%.2f",BoardInfTemp.InterpretPara.fCoef_DN[ExpEnable-EXP_LIMIT]);
+        KeyPadNum_Interface(POINT_MENU_FLAG);
+        if ( (KeyPadNum.ReturnKey == KEYPAD_NUM_RETURN_ENTER)&&(KeyPadNum.InputValueStr[0]!=0) )
+        {
+            BoardInfTemp.InterpretPara.fCoef_DN[ExpEnable-EXP_LIMIT]=atof(KeyPadNum.InputValueStr);
+
+            if(BoardInfTemp.InterpretPara.fCoef_DN[ExpEnable-EXP_LIMIT] > INTERPRET_COEF_MAX)
+            {
+                BoardInfTemp.InterpretPara.fCoef_DN[ExpEnable-EXP_LIMIT] = INTERPRET_COEF_MAX;
+            }
+            else if(BoardInfTemp.InterpretPara.fCoef_DN[ExpEnable-EXP_LIMIT] < 0)
+            {
+                BoardInfTemp.InterpretPara.fCoef_DN[ExpEnable-EXP_LIMIT]=0;
+            }
+        }
+        ExpEnable =0;
+        TouchKey.KeyStatus = 1;
+        WM_Invalidate(ProtocolInterWin);
+    }//else if (ExpEnable == EXP_CUTOFF_COEF)
+		#endif
+}

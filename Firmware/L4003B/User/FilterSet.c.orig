@@ -1,0 +1,598 @@
+//程序已自检
+#include "MainTask.h"
+#include "FilterSet.h"
+
+
+FILTER_LUN FilterLun;;
+COLOR_RGB ColorRGB;;
+
+
+const char STR_FILTER_TITLE[LANGUAGE_TYPES][20] = {"Set filters","滤光片设置"};
+
+
+
+const BUTTON_DATA _aButtonFilter[] =
+{
+    { TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(3), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Ok", "确认" },
+    { TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(4), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Back", "返回" },
+};
+
+//ExpEnable的值定义
+enum
+{
+    EXP_FILTER_LUN_1=1,
+    EXP_FILTER_LUN_2,
+    EXP_FILTER_LUN_3,
+    EXP_FILTER_LUN_4,
+    EXP_FILTER_LUN_5,
+    EXP_FILTER_LUN_6,
+    EXP_FILTER_LUN_7,
+    EXP_FILTER_LUN_8,
+
+};
+static unsigned char ExpEnable;
+
+static unsigned short FilterVal[FILTER_MAX];                //系统语言
+
+
+
+WM_HWIN FilterWin = NULL;       //检测窗体
+
+
+int Adjust(float Color, float Factor, int IntensityMax, float Gamma)
+{
+    int v;
+    if(Color == 0.0)
+    {
+        return 0;
+    }
+    else
+    {
+        v= (int) (IntensityMax * pow(Color * Factor, Gamma));
+        if(v>255)v=255;
+        return(v);
+    }
+}
+
+
+
+void WavelengthToRGB(int Wavelength) //波长转RGB
+{
+    float Gamma = 0.8;
+    int IntensityMax = 255;
+
+    float Blue;
+    float Green;
+    float Red;
+    float factor;
+
+    if(Wavelength >= 380 && Wavelength <= 439)
+    {
+        Red = -(float)(Wavelength - 440) / (float)(440 - 350);
+        Green = 0.0;
+        Blue = 1.0;
+    }
+    else if(Wavelength >= 440 && Wavelength <= 489)
+    {
+        Red = 0.0;
+        Green = (float)(Wavelength - 440) / (float)(490 - 440);
+        Blue = 1.0;
+    }
+    else if(Wavelength >= 490 && Wavelength <= 509)
+    {
+        Red = 0.0;
+        Green = 1.0;
+        Blue = -(float)(Wavelength - 510) / (float)(510 - 490);
+    }
+    else if(Wavelength >= 510 && Wavelength <= 579)
+    {
+        Red = (float)(Wavelength - 510) / (float)(580 - 510);
+        Green = 1.0;
+        Blue = 0.0;
+    }
+    else if(Wavelength >= 580 && Wavelength <= 644)
+    {
+        Red = 1.0;
+        Green = -(float)(Wavelength - 645) / (float)(645 - 580);
+        Blue = 0.0;
+    }
+    else if(Wavelength >= 645 && Wavelength <= 780)
+    {
+        Red = 1.0;
+        Green = 0.0;
+        Blue = 0.0;
+    }
+    else
+    {
+        Red = 0.0;
+        Green = 0.0;
+        Blue = 0.0;
+    }
+
+    if(Wavelength >= 350 && Wavelength <= 419)
+    {
+        factor = 0.3f + 0.7f*(float)(Wavelength - 380) / (float)(420 - 380);
+    }
+    else if(Wavelength >= 420 && Wavelength <= 700)
+    {
+        factor = 1.0f;
+    }
+    else if(Wavelength >= 701 && Wavelength <= 780)
+    {
+        factor = 0.3f + 0.7f*(float)(780 - Wavelength) / (780 - 700);
+    }
+    else
+    {
+        factor = 0.0f;
+    }
+
+    ColorRGB.r = Adjust(Red, factor, IntensityMax, Gamma);
+    ColorRGB.g = Adjust(Green, factor, IntensityMax, Gamma);
+    ColorRGB.b= Adjust(Blue, factor, IntensityMax, Gamma);
+
+    if( (Wavelength >= 340)&&(Wavelength < 380) )
+    {
+        ColorRGB.r=255;
+        ColorRGB.g=0;
+        ColorRGB.b =255;
+    }
+}
+//0没有相同的数,1有相同的数
+unsigned char CalcFilterSame(void)
+{
+    unsigned char i,j;
+
+    for(i = 0; i < 7; i++)
+    {
+        if(  (FilterVal[i]<WAVELENGTH_MIN)||(FilterVal[i]>WAVELENGTH_MAX)  )
+        {
+            continue;
+        }
+        for(j = i + 1; j < 8; j++)
+        {
+            if( (FilterVal[i] == FilterVal[j])&&(FilterVal[i] >0) )
+            {
+                return 1; //有相同的数
+                //break;
+            }
+        }
+    }
+    return 0;
+}
+
+
+
+
+
+void _cbFilter(WM_MESSAGE * pMsg)
+{
+
+    WM_HWIN hWin = pMsg->hWin;
+    WM_HWIN hWinFocus;
+    BUTTON_Handle hbutton;
+    unsigned char i;
+    short        xSize;
+    short        ySize;
+    short NCode, Id;
+    unsigned int  text_color;
+    GUI_RECT rect;
+
+
+    hWinFocus = WM_GetFocussedWindow();
+//	IdWinFocus = WM_GetId(hWinFocus);
+
+    switch (pMsg->MsgId)
+    {
+    case WM_CREATE:
+    {
+
+        for (i = 0; i < GUI_COUNTOF(_aButtonFilter); i++)
+        {
+            hbutton = BUTTON_CreateEx(_aButtonFilter[i].xPos, _aButtonFilter[i].yPos, _aButtonFilter[i].xSize, _aButtonFilter[i].ySize,
+                                      hWin, WM_CF_SHOW, 0, ID_FILTER_BUTTON + i);
+            if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+            {
+                BUTTON_SetFont(hbutton, GUI_FONT_BIG);
+                BUTTON_SetText(hbutton, _aButtonFilter[i].acLabelEn);
+            }
+            else
+            {
+                BUTTON_SetFont(hbutton, GUI_FONT_BIG_CH);
+                BUTTON_SetText(hbutton, _aButtonFilter[i].acLabelCh);
+            }
+            BUTTON_SetTextAlign(hbutton, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            BUTTON_SetFocussable(hbutton, 0);
+        }
+        break;
+    }
+    //删除按钮
+    case WM_DELETE:
+
+        //WM_ShowWindow(ButtonZero[i]);
+        break;
+        //绘制背景
+    case WM_PAINT:
+        xSize = WM_GetWindowSizeX(hWin);
+        ySize = WM_GetWindowSizeY(hWin);
+        //上方第一行
+        GUI_SetColor(COLOR_TITLEBAR);
+        GUI_FillRect(0, 0, xSize - 1, CONTENTBAR_TITLE_HEIGHT - 1);
+        //左方内容栏
+        GUI_SetColor(COLOR_CONTENTBAR);
+        GUI_FillRect(0, CONTENTBAR_CONTENT_POSY, CONTENTBAR_CONTENT_WIDTH - 1, ySize - 1);
+        //右侧工具栏
+        GUI_SetColor(COLOR_TOOLSBAR);
+        GUI_FillRect(CONTENTBAR_CONTENT_WIDTH, CONTENTBAR_CONTENT_POSY, xSize - 1, ySize - 1);
+
+
+        //画背景
+        DrawFilterPicture();
+        //GUI_DrawBitmap(&bmFilterBk, FILTER_LUN_START_X, FILTER_LUN_START_Y - TITLESBAR_HEIGHT);
+
+        //	GUI_DrawBitmap(&bmFilterLunEmpty, FILTER_LUN_1_START_X, FILTER_LUN_1_START_Y - TITLESBAR_HEIGHT);
+        //	GUI_DrawBitmap(&bmFilterLunEmpty, FILTER_LUN_2_START_X, FILTER_LUN_2_START_Y - TITLESBAR_HEIGHT);
+        //	GUI_DrawBitmap(&bmFilterLunEmpty, FILTER_LUN_3_START_X, FILTER_LUN_3_START_Y - TITLESBAR_HEIGHT);
+        //	GUI_DrawBitmap(&bmFilterLunEmpty, FILTER_LUN_4_START_X, FILTER_LUN_4_START_Y - TITLESBAR_HEIGHT);
+        //	GUI_DrawBitmap(&bmFilterLunEmpty, FILTER_LUN_5_START_X, FILTER_LUN_5_START_Y - TITLESBAR_HEIGHT);
+        //	GUI_DrawBitmap(&bmFilterLunEmpty, FILTER_LUN_6_START_X, FILTER_LUN_6_START_Y - TITLESBAR_HEIGHT);
+        //	GUI_DrawBitmap(&bmFilterLunEmpty, FILTER_LUN_7_START_X, FILTER_LUN_7_START_Y - TITLESBAR_HEIGHT);
+        //	GUI_DrawBitmap(&bmFilterLunEmpty, FILTER_LUN_8_START_X, FILTER_LUN_8_START_Y - TITLESBAR_HEIGHT);
+
+
+
+        GUI_SetTextMode(GUI_TM_TRANS);
+
+        GUI_SetColor(COLOR_PAINT_TXT);
+
+        if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+        {
+            GUI_SetFont(GUI_FONT_BIG);
+        }
+        else
+        {
+            GUI_SetFont(GUI_FONT_BIG_CH);
+        }
+
+        GUI_DispStringAt(STR_FILTER_TITLE[SystemPrameter.SystemLanguage], CONTENTBAR_CAPTION_POSX, CONTENTBAR_CAPTION_POSY);//"Measurement parameters"
+
+
+
+
+        for(i = 0; i < 8; i++)
+        {
+            ColorRGB.r=0xff;
+            ColorRGB.g=0xff;
+            ColorRGB.b=0xff;
+
+            if(FilterVal[i] ==0)
+            {
+                text_color=0x444444;
+                strcpy(ConvertStr,STR_NO[SystemPrameter.SystemLanguage ]);
+            }
+            else
+            {
+                WavelengthToRGB(FilterVal[i]);//
+                text_color=COLOR_RGB(0xff-ColorRGB.r ,0xff-ColorRGB.g,0xff-ColorRGB.b);
+                sprintf(ConvertStr,"%d",FilterVal[i]);
+            }
+
+            GUI_SetColor(COLOR_RGB(ColorRGB.r ,ColorRGB.g,ColorRGB.b));
+            if(i == 0)
+            {
+                GUI_FillCircle(FILTER_LUN_1_POS_X, FILTER_LUN_1_POS_Y - TITLESBAR_HEIGHT,  FILTER_LUN_RADIUS);
+                rect.x0=FILTER_LUN_1_START_X + FILTER_LUN_OFFSET;
+                rect.y0=FILTER_LUN_1_START_Y + FILTER_LUN_OFFSET;
+                rect.x1=FILTER_LUN_1_END_X - FILTER_LUN_OFFSET;
+                rect.y1=FILTER_LUN_1_END_Y - FILTER_LUN_OFFSET;
+            }
+            else if(i == 1)
+            {
+                GUI_FillCircle(FILTER_LUN_2_POS_X, FILTER_LUN_2_POS_Y - TITLESBAR_HEIGHT,  FILTER_LUN_RADIUS);
+                rect.x0=FILTER_LUN_2_START_X + FILTER_LUN_OFFSET;
+                rect.y0=FILTER_LUN_2_START_Y + FILTER_LUN_OFFSET;
+                rect.x1=FILTER_LUN_2_END_X - FILTER_LUN_OFFSET;
+                rect.y1=FILTER_LUN_2_END_Y - FILTER_LUN_OFFSET;
+            }
+            else if(i == 2)
+            {
+                GUI_FillCircle(FILTER_LUN_3_POS_X, FILTER_LUN_3_POS_Y - TITLESBAR_HEIGHT,  FILTER_LUN_RADIUS);
+                rect.x0=FILTER_LUN_3_START_X + FILTER_LUN_OFFSET;
+                rect.y0=FILTER_LUN_3_START_Y + FILTER_LUN_OFFSET;
+                rect.x1=FILTER_LUN_3_END_X - FILTER_LUN_OFFSET;
+                rect.y1=FILTER_LUN_3_END_Y - FILTER_LUN_OFFSET;
+            }
+            else if(i == 3)
+            {
+                GUI_FillCircle(FILTER_LUN_4_POS_X, FILTER_LUN_4_POS_Y - TITLESBAR_HEIGHT,  FILTER_LUN_RADIUS);
+                rect.x0=FILTER_LUN_4_START_X + FILTER_LUN_OFFSET;
+                rect.y0=FILTER_LUN_4_START_Y + FILTER_LUN_OFFSET;
+                rect.x1=FILTER_LUN_4_END_X - FILTER_LUN_OFFSET;
+                rect.y1=FILTER_LUN_4_END_Y - FILTER_LUN_OFFSET;
+            }
+            else if(i == 4)
+            {
+                GUI_FillCircle(FILTER_LUN_5_POS_X, FILTER_LUN_5_POS_Y - TITLESBAR_HEIGHT,  FILTER_LUN_RADIUS);
+                rect.x0=FILTER_LUN_5_START_X + FILTER_LUN_OFFSET;
+                rect.y0=FILTER_LUN_5_START_Y +FILTER_LUN_OFFSET;
+                rect.x1=FILTER_LUN_5_END_X - FILTER_LUN_OFFSET;
+                rect.y1=FILTER_LUN_5_END_Y - FILTER_LUN_OFFSET;
+            }
+            else if(i == 5)
+            {
+                GUI_FillCircle(FILTER_LUN_6_POS_X, FILTER_LUN_6_POS_Y - TITLESBAR_HEIGHT,  FILTER_LUN_RADIUS);
+                rect.x0=FILTER_LUN_6_START_X + FILTER_LUN_OFFSET;
+                rect.y0=FILTER_LUN_6_START_Y + FILTER_LUN_OFFSET;
+                rect.x1=FILTER_LUN_6_END_X - FILTER_LUN_OFFSET;
+                rect.y1=FILTER_LUN_6_END_Y - FILTER_LUN_OFFSET;
+            }
+            else if(i == 6)
+            {
+                GUI_FillCircle(FILTER_LUN_7_POS_X, FILTER_LUN_7_POS_Y - TITLESBAR_HEIGHT,  FILTER_LUN_RADIUS);
+                rect.x0=FILTER_LUN_7_START_X + FILTER_LUN_OFFSET;
+                rect.y0=FILTER_LUN_7_START_Y + FILTER_LUN_OFFSET;
+                rect.x1=FILTER_LUN_7_END_X - FILTER_LUN_OFFSET;
+                rect.y1=FILTER_LUN_7_END_Y - FILTER_LUN_OFFSET;
+            }
+            else
+            {
+                GUI_FillCircle(FILTER_LUN_8_POS_X, FILTER_LUN_8_POS_Y - TITLESBAR_HEIGHT,  FILTER_LUN_RADIUS);
+                rect.x0=FILTER_LUN_8_START_X + FILTER_LUN_OFFSET;
+                rect.y0=FILTER_LUN_8_START_Y + FILTER_LUN_OFFSET;
+                rect.x1=FILTER_LUN_8_END_X - FILTER_LUN_OFFSET;
+                rect.y1=FILTER_LUN_8_END_Y - FILTER_LUN_OFFSET;
+            }
+            rect.y0=rect.y0-TITLESBAR_HEIGHT;
+            rect.y1=rect.y1-TITLESBAR_HEIGHT;
+
+            if(ExpEnable==i+1)
+            {
+                GUI_SetColor(0x0);
+                GUI_FillRect(rect.x0+3, rect.y0+15, rect.x1-3,rect.y1-15);
+                GUI_SetColor(GUI_WHITE);
+            }
+            else
+            {
+                GUI_SetColor(text_color);
+            }
+            GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+
+        }//for(i = 0; i < 8; i++)
+        GUI_DrawBitmap(&bmFilterLunEmpty2, FILTER_LUN_1_START_X, FILTER_LUN_1_START_Y - TITLESBAR_HEIGHT);
+        GUI_DrawBitmap(&bmFilterLunEmpty2, FILTER_LUN_2_START_X, FILTER_LUN_2_START_Y - TITLESBAR_HEIGHT);
+        GUI_DrawBitmap(&bmFilterLunEmpty2, FILTER_LUN_3_START_X, FILTER_LUN_3_START_Y - TITLESBAR_HEIGHT);
+        GUI_DrawBitmap(&bmFilterLunEmpty2, FILTER_LUN_4_START_X, FILTER_LUN_4_START_Y - TITLESBAR_HEIGHT);
+        GUI_DrawBitmap(&bmFilterLunEmpty2, FILTER_LUN_5_START_X, FILTER_LUN_5_START_Y - TITLESBAR_HEIGHT);
+        GUI_DrawBitmap(&bmFilterLunEmpty2, FILTER_LUN_6_START_X, FILTER_LUN_6_START_Y - TITLESBAR_HEIGHT);
+        GUI_DrawBitmap(&bmFilterLunEmpty2, FILTER_LUN_7_START_X, FILTER_LUN_7_START_Y - TITLESBAR_HEIGHT);
+        GUI_DrawBitmap(&bmFilterLunEmpty2, FILTER_LUN_8_START_X, FILTER_LUN_8_START_Y - TITLESBAR_HEIGHT);
+        break;
+
+    case WM_NOTIFY_PARENT:
+    {
+        if(RemoteInfo_PC.RemoteFlag)
+        {
+            break;
+        }
+        if( (KeyPadAsc.UseFlag == KEYPAD_BUSY)||(KeyPadNum.UseFlag == KEYPAD_BUSY)||(PromptMenu.InterfaceStatus==PROMPT_MENU_BUSY) )
+        {
+            break;
+        }
+        if(TouchKey.KeyStatus)
+        {
+            break;
+        }
+        Id = WM_GetId(pMsg->hWinSrc);    // Id of widget
+        NCode = pMsg->Data.v;               // Notification code
+        if (NCode == WM_NOTIFICATION_RELEASED)
+        {
+            if (Id == ID_FILTER_BUTTON)   //工具栏第4个按钮  Enter
+            {
+                if(CalcFilterSame()) //有相同的数
+                {
+                    strcpy(PromptMenu.InputStr,STR_SAME_WAVELENGTH[SystemPrameter.SystemLanguage]);
+                    Prompt_Interface(PROMPT_FILTER_SAME);
+                }
+                else
+                {
+                    unsigned char TestFlag=0;
+                    for(i=0; i<FILTER_MAX; i++) //FILTER_MAX=8
+                    {
+                        if(FilterLun.Filter[i]!=FilterVal[i])
+                        {
+                            TestFlag=1;
+                            break;
+                        }
+                    }
+                    for(i=0; i<FILTER_MAX; i++) //FILTER_MAX=8
+                    {
+                        FilterLun.Filter[i]=FilterVal[i];
+                    }
+                    //保存EEPROM
+                    SpiSaveSystemPra();
+                    gSystem.SystemInterface = MI_SET;
+                    if(TestFlag)
+                    {
+                        MCU_SendSelftest();
+                        if (SystemPrameter.SystemLanguage == LANGUAGE_EN)
+                        {
+                            strcpy(PromptMenu.InputStr, "Please waiting...");
+                        }
+                        else
+                        {
+                            strcpy(PromptMenu.InputStr, "请等待...");
+                        }
+                        Prompt_Interface(PROMPT_RUN);
+                        TouchKey.KeyStatus=1;
+                    }
+
+
+
+
+                    TouchKey.KeyStatus=1;
+                    gSystem.TitleButtonEnable = 1;
+										gSystem.MenuRefreshFlag = 1;
+										
+                    WM_DeleteWindow(FilterWin);
+                    WM_ShowWindow(SettingWin);
+     
+                }
+            }
+            else if (Id == ID_FILTER_BUTTON+1)   //工具栏第5个按钮  Cancel
+            {
+                gSystem.SystemInterface = MI_SET;
+                gSystem.TitleButtonEnable = 1;
+                TouchKey.KeyStatus=1;
+							  gSystem.MenuRefreshFlag = 1;
+							
+                WM_DeleteWindow(FilterWin);
+                WM_ShowWindow(SettingWin);
+          
+
+            }
+        }
+        break;
+    }
+
+    default:
+        //		WM_DefaultProc(pMsg);
+        break;
+    }
+}
+
+void FilterSet_Interface(void)
+{
+
+    unsigned char i;
+    TouchKey.KeyStatus=1;
+    ExpEnable = 0;
+    for(i=0; i<FILTER_MAX; i++)
+    {
+        FilterVal[i]=FilterLun.Filter[i];
+    }
+
+    FilterWin = WM_CreateWindowAsChild(CONTENTBAR_POSX, CONTENTBAR_POSY, CONTENTBAR_WIDTH, CONTENTBAR_HEIGHT, WM_HBKWIN, WM_CF_SHOW | WM_CF_STAYONTOP | WM_CF_MEMDEV, _cbFilter, 0);
+    WM_BringToTop(FilterWin);
+}
+
+
+
+void FilterSet_Scan(void)
+{
+    if (TouchKey.KeyStatus==0)
+    {
+        GUI_PID_STATE TouchState;
+
+        GUI_PID_GetState(&TouchState);
+
+        if (TouchState.Pressed)
+        {
+            if (ExpEnable==0)  //初使状态，没有弹出扩展项
+            {
+                if ((TouchState.x >= FILTER_LUN_1_START_X) && (TouchState.x <= FILTER_LUN_1_END_X) &&
+                        (TouchState.y >= FILTER_LUN_1_START_Y) && (TouchState.y <= FILTER_LUN_1_END_Y))
+                {
+                    ExpEnable = EXP_FILTER_LUN_1;
+                }
+                else if ((TouchState.x >= FILTER_LUN_2_START_X) && (TouchState.x <= FILTER_LUN_2_END_X) &&
+                         (TouchState.y >= FILTER_LUN_2_START_Y) && (TouchState.y <= FILTER_LUN_2_END_Y))
+                {
+                    ExpEnable = EXP_FILTER_LUN_2;
+                }
+                else if ((TouchState.x >= FILTER_LUN_3_START_X) && (TouchState.x <= FILTER_LUN_3_END_X) &&
+                         (TouchState.y >= FILTER_LUN_3_START_Y) && (TouchState.y <= FILTER_LUN_3_END_Y))
+                {
+                    ExpEnable = EXP_FILTER_LUN_3;
+                }
+                else if ((TouchState.x >= FILTER_LUN_4_START_X) && (TouchState.x <= FILTER_LUN_4_END_X) &&
+                         (TouchState.y >= FILTER_LUN_4_START_Y) && (TouchState.y <= FILTER_LUN_4_END_Y))
+                {
+                    ExpEnable = EXP_FILTER_LUN_4;
+                }
+                else if ((TouchState.x >= FILTER_LUN_5_START_X) && (TouchState.x <= FILTER_LUN_5_END_X) &&
+                         (TouchState.y >= FILTER_LUN_5_START_Y) && (TouchState.y <= FILTER_LUN_5_END_Y))
+                {
+                    ExpEnable = EXP_FILTER_LUN_5;
+                }
+                else if ((TouchState.x >= FILTER_LUN_6_START_X) && (TouchState.x <= FILTER_LUN_6_END_X) &&
+                         (TouchState.y >= FILTER_LUN_6_START_Y) && (TouchState.y <= FILTER_LUN_6_END_Y))
+                {
+                    ExpEnable = EXP_FILTER_LUN_6;
+                }
+                else if ((TouchState.x >= FILTER_LUN_7_START_X) && (TouchState.x <= FILTER_LUN_7_END_X) &&
+                         (TouchState.y >= FILTER_LUN_7_START_Y) && (TouchState.y <= FILTER_LUN_7_END_Y))
+                {
+                    ExpEnable = EXP_FILTER_LUN_7;
+                }
+                else if ((TouchState.x >= FILTER_LUN_8_START_X) && (TouchState.x <= FILTER_LUN_8_END_X) &&
+                         (TouchState.y >= FILTER_LUN_8_START_Y) && (TouchState.y <= FILTER_LUN_8_END_Y))
+                {
+                    ExpEnable = EXP_FILTER_LUN_8;
+                }
+                if(ExpEnable>0)
+                {
+                    TouchKey.KeyStatus = 1;
+                    WM_Invalidate(FilterWin);
+                }//if(ExpEnable>0)
+            }//	if (ExpEnable==0)  //初使状态，没有弹出扩展项
+
+        }//if (TouchState.Pressed)
+    }//if (TouchKey.KeyStatus==0)
+
+}
+
+
+void FilterSet_Go(void)
+{
+    unsigned short nWavelength=0;
+    if (TouchKey.KeyStatus)
+    {
+        GUI_PID_STATE TouchState;
+
+        GUI_PID_GetState(&TouchState);
+        if (TouchState.Pressed == 0)
+        {
+            TouchKey.KeyPressDelay++;
+            if (TouchKey.KeyPressDelay > TOUCH_RELEASE_DELAY)
+            {
+                TouchKey.KeyPressDelay = 0;
+                TouchKey.KeyStatus = 0;
+            }
+        }
+    }//	if (TouchKey.KeyStatus)
+
+    if(ExpEnable>0)
+    {
+        strcpy(KeyPadNum.InputValueStr,"");
+        if(FilterVal[ExpEnable-1]>=WAVELENGTH_MIN)
+        {
+            sprintf(KeyPadNum.InputValueStr,"%d",FilterVal[ExpEnable-1]);
+        }
+        KeyPadNum_Interface(NUM_MENUFLAG_3NUM);
+        if (KeyPadNum.ReturnKey == KEYPAD_NUM_RETURN_ENTER)
+        {
+            if(KeyPadNum.InputValueStr[0]!=0)
+            {
+                nWavelength= atoi(KeyPadNum.InputValueStr);
+                if(nWavelength > WAVELENGTH_MAX)
+                {
+                    nWavelength = WAVELENGTH_MAX;
+                }
+                else if(nWavelength < WAVELENGTH_MIN)
+                {
+                    nWavelength = WAVELENGTH_MIN;
+                }
+                FilterVal[ExpEnable-1]=nWavelength;
+            }
+            else
+            {
+                FilterVal[ExpEnable-1]=0;
+            }
+        }
+        ExpEnable=0;
+        TouchKey.KeyStatus = 1;
+        WM_Invalidate(FilterWin);
+    }//if(ExpEnable>0)
+
+
+}

@@ -1,0 +1,4232 @@
+
+//#include "MainTask.h"
+#include "MainTask.h"
+
+//void _cbReport(WM_MESSAGE * pMsg)
+//质控
+
+
+
+const unsigned int RGB_TAB_FOR_WELL[96]={0x808080,0x800000,  0x008000,  0x000080,  0xFF0000, 0x00FF00,0x0000ff,   0xc40000, 0x00c400,  0x0000c4,  //0-9
+                                                                               0x808000,0x008080,  0xc4c400,  0x0040FF,  0xFFFF00,0x400000, 0x004000,0xc00040, 0xc4c400,  0xc48000,  //10-19
+                                                                               0x80c400,0x0080c4,  0x00ff80,    0x8000ff,    0xc40080,  0xff00c4,   0x8000c4,  0xc400c4,0xc400ff,   0xff00ff,     0x800080, //20-30
+                                                                               0xff0080,  0x8080ff,    0x808000, 0xc40000,  0x00c400,  0x0000c4, 0xff4000,    0x00ff40,  0x0040ff,   0x400000,  0x004000, //31-41
+																			   0x000040,0xc4c400,  0x008040,  0xc48000,  0x0000ff,   0xffff40,      0x808080, 0x800000,0x008000, 0x000080,  0xff0000,  //42-52
+																			   0x00fff0,   0x0000ff,    0xc40000,  0x00c400,  0x0000c4, 0x808000,  0x008080,0xc4c400, 0xff4000,    0xffff00,  //53-62
+																			   0x40000,  0x004000,  0x000040,  0xc4c400,  0xc48000, 0x80c400,  0x0080c4,0x00ff80,   0x8000ff,    0xc40080, //63-72
+																			   0xff00c4,  0x8000c4,  0xc400c4,  0xc400ff,    0xff00ff,    0x800080,  0xff0080,   0x8080ff,   0x808000,  0xc40000,   0x00c400,  //73-83
+																			   0x000c4,  0xff4000,    0xc00ff40,  0x0040ff,    0x400000, 0x004000, 0x000040, 0xc4c400,  0x008040,   0xc48000,   0x0000ff,  0xffff40, };//84-96
+
+/*
+
+void  DisplayAnalysisFilterExpand(void);
+void DisplayAnalysisLogExpand(void);
+
+void DoNormalAnalysis(void);
+void InitNormalAnalysis(void) ;
+
+void DoKineticAnalysis() ;
+
+void InitKineticAnalysis(void);
+
+void DisplayQC(void);///////
+void DisplayKineticCurve(void);/////////
+void DisplayKineticAnalysis(void);//
+void DisplayRawInter(void);//
+void DisplayReportInterface(void);//
+
+
+
+void _cbReport(WM_MESSAGE * pMsg);
+void Report_Interface(void);
+void Report_Go(void);
+*/
+
+
+
+const int SELECT_CONTROL_REPORT_FILTER1_START_X[LANGUAGE_TYPES] = {30, 26}; 
+const int SELECT_CONTROL_REPORT_FILTER2_START_X[LANGUAGE_TYPES] = {30, 26}; 
+const int SELECT_CONTROL_REPORT_FILTER12_START_X[LANGUAGE_TYPES] = {18, 15}; 
+
+const int SELECT_CONTROL_REPORT_BAR_FILTER1_START_X[LANGUAGE_TYPES] = {10, 7}; 
+const int SELECT_CONTROL_REPORT_BAR_FILTER2_START_X[LANGUAGE_TYPES] = {7, 5}; 
+const int SELECT_CONTROL_REPORT_BAR_FILTER12_START_X[LANGUAGE_TYPES] = {0, -4}; 
+
+const char SELECT_CONTROL_REPORT_FILTER1[LANGUAGE_TYPES][15] = {"Filter 1", "滤光片1"};
+const char SELECT_CONTROL_REPORT_FILTER2[LANGUAGE_TYPES][15] = {"Filter 2", "滤光片2"};
+const char SELECT_CONTROL_REPORT_FILTER12[LANGUAGE_TYPES][20] = {"Filter 1&2", "滤光片1&2"};
+
+
+
+
+const char SELECT_REPORT_CYCLE[LANGUAGE_TYPES][20] = {"Cycle: %d", "循环：%d"};
+const char SELECT_REPORT_SAMPLE_NO[LANGUAGE_TYPES][20] = {"Sample: %c%d", "样本：%c%d"};
+const char SELECT_REPORT_SAMPLE_ALL[LANGUAGE_TYPES][20] = {"Samples: All", "样本：全部"};
+
+
+//const char STR_MEASURE_FILTER[LANGUAGE_TYPES][10] = {"  filter", "滤光片"};
+//const char STR_MEASURE_MODE[LANGUAGE_TYPES][10] = {"Mode", "测量模式"};
+//const char STR_MEASURE_FILTER1[LANGUAGE_TYPES][10] = {"Filter 1", "滤光片1"};
+//const char STR_MEASURE_FILTER2[LANGUAGE_TYPES][10] = {"Filter 2", "滤光片2"};
+
+//const char STR_MEASURE_TITLE[LANGUAGE_TYPES][30] = {"Measurement parameters", "测量参数"};
+
+//正常分析-5个按钮
+const char STR_REPORT_RAW_DATA[LANGUAGE_TYPES][15] = {"Raw data", "原始数据"};
+const char STR_REPORT_INTERPRET[LANGUAGE_TYPES][15] = {"Interpret", "定性分析"};
+const char STR_REPORT_ANALYSIS[LANGUAGE_TYPES][15] = {"Analysis", "定量分析"};
+const char STR_REPORT_CURVE[LANGUAGE_TYPES][15] = {"Curve", "标准曲线"};
+const char STR_REPORT_QC[LANGUAGE_TYPES][15] = {"QC", "质控分析"};
+
+//动力学分析-3个按钮
+const char STR_REPORT_KINETIC_ANALYSIS[LANGUAGE_TYPES][15] = {"Analysis", "分析结果"};
+const char STR_REPORT_KINETIC_CURVE[LANGUAGE_TYPES][15] = {"Curve", "原始曲线"};
+
+
+
+const char XY_COORDINATES[LANGUAGE_TYPES][2][10] = {{"Linear", "Log"}, {"线性", "对数"}};
+const char CUTOFF_CONDITION[LANGUAGE_TYPES][10] = {"Cutoff", "临界值"};
+
+
+const char CURVE_REPORT_CYCLE[LANGUAGE_TYPES][10] = {"Cycle", "循环数"};
+
+const char CURVE_REPORT_ABSORBANCE[LANGUAGE_TYPES][20] = {"Absorbance", "吸光度"};
+const char CURVE_REPORT_LOG_ABSORBANCE[LANGUAGE_TYPES][30] = {"Log absorbance", "对数吸光度"};
+const char CURVE_REPORT_CONCENTRATION[LANGUAGE_TYPES][20] = {"Concentration", "浓度"};
+const char CURVE_REPORT_LOG_CONCENTRATION[LANGUAGE_TYPES][30] = {"Log concentration", "对数浓度"};
+
+const char NORMAL_ANALYSIS_TITLE[LANGUAGE_TYPES][ANALYSIS_MODE_MAX][30]  
+= {{"raw data", "Inter. result", "analysis result", "analysis curve", "QC result"}
+, {"原始数据", "定性分析结果", "定量分析结果", "标准曲线", "质控分析结果"}};
+const char KINETIC_ANALYSIS_TITLE[LANGUAGE_TYPES][ANALYSIS_MODE_MAX][30]
+= {{"raw data", "Inter. result", "kinetic analysis", "kinetic curve", "QC result"}
+, {"原始数据", "定性分析结果", "动力学分析结果", "动力学曲线", "质控分析结果"}};
+
+
+
+
+//const char BUTTON_REPORT_PRINT[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Print"), _T("打印"), _T("Print"), _T("Print")};
+//const wchar_t BUTTON_REPORT_EXPORT[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Export"), _T("数据导出"), _T("Export"), _T("Export")};
+//const wchar_t BUTTON_EXPORT_REPORT[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Ex Report"), _T("导出报告"), _T("Ex Report"), _T("Ex Report")};
+
+
+
+
+
+//BUTTON_Handle ProtocolMeasureButton[2];
+
+
+
+
+//正常分析时的按键
+const BUTTON_DATA _aButtonReport[] =
+{
+	//{ TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(3), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Ok", "确认" },
+	//{ TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(4), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Back", "返回" },
+	{ TOOLS0_BUTTON_POSX(0), TOOLS0_BUTTON_POSY, TOOLS0_BUTTON_WIDTH, TOOLS0_BUTTON_HEIGHT, "Raw data", "原始数据" }, 
+	{ TOOLS0_BUTTON_POSX(1), TOOLS0_BUTTON_POSY, TOOLS0_BUTTON_WIDTH, TOOLS0_BUTTON_HEIGHT, "Interpret", "定性分析" }, 
+	{ TOOLS0_BUTTON_POSX(2), TOOLS0_BUTTON_POSY, TOOLS0_BUTTON_WIDTH, TOOLS0_BUTTON_HEIGHT, "Analysis", "定量分析"},   
+	{ TOOLS0_BUTTON_POSX(3), TOOLS0_BUTTON_POSY, TOOLS0_BUTTON_WIDTH, TOOLS0_BUTTON_HEIGHT, "Curve", "标准曲线"},   
+	{ TOOLS0_BUTTON_POSX(4), TOOLS0_BUTTON_POSY, TOOLS0_BUTTON_WIDTH, TOOLS0_BUTTON_HEIGHT, "QC", "质控分析" },   
+
+
+	//Run
+	//{ TOOLS1_BUTTON_POSX,TOOLS1_BUTTON_POSY(0), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Run", "运行" },  
+	{ TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(3), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Print", "打印" },  
+	{ TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(4), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Ex Report","导出报告"},  
+
+};
+//动力学分析时的按键
+const BUTTON_DATA _aButtonReportKinetic[] =
+{
+  { TOOLS0_BUTTON_POSX(0), TOOLS0_BUTTON_POSY, TOOLS0_BUTTON_WIDTH, TOOLS0_BUTTON_HEIGHT, "", "" }, 
+	{ TOOLS0_BUTTON_POSX(1), TOOLS0_BUTTON_POSY, TOOLS0_BUTTON_WIDTH, TOOLS0_BUTTON_HEIGHT, "", "" }, 
+	{ TOOLS0_BUTTON_POSX(2), TOOLS0_BUTTON_POSY, TOOLS0_BUTTON_WIDTH, TOOLS0_BUTTON_HEIGHT, "Raw data", "原始数据" }, 
+	{ TOOLS0_BUTTON_POSX(3), TOOLS0_BUTTON_POSY, TOOLS0_BUTTON_WIDTH, TOOLS0_BUTTON_HEIGHT, "Analysis", "分析结果"},   
+	{ TOOLS0_BUTTON_POSX(4), TOOLS0_BUTTON_POSY, TOOLS0_BUTTON_WIDTH, TOOLS0_BUTTON_HEIGHT, "Curve", "原始曲线"},   
+
+
+	//Run
+	//{ TOOLS1_BUTTON_POSX,TOOLS1_BUTTON_POSY(0), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Run", "运行" },  
+	{ TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(3), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Print", "打印" },  
+	{ TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(4), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Ex Report","导出报告"},  
+
+};
+
+
+
+//ExpEnable的值定义
+enum
+{
+	EXP_FILTER=1,
+	EXP_LOG,
+	//EXP_MODE,
+};
+//unsigned char ReportReady;
+
+static unsigned char ExpEnable;  
+
+//static QUALITY_PARA QualityParaBack;
+
+REPORT_MENU  ReportMenu;
+/*
+signed char Filter1Locate;                  //第1个滤光片
+signed char Filter2Locate;                  //辐滤光片
+unsigned char DetectMode;                //检测模式
+*/
+WM_HWIN ReportWin = NULL;       //检测窗体
+
+
+
+
+void RefreshReport(void)
+{
+	 unsigned char i;
+	 if(BoardInf.KineticPara.Enable)
+	 {
+						 for (i = 0; i < GUI_COUNTOF(_aButtonReportKinetic); i++)
+					   {
+							   if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+							   {
+									  BUTTON_SetFont(WM_GetDialogItem(ReportWin, ID_REPORT_BUTTON + i), GUI_FONT_BIG);
+									  BUTTON_SetText(WM_GetDialogItem(ReportWin, ID_REPORT_BUTTON + i), _aButtonReportKinetic[i].acLabelEn);
+							   }
+							   else
+							   {
+									  BUTTON_SetFont(WM_GetDialogItem(ReportWin, ID_REPORT_BUTTON + i), GUI_FONT_BIG_CH);
+									  BUTTON_SetText(WM_GetDialogItem(ReportWin, ID_REPORT_BUTTON + i), _aButtonReportKinetic[i].acLabelCh);
+							   }						 
+					  }
+						 //不显示按钮
+			       WM_HideWindow(WM_GetDialogItem(ReportWin, ID_REPORT_BUTTON)); 
+		         WM_HideWindow(WM_GetDialogItem(ReportWin, ID_REPORT_BUTTON+1));
+	}
+	else
+	{
+						    for (i = 0; i < GUI_COUNTOF(_aButtonReport); i++)
+					      {
+                     if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+				             {
+										     BUTTON_SetFont(WM_GetDialogItem(ReportWin, ID_REPORT_BUTTON + i), GUI_FONT_BIG);
+										     BUTTON_SetText(WM_GetDialogItem(ReportWin, ID_REPORT_BUTTON + i), _aButtonReport[i].acLabelEn);
+								     }
+							       else
+				             {
+					              BUTTON_SetFont(WM_GetDialogItem(ReportWin, ID_REPORT_BUTTON + i), GUI_FONT_BIG_CH);
+							          BUTTON_SetText(WM_GetDialogItem(ReportWin, ID_REPORT_BUTTON + i), _aButtonReport[i].acLabelCh);
+				             }						 
+					     }
+						//显示按钮
+			      WM_ShowWindow(WM_GetDialogItem(ReportWin, ID_REPORT_BUTTON)); 
+		        WM_ShowWindow(WM_GetDialogItem(ReportWin, ID_REPORT_BUTTON+1));
+							
+		}
+}
+
+
+void  DisplayAnalysisFilterExpand(void)
+{
+	GUI_RECT rect;
+//	int i;
+	
+	int start_x, start_y, wide, high;
+
+	start_x=ANALYSIS_FILTER_SELECT_START_X - NORMAL_ANLYSIS_RAWDATA_FILTER_SELECT_WIDTH;// +10;// 20; //2014-8-18项
+	start_y=ANALYSIS_FILTER_SELECT_START_Y - TITLESBAR_HEIGHT;
+	wide=NORMAL_ANLYSIS_RAWDATA_FILTER_SELECT_UNIT_WIDTH;
+	high=20;
+	//GUI_DrawBitmap(&bmExpMenuLeft_230_46, start_x, start_y);
+	
+	GUI_DrawBitmap(&bmExpMenuLeft_20_46, start_x, start_y);
+	GUI_SetColor(COLOR_EXP_PICTURE_FRAME);
+	GUI_DrawLine(start_x+20, start_y,start_x+NORMAL_ANLYSIS_RAWDATA_FILTER_SELECT_WIDTH,start_y);
+	GUI_DrawLine(start_x+20, start_y+45,start_x+NORMAL_ANLYSIS_RAWDATA_FILTER_SELECT_WIDTH,start_y+45);
+	GUI_SetColor(COLOR_EXP_PICTURE);
+	GUI_FillRect(start_x+20, start_y+1,start_x+NORMAL_ANLYSIS_RAWDATA_FILTER_SELECT_WIDTH,start_y+44);
+	
+
+	start_x=start_x+15;//17
+	start_y=start_y+23;
+
+
+    //有预计算则为3个选项(最左侧项  Filter 1&2)
+	if(BoardInf.KineticPara.PreProcess!=PRE_CALCULATE_NO)
+	{
+		 GUI_SetFont(GUI_FONT_SMALL);
+		if(NormalAnalysis.FilterCurrent > 1) //2选中
+		{
+			GUI_SetColor(COLOR_MODE_SEL_TXT);
+		}
+		else
+		{
+			GUI_SetColor(0x068400);
+		}
+		//第2行
+			rect.x0 = start_x;
+			rect.y0 = start_y +5;
+			rect.x1 = start_x + wide;
+			rect.y1 = start_y+ 17;
+      GUI_FillRect(rect.x0+2, rect.y0, rect.x1-2, rect.y1 );
+
+			GUI_SetColor(0xb5e3cd);
+		  if ((BoardInf.KineticPara.PreProcess<PRE_CALCULATE_MAX) && (BoardInf.KineticPara.PreProcess >PRE_CALCULATE_NO ))
+		//if(BoardInf.KineticPara.PreProcess<PRE_CALCULATE_MAX)
+		{
+			strcpy(ConvertStr,PRE_CALCULATE_STR[ BoardInf.KineticPara.PreProcess]);
+		}
+		else //if (BoardInf.KineticPara.PreProcess == 0)
+		{
+			  if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+				{
+					   GUI_SetFont(GUI_FONT_SMALL);
+		    }
+				else
+				{
+					   GUI_SetFont(GUI_FONT_MED_CH);
+				}
+			strcpy(ConvertStr, STR_NO[SystemPrameter.SystemLanguage]);//"Off"
+		}
+         //   strcpy(ConvertStr,PRE_CALCULATE_STR[BoardInf.KineticPara.PreProcess]);
+			GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+			//第1行
+			GUI_SetColor(0x068400);
+			rect.y0 = start_y - high;
+			rect.y1 = start_y -2;
+		  if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+				{
+					   GUI_SetFont(GUI_FONT_MED);
+		    }
+				else
+				{
+					   GUI_SetFont(GUI_FONT_MED_CH);
+				}
+			strcpy(ConvertStr,SELECT_CONTROL_REPORT_FILTER12[SystemPrameter.SystemLanguage]);
+			GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+	}
+
+	  //2.第2列(滤光片1)
+	   start_x+=NORMAL_ANLYSIS_RAWDATA_FILTER_SELECT_UNIT_WIDTH;
+	
+	   if(NormalAnalysis.FilterCurrent ==0)
+		{
+			  GUI_SetColor(COLOR_MODE_SEL_TXT);	
+		}
+		else
+		{
+			  GUI_SetColor(0x068400);
+		}
+	   	//底行背景色
+		rect.x0 = start_x;
+	    rect.y0 = start_y +5;
+		rect.x1 = start_x + wide;
+		rect.y1 = start_y+ 17;
+        GUI_FillRect(rect.x0+2, rect.y0, rect.x1-2, rect.y1 );
+
+       //底行文本
+		GUI_SetColor(0xb5e3cd);
+		if(BoardInf.Filter1Locate<0)
+		{
+			   if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+	        {
+			          GUI_SetFont(GUI_FONT_SMALL);
+	        }
+	        else
+	        {
+			           GUI_SetFont(GUI_FONT_SMALL_CH);
+	        }
+			   GUI_DispStringInRect(STR_NO[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Off"
+			   GUI_SetFont(GUI_FONT_SMALL);
+
+		}
+		else
+		{
+			  GUI_SetFont(GUI_FONT_SMALL);
+        sprintf(ConvertStr,"%d",FilterLun.Filter[BoardInf.Filter1Locate]);
+		    strcat(ConvertStr,"nm");
+		    GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+		}
+
+        //顶行文本
+		 if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+				{
+					   GUI_SetFont(GUI_FONT_MED);
+		    }
+				else
+				{
+					   GUI_SetFont(GUI_FONT_MED_CH);
+				}
+		GUI_SetColor(0x068400);
+		rect.y0 = start_y - high;
+		rect.y1 = start_y -2;
+    strcpy(ConvertStr,SELECT_CONTROL_REPORT_FILTER1[SystemPrameter.SystemLanguage]);
+		GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+
+	  //3.第3列(滤光片2)
+	   start_x+=NORMAL_ANLYSIS_RAWDATA_FILTER_SELECT_UNIT_WIDTH;
+       if(NormalAnalysis.FilterCurrent ==1)
+		{
+			GUI_SetColor(COLOR_MODE_SEL_TXT);	
+		}
+		else
+		{
+			 GUI_SetColor(0x068400);
+		}
+	   	//底行背景色
+		rect.x0 = start_x;
+	  rect.y0 = start_y +5;
+		rect.x1 = start_x + wide;
+		rect.y1 = start_y+ 17;
+    GUI_FillRect(rect.x0+2, rect.y0, rect.x1-2, rect.y1 );
+
+		//底行文本
+		GUI_SetColor(0xb5e3cd);
+		if(BoardInf.Filter2Locate<0)
+		{
+			   if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+	       {
+			      GUI_SetFont(GUI_FONT_SMALL);
+	       }
+	       else
+	       {
+			     GUI_SetFont(GUI_FONT_SMALL_CH);
+	       }
+			
+			   GUI_DispStringInRect(STR_OFF[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Off"
+	       GUI_SetFont(GUI_FONT_SMALL);
+		}
+		else
+		{
+			   GUI_SetFont(GUI_FONT_SMALL);
+        sprintf(ConvertStr,"%d",FilterLun.Filter[BoardInf.Filter2Locate]);
+	      strcat(ConvertStr,"nm");
+		    GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+		}
+
+		if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+	  {
+			 GUI_SetFont(GUI_FONT_MED);
+	  }
+	  else
+	  {
+			 GUI_SetFont(GUI_FONT_MED_CH);
+	  }
+    //顶行文本
+		GUI_SetColor(0x068400);
+		rect.y0 = start_y - high;
+		rect.y1 = start_y -2;
+    strcpy(ConvertStr,SELECT_CONTROL_REPORT_FILTER2[SystemPrameter.SystemLanguage]);
+		GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+
+}
+
+void DisplayAnalysisLogExpand(void) //2014-8-19项
+{
+	GUI_RECT rect;
+	unsigned char i;
+	//dc->SetTextColor(RGB(0xef,0xf1,0xf7));
+	//dc->SetBkMode(TRANSPARENT);
+
+	int start_x,start_y,wide,high;
+	int nSel;
+//	int nDX,nSel;
+	//int nCal;
+	start_x=ANALYSIS_LOG_SELECT_START_X - NORMAL_ANLYSIS_LOG_SELECT_WIDTH;// + 10; //2014-8-18项
+	start_y=ANALYSIS_LOG_SELECT_START_Y-TITLESBAR_HEIGHT;
+	wide=NORMAL_ANLYSIS_LOG_SELECT_UNIT_WIDTH;
+	high=40;
+
+//    GUI_DrawBitmap(&bmExpMenuLeft_330_46, start_x, start_y);
+	GUI_DrawBitmap(&bmExpMenuLeft_20_46, start_x, start_y);
+	GUI_SetColor(COLOR_EXP_PICTURE_FRAME);
+	GUI_DrawLine(start_x+20, start_y,start_x+NORMAL_ANLYSIS_LOG_SELECT_WIDTH,start_y); 
+	GUI_DrawLine(start_x+20, start_y+45,start_x+NORMAL_ANLYSIS_LOG_SELECT_WIDTH,start_y+45);
+	GUI_SetColor(COLOR_EXP_PICTURE);
+	GUI_FillRect(start_x+20, start_y+1,start_x+NORMAL_ANLYSIS_LOG_SELECT_WIDTH,start_y+44);
+	
+	start_x=start_x+20;
+
+	//dc->SetTextColor(RGB(0x00,0x84,0x06));
+    GUI_SetColor(0x068400);
+	nSel = NormalAnalysis.bLogX * 2 + NormalAnalysis.bLogY;
+	for(i = 0; i < 4; i++)
+	{
+			//填充选中的底色
+		       GUI_SetColor(COLOR_MODE_SEL_BK);
+		       if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+				{
+					GUI_SetFont(GUI_FONT_MED);
+				}
+				else
+				{
+					GUI_SetFont(GUI_FONT_MED_CH);
+				}
+
+	
+
+		if(nSel == i)
+		{
+			   	GUI_SetColor(0xe7a362);
+				GUI_FillRect(start_x, start_y+3, start_x + wide, start_y+high);
+				GUI_SetColor(COLOR_MODE_SEL_TXT);
+		}
+		else
+		{
+                 GUI_SetColor(0x068400);
+		}
+
+	//  CString strTemp = CString(XY_COORDINATES[SystemPrameter.SystemLanguage][i/2]) + _T(" / ") + CString(XY_COORDINATES[SystemPrameter.SystemLanguage][i%2]);
+	//	GetClientRect(rect);
+	//	dc->ExtTextOutW(start_x + 10,stary_y - 14,ETO_CLIPPED,rect, strTemp,NULL) ;
+            
+		    rect.x0 = start_x;
+			rect.y0 = start_y +3;
+			rect.x1 = start_x + wide;
+			rect.y1 = start_y + high;
+
+			//start_x += wide;
+			//wide = MODE_EXPAND_WIDTH2;
+                          
+			strcpy(ConvertStr,XY_COORDINATES[SystemPrameter.SystemLanguage][i/2]);
+			strcat(ConvertStr, "/");
+			strcat(ConvertStr,XY_COORDINATES[SystemPrameter.SystemLanguage][i%2]);
+			GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+			start_x+=NORMAL_ANLYSIS_LOG_SELECT_UNIT_WIDTH;
+	}
+
+	//dc->SelectObject(oldCFont);
+	//delete dc;
+}
+
+
+
+void DoNormalAnalysis(void)
+{
+	int i,j;
+	float dTemp;
+	unsigned char bHasResult = 1;//true;
+
+	NormalAnalysis.wcModeBack = NormalAnalysis.wcMode; //备份分析模式
+	NormalAnalysis.FilterCurrentBack = NormalAnalysis.FilterCurrent; //备份滤光片选择
+	//if(BoardInf.curentcurve[0] != _T('N')) //不进行定量分析
+
+	 //1.进行定量分析
+	if(BoardInf.KineticPara.Curve>=0) //进行定量分析
+	{
+		//if(CString(BoardInf.curentcurve) == _T("Linear"))
+		if(BoardInf.KineticPara.Curve==CURVE_LINEAR) //进行定量分析
+		{
+			for(j = 0; j < 3; j++)
+			{
+				if(NormalAnalysis.nCalibratorCountTotal[j] >= 2)
+				{
+					NormalAnalysis.nAnalysisResult[j] = DoLinearAnalysis(j); //线性拟合
+				}
+				else
+				{
+					NormalAnalysis.nAnalysisResult[j] = ANALYSIS_ERROR_CALIBRATOR_NUMBER;
+				}
+			}
+		}
+		
+		else if(BoardInf.KineticPara.Curve==CURVE_FACTOR) //进行定量分析
+		//else if(CString(BoardInf.curentcurve) == _T("Factor"))
+		{
+			for(j = 0; j < 3; j++)
+			{
+				if(NormalAnalysis.nCalibratorCountTotal[j] >= 1)
+				{
+					NormalAnalysis.nAnalysisResult[j] = DoFactorAnalysis(j); //比例拟合
+				}
+				else
+				{
+					NormalAnalysis.nAnalysisResult[j] = ANALYSIS_ERROR_CALIBRATOR_NUMBER;
+				}
+			}
+		}
+		
+		else if(BoardInf.KineticPara.Curve==CURVE_LOGISTIC) //进行定量分析
+		//else if(CString(BoardInf.curentcurve) == _T("Logistic"))
+		{
+			for(j = 0; j < 3; j++)
+			{
+				if(NormalAnalysis.nCalibratorCountTotal[j] >= 4)
+				{
+					NormalAnalysis.nAnalysisResult[j] = DoLogisticAnalysis(j); //logistic拟合
+				}
+				else
+				{
+					NormalAnalysis.nAnalysisResult[j] = ANALYSIS_ERROR_CALIBRATOR_NUMBER;
+				}
+			}
+		}
+		else if(BoardInf.KineticPara.Curve==CURVE_PTOP) //进行定量分析
+		//else if(CString(BoardInf.curentcurve) == _T("PtoP"))
+		{
+			for(j = 0; j < 3; j++)
+			{
+				if(NormalAnalysis.nCalibratorCountTotal[j] >= 2)
+				{
+					NormalAnalysis.nAnalysisResult[j] = DoPtoPAnalysis(j); //点对点拟合
+				}
+				else
+				{
+					NormalAnalysis.nAnalysisResult[j] = ANALYSIS_ERROR_CALIBRATOR_NUMBER;
+				}
+			}
+		}
+		
+		else if(BoardInf.KineticPara.Curve==CURVE_CUBIC) //进行定量分析
+		//else if(CString(BoardInf.curentcurve) == _T("CubicSpline"))
+		{
+			for(j = 0; j < 3; j++)
+			{
+				if(NormalAnalysis.nCalibratorCountTotal[j] >= 3)
+				{
+					NormalAnalysis.nAnalysisResult[j] = DoSplineAnalysis(j); //样条函数拟合
+				}
+				else
+				{
+					NormalAnalysis.nAnalysisResult[j] = ANALYSIS_ERROR_CALIBRATOR_NUMBER;
+				}
+			}
+		}
+
+		//分析OK
+		if(NormalAnalysis.nAnalysisResult[NormalAnalysis.FilterCurrentBack] == ANALYSIS_SUCCESS)
+		{
+			NormalAnalysis.FilterCurrent = NormalAnalysis.FilterCurrentBack;
+			if(NormalAnalysis.wcModeBack != ANALYSIS_MODE_ANALYSIS && NormalAnalysis.wcModeBack != ANALYSIS_MODE_CURVE)
+			{
+				NormalAnalysis.wcMode = ANALYSIS_MODE_ANALYSIS;
+			}
+		}
+		else if(NormalAnalysis.nAnalysisResult[2] == ANALYSIS_SUCCESS)
+		{
+			NormalAnalysis.FilterCurrent = 2;
+			if(NormalAnalysis.wcModeBack != ANALYSIS_MODE_ANALYSIS && NormalAnalysis.wcModeBack != ANALYSIS_MODE_CURVE)
+			{
+				NormalAnalysis.wcMode = ANALYSIS_MODE_ANALYSIS;
+			}
+		}
+		else if(NormalAnalysis.nAnalysisResult[0] == ANALYSIS_SUCCESS)
+		{
+			NormalAnalysis.FilterCurrent = 0;
+			if(NormalAnalysis.wcModeBack != ANALYSIS_MODE_ANALYSIS && NormalAnalysis.wcModeBack != ANALYSIS_MODE_CURVE)
+			{
+				NormalAnalysis.wcMode = ANALYSIS_MODE_ANALYSIS;
+			}
+		}
+		else if(NormalAnalysis.nAnalysisResult[1] == ANALYSIS_SUCCESS)
+		{
+			NormalAnalysis.FilterCurrent = 1;
+			if(NormalAnalysis.wcModeBack != ANALYSIS_MODE_ANALYSIS && NormalAnalysis.wcModeBack != ANALYSIS_MODE_CURVE)
+			{
+				NormalAnalysis.wcMode = ANALYSIS_MODE_ANALYSIS;
+			}
+		}
+		else
+		{
+			NormalAnalysis.wcMode = ANALYSIS_MODE_RAWDATA;
+		}
+	}//if(BoardInf.KineticPara.Curve>=0) //进行定量分析
+
+    
+
+
+
+
+//2.定性分析
+	if(BoardInf.InterpretPara.Enable) //定性分析
+	{
+		for(j = 0; j < 3; j++)
+		{
+			if((BoardInf.InterpretPara.AbsFlag==0) && ((BoardInf.KineticPara.Curve ==CURVE_NO)   //定性分析为浓度,无曲线
+				|| (NormalAnalysis.nAnalysisResult[j] != ANALYSIS_SUCCESS)))
+			{
+				BoardInf.InterpretPara.nAnalysisResult[j] = ANALYSIS_ERROR_NO_CONCENTRATION;
+				continue;
+			}
+			
+			if(j > 0 && BoardInf.Filter2Locate<0)
+			{
+				BoardInf.InterpretPara.nAnalysisResult[j] = ANALYSIS_ERROR_NO_CONCENTRATION;
+				continue;
+			}
+
+			BoardInf.InterpretPara.nAnalysisResult[j] = SearchForNCPC(j);
+
+			if(BoardInf.InterpretPara.nAnalysisResult[j] == ANALYSIS_SUCCESS)
+			{
+				for(i = 0; i < TUBE_MAX; i++)
+				{
+				    bHasResult = 1;
+					BoardInf.InterpretPara.bWeakPos[j][i] = 0;
+					BoardInf.InterpretPara.bPos[j][i] = 0;
+					if(j < 2)
+					{
+						dTemp = dABS[0][j][i];
+					}
+					else if(NormalAnalysis.bPreCalOK[0][i])
+					{
+						dTemp = NormalAnalysis.dPreCal[0][i];
+					}
+					else
+					{
+						bHasResult = 0;
+					}
+
+					if((BoardInf.InterpretPara.AbsFlag==0) && bHasResult)
+					{
+						dTemp = NormalAnalysis.dConcentration[j][i];
+
+						if(dTemp < 0.0f)
+						{
+							bHasResult = 0;
+						}
+					}
+
+					if(bHasResult)
+					{
+						if(BoardInf.InterpretPara.GreatFlag)
+						{
+							if(dTemp > BoardInf.InterpretPara.dReference[j])
+							{
+								BoardInf.InterpretPara.bPos[j][i] = 1;
+							}
+							else if(dTemp > BoardInf.InterpretPara.dReference[j] * (1.0f - BoardInf.InterpretPara.fWeakPValue / 100.0f))
+							{
+								BoardInf.InterpretPara.bWeakPos[j][i] = 1;
+							}
+						}
+						else
+						{
+							if(dTemp < BoardInf.InterpretPara.dReference[j])
+							{
+								BoardInf.InterpretPara.bPos[j][i] = 1;
+							}
+							else if(dTemp < BoardInf.InterpretPara.dReference[j] * (1.0f + BoardInf.InterpretPara.fWeakPValue / 100.0f))
+							{
+								BoardInf.InterpretPara.bWeakPos[j][i] = 1;
+							}
+						}//if(BoardInf.InterpretPara.GreatFlag)else
+					}//if(bHasResult)
+				}//for(i = 0; i < TUBE_MAX; i++)
+			}//if(BoardInf.InterpretPara.nAnalysisResult[j] == ANALYSIS_SUCCESS)
+		}//for(j = 0; j < 3; j++)
+        
+
+		if(NormalAnalysis.wcModeBack == ANALYSIS_MODE_INTERPRET || NormalAnalysis.wcMode == ANALYSIS_MODE_RAWDATA)
+		{
+			if(BoardInf.InterpretPara.nAnalysisResult[NormalAnalysis.FilterCurrentBack] == ANALYSIS_SUCCESS)
+			{
+				NormalAnalysis.FilterCurrent = NormalAnalysis.FilterCurrentBack;
+				NormalAnalysis.wcMode = ANALYSIS_MODE_INTERPRET;
+			}
+			else if(BoardInf.InterpretPara.nAnalysisResult[2] == ANALYSIS_SUCCESS)
+			{
+				NormalAnalysis.FilterCurrent = 2;
+				NormalAnalysis.wcMode = ANALYSIS_MODE_INTERPRET;
+			}
+			else if(BoardInf.InterpretPara.nAnalysisResult[0] == ANALYSIS_SUCCESS)
+			{
+				NormalAnalysis.FilterCurrent = 0;
+				NormalAnalysis.wcMode = ANALYSIS_MODE_INTERPRET;
+			}
+			else if(BoardInf.InterpretPara.nAnalysisResult[1] == ANALYSIS_SUCCESS)
+			{
+				NormalAnalysis.FilterCurrent = 1;
+				NormalAnalysis.wcMode = ANALYSIS_MODE_INTERPRET;
+			}
+			else
+			{
+				NormalAnalysis.wcMode = ANALYSIS_MODE_RAWDATA;
+			}
+		}//if(NormalAnalysis.wcModeBack == ANALYSIS_MODE_INTERPRET || NormalAnalysis.wcMode == ANALYSIS_MODE_RAWDATA)
+	}//if(BoardInf.InterpretPara.Enable) //定性分析
+
+
+
+
+
+	//3.质控分析
+	if(BoardInf.QualityPara.Enable )
+	//if(BoardInf.quality_para.bOpened) 
+	{
+		for(j = 0; j < 3; j++)
+		{
+			
+			if( (BoardInf.InterpretPara.AbsFlag==0) && 
+				((BoardInf.KineticPara.Curve==CURVE_NO) || (NormalAnalysis.nAnalysisResult[j] != ANALYSIS_SUCCESS)) )
+			{
+				BoardInf.QualityResult.nAnalysisResult[j] = ANALYSIS_ERROR_NO_CONCENTRATION;
+				//BoardInf.quality_para.nAnalysisResult[j] = ANALYSIS_ERROR_NO_CONCENTRATION;
+				continue;
+			}
+
+			if( (j > 0 && BoardInf.Filter2Locate<0) )
+		//	if(j > 0 && BoardInf.Filter_2[0] == _T('N'))
+			{
+				BoardInf.QualityResult.nAnalysisResult[j] = ANALYSIS_ERROR_NO_CONCENTRATION;
+				continue;
+			}
+
+			BoardInf.QualityResult.nAnalysisResult[j] = SearchForQC(j);
+
+			if(BoardInf.QualityResult.nAnalysisResult[j] == ANALYSIS_SUCCESS)
+			{
+				for(i = 0; i < QC_MAX; i++)
+				{
+					if(BoardInf.QualityResult.nTotalQC[j][i] < 1) //必须有QC
+					{
+						continue;
+					}
+					//float dTemp;
+					BoardInf.QualityResult.bFailed[j][i] = 0;
+
+					if(BoardInf.QualityResult.dReferenceQC[j][i] < BoardInf.QualityPara.dLowerLimit[BoardInf.QualityPara.AbsFlag][i] 
+					|| BoardInf.QualityResult.dReferenceQC[j][i] > BoardInf.QualityPara.dUpperLimit[BoardInf.QualityPara.AbsFlag][i])
+					{
+						BoardInf.QualityResult.bFailed[j][i] = 1;
+					}
+				}
+			}//if(BoardInf.QualityResult.nAnalysisResult[j] == ANALYSIS_SUCCESS)
+		}//for(j = 0; j < 3; j++)
+
+		if(NormalAnalysis.wcModeBack == ANALYSIS_MODE_QC || NormalAnalysis.wcMode == ANALYSIS_MODE_RAWDATA)
+		{
+			if(BoardInf.QualityResult.nAnalysisResult[NormalAnalysis.FilterCurrentBack] == ANALYSIS_SUCCESS)
+			{
+				NormalAnalysis.FilterCurrent = NormalAnalysis.FilterCurrentBack;
+				NormalAnalysis.wcMode = ANALYSIS_MODE_QC;
+			}
+			else if(BoardInf.QualityResult.nAnalysisResult[2] == ANALYSIS_SUCCESS)
+			{
+				NormalAnalysis.FilterCurrent = 2;
+				NormalAnalysis.wcMode = ANALYSIS_MODE_QC;
+			}
+			else if(BoardInf.QualityResult.nAnalysisResult[0] == ANALYSIS_SUCCESS)
+			{
+				NormalAnalysis.FilterCurrent = 0;
+				NormalAnalysis.wcMode = ANALYSIS_MODE_QC;
+			}
+			else if(BoardInf.QualityResult.nAnalysisResult[1] == ANALYSIS_SUCCESS)
+			{
+				NormalAnalysis.FilterCurrent = 1;
+				NormalAnalysis.wcMode = ANALYSIS_MODE_QC;
+			}
+			else
+			{
+				NormalAnalysis.wcMode = ANALYSIS_MODE_RAWDATA;
+			}
+		}//if(NormalAnalysis.wcModeBack == ANALYSIS_MODE_QC || NormalAnalysis.wcMode == ANALYSIS_MODE_RAWDATA)
+	}//if(BoardInf.QualityResult.Enable )
+
+
+
+
+}
+
+
+
+
+
+
+void InitNormalAnalysis(void) 
+{
+	int i,j;
+
+	memset(&NormalAnalysis, 0, sizeof(NormalAnalysis));
+	NormalAnalysis.wcMode = ANALYSIS_MODE_RAWDATA;
+	NormalAnalysis.FilterCurrent = 0; //选择第一滤镜
+	//NormalAnalysis.FilterSelect = false;
+	//NormalAnalysis.LogSelect = false;
+	NormalAnalysis.bLogX = 0;
+	NormalAnalysis.bLogY = 0;
+
+	SearchForBlanks();
+
+	for(i = 0; i < FILTER_PLATE_MAX; i++) //减去空白样本
+	{
+		if(BoardInf.bHasRawData[i]==0)
+		{
+			continue;
+		}
+
+		for(j = 0; j < TUBE_MAX; j++)
+		{
+			if(BoardInf.Layout.WellType[i] == WELLS_TYPE_BK)//"BK"
+			{
+				dABS[0][i][j] = 0.0f;
+				continue;
+			}
+
+			dABS[0][i][j] = dABSInit[0][i][j] - NormalAnalysis.dBlank[0][i];
+			if(dABS[0][i][j] < 0.0f)
+			{
+				dABS[0][i][j] = 0.0f;
+			}
+		}
+	}
+
+	if(BoardInf.Filter2Locate>=0  && BoardInf.KineticPara.PreProcess>=0)
+	//if(CString(BoardInf.Filter_2) != _T("No") && BoardInf.KineticPara.PreProcess[0] != _T('N'))
+	{
+		Preproccessing(0);
+	}
+
+	NormalAnalysis.nCalibratorCountTotal[0] = 0;
+	NormalAnalysis.nCalibratorCountTotal[1] = 0;
+	NormalAnalysis.nCalibratorCountTotal[2] = 0;
+	for(i = 0; i < CALIBRATOR_CONCENTRATION_MAX; i++)
+	{
+		SearchForStandards(i);
+
+		for(j = 0; j < 3; j++)
+		{
+			if(NormalAnalysis.nCalibratorCount[j][i] > 0)
+			{
+				NormalAnalysis.nCalibratorCountTotal[j]++;
+			}
+		}
+	}
+	
+	if(BoardInf.KineticPara.Curve >=0 || BoardInf.InterpretPara.Enable || BoardInf.QualityPara.Enable )
+	//if(BoardInf.curentcurve[0] != _T('N') || BoardInf.interpret_para.bOpened || BoardInf.quality_para.bOpened)
+	{
+		DoNormalAnalysis();
+	}
+}
+
+
+
+//进行动力学分析
+void DoKineticAnalysis(void) 
+{
+
+	int i,j,k;
+	unsigned char bOK,bAfter;
+	int nStartBase, nEndBase;
+	int nStart,nEnd;
+	int nTime ;
+	float dTime;
+	
+
+
+
+	NormalAnalysis.wcModeBack = NormalAnalysis.wcMode; //备份分析模式
+	NormalAnalysis.FilterCurrentBack = NormalAnalysis.FilterCurrent; //备份滤光片选择
+	BoardInf.KineticPara.kinetic_readings_analysis = BoardInf.KineticPara.kinetic_readings_practical;
+	if(BoardInf.KineticPara.Readings< BoardInf.KineticPara.kinetic_readings_practical)
+	{
+		BoardInf.KineticPara.kinetic_readings_analysis = BoardInf.KineticPara.Readings;
+	}
+
+	if(BoardInf.KineticPara.kinetic_readings_analysis < KINETIC_READINGS_MIN)
+	{
+		BoardInf.KineticPara.nAnalysisResult[0] = ANALYSIS_ERROR_KINETIC_DATA;
+		BoardInf.KineticPara.nAnalysisResult[1] = ANALYSIS_ERROR_KINETIC_DATA;
+		BoardInf.KineticPara.nAnalysisResult[2] = ANALYSIS_ERROR_KINETIC_DATA;
+		return;
+	}
+
+	if(BoardInf.KineticPara.FirstReadings > BoardInf.KineticPara.kinetic_readings_analysis - 1)
+	{
+		BoardInf.KineticPara.FirstReadings = BoardInf.KineticPara.kinetic_readings_analysis - 1;
+	}
+  
+	//modify 20171202 start 
+	//if(BoardInf.KineticPara.EndReadings> BoardInf.KineticPara.kinetic_readings_analysis-BoardInf.KineticPara.FirstReadings  - 1)
+	//{
+		//BoardInf.KineticPara.EndReadings = BoardInf.KineticPara.kinetic_readings_analysis-BoardInf.KineticPara.FirstReadings  - 1;
+	//}
+	if(BoardInf.KineticPara.EndReadings> BoardInf.KineticPara.kinetic_readings_analysis - 1)
+	{
+		BoardInf.KineticPara.EndReadings = BoardInf.KineticPara.kinetic_readings_analysis - 1;
+	}
+	if(BoardInf.KineticPara.FirstReadings>BoardInf.KineticPara.EndReadings)
+	{
+		 BoardInf.KineticPara.FirstReadings=BoardInf.KineticPara.EndReadings;
+	}
+	//modify 20171202 end
+
+
+	bOK = PreCalOK();
+	BoardInf.KineticPara.nAnalysisResult[0] = ANALYSIS_SUCCESS;
+	BoardInf.KineticPara.nAnalysisResult[1] = ANALYSIS_SUCCESS;
+	if(bOK==0)
+	{
+		BoardInf.KineticPara.nAnalysisResult[2] = ANALYSIS_ERROR_KINETIC_DATA;
+	}
+
+	if(BoardInf.KineticPara.BaseLinePoint > BoardInf.KineticPara.kinetic_readings_analysis)
+	{
+		BoardInf.KineticPara.BaseLinePoint = BoardInf.KineticPara.kinetic_readings_analysis;
+	}
+
+	
+	//if(BoardInf.KineticPara.bBeginning)
+	if(BoardInf.KineticPara.BaseLineSel==0)//0表示起始点
+	{
+		nStartBase = 0;
+		nEndBase = BoardInf.KineticPara.BaseLinePoint - 1;
+	}
+	else
+	{
+		nEndBase = BoardInf.KineticPara.kinetic_readings_analysis - 1;
+		nStartBase = nEndBase - BoardInf.KineticPara.BaseLinePoint + 1;
+	}
+
+	//Modify start lugj171202
+	nStart = BoardInf.KineticPara.FirstReadings;
+	//nEnd = BoardInf.KineticPara.kinetic_readings_analysis -  BoardInf.KineticPara.EndReadings - 1;
+	nEnd = BoardInf.KineticPara.EndReadings;
+	//Modify end
+	
+	bAfter = (nStart == 0);
+	nTime=BoardInf.KineticPara.TimeInterval ;
+	if(nTime < KINETIC_TIME_MIN)
+	{
+		nTime = KINETIC_TIME_MIN;
+	}
+	dTime = (float)nTime;
+
+	if(BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_TIME_CHANGE)
+	{
+		for(k = 0; k < TUBE_MAX; k++)
+		{
+			for(j = 0; j < 3; j++)
+			{
+				//short nTotal;
+				float dBase = 0.0f;
+				short m;
+				BoardInf.KineticPara.KineticTimeChange[j].bOK[k]=0;
+				//BoardInf.KineticPara.kinetic_time_change[j].bOK[k] = false;
+				for(m = nStartBase; m <= nEndBase; m++)
+				{
+					if(j < 2)
+					{
+						dBase += dABS[m][j][k];
+					} //if(j < 2)
+					else if(BoardInf.KineticPara.bPreCalOK[k])
+					{
+						dBase += NormalAnalysis.dPreCal[m][k];
+					} //else if(BoardInf.KineticPara.bPreCalOK[k])
+				} //for(int m = nStartBase; m <= nEndBase; m++)
+				if(BoardInf.KineticPara.BaseLinePoint < 1)
+				{
+					dBase = 0.0;
+				} //BoardInf.KineticPara.nPoints < 1
+				else
+				{
+					dBase /= ((float)(nEndBase - nStartBase + 1));
+				} //BoardInf.KineticPara.nPoints < 1
+//				nTotal = nEnd - nStart + 1;
+
+				for(i = nStart; i <= nEnd; i++)
+				{
+					if(j < 2)
+					{
+						if((dABS[i][j][k] - dBase) > BoardInf.KineticPara.Change)//?
+						{
+							BoardInf.KineticPara.KineticTimeChange[j].nTime[k] = (i) * nTime;
+							BoardInf.KineticPara.KineticTimeChange[j].bOK[k] = 1;
+							break;
+						} //if((dABS[i][j][k] - dBase) > BoardInf.KineticPara.dChange)
+					} //if(j < 2)
+					else if(BoardInf.KineticPara.bPreCalOK[k])
+					{
+						if((NormalAnalysis.dPreCal[i][k] - dBase) > BoardInf.KineticPara.Change)
+						{
+							BoardInf.KineticPara.KineticTimeChange[j].nTime[k] = (i) * nTime;
+							BoardInf.KineticPara.KineticTimeChange[j].bOK[k] = 1;
+							break;
+						} //if((dABS[i][j][k] - dBase) > BoardInf.KineticPara.dChange)
+					} //else if(BoardInf.KineticPara.bPreCalOK[k])
+				} //for(int i = nStart; i <= nEnd; i++)
+			} //for(int j = 0; j < 3; j++)
+		} //for(int k = 0; k < TUBE_MAX; k++)
+	} //if(BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_TIME_CHANGE)
+
+	if(BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_MAX_RATE
+		|| BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_TIME_MAX_RATE)
+	{
+		for(k = 0; k < TUBE_MAX; k++)
+		{
+			for(j = 0; j < 3; j++)
+			{
+				float dMaxRate = 0.0;
+				int nStep = nStart;
+
+				for(i = nStart; i < nEnd; i++) //<= 
+				{
+					int n1 = i;
+					int n2 = i + 1;
+					float dRate;
+					/*
+					if(bAfter)
+					{
+						if(i == BoardInf.KineticPara.kinetic_readings_analysis - 1)
+						{
+							break;
+						} //if(i == BoardInf.KineticPara.kinetic_readings_analysis - 1)
+					} //if(bAfter)
+					else
+					{
+						n1 = i - 1;
+						n2 = i;
+					} //if(bAfter)
+         */
+					dRate = 0.0;
+					if(j < 2)
+					{
+						dRate = (dABS[n2][j][k] - dABS[n1][j][k]) / dTime;
+					} //if(j < 2)
+					else if(BoardInf.KineticPara.bPreCalOK[k])
+					{
+						dRate = (NormalAnalysis.dPreCal[n2][k] - NormalAnalysis.dPreCal[n1][k]) / dTime;
+					} //else if(BoardInf.KineticPara.bPreCalOK[k])
+
+					if(dRate > dMaxRate)
+					{
+						dMaxRate = dRate;
+						nStep = n2;//i
+					} //if(dRate > dMaxRate)
+				} //for(int i = nStart; i <= nEnd; i++)
+				BoardInf.KineticPara.KineticMaxRate[j].dMaxRate[k] = dMaxRate;
+				BoardInf.KineticPara.KineticTimeMaxRate[j].nTime[k] = (nStep) * nTime;
+			} //for(int j = 0; j < 3; j++)
+		} //for(int k = 0; k < TUBE_MAX; k++)
+	} //if(BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_MAX_RATE|| BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_TIME_MAX_RATE)
+
+
+	if(BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_AVERAGE_RATE)
+	{
+		for(k = 0; k < TUBE_MAX; k++)
+		{
+			for(j = 0; j < 3; j++)
+			{
+				int nTotal = nEnd - nStart;// + 1;
+				BoardInf.KineticPara.KineticAverageRate[j].dAverageRate[k] = 0.0;
+				if(nTotal<=0)
+				{
+					continue;
+				}
+				for(i = nStart; i < nEnd; i++) //<=
+				{
+					int n1 = i;
+					int n2 = i + 1;
+				//	if(bAfter)//第一板开始，First=0
+					//{
+						//if(i == BoardInf.KineticPara.kinetic_readings_analysis - 1)
+					//	{
+							//nTotal--;
+						//	break;
+					//	} //if(i == BoardInf.KineticPara.kinetic_readings_analysis - 1)
+				//	} //if(bAfter)
+					//else
+					//{
+						//n1 = i - 1;
+						//n2 = i;
+				//	} //if(bAfter)
+					if(j < 2)
+					{
+						BoardInf.KineticPara.KineticAverageRate[j].dAverageRate[k] 
+						+= (dABS[n2][j][k] - dABS[n1][j][k]) / dTime;
+					} //if(j < 2)
+					else if(BoardInf.KineticPara.bPreCalOK[k])
+					{
+						BoardInf.KineticPara.KineticAverageRate[j].dAverageRate[k] 
+						+= (NormalAnalysis.dPreCal[n2][k] - NormalAnalysis.dPreCal[n1][k]) / dTime;
+					} //else if(BoardInf.KineticPara.bPreCalOK[k])
+				} //for(int i = nStart; i <= nEnd; i++)
+				if(nTotal>0)
+				{
+				  BoardInf.KineticPara.KineticAverageRate[j].dAverageRate[k] /= (float)nTotal;
+				}
+			} //for(int j = 0; j < 3; j++)
+		} //for(int k = 0; k < TUBE_MAX; k++)
+	} //if(BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_AVERAGE_RATE)
+
+	if(BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_MAX_WELL
+		|| BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_TIME_MAX)
+	{
+		for(k = 0; k < TUBE_MAX; k++)
+		{
+			for(j = 0; j < 3; j++)
+			{
+				float dMax = 0.0;
+				int nStep = nStart;
+				for(i = nStart; i <= nEnd; i++)//<=
+				{
+					if(j < 2)
+					{
+						if(dABS[i][j][k] > dMax)
+						{
+							dMax = dABS[i][j][k];
+							nStep = i;
+						} //if(dABS[i][j][k] > dMax)
+					} //if(j < 2)
+					else if(BoardInf.KineticPara.bPreCalOK[k])
+					{
+						if(NormalAnalysis.dPreCal[i][k] > dMax)
+						{
+							dMax = NormalAnalysis.dPreCal[i][k];
+							nStep = i;
+						} //if(NormalAnalysis.dPreCal[i][k] > dMax)
+					} //else if(BoardInf.KineticPara.bPreCalOK[k])
+				} //for(int i = nStart; i <= nEnd; i++)
+				BoardInf.KineticPara.KineticMaxWell[j].dMaxWell[k] = dMax;
+				BoardInf.KineticPara.KineticTimeMax[j].nTime[k] = (nStep) * nTime;
+			} //for(int j = 0; j < 3; j++)
+		} //for(int k = 0; k < TUBE_MAX; k++)
+	} //if(BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_MAX_WELL|| BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_TIME_MAX)
+
+	if(NormalAnalysis.nAnalysisResult[NormalAnalysis.FilterCurrentBack] == ANALYSIS_SUCCESS)
+	{
+		NormalAnalysis.FilterCurrent = NormalAnalysis.FilterCurrentBack;
+		if(NormalAnalysis.wcModeBack != ANALYSIS_MODE_ANALYSIS && NormalAnalysis.wcModeBack != ANALYSIS_MODE_CURVE)
+		{
+			NormalAnalysis.wcMode = ANALYSIS_MODE_ANALYSIS;
+		}
+	}
+	else if(NormalAnalysis.nAnalysisResult[2] == ANALYSIS_SUCCESS)
+	{
+		NormalAnalysis.FilterCurrent = 2;
+		if(NormalAnalysis.wcModeBack != ANALYSIS_MODE_ANALYSIS && NormalAnalysis.wcModeBack != ANALYSIS_MODE_CURVE)
+		{
+			NormalAnalysis.wcMode = ANALYSIS_MODE_ANALYSIS;
+		}
+	}
+	else if(NormalAnalysis.nAnalysisResult[0] == ANALYSIS_SUCCESS)
+	{
+		NormalAnalysis.FilterCurrent = 0;
+		if(NormalAnalysis.wcModeBack != ANALYSIS_MODE_ANALYSIS && NormalAnalysis.wcModeBack != ANALYSIS_MODE_CURVE)
+		{
+			NormalAnalysis.wcMode = ANALYSIS_MODE_ANALYSIS;
+		}
+	}
+	else if(NormalAnalysis.nAnalysisResult[1] == ANALYSIS_SUCCESS)
+	{
+		NormalAnalysis.FilterCurrent = 1;
+		if(NormalAnalysis.wcModeBack != ANALYSIS_MODE_ANALYSIS && NormalAnalysis.wcModeBack != ANALYSIS_MODE_CURVE)
+		{
+			NormalAnalysis.wcMode = ANALYSIS_MODE_ANALYSIS;
+		}
+	}
+	else
+	{
+		NormalAnalysis.wcMode = ANALYSIS_MODE_RAWDATA;
+	}
+	
+}
+
+
+void InitKineticAnalysis(void) //动力学分析初始化
+{
+	int i;
+
+	NormalAnalysis.FilterCurrent = 0; //选择第一滤镜
+	//NormalAnalysis.bFilterSelect = false;
+	BoardInf.KineticPara.kinetic_reading_current = 0;  
+	BoardInf.KineticPara.nCurrentSample = 0;
+
+	SearchForBlanks();
+
+	for(i = 0; i < BoardInf.KineticPara.kinetic_readings_practical; i++)
+	{
+		GetKineticABS(i);
+	}
+
+	DoKineticAnalysis();
+}
+
+
+
+//正常分析显示标准曲线
+void DisplayCurve(void)
+{
+	GUI_RECT rect;
+	float dTemp;
+    float dX,dY;
+	int i,j,k;
+	float dXMin, dXMax, dYMin, dYMax;
+	int nTotal = NormalAnalysis.nCalibratorCountTotal[NormalAnalysis.FilterCurrent];
+	
+	
+	
+	if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		{
+			GUI_SetFont(GUI_FONT_MED);
+		}
+		else
+		{
+			GUI_SetFont(GUI_FONT_MED_CH);
+		}
+		
+		//float* p_dX = new float[nTotal];
+		//float* p_dY = new float[nTotal]; 
+//	float *p_dX = (float *)malloc(sizeof(float) * nTotal);
+	//float *p_dY = (float *)malloc(sizeof(float) * nTotal);  
+		GetAxisLimits(&dXMin, &dXMax, &dYMin, &dYMax, CalcuPara.p_dX, CalcuPara.p_dY);
+   
+
+	//else if((NormalAnalysis.wcMode == ANALYSIS_MODE_CURVE) && BoardInf.bHasData)
+	//if((NormalAnalysis.wcMode == ANALYSIS_MODE_CURVE) && BoardInf.bHasData)
+	{
+		//CPen penAxis, penPoint, penCurve, penTick;
+		//CRect rectCurve, rectAxis;
+		//CPen* p_penOld;
+		//penAxis.CreatePen(PS_SOLID, 1, RGB(0,0,0));
+		//penPoint.CreatePen(PS_SOLID, 1, RGB(0xff,0,0));
+		//penCurve.CreatePen(PS_SOLID, 1, RGB(0,0,0xff));
+		//penTick.CreatePen(PS_SOLID, 0, RGB(0,0,0));
+
+
+		GUI_SetColor(0x0);
+
+		GUI_DrawLine(CURVE_AREA_AXIS_START_X,CURVE_AREA_AXIS_START_Y,CURVE_AREA_AXIS_START_X,CURVE_AREA_AXIS_END_Y);//画坐标轴垂直线
+        GUI_DrawLine(CURVE_AREA_AXIS_START_X,CURVE_AREA_AXIS_END_Y,CURVE_AREA_AXIS_END_X,CURVE_AREA_AXIS_END_Y);//画坐标轴水平线
+
+		//画tick
+        dX=(CURVE_AREA_AXIS_END_X-CURVE_AREA_AXIS_LINE_X-CURVE_AREA_AXIS_START_X)/5.0;
+        dY=(CURVE_AREA_AXIS_END_Y-CURVE_AREA_AXIS_START_Y-CURVE_AREA_AXIS_LINE_Y)/5.0;
+        for(i=0;i<5;i++)
+		{
+		    GUI_DrawLine(CURVE_AREA_AXIS_START_X+dX*(i+1),CURVE_AREA_AXIS_END_Y,CURVE_AREA_AXIS_START_X+dX*(i+1),CURVE_AREA_AXIS_END_Y+CURVE_AREA_AXIS_TICK_Y);//画5条短垂直线
+			  GUI_DrawLine(CURVE_AREA_AXIS_START_X-CURVE_AREA_AXIS_TICK_X,CURVE_AREA_AXIS_START_Y+CURVE_AREA_AXIS_LINE_Y+dY * i,CURVE_AREA_AXIS_START_X,CURVE_AREA_AXIS_START_Y+CURVE_AREA_AXIS_LINE_Y+ dY * i);//画5条短水平线
+		}
+        
+
+		
+		if(NormalAnalysis.bLogY)
+		{
+			GUI_DispStringAt(CURVE_REPORT_LOG_ABSORBANCE[SystemPrameter.SystemLanguage],CURVE_AREA_AXIS_START_X + 10,CURVE_AREA_AXIS_START_Y);
+		}
+		else
+		{
+			GUI_DispStringAt(CURVE_REPORT_ABSORBANCE[SystemPrameter.SystemLanguage],CURVE_AREA_AXIS_START_X + 10,CURVE_AREA_AXIS_START_Y);
+		}
+
+
+
+		rect.x0 = CURVE_AREA_AXIS_END_X-200;
+		rect.x1 = CURVE_AREA_AXIS_END_X;
+		rect.y0 = CURVE_AREA_AXIS_END_Y-40;
+		rect.y1 = CURVE_AREA_AXIS_END_Y;
+
+		if(NormalAnalysis.bLogX)
+		{
+			
+		    GUI_DispStringInRect(CURVE_REPORT_LOG_CONCENTRATION[SystemPrameter.SystemLanguage], &rect, GUI_TA_RIGHT | GUI_TA_VCENTER);
+
+
+		}
+		else
+		{
+			 GUI_DispStringInRect(CURVE_REPORT_CONCENTRATION[SystemPrameter.SystemLanguage], &rect, GUI_TA_RIGHT | GUI_TA_VCENTER);
+		}
+
+
+		
+		
+	//	if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		//{
+			GUI_SetFont(GUI_FONT_MED);
+		//}
+		//else
+	//	{
+		//	GUI_SetFont(GUI_FONT_MED_CH);
+		//}
+		
+
+		//画标签
+		
+
+		for(i = 0; i <= 5; i++)
+		{
+			//float dTemp;
+			//Y Lable
+			dTemp = dYMin + (dYMax - dYMin) * (float)i / 5.0f;
+			if(dTemp > 10000.0f || dTemp < -10000.0f)
+			{
+				sprintf(ConvertStr,"%.3e",dTemp);
+				EConvert(ConvertStr);
+				//strTemp.Format(_T("%.2e"), dTemp);
+				//strTemp = strTemp.Left(strTemp.GetLength()-3) + strTemp.Right(1);
+			}
+			else
+			{
+				sprintf(ConvertStr,"%1.2f",dTemp);
+			//	strTemp.Format(_T("%1.2f"), dTemp);
+			}
+			rect.x0 = 0;
+		    rect.x1 = CURVE_AREA_AXIS_START_X - CURVE_AREA_AXIS_TICK_X - 5;
+            rect.y0 = CURVE_AREA_AXIS_END_Y- 10 - dY * i;
+            rect.y1 = CURVE_AREA_AXIS_END_Y+ 10 - dY * i;
+		    GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+			
+
+			
+			dTemp = dXMin + (dXMax - dXMin) * (float)i / 5.0f;
+			if(dTemp > 10000.0f || dTemp < -10000.0f)
+			{
+				sprintf(ConvertStr,"%.3e",dTemp);
+				EConvert(ConvertStr);
+				//strTemp.Format(_T("%.2e"), dTemp);
+				//strTemp = strTemp.Left(strTemp.GetLength()-3) + strTemp.Right(1);
+			}
+			else
+			{
+				sprintf(ConvertStr,"%1.2f",dTemp);
+				//strTemp.Format(_T("%1.2f"), dTemp);
+			
+			}
+			
+            rect.x0 = CURVE_AREA_AXIS_START_X - 50 + dX * i;
+		    rect.x1 = CURVE_AREA_AXIS_START_X + 50 + dX * i;
+            rect.y0 = CURVE_AREA_AXIS_END_Y + CURVE_AREA_AXIS_TICK_Y;
+            rect.y1 =  rect.y0+30;
+			GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+		
+		}
+
+		//画拟合曲线线
+		//dc->SelectObject(&penCurve);
+		//CString strType;
+		//if(CString(BoardInf.curentcurve) == _T("Logistic"))
+
+
+		GUI_SetColor(GUI_BLUE);
+		if(BoardInf.KineticPara.Curve==CURVE_LOGISTIC)
+		{
+			//strType = _T("Logistic");
+			float dX0, dY0, ddX;
+			unsigned char bStart =0;// false;
+			//float dTemp;
+
+			ddX = (dXMax - dXMin) /  ANALYSIS_CURVE_POINT_MAX;
+			
+			for(i = 0; i <= ANALYSIS_CURVE_POINT_MAX; i++)
+			{
+				dX0 = dXMin + ddX * i;
+				if(dX0 <= 0.0f)
+				{
+					continue;
+				}
+				dTemp = pow((dX0 / NormalAnalysis.LogisticAnalysis[NormalAnalysis.FilterCurrent].dCoef[2])
+					, NormalAnalysis.LogisticAnalysis[NormalAnalysis.FilterCurrent].dCoef[1]);
+				dY0 = (NormalAnalysis.LogisticAnalysis[NormalAnalysis.FilterCurrent].dCoef[3]
+				+ (NormalAnalysis.LogisticAnalysis[NormalAnalysis.FilterCurrent].dCoef[0]
+				- NormalAnalysis.LogisticAnalysis[NormalAnalysis.FilterCurrent].dCoef[3]) / (1 + dTemp));
+				if(bStart==0)
+				{
+					//dc->MoveTo(CURVE_AREA_AXIS_START_X + (dX0 - dXMin) / (dXMax - dXMin) * dX * 5.0
+					//	, CURVE_AREA_AXIS_START_Y - (dY0 - dYMin) / (dYMax - dYMin) * dY * 5.0);
+					rect.x0=CURVE_AREA_AXIS_START_X + (dX0 - dXMin) / (dXMax - dXMin) * dX * 5.0f;
+					rect.y0=CURVE_AREA_AXIS_END_Y - (dY0 - dYMin) / (dYMax - dYMin) * dY * 5.0f;
+					bStart = 1;//true;
+				}
+				else
+				{
+					rect.x1=CURVE_AREA_AXIS_START_X + (dX0 - dXMin) / (dXMax - dXMin) * dX * 5.0f;
+					rect.y1=CURVE_AREA_AXIS_END_Y - (dY0 - dYMin) / (dYMax - dYMin) * dY * 5.0f;
+					
+					if(rect.y0<CURVE_AREA_AXIS_START_Y)rect.y0=CURVE_AREA_AXIS_START_Y;//lgj180110
+					if(rect.y1<CURVE_AREA_AXIS_START_Y)rect.y1=CURVE_AREA_AXIS_START_Y;//lgj180110
+					if(rect.y0>CURVE_AREA_AXIS_END_Y)rect.y0=CURVE_AREA_AXIS_END_Y;//lgj180110
+					if(rect.y1>CURVE_AREA_AXIS_END_Y)rect.y1=CURVE_AREA_AXIS_END_Y;//lgj180110
+                    GUI_DrawLine(rect.x0,rect.y0,rect.x1,rect.y1);
+                    rect.x0=rect.x1;
+					rect.y0=rect.y1;
+					//dc->LineTo(CURVE_AREA_AXIS_START_X + (dX0 - dXMin) / (dXMax - dXMin) * dX * 5.0
+					//	, CURVE_AREA_AXIS_START_Y - (dY0 - dYMin) / (dYMax - dYMin) * dY * 5.0);
+				}
+			}
+      
+			GUI_SetColor(0x008000);
+			strcpy(ConvertStr,"Logistic");
+			//dc->SetTextColor(RGB(0,0x80,0));
+			//dc->SelectObject(fontLogSelect);
+			sprintf(StrTemp,": y=%1.3f+(%1.3f-%1.3f)/(1+(x/%1.3f)^%1.3f)"
+				
+			//strTemp.Format(_T(":  y = %1.3f + (%1.3f - %1.3f) / (1 + (x / %1.3f) ^ %1.3f)")
+				, NormalAnalysis.LogisticAnalysis[NormalAnalysis.FilterCurrent].dCoef[3]
+			, NormalAnalysis.LogisticAnalysis[NormalAnalysis.FilterCurrent].dCoef[0]
+			, NormalAnalysis.LogisticAnalysis[NormalAnalysis.FilterCurrent].dCoef[3]
+			, NormalAnalysis.LogisticAnalysis[NormalAnalysis.FilterCurrent].dCoef[2]
+			, NormalAnalysis.LogisticAnalysis[NormalAnalysis.FilterCurrent].dCoef[1]);
+			strcat(ConvertStr,StrTemp);
+			GUI_DispStringAt(ConvertStr,CURVE_AREA_TEXT_START_X,CURVE_AREA_AXIS_START_Y+3);
+		//	strTemp = strType + strTemp;
+			//dc->ExtTextOutW(CURVE_AREA_TEXT_START_X,rectCurve.top + 3,ETO_CLIPPED,rect, strTemp,NULL) ;
+
+			sprintf(ConvertStr,"R2: %1.3f",NormalAnalysis.LogisticAnalysis[NormalAnalysis.FilterCurrent].dRR);
+			GUI_DispStringAt(ConvertStr,CURVE_AREA_TEXT_START_X,CURVE_AREA_AXIS_START_Y+20);
+			//strTemp.Format(_T("R2:  %1.3f"), NormalAnalysis.logistic_analysis[NormalAnalysis.FilterCurrent].dRR);
+			//dc->ExtTextOutW(CURVE_AREA_TEXT_START_X,rectCurve.top + 20,ETO_CLIPPED,rect, strTemp,NULL) ;
+			//dc->SelectObject(f2);
+			//dc->SetTextColor(RGB(0,0,0));
+			GUI_SetColor(0x00);
+		}
+		else if(BoardInf.KineticPara.Curve==CURVE_LINEAR)
+		//else if(CString(BoardInf.curentcurve) == _T("Linear"))
+		{
+			//strType = _T("Linear");
+			
+			float dX1, dX2, dY1, dY2;
+			dX1 = dXMin;
+			dY1 = dX1 * NormalAnalysis.LinearAnalysis[NormalAnalysis.FilterCurrent].dSlope 
+				+ NormalAnalysis.LinearAnalysis[NormalAnalysis.FilterCurrent].dIntercept;
+			if(dY1 > dYMax)
+			{
+				dY1 = dYMax;
+				dX1 = (dY1 - NormalAnalysis.LinearAnalysis[NormalAnalysis.FilterCurrent].dIntercept)
+					/ NormalAnalysis.LinearAnalysis[NormalAnalysis.FilterCurrent].dSlope;
+			}
+			else if(dY1 < dYMin)
+			{
+				dY1 = dYMin;
+				dX1 = (dY1 - NormalAnalysis.LinearAnalysis[NormalAnalysis.FilterCurrent].dIntercept)
+					/ NormalAnalysis.LinearAnalysis[NormalAnalysis.FilterCurrent].dSlope;
+			}
+
+			dX2 = dXMax;
+			dY2 = dX2 * NormalAnalysis.LinearAnalysis[NormalAnalysis.FilterCurrent].dSlope 
+				+ NormalAnalysis.LinearAnalysis[NormalAnalysis.FilterCurrent].dIntercept;
+			if(dY2 > dYMax)
+			{
+				dY2 = dYMax;
+				dX2 = (dY2 - NormalAnalysis.LinearAnalysis[NormalAnalysis.FilterCurrent].dIntercept)
+					/ NormalAnalysis.LinearAnalysis[NormalAnalysis.FilterCurrent].dSlope;
+			}
+			else if(dY2 < dYMin)
+			{
+				dY2 = dYMin;
+				dX2 = (dY2 - NormalAnalysis.LinearAnalysis[NormalAnalysis.FilterCurrent].dIntercept)
+					/ NormalAnalysis.LinearAnalysis[NormalAnalysis.FilterCurrent].dSlope;
+			}
+            rect.x0=CURVE_AREA_AXIS_START_X + (dX1 - dXMin) / (dXMax - dXMin) * dX * 5.0f;
+			rect.y0=CURVE_AREA_AXIS_END_Y - (dY1 - dYMin) / (dYMax - dYMin) * dY * 5.0f;
+			rect.x1=CURVE_AREA_AXIS_START_X + (dX2 - dXMin) / (dXMax - dXMin) * dX * 5.0f;
+			rect.y1=CURVE_AREA_AXIS_END_Y - (dY2 - dYMin) / (dYMax - dYMin) * dY * 5.0f;
+			
+			if(rect.y0<CURVE_AREA_AXIS_START_Y)rect.y0=CURVE_AREA_AXIS_START_Y;//lgj180110
+					if(rect.y1<CURVE_AREA_AXIS_START_Y)rect.y1=CURVE_AREA_AXIS_START_Y;//lgj180110
+			if(rect.y0>CURVE_AREA_AXIS_END_Y)rect.y0=CURVE_AREA_AXIS_END_Y;//lgj180110
+					if(rect.y1>CURVE_AREA_AXIS_END_Y)rect.y1=CURVE_AREA_AXIS_END_Y;//lgj180110
+            GUI_DrawLine(rect.x0,rect.y0,rect.x1,rect.y1);
+
+			
+      GUI_SetColor(0x008000);
+			strcpy(ConvertStr,"Linear");
+			//dc->SetTextColor(RGB(0,0x80,0));
+			//dc->SelectObject(fontLogSelect);
+			sprintf(StrTemp,": y = %1.3f * x + %1.3f"
+				
+			//strTemp.Format(_T(":  y = %1.3f + (%1.3f - %1.3f) / (1 + (x / %1.3f) ^ %1.3f)")
+				, NormalAnalysis.LinearAnalysis[NormalAnalysis.FilterCurrent].dSlope
+			, NormalAnalysis.LinearAnalysis[NormalAnalysis.FilterCurrent].dIntercept);
+			strcat(ConvertStr,StrTemp);
+			GUI_DispStringAt(ConvertStr,CURVE_AREA_TEXT_START_X,CURVE_AREA_AXIS_START_Y+3);
+		//	strTemp = strType + strTemp;
+			//dc->ExtTextOutW(CURVE_AREA_TEXT_START_X,rectCurve.top + 3,ETO_CLIPPED,rect, strTemp,NULL) ;
+
+			sprintf(ConvertStr,"R2: %1.3f",NormalAnalysis.LinearAnalysis[NormalAnalysis.FilterCurrent].dRR);
+			GUI_DispStringAt(ConvertStr,CURVE_AREA_TEXT_START_X,CURVE_AREA_AXIS_START_Y+20);
+			//strTemp.Format(_T("R2:  %1.3f"), NormalAnalysis.logistic_analysis[NormalAnalysis.FilterCurrent].dRR);
+			//dc->ExtTextOutW(CURVE_AREA_TEXT_START_X,rectCurve.top + 20,ETO_CLIPPED,rect, strTemp,NULL) ;
+			//dc->SelectObject(f2);
+			//dc->SetTextColor(RGB(0,0,0));
+			GUI_SetColor(0x00);
+		}
+		else if(BoardInf.KineticPara.Curve==CURVE_FACTOR)
+		//else if(CString(BoardInf.curentcurve) == _T("Factor"))
+		{
+		//	strType = _T("Factor");
+			float dX1, dX2, dY1, dY2;
+			dX1 = dXMin;
+			dY1 = dX1 * NormalAnalysis.FactorAnalysis[NormalAnalysis.FilterCurrent].dSlope;
+			if(dY1 > dYMax)
+			{
+				dY1 = dYMax;
+				dX1 = dY1 / NormalAnalysis.FactorAnalysis[NormalAnalysis.FilterCurrent].dSlope;
+			}
+			else if(dY1 < dYMin)
+			{
+				dY1 = dYMin;
+				dX1 = dY1 / NormalAnalysis.FactorAnalysis[NormalAnalysis.FilterCurrent].dSlope;
+			}
+			dX2 = dXMax;
+			dY2 = dX2 * NormalAnalysis.FactorAnalysis[NormalAnalysis.FilterCurrent].dSlope;
+			if(dY2 > dYMax)
+			{
+				dY2 = dYMax;
+				dX2 = dY2 / NormalAnalysis.FactorAnalysis[NormalAnalysis.FilterCurrent].dSlope;
+			}
+			else if(dY2 < dYMin)
+			{
+				dY2 = dYMin;
+				dX2 = dY2 / NormalAnalysis.FactorAnalysis[NormalAnalysis.FilterCurrent].dSlope;
+			}
+
+			rect.x0=CURVE_AREA_AXIS_START_X + (dX1 - dXMin) / (dXMax - dXMin) * dX * 5.0f;
+			rect.y0=CURVE_AREA_AXIS_END_Y - (dY1 - dYMin) / (dYMax - dYMin) * dY * 5.0f;
+			rect.x1=CURVE_AREA_AXIS_START_X + (dX2 - dXMin) / (dXMax - dXMin) * dX * 5.0f;
+			rect.y1=CURVE_AREA_AXIS_END_Y - (dY2 - dYMin) / (dYMax - dYMin) * dY * 5.0f;
+			
+			if(rect.y0<CURVE_AREA_AXIS_START_Y)rect.y0=CURVE_AREA_AXIS_START_Y;//lgj180110
+					if(rect.y1<CURVE_AREA_AXIS_START_Y)rect.y1=CURVE_AREA_AXIS_START_Y;//lgj180110
+			if(rect.y0>CURVE_AREA_AXIS_END_Y)rect.y0=CURVE_AREA_AXIS_END_Y;//lgj180110
+				if(rect.y1>CURVE_AREA_AXIS_END_Y)rect.y1=CURVE_AREA_AXIS_END_Y;//lgj180110
+      GUI_DrawLine(rect.x0,rect.y0,rect.x1,rect.y1);
+
+
+			 GUI_SetColor(0x008000);
+			strcpy(ConvertStr,"Factor");
+			//dc->SetTextColor(RGB(0,0x80,0));
+			//dc->SelectObject(fontLogSelect);
+			sprintf(StrTemp,": y = %1.3f * x"
+				
+			//strTemp.Format(_T(":  y = %1.3f + (%1.3f - %1.3f) / (1 + (x / %1.3f) ^ %1.3f)")
+				, NormalAnalysis.FactorAnalysis[NormalAnalysis.FilterCurrent].dSlope);
+			strcat(ConvertStr,StrTemp);
+			GUI_DispStringAt(ConvertStr,CURVE_AREA_TEXT_START_X,CURVE_AREA_AXIS_START_Y+3);
+		//	strTemp = strType + strTemp;
+			//dc->ExtTextOutW(CURVE_AREA_TEXT_START_X,rectCurve.top + 3,ETO_CLIPPED,rect, strTemp,NULL) ;
+
+			sprintf(ConvertStr,"R2: %1.3f",NormalAnalysis.FactorAnalysis[NormalAnalysis.FilterCurrent].dRR);
+			GUI_DispStringAt(ConvertStr,CURVE_AREA_TEXT_START_X,CURVE_AREA_AXIS_START_Y+20);
+
+			GUI_SetColor(0x00);
+			
+		}
+		else if(BoardInf.KineticPara.Curve==CURVE_PTOP)
+		//else if(CString(BoardInf.curentcurve) == _T("PtoP"))
+		{
+			//strType = _T("Point to point");
+			float dX1, dY1;
+
+			for(i = 0; i < nTotal; i++)
+			{
+				dX1 = NormalAnalysis.PtopAnalysis[NormalAnalysis.FilterCurrent].dX[i];
+				dY1 = NormalAnalysis.PtopAnalysis[NormalAnalysis.FilterCurrent].dY[i];
+				if(i == 0)
+				{
+					rect.x0=CURVE_AREA_AXIS_START_X + (dX1 - dXMin) / (dXMax - dXMin) * dX * 5.0f;
+					rect.y0=CURVE_AREA_AXIS_END_Y - (dY1 - dYMin) / (dYMax - dYMin) * dY * 5.0f;
+				}
+				else
+				{
+					rect.x1=CURVE_AREA_AXIS_START_X + (dX1 - dXMin) / (dXMax - dXMin) * dX * 5.0f;
+					rect.y1=CURVE_AREA_AXIS_END_Y - (dY1 - dYMin) / (dYMax - dYMin) * dY * 5.0f;
+					
+					if(rect.y0<CURVE_AREA_AXIS_START_Y)rect.y0=CURVE_AREA_AXIS_START_Y;//lgj180110
+					if(rect.y1<CURVE_AREA_AXIS_START_Y)rect.y1=CURVE_AREA_AXIS_START_Y;//lgj180110
+					if(rect.y0>CURVE_AREA_AXIS_END_Y)rect.y0=CURVE_AREA_AXIS_END_Y;//lgj180110
+					if(rect.y1>CURVE_AREA_AXIS_END_Y)rect.y1=CURVE_AREA_AXIS_END_Y;//lgj180110
+          GUI_DrawLine(rect.x0,rect.y0,rect.x1,rect.y1);
+          rect.x0=rect.x1;
+					rect.y0=rect.y1;
+					
+				}
+			}
+            GUI_SetColor(0x008000);
+			
+			GUI_DispStringAt("Point to point",CURVE_AREA_TEXT_START_X + 20,CURVE_AREA_AXIS_START_Y+3);
+		//	strTemp = strType + strTemp;
+			//dc->ExtTextOutW(CURVE_AREA_TEXT_START_X,rectCurve.top + 3,ETO_CLIPPED,rect, strTemp,NULL) ;
+			GUI_SetColor(0x00);
+
+			//dc->SetTextColor(RGB(0,0x80,0));
+			//dc->SelectObject(fontLogSelect);
+			//dc->ExtTextOutW(CURVE_AREA_TEXT_START_X + 20,rectCurve.top + 3,ETO_CLIPPED,rect, strType,NULL) ;
+			//dc->SelectObject(f2);
+			//dc->SetTextColor(RGB(0,0,0));
+		}
+		else if(BoardInf.KineticPara.Curve==CURVE_CUBIC)
+		//else if(CString(BoardInf.curentcurve) == _T("CubicSpline"))
+		{
+			//strType = _T("Cubic spline");
+			unsigned char bCurveBegin =0;// false;
+			float dX0, dY0, ddX;
+			ddX = (dXMax - dXMin) /  ANALYSIS_CURVE_POINT_MAX;
+			for(i = 0; i <= ANALYSIS_CURVE_POINT_MAX; i++)
+			{
+				float dSplineX2, dSplineX1; //区间浓度值
+				float dSplineY2, dSplineY1; //区间浓度值
+				float dSplineM2, dSplineM1; //区间M值
+				float dSplineH; //区间间隔
+
+				dX0 = dXMin + ddX * i;
+				k = nTotal - 2; //区间号初始化
+				for(j = 0; j < nTotal; j++) //找出样条拟合区间
+				{
+					if(dX0 < NormalAnalysis.SplineAnalysis[NormalAnalysis.FilterCurrent].dX[j])
+					{
+						k = j - 1;
+						if(k < 0)
+						{
+							k = 0;
+						}
+						break;
+					}
+				}
+				
+				dSplineX2 = NormalAnalysis.SplineAnalysis[NormalAnalysis.FilterCurrent].dX[k + 1];
+				dSplineX1 = NormalAnalysis.SplineAnalysis[NormalAnalysis.FilterCurrent].dX[k];
+				dSplineY2 = NormalAnalysis.SplineAnalysis[NormalAnalysis.FilterCurrent].dY[k + 1];
+				dSplineY1 = NormalAnalysis.SplineAnalysis[NormalAnalysis.FilterCurrent].dY[k];
+				dSplineM2 = NormalAnalysis.SplineAnalysis[NormalAnalysis.FilterCurrent].dM[k + 1];
+				dSplineM1 = NormalAnalysis.SplineAnalysis[NormalAnalysis.FilterCurrent].dM[k];
+				dSplineH = NormalAnalysis.SplineAnalysis[NormalAnalysis.FilterCurrent].dH[k];
+				dY0 = ((dSplineX2 - dX0) * (dSplineX2 - dX0) * (dSplineX2 - dX0)) * dSplineM1 / (6 * dSplineH)
+					+ ((dX0 - dSplineX1) * (dX0 - dSplineX1) * (dX0 - dSplineX1)) * dSplineM2 / (6 * dSplineH)
+					+ (dSplineY1 - dSplineH * dSplineH * dSplineM1 / 6) * (dSplineX2 - dX0) / dSplineH
+					+ (dSplineY2 - dSplineH * dSplineH * dSplineM2 / 6) * (dX0 - dSplineX1) / dSplineH;
+
+				if(dY0 < dYMin)
+				{
+					continue;
+				}
+
+				if(bCurveBegin==0)
+				{
+					bCurveBegin = 1;//true;
+					rect.x0=CURVE_AREA_AXIS_START_X + (dX0 - dXMin) / (dXMax - dXMin) * dX * 5.0f;
+					rect.y0=CURVE_AREA_AXIS_END_Y - (dY0 - dYMin) / (dYMax - dYMin) * dY * 5.0f;
+		
+				}
+				else
+				{
+					rect.x1=CURVE_AREA_AXIS_START_X + (dX0 - dXMin) / (dXMax - dXMin) * dX * 5.0f;
+					rect.y1=CURVE_AREA_AXIS_END_Y - (dY0 - dYMin) / (dYMax - dYMin) * dY * 5.0f;
+					
+					if(rect.y0<CURVE_AREA_AXIS_START_Y)rect.y0=CURVE_AREA_AXIS_START_Y;//lgj180110
+					if(rect.y1<CURVE_AREA_AXIS_START_Y)rect.y1=CURVE_AREA_AXIS_START_Y;//lgj180110
+					if(rect.y0>CURVE_AREA_AXIS_END_Y)rect.y0=CURVE_AREA_AXIS_END_Y;//lgj180110
+					if(rect.y1>CURVE_AREA_AXIS_END_Y)rect.y1=CURVE_AREA_AXIS_END_Y;//lgj180110
+                    GUI_DrawLine(rect.x0,rect.y0,rect.x1,rect.y1);
+                    rect.x0=rect.x1;
+					rect.y0=rect.y1;
+				}
+			}
+
+			//dc->SetTextColor(RGB(0,0x80,0));
+			//dc->SelectObject(fontLogSelect);
+			//dc->ExtTextOutW(CURVE_AREA_TEXT_START_X + 20,rectCurve.top + 3,ETO_CLIPPED,rect, strType,NULL) ;
+			//dc->SelectObject(f2);
+			//dc->SetTextColor(RGB(0,0,0));
+
+			 GUI_SetColor(0x008000);
+			
+			GUI_DispStringAt("Cubic Spline",CURVE_AREA_TEXT_START_X + 20,CURVE_AREA_AXIS_START_Y+3);
+		//	strTemp = strType + strTemp;
+			//dc->ExtTextOutW(CURVE_AREA_TEXT_START_X,rectCurve.top + 3,ETO_CLIPPED,rect, strTemp,NULL) ;
+			GUI_SetColor(0x00);
+
+		}//else if(BoardInf.KineticPara.Curve==CURVE_CUBIC)
+
+		//画标准品
+//		dc->SelectObject(&penPoint);
+		for(i = 0; i < nTotal; i++)
+		{
+			int nPointX = CURVE_AREA_AXIS_START_X + (CalcuPara.p_dX[i] - dXMin) / (dXMax - dXMin) * dX * 5.0f;
+			int nPointY = CURVE_AREA_AXIS_END_Y - (CalcuPara.p_dY[i] - dYMin) / (dYMax - dYMin) * dY * 5.0f;
+			int nDX = 4;
+			int nDY = 4;
+        
+			GUI_SetColor(GUI_RED);
+			//dc->MoveTo(nPointX - nDX, nPointY);
+			//dc->LineTo(nPointX + nDX + 1, nPointY);
+			GUI_DrawLine(nPointX - nDX, nPointY,nPointX + nDX + 1, nPointY);
+
+			//dc->MoveTo(nPointX, nPointY - nDY);
+			//dc->LineTo(nPointX, nPointY + nDY + 1);
+			GUI_DrawLine(nPointX, nPointY - nDY,nPointX, nPointY + nDY + 1);
+		}
+		
+
+		//delete[] p_dX;
+		//delete[] p_dY;
+		//free(p_dX);
+		//free(p_dY);
+		//penAxis.DeleteObject();
+		//penPoint.DeleteObject();
+		//penCurve.DeleteObject();
+		//penTick.DeleteObject();
+		//dc->SelectObject(p_penOld);
+		//oldCFont=dc->SelectObject(oldCFont);
+	}
+}
+
+
+
+//正常分析质控
+void DisplayQC(void)
+{
+    float temp;
+		short i,j;
+		GUI_RECT rect;
+  //    nCurrentPage
+	
+	
+	if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		{
+			GUI_SetFont(GUI_FONT_MED);
+		}
+		else
+		{
+			GUI_SetFont(GUI_FONT_MED_CH);
+		}
+		
+		
+    //画表格的边框
+		GUI_SetColor(0xe1d8ca);//ok
+		rect.x0 = TABLE_QUALITY_START_X;
+		rect.y0 = TABLE_QUALITY_START_Y - TITLESBAR_HEIGHT;
+		rect.x1 =TABLE_QUALITY_END_X; 
+		rect.y1=TABLE_QUALITY_END_Y - TITLESBAR_HEIGHT;
+		GUI_DrawRect(rect.x0, rect.y0, rect.x1, rect.y1);
+		//画表格顶行的背景色
+		GUI_SetColor(COLOR_TITLEBAR);
+		GUI_FillRect(rect.x0 + 2, rect.y0 + 2, rect.x1 - 2, rect.y0 + 35);    //首行
+		//画表格翻页图标的背景色
+	  GUI_SetColor(0xf4dbb2);
+	  GUI_FillRect(rect.x0+2, rect.y1-37, rect.x1-2 , rect.y1-2);                //尾行
+    //画表格线(5条）
+		GUI_SetColor(COLOR_TITLEBAR);
+	   for(i=rect.x0;i<rect.x1;)
+	   {
+		    for(j=0;j<5;j++)
+			  {
+		       GUI_DrawPoint(i,rect.y0+37*2+37*j);
+				   GUI_DrawPoint(i+1,rect.y0+37*2+37*j);
+				   GUI_DrawPoint(i+2,rect.y0+37*2+37*j);
+			  }
+			   i=i+5;
+		}
+     //画表格的翻页图标
+	  GUI_DrawBitmap(&bmQcTabFirst_P, TABPAGE_LEFT_START_X, TABPAGE_LEFT_START_Y- TITLESBAR_HEIGHT);
+      GUI_DrawBitmap(&bmQcTabPrev_P, TAB_LEFT_START_X, TAB_LEFT_START_Y - TITLESBAR_HEIGHT);
+	  GUI_DrawBitmap(&bmQcTabNext_P, TAB_RIGHT_START_X, TAB_RIGHT_START_Y - TITLESBAR_HEIGHT);
+	  GUI_DrawBitmap(&bmQcTabEnd_P, TABPAGE_RIGHT_START_X, TABPAGE_RIGHT_START_Y - TITLESBAR_HEIGHT);
+	    
+      //画表格顶部的文字
+        GUI_SetColor(0xffdddd);//
+		rect.x0 = QC_RESULT_COLUMN_NO ;
+		rect.y0 = TABLE_QUALITY_START_Y+QUALITY_ROW_TXT_DIS_Y;
+		rect.y0=rect.y0 -TITLESBAR_HEIGHT;
+        GUI_DispStringAt(STR_TABLE_RECORD_NO[SystemPrameter.SystemLanguage],rect.x0,rect.y0);
+		GUI_DispStringAt(REFERENCE_SELECT[SystemPrameter.SystemLanguage][BoardInf.QualityPara.AbsFlag],
+	              QC_RESULT_COLUMN_REFERENCE,
+		          rect.y0);
+        GUI_DispStringAt(QUALITY_TABLE_SD[SystemPrameter.SystemLanguage],
+	              QC_RESULT_COLUMN_SD,
+		          rect.y0);
+       GUI_DispStringAt(QUALITY_TABLE_CV[SystemPrameter.SystemLanguage],
+	              QC_RESULT_COLUMN_CV,// + QUALITY_TABLE_CV_START_X[SystemPrameter.SystemLanguage],
+		          rect.y0);
+       GUI_DispStringAt(QUALITY_TABLE_UPPER_LIMIT[SystemPrameter.SystemLanguage],
+	              QC_RESULT_COLUMN_UPPER,
+		          rect.y0);
+	   GUI_DispStringAt(QUALITY_TABLE_LOWER_LIMIT[SystemPrameter.SystemLanguage],
+	              QC_RESULT_COLUMN_LOWER,
+		          rect.y0);
+       GUI_DispStringAt(QUALITY_TABLE_RESULT[SystemPrameter.SystemLanguage],
+	              QC_RESULT_COLUMN_RESULT,
+		          rect.y0);
+if(BoardInf.QualityResult.nCurrentPageAnalysis>BoardInf.QualityResult.nPageTotalAnalysis)
+{
+	  BoardInf.QualityResult.nCurrentPageAnalysis=BoardInf.QualityResult.nPageTotalAnalysis;
+}
+if( (BoardInf.QualityResult.nTotal[NormalAnalysis.FilterCurrent] % QC_PAGE_NUMBER)||(BoardInf.QualityResult.nTotal[NormalAnalysis.FilterCurrent]==0) )
+{
+            BoardInf.QualityResult.nPageTotalAnalysis = BoardInf.QualityResult.nTotal[NormalAnalysis.FilterCurrent] / QC_PAGE_NUMBER + 1;  //质控分析的页数
+}
+else
+{
+	          BoardInf.QualityResult.nPageTotalAnalysis = BoardInf.QualityResult.nTotal[NormalAnalysis.FilterCurrent] / QC_PAGE_NUMBER;
+}
+	/*
+  if(nCurrentSelect>= QC_MAX ||  nCurrentSelect<0) // //只有九个质控品
+  {
+	   nCurrentSelect=0;
+  }
+  nCurrentPage = nCurrentSelect / QC_PAGE_NUMBER;
+ nCurrentSelectPage = nCurrentSelect % QC_PAGE_NUMBER;
+*/
+  //质控打开时的绘制
+//if(QualityParaBack.Enable)
+//{
+   
+	   GUI_SetColor(0x0);
+	   j=0;
+	   for (i = 0; i < QC_MAX; i++)
+	   {
+			 if(j + 1 > BoardInf.QualityResult.nTotal[NormalAnalysis.FilterCurrent]) //只有九个质控品
+		   {
+			      break;
+		   }
+           if(j + 1 > QC_PAGE_NUMBER && BoardInf.QualityResult.nCurrentPageAnalysis == 0) //每页5个
+		   { 
+			   break;
+		   }
+		   	if(BoardInf.QualityResult.nTotalQC[NormalAnalysis.FilterCurrent][i]==0)
+		   {
+			    continue;
+		   }
+			if(j < QC_PAGE_NUMBER && BoardInf.QualityResult.nCurrentPageAnalysis > 0) //每页5个
+		   { 
+			   j++;
+			   continue;
+		   }
+
+		   
+
+       //显示No
+		GUI_SetColor(0x0);
+		rect.x0 = QC_RESULT_COLUMN_NO;
+		rect.y0=PAGE_SELECT_START_Y+2-TITLESBAR_HEIGHT+i*PAGE_SELECT_DIS_Y;
+		rect.x1 = rect.x0+55;
+		rect.y1 =  rect.y0+SELECT_HIGH;
+        sprintf(ConvertStr,"%d",i + 1);
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+
+        
+
+
+		//显示吸光度或浓度Target
+		temp=BoardInf.QualityResult.dReferenceQC[NormalAnalysis.FilterCurrent][i ];
+		//temp=QualityParaBack.dTarget[QualityParaBack.AbsFlag][i + QC_PAGE_NUMBER * nCurrentPage];
+		if(temp > 1000.0f || temp < -1000.0f)
+		{
+			sprintf(ConvertStr,"%.3e",temp);
+			EConvert(ConvertStr);
+		}
+		else
+		{
+			sprintf(ConvertStr,"%1.3f",temp);
+		}
+		rect.x0 = QC_RESULT_COLUMN_REFERENCE;
+		rect.x1 = rect.x0+110;//
+		GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+
+
+       //显示SD
+		 GUI_SetColor(0x0);
+       // temp=QualityParaBack.dSD[QualityParaBack.AbsFlag][i + QC_PAGE_NUMBER * nCurrentPage];
+		temp=BoardInf.QualityPara.dSD[NormalAnalysis.FilterCurrent][i ];
+		if(temp > 1000.0f || temp < -1000.0f)
+		{
+			sprintf(ConvertStr,"%.3e",temp);
+			EConvert(ConvertStr);
+		}
+		else
+		{
+			sprintf(ConvertStr,"%1.3f",temp);
+		}
+		rect.x0 = QC_RESULT_COLUMN_SD;
+		rect.x1 = rect.x0+100;
+
+		GUI_SetColor(0x0);
+		GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+	
+
+
+        //CV
+		 GUI_SetColor(0x0);
+		 //if(BoardInf.QualityResult.dReferenceQC[NormalAnalysis.FilterCurrent][i]==0)
+		 if(BoardInf.QualityResult.dReferenceQC[NormalAnalysis.FilterCurrent][i] < CONCENTRATION_VALUE_MIN && BoardInf.QualityResult.dReferenceQC[NormalAnalysis.FilterCurrent][i] > -CONCENTRATION_VALUE_MIN)
+		 {
+			   strcpy(ConvertStr,"N.A.");
+		 }
+		 else
+		 {
+		     temp=BoardInf.QualityPara.dSD[NormalAnalysis.FilterCurrent][i ] /BoardInf.QualityResult.dReferenceQC[NormalAnalysis.FilterCurrent][i];
+		     //temp=QualityParaBack.dCV[QualityParaBack.AbsFlag][i + QC_PAGE_NUMBER * nCurrentPage];
+		     //if(temp < CONCENTRATION_VALUE_MIN && temp > -CONCENTRATION_VALUE_MIN)
+		     //{
+				//	  sprintf(ConvertStr,"%1.3f",0.0f); //			     //strcpy(ConvertStr,"N.A.");
+		     //}
+		     if(temp > 1000.0f || temp < -1000.0f)
+		     {
+			      sprintf(ConvertStr,"%.3e",temp);
+			      EConvert(ConvertStr);
+		     }
+		     else
+		     {
+			     sprintf(ConvertStr,"%1.3f",temp);
+		     }
+	  }
+		rect.x0 = QC_RESULT_COLUMN_CV;
+		rect.x1 = rect.x0+100;//
+		GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+
+
+	   //Upper limit
+    temp=BoardInf.QualityPara.dUpperLimit[BoardInf.QualityPara.AbsFlag][i];
+		if(temp > 1000.0f || temp < -1000.0f)
+		{
+			sprintf(ConvertStr,"%.3e",temp);
+			EConvert(ConvertStr);
+		}
+		else
+		{
+			sprintf(ConvertStr,"%1.3f",temp);
+		}
+		rect.x0 = QC_RESULT_COLUMN_UPPER;
+		rect.x1 = rect.x0+120;
+		GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+
+
+        //Lower limit
+		temp=BoardInf.QualityPara.dLowerLimit[BoardInf.QualityPara.AbsFlag][i ];
+		if(temp > 1000.0f || temp < -1000.0f)
+		{
+			sprintf(ConvertStr,"%.3e",temp);
+			EConvert(ConvertStr);
+		}
+		else
+		{
+			sprintf(ConvertStr,"%1.3f",temp);
+		}
+		rect.x0 = QC_RESULT_COLUMN_LOWER;
+		rect.x1 = rect.x0+100;//
+		GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+
+
+		    //Lower limit
+		if(BoardInf.QualityResult.bFailed[NormalAnalysis.FilterCurrent][i ])//失败
+		{
+			GUI_SetColor(0x0000ff);
+		}
+		else  //成功
+		{
+			GUI_SetColor(0x00);
+		}
+		
+		rect.x0 = QC_RESULT_COLUMN_RESULT;
+		rect.x1 = rect.x0+100;//
+		strcpy(ConvertStr,STR_QUALITY_RESULT[SystemPrameter.SystemLanguage][BoardInf.QualityResult.bFailed[NormalAnalysis.FilterCurrent][i]]);
+		GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+
+
+		rect.y0 +=PAGE_SELECT_DIS_Y;
+	}
+	
+//}
+
+	//4.画页码
+    GUI_SetColor(0x0);
+	rect.x0=270;
+	rect.x1=350;
+    rect.y0=TAB_RIGHT_START_Y-10- TITLESBAR_HEIGHT;
+	rect.y1=TAB_RIGHT_END_Y+10- TITLESBAR_HEIGHT;
+   
+	sprintf(ConvertStr,"%d",BoardInf.QualityResult.nCurrentPageAnalysis + 1);
+	strcat(ConvertStr," / ");
+	sprintf(StrTemp,"%d",BoardInf.QualityResult.nPageTotalAnalysis);
+	strcat(ConvertStr,StrTemp);
+    GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+	//if(board_inf.quality_para.bOpened)
+	//{
+	 //   DisplayList(dc);
+	//}
+
+
+
+
+		
+//if(ExpEnable==EXP_ENABLE)
+//{
+//	DisplayExpandEnable();
+//}
+
+
+
+
+
+	/*
+		StretchBlt(DstDC,
+			MAIN_BK_START_X,
+			MAIN_BK_START_Y,
+			MAIN_BK_END_X-MAIN_BK_START_X,
+			MAIN_BK_END_Y-MAIN_BK_START_Y,
+			table_background.hdcMem,
+			0,
+			0,
+			MAIN_BK_END_X-MAIN_BK_START_X,
+			MAIN_BK_END_Y-MAIN_BK_START_Y,
+			SRCCOPY);
+
+		oldCFont=dc->SelectObject(f[sys_para.wcLanguage]); //2014-8-10项
+		if(sys_para.wcLanguage == CHINESE)
+			dc->ExtTextOutW(QC_RESULT_COLUMN_NO,EDIT_START_Y+62,ETO_CLIPPED,rect,_T("编号 "),NULL) ;
+		else
+			dc->ExtTextOutW(QC_RESULT_COLUMN_NO,EDIT_START_Y+62,ETO_CLIPPED,rect,_T("NO."),NULL) ;
+		dc->ExtTextOutW(QC_RESULT_COLUMN_REFERENCE,EDIT_START_Y+62,ETO_CLIPPED,rect
+			, REFERENCE_SELECT[sys_para.wcLanguage][BoardInf.quality_para.bABS],NULL) ;
+		dc->ExtTextOutW(QC_RESULT_COLUMN_SD,EDIT_START_Y+62,ETO_CLIPPED,rect,_T("SD"),NULL) ;
+		dc->ExtTextOutW(QC_RESULT_COLUMN_CV,EDIT_START_Y+62,ETO_CLIPPED,rect,_T("CV"),NULL) ;
+
+		if(sys_para.wcLanguage == CHINESE)
+		{
+			dc->ExtTextOutW(QC_RESULT_COLUMN_UPPER,EDIT_START_Y+62,ETO_CLIPPED,rect,_T(" 上限  "),NULL) ;
+			dc->ExtTextOutW(QC_RESULT_COLUMN_LOWER,EDIT_START_Y+62,ETO_CLIPPED,rect,_T("  下限  "),NULL) ;
+			dc->ExtTextOutW(QC_RESULT_COLUMN_RESULT,EDIT_START_Y+62,ETO_CLIPPED,rect,_T(" 结果 "),NULL) ;
+		}
+		else
+		{
+			dc->ExtTextOutW(QC_RESULT_COLUMN_UPPER,EDIT_START_Y+62,ETO_CLIPPED,rect,_T("Upper limit"),NULL) ;
+			dc->ExtTextOutW(QC_RESULT_COLUMN_LOWER,EDIT_START_Y+62,ETO_CLIPPED,rect,_T("Lower limit"),NULL) ;
+			dc->ExtTextOutW(QC_RESULT_COLUMN_RESULT,EDIT_START_Y+62,ETO_CLIPPED,rect,_T("Result"),NULL) ;
+		}
+
+		DisplayList(dc);
+		*/
+}
+
+
+/*
+//正常分析原始数据，定性分析，分析结果
+void DisplayNormal(void)
+{
+}	*/
+
+
+//动力学分析原始曲线
+void DisplayKineticCurve(void)
+{
+	   GUI_RECT rect;
+	   float dTemp;
+       float dX,dY;
+	   int i,j;
+	   float dXMin, dXMax, dYMin, dYMax;
+	   float dX0, dY0;
+//       int nTotal = BoardInf.KineticPara.kinetic_readings_analysis;
+
+
+//		float *p_dX = (float *)malloc(sizeof(float) * nTotal);
+	    //float *p_dY = (float *)malloc(sizeof(float) * nTotal);  
+		GetAxisLimitsKinetic(&dXMin, &dXMax, &dYMin, &dYMax, CalcuPara.p_dX, CalcuPara.p_dY);
+
+
+	   GUI_SetColor(0x0);
+
+		GUI_DrawLine(CURVE_AREA_AXIS_START_X,CURVE_AREA_AXIS_START_Y,CURVE_AREA_AXIS_START_X,CURVE_AREA_AXIS_END_Y);//画坐标轴垂直线
+        GUI_DrawLine(CURVE_AREA_AXIS_START_X,CURVE_AREA_AXIS_END_Y,CURVE_AREA_AXIS_END_X,CURVE_AREA_AXIS_END_Y);//画坐标轴水平线
+
+		//画tick
+        dX=(CURVE_AREA_AXIS_END_X-CURVE_AREA_AXIS_LINE_X-CURVE_AREA_AXIS_START_X)/5.0;
+        dY=(CURVE_AREA_AXIS_END_Y-CURVE_AREA_AXIS_START_Y-CURVE_AREA_AXIS_LINE_Y)/5.0;
+        for(i=0;i<5;i++)
+		{
+		    GUI_DrawLine(CURVE_AREA_AXIS_START_X+dX*(i+1),CURVE_AREA_AXIS_END_Y,CURVE_AREA_AXIS_START_X+dX*(i+1),CURVE_AREA_AXIS_END_Y+CURVE_AREA_AXIS_TICK_Y);//画5条短垂直线
+			GUI_DrawLine(CURVE_AREA_AXIS_START_X-CURVE_AREA_AXIS_TICK_X,CURVE_AREA_AXIS_START_Y+CURVE_AREA_AXIS_LINE_Y+dY * i,CURVE_AREA_AXIS_START_X,CURVE_AREA_AXIS_START_Y+CURVE_AREA_AXIS_LINE_Y+ dY * i);//画5条短水平线
+		}
+        
+
+
+     if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		{
+			GUI_SetFont(GUI_FONT_MED);
+		}
+		else
+		{
+			GUI_SetFont(GUI_FONT_MED_CH);
+		}
+	   GUI_DispStringAt(CURVE_REPORT_ABSORBANCE[SystemPrameter.SystemLanguage],CURVE_AREA_AXIS_START_X + 10,CURVE_AREA_AXIS_START_Y);
+	
+
+
+		
+      	rect.x0 = CURVE_AREA_AXIS_END_X-100;
+		rect.x1 = CURVE_AREA_AXIS_END_X;
+		rect.y0 = CURVE_AREA_AXIS_END_Y-40;
+		rect.y1 = CURVE_AREA_AXIS_END_Y;		
+		GUI_DispStringInRect(CURVE_REPORT_CYCLE[SystemPrameter.SystemLanguage], &rect, GUI_TA_RIGHT | GUI_TA_VCENTER);
+		
+
+
+
+			GUI_SetFont(GUI_FONT_MED);
+
+       //画标签
+		
+
+		for(i = 0; i <= 5; i++)
+		{
+			//float dTemp;
+			//Y Lable
+			dTemp = dYMin + (dYMax - dYMin) * (float)i / 5.0f;
+			if(dTemp > 10000.0f || dTemp < -10000.0f)
+			{
+				sprintf(ConvertStr,"%.2e",dTemp);
+				EConvert(ConvertStr);
+				//strTemp.Format(_T("%.2e"), dTemp);
+				//strTemp = strTemp.Left(strTemp.GetLength()-3) + strTemp.Right(1);
+			}
+			else
+			{
+				sprintf(ConvertStr,"%1.2f",dTemp);
+			//	strTemp.Format(_T("%1.2f"), dTemp);
+			}
+			rect.x0 = 0;
+		    rect.x1 = CURVE_AREA_AXIS_START_X - CURVE_AREA_AXIS_TICK_X - 5;
+            rect.y0 = CURVE_AREA_AXIS_END_Y- 10 - dY * i;
+            rect.y1 = CURVE_AREA_AXIS_END_Y+ 10 - dY * i;
+			if(rect.y0<CURVE_AREA_AXIS_START_Y)rect.y0=CURVE_AREA_AXIS_START_Y;//lgj180110
+					if(rect.y1<CURVE_AREA_AXIS_START_Y)rect.y1=CURVE_AREA_AXIS_START_Y;//lgj180110
+			if(rect.y0>CURVE_AREA_AXIS_END_Y)rect.y0=CURVE_AREA_AXIS_END_Y;//lgj180110
+					if(rect.y1>CURVE_AREA_AXIS_END_Y)rect.y1=CURVE_AREA_AXIS_END_Y;//lgj180110
+		    GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+			
+
+			
+			dTemp = dXMin + (dXMax - dXMin) * (float)i / 5.0f;
+			if(dTemp > 10000.0f || dTemp < -10000.0f)
+			{
+				sprintf(ConvertStr,"%.2e",dTemp);
+				EConvert(ConvertStr);
+				//strTemp.Format(_T("%.2e"), dTemp);
+				//strTemp = strTemp.Left(strTemp.GetLength()-3) + strTemp.Right(1);
+			}
+			else
+			{
+				sprintf(ConvertStr,"%1.2f",dTemp);
+				//strTemp.Format(_T("%1.2f"), dTemp);
+			
+			}
+			
+            rect.x0 = CURVE_AREA_AXIS_START_X - 50 + dX * i;
+		    rect.x1 = CURVE_AREA_AXIS_START_X + 50 + dX * i;
+            rect.y0 = CURVE_AREA_AXIS_END_Y + CURVE_AREA_AXIS_TICK_Y;
+            rect.y1 =  rect.y0+30;
+			GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+		
+		}
+
+
+
+      	//画曲线
+		if(BoardInf.KineticPara.nCurrentSample >= TUBE_MAX)
+		{
+			
+			for(j = 0; j < TUBE_MAX; j++)
+			{
+				GUI_SetColor(RGB_TAB_FOR_WELL[j]);
+				
+				for(i = 0; i < BoardInf.KineticPara.kinetic_readings_analysis; i++)
+				{
+					if(NormalAnalysis.FilterCurrent < 2)
+					{
+						CalcuPara.p_dY[i] = dABS[i][NormalAnalysis.FilterCurrent][j];
+					} //if(NormalAnalysis.FilterCurrent < 2)
+					else if(BoardInf.KineticPara.bPreCalOK[j])
+					{
+						CalcuPara.p_dY[i] = NormalAnalysis.dPreCal[i][j];
+					} //else if(BoardInf.KineticPara.bPreCalOK[j])
+					else
+					{
+						break;
+					} //else if(BoardInf.KineticPara.bPreCalOK[j])
+
+					//dc->SelectObject(&penCurve[j]);
+					//float dX0, dY0, ddX;
+//					ddX = (dXMax - dXMin) /  ANALYSIS_CURVE_POINT_MAX;
+					dX0 = (float)(i + 1);
+					dY0 = CalcuPara.p_dY[i];
+
+					if(i == 0)
+					{
+						 rect.x0=CURVE_AREA_AXIS_START_X + (dX0 - dXMin) / (dXMax - dXMin) * dX * 5.0f;
+					     rect.y0=CURVE_AREA_AXIS_END_Y - (dY0 - dYMin) / (dYMax - dYMin) * dY * 5.0f;
+
+				//		dc->MoveTo(CURVE_AREA_AXIS_START_X + (dX0 - dXMin) / (dXMax - dXMin) * dX * 5.0
+						//	, CURVE_AREA_AXIS_START_Y - (dY0 - dYMin) / (dYMax - dYMin) * dY * 5.0);
+					} //if(i == 0)
+					else
+					{
+						  rect.x1=CURVE_AREA_AXIS_START_X + (dX0 - dXMin) / (dXMax - dXMin) * dX * 5.0f;
+					      rect.y1=CURVE_AREA_AXIS_END_Y - (dY0 - dYMin) / (dYMax - dYMin) * dY * 5.0f;
+						
+						if(rect.y0<CURVE_AREA_AXIS_START_Y)rect.y0=CURVE_AREA_AXIS_START_Y;//lgj180110
+					if(rect.y1<CURVE_AREA_AXIS_START_Y)rect.y1=CURVE_AREA_AXIS_START_Y;//lgj180110
+						if(rect.y0>CURVE_AREA_AXIS_END_Y)rect.y0=CURVE_AREA_AXIS_END_Y;//lgj180110
+					if(rect.y1>CURVE_AREA_AXIS_END_Y)rect.y1=CURVE_AREA_AXIS_END_Y;//lgj180110
+						  GUI_DrawLine(rect.x0,rect.y0,rect.x1,rect.y1);
+                          rect.x0=rect.x1;
+					      rect.y0=rect.y1;
+						//dc->LineTo(CURVE_AREA_AXIS_START_X + (dX0 - dXMin) / (dXMax - dXMin) * dX * 5.0
+							//, CURVE_AREA_AXIS_START_Y - (dY0 - dYMin) / (dYMax - dYMin) * dY * 5.0);
+					} //if(i == 0)
+				} //for(int i = 0; i < BoardInf.KineticPara.kinetic_readings_analysis; i++)
+			} //for(int j = 0; j < TUBE_MAX; j++)
+		} //if(BoardInf.KineticPara.nCurrentSample >= TUBE_MAX)
+		else
+		{
+			for(i = 0; i < BoardInf.KineticPara.kinetic_readings_analysis; i++)
+			{
+				if(NormalAnalysis.FilterCurrent < 2)
+				{
+					CalcuPara.p_dY[i] = dABS[i][NormalAnalysis.FilterCurrent][BoardInf.KineticPara.nCurrentSample];
+				} //if(NormalAnalysis.FilterCurrent < 2)
+				else if(BoardInf.KineticPara.bPreCalOK[BoardInf.KineticPara.nCurrentSample])
+				{
+					CalcuPara.p_dY[i] = NormalAnalysis.dPreCal[i][BoardInf.KineticPara.nCurrentSample];
+				} //else if(BoardInf.KineticPara.bPreCalOK[j])
+				else
+				{
+					break;
+				} //else if(BoardInf.KineticPara.bPreCalOK[])
+               
+				GUI_SetColor(RGB_TAB_FOR_WELL[BoardInf.KineticPara.nCurrentSample]);
+				//dc->SelectObject(&penCurve[BoardInf.KineticPara.nCurrentSample]);
+			//	float dX0, dY0, ddX;
+//			ddX = (dXMax - dXMin) /  ANALYSIS_CURVE_POINT_MAX;
+				dX0 = (float)(i + 1);
+				dY0 = CalcuPara.p_dY[i];
+
+				if(i == 0)
+				{
+					//dc->MoveTo(CURVE_AREA_AXIS_START_X + (dX0 - dXMin) / (dXMax - dXMin) * dX * 5.0
+					//	, CURVE_AREA_AXIS_START_Y - (dY0 - dYMin) / (dYMax - dYMin) * dY * 5.0);
+					rect.x0=CURVE_AREA_AXIS_START_X + (dX0 - dXMin) / (dXMax - dXMin) * dX * 5.0f;
+					     rect.y0=CURVE_AREA_AXIS_END_Y - (dY0 - dYMin) / (dYMax - dYMin) * dY * 5.0f;
+
+				} //if(i == 0)
+				else
+				{
+					//dc->LineTo(CURVE_AREA_AXIS_START_X + (dX0 - dXMin) / (dXMax - dXMin) * dX * 5.0
+					//	, CURVE_AREA_AXIS_START_Y - (dY0 - dYMin) / (dYMax - dYMin) * dY * 5.0);
+					  rect.x1=CURVE_AREA_AXIS_START_X + (dX0 - dXMin) / (dXMax - dXMin) * dX * 5.0f;
+					      rect.y1=CURVE_AREA_AXIS_END_Y - (dY0 - dYMin) / (dYMax - dYMin) * dY * 5.0f;
+					if(rect.y0<CURVE_AREA_AXIS_START_Y)rect.y0=CURVE_AREA_AXIS_START_Y;//lgj180110
+					if(rect.y1<CURVE_AREA_AXIS_START_Y)rect.y1=CURVE_AREA_AXIS_START_Y;//lgj180110
+					if(rect.y0>CURVE_AREA_AXIS_END_Y)rect.y0=CURVE_AREA_AXIS_END_Y;//lgj180110
+					if(rect.y1>CURVE_AREA_AXIS_END_Y)rect.y1=CURVE_AREA_AXIS_END_Y;//lgj180110
+						  GUI_DrawLine(rect.x0,rect.y0,rect.x1,rect.y1);
+                          rect.x0=rect.x1;
+					      rect.y0=rect.y1;
+				} //if(i == 0)
+			} //for(int i = 0; i < BoardInf.KineticPara.kinetic_readings_analysis; i++)
+		} //if(BoardInf.KineticPara.nCurrentSample >= TUBE_MAX)
+
+
+
+
+}
+
+//动力学分析定量分析结果
+void DisplayKineticAnalysis(void)
+{
+        short i,j,x,y;
+
+	    GUI_RECT rect;
+
+	  
+	  //if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		//{
+			GUI_SetFont(GUI_FONT_MED);
+		//}
+		//else
+		//{
+		//	GUI_SetFont(GUI_FONT_MED_CH);
+		//}
+		
+	    GUI_SetColor(0x0);
+
+        rect.x0 = 37;
+		rect.y0 = 130-TITLESBAR_HEIGHT;
+		rect.x1 = rect.x0 + NORMAL_ANALYSIS_WELL_WIDTH_DX;
+		rect.y1 = rect.y0 + 16;
+		for (i = 0; i < 12; i++)
+		{
+			TwoNumConvertStr(ConvertStr, i+1);
+			GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+			rect.x0 +=NORMAL_ANALYSIS_WELL_WIDTH_DX;
+			rect.x1 += NORMAL_ANALYSIS_WELL_WIDTH_DX;
+		}
+
+
+		rect.x0 = 10;
+		rect.y0 = 155 - TITLESBAR_HEIGHT;
+		rect.x1 = rect.x0 + 16;
+		rect.y1 = rect.y0 + 16;
+		for (i = 0; i <8; i++)
+		{
+			ConvertStr[0] = 'A' + i;
+			ConvertStr[1] = 0;
+			GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+			rect.y0 += 36;
+			rect.y1 += 36;
+		}
+		
+
+
+
+			
+
+		 //if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		 // {
+			      // GUI_SetFont(GUI_FONT_MED);
+		 // }
+		// else
+		// {
+				//  	 GUI_SetFont(GUI_FONT_MED_CH);
+		// }		
+		 
+	    x=NORMAL_ANALYSIS_WELL_DATA_START_X; //2014-8-20项
+		y=NORMAL_ANALYSIS_WELL_DATA_START_Y-TITLESBAR_HEIGHT;
+	    for(i = 0; i < 12; i++) //2014-8-20项
+		{
+			for(j = 0; j < 8; j++)   
+			{
+				short nDX = 0;
+				short nDY = 0;
+				float dTemp;
+				unsigned char bHasResult = 1;
+				unsigned char small_font=0;
+        GUI_SetFont(GUI_FONT_MED);
+				if(BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_AVERAGE_RATE)
+				{
+					if(NormalAnalysis.FilterCurrent < 2)
+					{
+						dTemp = BoardInf.KineticPara.KineticAverageRate[NormalAnalysis.FilterCurrent].dAverageRate[j * 12 + i];
+					}
+					else if(BoardInf.KineticPara.bPreCalOK[j * 12 + i])
+					{
+						dTemp = BoardInf.KineticPara.KineticAverageRate[NormalAnalysis.FilterCurrent].dAverageRate[j * 12 + i];
+					}
+					else
+					{
+						bHasResult = 0;
+					}
+
+				}
+				else if(BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_MAX_RATE)
+				{
+					if(NormalAnalysis.FilterCurrent < 2)
+					{
+						dTemp = BoardInf.KineticPara.KineticMaxRate[NormalAnalysis.FilterCurrent].dMaxRate[j * 12 + i];
+					}
+					else if(BoardInf.KineticPara.bPreCalOK[j * 12 + i])
+					{
+						dTemp = BoardInf.KineticPara.KineticMaxRate[NormalAnalysis.FilterCurrent].dMaxRate[j * 12 + i];
+					}
+					else
+					{
+						bHasResult = 0;
+					}
+				}
+				else if(BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_MAX_WELL)
+				{
+					if(NormalAnalysis.FilterCurrent < 2)
+					{
+						dTemp = BoardInf.KineticPara.KineticMaxWell[NormalAnalysis.FilterCurrent].dMaxWell[j * 12 + i];
+					}
+					else if(BoardInf.KineticPara.bPreCalOK[j * 12 + i])
+					{
+						dTemp = BoardInf.KineticPara.KineticMaxWell[NormalAnalysis.FilterCurrent].dMaxWell[j * 12 + i];
+					}
+					else
+					{
+						bHasResult = 0;
+					}
+				}
+				else if(BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_TIME_MAX_RATE)
+				{
+					if(NormalAnalysis.FilterCurrent < 2)
+					{
+						dTemp = BoardInf.KineticPara.KineticTimeMaxRate[NormalAnalysis.FilterCurrent].nTime[j * 12 + i];
+					}
+					else if(BoardInf.KineticPara.bPreCalOK[j * 12 + i])
+					{
+						dTemp = BoardInf.KineticPara.KineticTimeMaxRate[NormalAnalysis.FilterCurrent].nTime[j * 12 + i];
+					}
+					else
+					{
+						bHasResult = 0;
+					}
+
+				}
+				else if(BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_TIME_MAX)
+				{
+					if(NormalAnalysis.FilterCurrent < 2)
+					{
+						dTemp = BoardInf.KineticPara.KineticTimeMax[NormalAnalysis.FilterCurrent].nTime[j * 12 + i];
+					}
+					else if(BoardInf.KineticPara.bPreCalOK[j * 12 + i])
+					{
+						dTemp = BoardInf.KineticPara.KineticTimeMax[NormalAnalysis.FilterCurrent].nTime[j * 12 + i];
+					}
+					else
+					{
+						bHasResult = 0;
+					}
+				}
+
+				else if(BoardInf.KineticPara.kinetic_analysis_mode == KINETIC_ANALYSIS_TIME_CHANGE)
+				{
+					if(NormalAnalysis.FilterCurrent < 2)
+					{
+						dTemp = BoardInf.KineticPara.KineticTimeChange[NormalAnalysis.FilterCurrent].nTime[j * 12 + i];
+						bHasResult = BoardInf.KineticPara.KineticTimeChange[NormalAnalysis.FilterCurrent].bOK[j * 12 + i];
+					}
+					else if(BoardInf.KineticPara.bPreCalOK[j * 12 + i])
+					{
+						dTemp = BoardInf.KineticPara.KineticTimeChange[NormalAnalysis.FilterCurrent].nTime[j * 12 + i];
+						bHasResult = BoardInf.KineticPara.KineticTimeChange[NormalAnalysis.FilterCurrent].bOK[j * 12 + i];
+					}
+					else
+					{
+						bHasResult = 0;
+					}
+
+				}
+
+
+
+        if(bHasResult==0)
+				{
+					strcpy(ConvertStr,"N.A.");
+				}
+			  else if(dTemp>=CONCENTRATION_MAX)
+				{
+					strcpy(ConvertStr,"N.A.");
+				}
+				else if(dTemp>99999.0)
+				{
+					 small_font=1;
+					  nDX = 8;
+					 nDY = 4;
+					 sprintf(ConvertStr,"%.1e",dTemp);
+			     EConvert(ConvertStr);
+				}
+				else if(dTemp>=1000.0)
+				{
+					 sprintf(ConvertStr,"%d",(int)dTemp);
+				}
+				else if(dTemp >= 100.0f)
+				{
+					sprintf(ConvertStr,"%.1f",dTemp);
+				}
+				else if(dTemp >= 10.0f)
+				{
+					sprintf(ConvertStr,"%.2f",dTemp);
+				}
+				else if((dTemp < 10.0f) && (dTemp >=0))
+				{
+					sprintf(ConvertStr,"%.3f",dTemp);
+				}
+				else if(dTemp > -10.0f)
+				{
+					sprintf(ConvertStr,"%.2f",dTemp);
+				}
+				else if(dTemp > -100.0f)
+				{
+					sprintf(ConvertStr,"%.1f",dTemp);
+				}
+				else
+				{
+					small_font=1;
+					
+					sprintf(ConvertStr,"%.1e",dTemp);
+			    EConvert(ConvertStr);
+					 nDX = 8;
+					 nDY = 4;
+				}
+
+				if(BoardInf.Layout.WellType[j * 12 + i]==WELLS_TYPE_EP) //board_inf.layout[j * 12 + i + 1].Type
+				{
+					   nDX = 0;
+					   nDY = 0;
+					   strcpy(ConvertStr,"EP");
+					 //  GUI_DispStringAt(ConvertStr,x + 8, y );
+					//   GUI_SetColor(0x00);
+				}
+
+
+				if(small_font)
+				{
+					   GUI_SetFont(GUI_FONT_SMALL);
+				}
+				else
+				{
+					// if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		       //{
+			         GUI_SetFont(GUI_FONT_MED);
+		       //}
+		       //else
+		       //{
+			     //   GUI_SetFont(GUI_FONT_MED_CH);
+		       //}
+			  }
+
+				GUI_DispStringAt(ConvertStr,x + nDX,y + nDY);
+				GUI_SetColor(0x00);
+				y+=NORMAL_ANALYSIS_WELL_HEIGHT_DY;
+
+			//	if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		       //{
+			      //   GUI_SetFont(GUI_FONT_MED);
+		      // }
+		      // else
+		      // {
+			       // GUI_SetFont(GUI_FONT_MED_CH);
+		      // }
+			}
+
+			y=NORMAL_ANALYSIS_WELL_DATA_START_Y-TITLESBAR_HEIGHT;
+			x+= NORMAL_ANALYSIS_WELL_WIDTH_DX;
+		}
+}
+
+//显示原始光强
+void DisplayRawIntensity(void)
+{
+	    short i,j,x,y;
+	    GUI_RECT rect;
+
+	
+
+		//if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		//{
+			GUI_SetFont(GUI_FONT_MED);
+		//}
+	//	else
+	//	{
+		//	GUI_SetFont(GUI_FONT_MED_CH);
+	//	}
+		
+		
+	    GUI_SetColor(0x0);
+
+        rect.x0 = 37;
+		rect.y0 = 130-TITLESBAR_HEIGHT;
+		rect.x1 = rect.x0 + NORMAL_ANALYSIS_WELL_WIDTH_DX;
+		rect.y1 = rect.y0 + 16;
+		for (i = 0; i < 12; i++)
+		{
+			TwoNumConvertStr(ConvertStr, i+1);
+			GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+			rect.x0 +=NORMAL_ANALYSIS_WELL_WIDTH_DX;
+			rect.x1 += NORMAL_ANALYSIS_WELL_WIDTH_DX;
+		}
+
+
+		rect.x0 = 10;
+		rect.y0 = 155 - TITLESBAR_HEIGHT;
+		rect.x1 = rect.x0 + 16;
+		rect.y1 = rect.y0 + 16;
+		for (i = 0; i <8; i++)
+		{
+			ConvertStr[0] = 'A' + i;
+			ConvertStr[1] = 0;
+			GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+			rect.y0 += 36;
+			rect.y1 += 36;
+		}
+		
+
+
+			GUI_SetFont(GUI_FONT_SMALL);
+
+		
+        x=NORMAL_ANALYSIS_WELL_DATA_START_X; //2014-8-20项
+		y=NORMAL_ANALYSIS_WELL_DATA_START_Y-TITLESBAR_HEIGHT;
+		//x = LAY_SMALL_START_X + LAY_SMALL_RADIUS; //2014-8-17项
+		//y = LAY_SMALL_START_Y+ LAY_SMALL_RADIUS;
+        for(i = 0; i < 12; i++) //2014-8-20项
+		{
+			for(j = 0; j < 8; j++)   
+				//	 for(int j = 0; j < CHANNEL_MAX; j++) 
+			{
+				sprintf(ConvertStr,"%d",nIntensity[0][NormalAnalysis.FilterCurrent][j * 12 + i]);
+				//GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+                GUI_DispStringAt(ConvertStr,x,y);
+				//int nDX = -3;
+				//int nDY = 3;
+				//temp.Format(_T("%d"), raw_data.nIntensity[0][NormalAnalysis.FilterCurrent][j * 12 + i]);
+				//dc->ExtTextOutW(x + nDX,y + nDY,ETO_CLIPPED,rect,temp,NULL);
+				if(j == 0 && i <9)
+				{
+					 sprintf(ConvertStr,"%d",nInputIntensity[0][i]);
+					 GUI_DispStringAt(ConvertStr,x,y+15);
+					//temp.Format(_T("%d"), raw_data.nInputIntensity[0][i]);
+					//dc->ExtTextOutW(x + nDX,y + nDY - 10,ETO_CLIPPED,rect,temp,NULL);
+				}
+				if(j == 1 && i < 9)
+				{
+					 sprintf(ConvertStr,"%d",nBackgroundIntensity[0][i]);
+					 GUI_DispStringAt(ConvertStr,x,y+15);
+				//	temp.Format(_T("%d"), raw_data.nBackgroundIntensity[0][i]);
+				//	dc->ExtTextOutW(x + nDX,y + nDY - 10,ETO_CLIPPED,rect,temp,NULL);
+				}
+				if(j == 7 && i <12) //2015-09-02
+				{
+					 sprintf(ConvertStr,"%d",nIntensity[0][NormalAnalysis.FilterCurrent][ABS_CHANNEL_MAX*12+ i]);
+					 GUI_DispStringAt(ConvertStr,x,y+15);
+
+					//temp.Format(_T("%d"),  raw_data.nIntensity[0][NormalAnalysis.FilterCurrent][ABS_CHANNEL_MAX*12+ i]);
+					//dc->ExtTextOutW(x + nDX,y + nDY - 10,ETO_CLIPPED,rect,temp,NULL);
+				}
+				y+=NORMAL_ANALYSIS_WELL_HEIGHT_DY;
+			}
+
+			y=NORMAL_ANALYSIS_WELL_DATA_START_Y-TITLESBAR_HEIGHT;
+			x+= NORMAL_ANALYSIS_WELL_WIDTH_DX;
+		}
+		
+}
+void DisplayRawInter(void)
+{
+	 short i,j,x,y;
+	 unsigned char small_font=0;
+	 GUI_RECT rect;
+   
+   //if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+	 //{
+			GUI_SetFont(GUI_FONT_MED);
+	 //}
+	 //else
+	 //{
+		//	GUI_SetFont(GUI_FONT_MED_CH);
+	// }
+		
+	 GUI_SetColor(0x0);
+
+    rect.x0 = 37;
+		rect.y0 = 130-TITLESBAR_HEIGHT;
+		rect.x1 = rect.x0 + NORMAL_ANALYSIS_WELL_WIDTH_DX;
+		rect.y1 = rect.y0 + 16;
+		for (i = 0; i < 12; i++)
+		{
+			TwoNumConvertStr(ConvertStr, i+1);
+			GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+			rect.x0 +=NORMAL_ANALYSIS_WELL_WIDTH_DX;
+			rect.x1 += NORMAL_ANALYSIS_WELL_WIDTH_DX;
+		}
+
+
+		rect.x0 = 10;
+		rect.y0 = 155 - TITLESBAR_HEIGHT;
+		rect.x1 = rect.x0 + 16;
+		rect.y1 = rect.y0 + 16;
+		for (i = 0; i <8; i++)
+		{
+			ConvertStr[0] = 'A' + i;
+			ConvertStr[1] = 0;
+			GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+			rect.y0 += 36;
+			rect.y1 += 36;
+		}
+		x=NORMAL_ANALYSIS_WELL_DATA_START_X; //2014-8-20项
+		y=NORMAL_ANALYSIS_WELL_DATA_START_Y-TITLESBAR_HEIGHT;
+
+		//start
+		/*
+	  for(i=0;i<TUBE_MAX;i++)
+	  {
+		  NormalAnalysis.dConcentration[0][i]=0;
+		  NormalAnalysis.dConcentration[1][i]=0;
+	//	  NormalAnalysis.dConcentration[0][i]=0;
+	  }
+	  */
+	  //end
+
+		//if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+	//	{
+			
+	//	}
+		//else
+		//{
+		//	GUI_SetFont(GUI_FONT_MED_CH);
+		//}
+		
+		for(i = 0; i < TUBE_MAX_PER_ROW; i++) //12
+		{
+			for(j = 0; j < TUBE_MAX_PER_COL; j++)//8
+			{
+				short nDX = 0;
+				short nDY = 0;
+				float dTemp;
+				unsigned char  bHasResult = 1;
+				unsigned char  bRed = 0;
+				unsigned char nCycle = 0;
+				
+				small_font=0;
+				GUI_SetFont(GUI_FONT_MED);
+				//if(board_inf.curentKinetic[0] == _T('O'))
+				if(BoardInf.KineticPara.Enable)
+				{
+					nCycle = BoardInf.KineticPara.kinetic_reading_current;
+				}
+				if(NormalAnalysis.FilterCurrent < 2)
+				{
+					dTemp = dABS[nCycle][NormalAnalysis.FilterCurrent][j * 12 + i];
+					if(dTemp >= ABS_RANGE_MAX)
+					{
+						bRed = 1;
+					}
+				}
+				else if(NormalAnalysis.bPreCalOK[nCycle][j * 12 + i])
+				{
+					dTemp = NormalAnalysis.dPreCal[nCycle][j * 12 + i];
+				}
+				else
+				{
+					bHasResult = 0;
+				}
+				if( ((NormalAnalysis.wcMode == ANALYSIS_MODE_ANALYSIS) || ( (NormalAnalysis.wcMode == ANALYSIS_MODE_INTERPRET) && (BoardInf.InterpretPara.AbsFlag==0))) 
+				&& bHasResult)
+				{
+					dTemp = NormalAnalysis.dConcentration[NormalAnalysis.FilterCurrent][j * 12 + i];
+					if(dTemp < 0.0f)
+					{
+						bHasResult = 0;
+					}
+				}
+
+				if(bHasResult==0)
+				{
+					strcpy(ConvertStr,"N.A.");
+				}
+				//else if((dTemp < 100.0f) && (dTemp > -100.0f))
+				else if(dTemp>=CONCENTRATION_MAX)
+				{
+					strcpy(ConvertStr,"N.A.");
+				}
+				else if(dTemp>99999.0)
+				{
+					 small_font=1;
+					 nDX = 8;
+					 nDY = 4;
+					 sprintf(ConvertStr,"%.1e",dTemp);
+			     EConvert(ConvertStr);
+				}
+				else if(dTemp>=1000.0)
+				{
+					 sprintf(ConvertStr,"%d",(int)dTemp);
+				}
+				else if(dTemp >= 100.0f)
+				{
+					sprintf(ConvertStr,"%.1f",dTemp);
+				}
+				else if(dTemp >= 10.0f)
+				{
+					sprintf(ConvertStr,"%.2f",dTemp);
+				}
+				else if((dTemp < 10.0f) && (dTemp >=0))
+				{
+					sprintf(ConvertStr,"%.3f",dTemp);
+				}
+				else if(dTemp > -10.0f)
+				{
+					sprintf(ConvertStr,"%.2f",dTemp);
+				}
+				else if(dTemp > -100.0f)
+				{
+					sprintf(ConvertStr,"%.1f",dTemp);
+				}
+				else
+				{
+					small_font=1;
+					
+					sprintf(ConvertStr,"%.1e",dTemp);
+			    EConvert(ConvertStr);
+					 nDX = 8;
+					 nDY = 4;
+				}
+//j * 12 + i + 1
+				if(BoardInf.Layout.WellType[j * 12 + i]==WELLS_TYPE_EP) //board_inf.layout[j * 12 + i + 1].Type
+				{
+					nDX = 0;
+					nDY = 0;
+					strcpy(ConvertStr,"EP");
+					//GUI_DispStringAt(ConvertStr,x + 8, y );
+				}
+			
+				else if(NormalAnalysis.wcMode == ANALYSIS_MODE_INTERPRET && bHasResult)
+				{
+					if(BoardInf.InterpretPara.bPos[NormalAnalysis.FilterCurrent][j * 12 + i])
+					{
+						strcpy(StrTemp,"++");
+						GUI_SetColor(0x0000ff);
+						GUI_DispStringAt(StrTemp,x + 8, y -10);
+					}
+					else if(BoardInf.InterpretPara.bWeakPos[NormalAnalysis.FilterCurrent][j * 12 + i])
+					{
+						strcpy(StrTemp,"+");
+						GUI_SetColor(0x00f4f4);
+						GUI_DispStringAt(StrTemp,x + 15, y -10);
+					}
+				}
+
+
+				GUI_SetColor(0x00);
+				//if(NormalAnalysis.wcMode == ANALYSIS_MODE_INTERPRET)
+				//{
+				//	nDY += 5;
+				//}
+				if(bRed)
+				{
+					GUI_SetColor(0x0000ff);
+				}
+				//j * 12 + i + 1
+				if(BoardInf.Layout.WellType[j * 12 + i]==WELLS_TYPE_EP)//if(temp == _T("EP"))
+				{
+					GUI_SetColor(0x00);
+				}
+				if(small_font)
+				{
+					   GUI_SetFont(GUI_FONT_SMALL);
+				}
+				else
+				{
+			       GUI_SetFont(GUI_FONT_MED);
+			  }
+
+				GUI_DispStringAt(ConvertStr,x + nDX,y + nDY);
+				GUI_SetColor(0x00);
+				y+=NORMAL_ANALYSIS_WELL_HEIGHT_DY;
+
+				//if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		       //{
+			      //   GUI_SetFont(GUI_FONT_MED);
+		      // }
+		      // else
+		       //{
+			     //   GUI_SetFont(GUI_FONT_MED_CH);
+		      // }
+
+			}
+
+			y=NORMAL_ANALYSIS_WELL_DATA_START_Y-TITLESBAR_HEIGHT;
+			x+= NORMAL_ANALYSIS_WELL_WIDTH_DX;
+		}//for(int i = 0; i < 12; i++) //2014-8-20项
+		//DisplayDateTime(dc);
+}
+
+void DisplayReportInterface(void)
+{
+	GUI_RECT rect;
+	float dTemp;
+
+	//1.出报告前先初使化
+	if(ReportMenu.ReportReady != 4 && ReportMenu.ReportReady)
+	{
+		     ReportMenu.ReportReady=0;
+	       if(BoardInf.KineticPara.Enable)
+         {
+	          InitKineticAnalysis();
+         }
+         else
+         {
+	          InitNormalAnalysis();
+         }
+	}
+
+	GUI_SetColor(COLOR_PAINT_TXT);
+	 if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		{
+			GUI_SetFont(GUI_FONT_BIG);
+		}
+		else
+		{
+			GUI_SetFont(GUI_FONT_BIG_CH);
+		}
+    //2.显示标题栏和右侧工具栏的内容
+	if(BoardInf.bHasData) //有数据
+	{
+		if(BoardInf.KineticPara.Enable ) //动力学分析(右侧工具栏的内容)
+		{
+			if((NormalAnalysis.wcMode==ANALYSIS_MODE_RAWDATA)||(NormalAnalysis.wcMode==ANALYSIS_MODE_CURVE) )//原始数据、动力学曲线
+			{
+				//GUI_DrawBitmap(&bmMenuRight_120_46, QUALITY_OPEN_SELECT_START_X, QUALITY_OPEN_SELECT_START_Y - TITLESBAR_HEIGHT);   
+        //  GUI_DrawBitmap(&bmMenuRight_120_46, ANALYSIS_LOG_SELECT_START_X, ANALYSIS_LOG_SELECT_START_Y - TITLESBAR_HEIGHT);
+       GUI_SetColor(COLOR_PICTURE);
+	     GUI_FillRect(ANALYSIS_LOG_SELECT_START_X, ANALYSIS_LOG_SELECT_START_Y- TITLESBAR_HEIGHT,ANALYSIS_LOG_SELECT_START_X+100, ANALYSIS_LOG_SELECT_START_Y- TITLESBAR_HEIGHT+45);
+	     GUI_DrawBitmap(&bmMenuRight_20_46, ANALYSIS_LOG_SELECT_START_X+100, ANALYSIS_LOG_SELECT_START_Y- TITLESBAR_HEIGHT);
+				
+				GUI_DrawBitmap(&bmMenuPlus_62_37, PLUS_BUTTON_START_X, PLUS_BUTTON_START_Y - TITLESBAR_HEIGHT);
+                GUI_DrawBitmap(&bmMenuMinus_62_37, MINUS_BUTTON_START_X, MINUS_BUTTON_START_Y - TITLESBAR_HEIGHT);
+        GUI_SetColor(COLOR_PAINT_TXT);
+				if(NormalAnalysis.wcMode == ANALYSIS_MODE_RAWDATA)  //原始数据显示“循环:1”
+				{
+					sprintf(ConvertStr,SELECT_REPORT_CYCLE[SystemPrameter.SystemLanguage],BoardInf.KineticPara.kinetic_reading_current+1);
+				}
+				else if(BoardInf.KineticPara.nCurrentSample < TUBE_MAX)//动力学曲线显示“样本：A1”
+				{
+					sprintf(ConvertStr,SELECT_REPORT_SAMPLE_NO[SystemPrameter.SystemLanguage], BoardInf.KineticPara.nCurrentSample / 12 + 'A'
+						, BoardInf.KineticPara.nCurrentSample % 12 + 1);
+				}
+				else                                  //动力学曲线显示“所有样本”
+				{
+					strcpy(ConvertStr,SELECT_REPORT_SAMPLE_ALL[SystemPrameter.SystemLanguage]);
+				}
+				rect.x0=ANALYSIS_LOG_SELECT_START_X;
+				rect.y0=ANALYSIS_LOG_SELECT_START_Y-TITLESBAR_HEIGHT;
+				rect.x1= ANALYSIS_LOG_SELECT_END_X;//- 8;
+				rect.y1=ANALYSIS_LOG_SELECT_END_Y-TITLESBAR_HEIGHT;
+                GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+			}//if((NormalAnalysis.wcMode==ANALYSIS_MODE_RAWDATA)||(NormalAnalysis.wcMode==ANALYSIS_MODE_CURVE) )//
+			else if(NormalAnalysis.wcMode == ANALYSIS_MODE_ANALYSIS)////动力学分析结果
+			{
+				//GUI_DrawBitmap(&bmMenuRight_120_46, QUALITY_OPEN_SELECT_START_X, QUALITY_OPEN_SELECT_START_Y - TITLESBAR_HEIGHT);   
+				//GUI_DrawBitmap(&bmMenuRight_120_46, ANALYSIS_LOG_SELECT_START_X, ANALYSIS_LOG_SELECT_START_Y - TITLESBAR_HEIGHT); 
+				 GUI_SetColor(COLOR_PICTURE);
+	     GUI_FillRect(ANALYSIS_LOG_SELECT_START_X, ANALYSIS_LOG_SELECT_START_Y- TITLESBAR_HEIGHT,ANALYSIS_LOG_SELECT_START_X+100, ANALYSIS_LOG_SELECT_START_Y- TITLESBAR_HEIGHT+45);
+	     GUI_DrawBitmap(&bmMenuRight_20_46, ANALYSIS_LOG_SELECT_START_X+100, ANALYSIS_LOG_SELECT_START_Y- TITLESBAR_HEIGHT);
+				GUI_SetColor(COLOR_PAINT_TXT);
+                //按钮第一行"平均“
+				rect.x0=ANALYSIS_FILTER_SELECT_START_X;
+				rect.y0=ANALYSIS_LOG_SELECT_START_Y+3-TITLESBAR_HEIGHT;
+				rect.x1=ANALYSIS_FILTER_SELECT_END_X;
+				rect.y1=ANALYSIS_LOG_SELECT_START_Y+ (ANALYSIS_LOG_SELECT_END_Y - ANALYSIS_LOG_SELECT_START_Y) / 2-3-TITLESBAR_HEIGHT;
+				strcpy(ConvertStr,KINETIC_ANALYSIS_SELECTION[0][SystemPrameter.SystemLanguage][BoardInf.KineticPara.kinetic_analysis_mode]);
+				GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+			     //按钮第一行"速率“
+				rect.x0=ANALYSIS_FILTER_SELECT_START_X;
+				rect.y0=ANALYSIS_LOG_SELECT_START_Y+ (ANALYSIS_LOG_SELECT_END_Y - ANALYSIS_LOG_SELECT_START_Y) / 2+3-TITLESBAR_HEIGHT;
+				rect.x1=ANALYSIS_FILTER_SELECT_END_X;
+				rect.y1=ANALYSIS_LOG_SELECT_END_Y - 3-TITLESBAR_HEIGHT;
+				strcpy(ConvertStr,KINETIC_ANALYSIS_SELECTION[1][SystemPrameter.SystemLanguage][BoardInf.KineticPara.kinetic_analysis_mode]);
+				GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+			}//else if(NormalAnalysis.wcMode == ANALYSIS_MODE_ANALYSIS)////定量分析
+		}//if(BoardInf.KineticPara.Enable )
+		else
+		{
+			//StretchBlt(DstDC,
+			//	ANALYSIS_FILTER_SELECT_START_X,//662
+			//	ANALYSIS_FILTER_SELECT_START_Y,//152
+			//	ANALYSIS_FILTER_SELECT_END_X - ANALYSIS_FILTER_SELECT_START_X + 1,//783-662+1
+			//	ANALYSIS_FILTER_SELECT_END_Y - ANALYSIS_FILTER_SELECT_START_Y + 1,//198-152+1
+			//	buttons.hdcMem,
+			//	ANALYSIS_FILTER_SELECT_START_X,
+			//	ANALYSIS_FILTER_SELECT_START_Y - KINETIC_RAWDATA_SHIFT,
+			//	ANALYSIS_FILTER_SELECT_END_X - ANALYSIS_FILTER_SELECT_START_X ,
+			//	ANALYSIS_FILTER_SELECT_END_Y - ANALYSIS_FILTER_SELECT_START_Y ,//+1
+			//	SRCCOPY);
+		} //if(BoardInf.KineticPara.Enable ) else
+	
+		  //3.以下为正常分析(显示右侧工具栏中的按钮内容）
+          //定量分析、标准曲线、定性分析
+		if((NormalAnalysis.wcMode == ANALYSIS_MODE_ANALYSIS || NormalAnalysis.wcMode == ANALYSIS_MODE_CURVE
+			|| NormalAnalysis.wcMode == ANALYSIS_MODE_INTERPRET)	&& (SystemPrameter.RawIntensity==0) &&(BoardInf.KineticPara.Enable==0))
+		{
+			//GUI_DrawBitmap(&bmMenuRight_120_46, QUALITY_OPEN_SELECT_START_X, QUALITY_OPEN_SELECT_START_Y - TITLESBAR_HEIGHT);    
+			//GUI_DrawBitmap(&bmMenuRight_120_46, ANALYSIS_LOG_SELECT_START_X, ANALYSIS_LOG_SELECT_START_Y - TITLESBAR_HEIGHT);
+      GUI_SetColor(COLOR_PICTURE);
+	     GUI_FillRect(ANALYSIS_LOG_SELECT_START_X, ANALYSIS_LOG_SELECT_START_Y- TITLESBAR_HEIGHT,ANALYSIS_LOG_SELECT_START_X+100, ANALYSIS_LOG_SELECT_START_Y- TITLESBAR_HEIGHT+45);
+	     GUI_DrawBitmap(&bmMenuRight_20_46, ANALYSIS_LOG_SELECT_START_X+100, ANALYSIS_LOG_SELECT_START_Y- TITLESBAR_HEIGHT);			
+			GUI_SetColor(COLOR_PAINT_TXT);
+			if(NormalAnalysis.wcMode == ANALYSIS_MODE_ANALYSIS || NormalAnalysis.wcMode == ANALYSIS_MODE_CURVE) //定量分析、标准曲线
+			{
+				rect.x0=ANALYSIS_LOG_SELECT_START_X;
+				rect.y0=ANALYSIS_LOG_SELECT_START_Y-TITLESBAR_HEIGHT;
+				rect.x1=ANALYSIS_LOG_SELECT_END_X ;//- 8;
+				rect.y1=ANALYSIS_LOG_SELECT_END_Y-TITLESBAR_HEIGHT;
+				strcpy(ConvertStr,XY_COORDINATES[SystemPrameter.SystemLanguage][NormalAnalysis.bLogX]);
+				strcat(ConvertStr," / ");
+				strcat(ConvertStr,XY_COORDINATES[SystemPrameter.SystemLanguage][NormalAnalysis.bLogY]);
+				GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+			}//if(NormalAnalysis.wcMode == ANALYSIS_MODE_ANALYSIS || NormalAnalysis.wcMode == ANALYSIS_MODE_CURVE)
+			else       //定性分析
+			{
+				
+				
+				if(BoardInf.InterpretPara.GreatFlag)
+				{
+					strcpy(ConvertStr,"> ");
+				}//
+				else
+				{
+					strcpy(ConvertStr,"< ");
+				}
+
+				dTemp = BoardInf.InterpretPara.dReference[NormalAnalysis.FilterCurrent];
+				if(((dTemp < 100.0f && dTemp > 0.01f) || (dTemp > -CONCENTRATION_VALUE_MIN && dTemp < CONCENTRATION_VALUE_MIN))
+					||((dTemp > -100.0f && dTemp < -0.01f) || (dTemp > -CONCENTRATION_VALUE_MIN && dTemp < CONCENTRATION_VALUE_MIN)))
+				{
+					sprintf(StrTemp,"%1.3f",dTemp);
+				}
+				else
+				{
+					sprintf(StrTemp,"%.3e",dTemp);
+					EConvert(ConvertStr);
+				}
+
+				strcat(ConvertStr,StrTemp);
+
+				rect.x0=ANALYSIS_LOG_SELECT_START_X;
+				rect.y0= ANALYSIS_LOG_SELECT_START_Y+ 20-TITLESBAR_HEIGHT;
+				rect.x1=ANALYSIS_LOG_SELECT_END_X;// - 8;
+				rect.y1=ANALYSIS_LOG_SELECT_END_Y-3-TITLESBAR_HEIGHT;
+				GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+				
+				rect.x0=ANALYSIS_LOG_SELECT_START_X;
+				rect.y0= ANALYSIS_LOG_SELECT_START_Y+3 -TITLESBAR_HEIGHT;
+				rect.x1=ANALYSIS_LOG_SELECT_END_X;// - 8;
+				rect.y1=ANALYSIS_LOG_SELECT_START_Y + 26-TITLESBAR_HEIGHT;
+				GUI_DispStringInRect(CUTOFF_CONDITION[SystemPrameter.SystemLanguage], &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+			}//if(NormalAnalysis.wcMode == ANALYSIS_MODE_ANALYSIS || NormalAnalysis.wcMode == ANALYSIS_MODE_CURVE)
+		}//if((NormalAnalysis.wcMode == ANALYSIS_MODE_ANALYSIS || NormalAnalysis.wcMode == ANALYSIS_MODE_CURVE|| NormalAnalysis.wcMode == ANALYSIS_MODE_INTERPRET)	&& (SystemPrameter.RawIntensity==0) &&(BoardInf.KineticPara.Enable==0))
+
+		
+		
+		
+		//显示标题名
+		if(BoardInf.KineticPara.Enable==0)
+		{
+			     strcpy(ConvertStr,"\"");
+			     strcat(ConvertStr,BoardInf.Name);
+			     strcat(ConvertStr,"\" ");
+			     //strcat(ConvertStr," ");
+           strcat(ConvertStr,NORMAL_ANALYSIS_TITLE[SystemPrameter.SystemLanguage][NormalAnalysis.wcMode]);
+		}
+		else
+		{
+			     strcpy(ConvertStr,"\"");
+			     strcat(ConvertStr,BoardInf.Name);
+			     strcat(ConvertStr,"\" ");
+            strcat(ConvertStr,KINETIC_ANALYSIS_TITLE[SystemPrameter.SystemLanguage][NormalAnalysis.wcMode]);
+		}
+		rect.x0=EDIT_START_X+3;//modify
+	    rect.y0= EDIT_START_Y-TITLESBAR_HEIGHT;
+		rect.x1=EDIT_END_X;
+	    rect.y1=EDIT_END_Y-TITLESBAR_HEIGHT;
+		GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+
+
+		
+	
+         //动力学分析和正常分析公用（右侧工具栏）
+		    //工具栏第一个按钮上半部分(滤光片1)
+			rect.x0=ANALYSIS_FILTER_SELECT_START_X;//+SELECT_CONTROL_REPORT_FILTER1_START_X[SystemPrameter.SystemLanguage];//modify
+	        rect.y0= ANALYSIS_FILTER_SELECT_START_Y-TITLESBAR_HEIGHT;
+		    rect.x1=ANALYSIS_FILTER_SELECT_END_X;
+	        rect.y1=ANALYSIS_FILTER_SELECT_START_Y+(ANALYSIS_FILTER_SELECT_END_Y-ANALYSIS_FILTER_SELECT_START_Y)/2-TITLESBAR_HEIGHT;
+            if(NormalAnalysis.FilterCurrent == 0)
+			{
+		           GUI_DispStringInRect(SELECT_CONTROL_REPORT_FILTER1[SystemPrameter.SystemLanguage], &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+			}
+			else if(NormalAnalysis.FilterCurrent == 1)
+			{
+				    GUI_DispStringInRect(SELECT_CONTROL_REPORT_FILTER2[SystemPrameter.SystemLanguage], &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+			}
+			else
+		    {
+				   GUI_DispStringInRect(SELECT_CONTROL_REPORT_FILTER12[SystemPrameter.SystemLanguage], &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+		    }
+             //工具栏第一个按钮下半部分(405nm)
+			rect.x0=ANALYSIS_FILTER_SELECT_START_X;//+36;//modify
+	        rect.y0= ANALYSIS_FILTER_SELECT_START_Y+(ANALYSIS_FILTER_SELECT_END_Y-ANALYSIS_FILTER_SELECT_START_Y)/2-TITLESBAR_HEIGHT;
+		    rect.x1=ANALYSIS_FILTER_SELECT_END_X;
+	        rect.y1=ANALYSIS_FILTER_SELECT_END_Y-TITLESBAR_HEIGHT;
+			if(NormalAnalysis.FilterCurrent == 0)
+			{
+				  sprintf(ConvertStr,"%d",FilterLun.Filter[BoardInf.Filter1Locate]);
+				  strcat(ConvertStr,"nm");
+			      GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+			}
+			else if(NormalAnalysis.FilterCurrent == 1)
+			{
+				  sprintf(ConvertStr,"%d",FilterLun.Filter[BoardInf.Filter2Locate]);
+				  strcat(ConvertStr,"nm");
+			      GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+			}
+			else
+			{
+				  GUI_DispStringInRect(PRE_CALCULATE_STR[BoardInf.KineticPara.PreProcess], &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+			}
+			
+			if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		{
+			GUI_SetFont(GUI_FONT_MED);
+		}
+		else
+		{
+			GUI_SetFont(GUI_FONT_MED_CH);
+		}
+	}//if(BoardInf.bHasData)
+
+   //if(ReportMenu.ReportReady == 4) //显示荧光强度
+   //{
+   //}
+
+	//else 
+	//显示原始光强
+	if(SystemPrameter.RawIntensity && BoardInf.bHasData) //显示荧光强度
+	{
+		     DisplayRawIntensity();
+		
+	}//if(SystemPrameter.RawIntensity && BoardInf.bHasData) //显示荧光强度
+
+
+  //动力学曲线
+	else if((NormalAnalysis.wcMode == ANALYSIS_MODE_CURVE) && BoardInf.bHasData && BoardInf.KineticPara.Enable )
+	{
+	         DisplayKineticCurve();
+	}
+	//动力学分析
+  else if((NormalAnalysis.wcMode == ANALYSIS_MODE_ANALYSIS) && BoardInf.bHasData && BoardInf.KineticPara.Enable)
+	{
+	        DisplayKineticAnalysis();
+	}
+	
+  //3.以下为正常分析
+   //原始数据、定量分析、定性分析
+   else if((NormalAnalysis.wcMode == ANALYSIS_MODE_RAWDATA || NormalAnalysis.wcMode == ANALYSIS_MODE_ANALYSIS
+		|| NormalAnalysis.wcMode == ANALYSIS_MODE_INTERPRET) && BoardInf.bHasData ) //&&(BoardInf.KineticPara.Enable==0)
+   {
+           DisplayRawInter();
+   }
+	//标准曲线
+   else if((NormalAnalysis.wcMode == ANALYSIS_MODE_CURVE) && BoardInf.bHasData && (BoardInf.KineticPara.Enable==0))
+   {
+           DisplayCurve();
+   }
+   //质控分析
+   else if((NormalAnalysis.wcMode == ANALYSIS_MODE_QC) && BoardInf.bHasData && (BoardInf.KineticPara.Enable==0))
+   {
+	       DisplayQC();
+   }
+
+
+   if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+	 {
+			GUI_SetFont(GUI_FONT_MED);
+	 }
+		else
+		{
+			GUI_SetFont(GUI_FONT_MED_CH);
+		}
+  // DisplayDateTime(dc);
+
+   //DiplayButton();
+   
+   
+
+
+
+	//InitNormalAnalysis();
+      //  DisplayCurve();
+}
+
+void _cbReport(WM_MESSAGE * pMsg)
+{
+	
+	//char str[10];
+	WM_HWIN hWin = pMsg->hWin;
+//	WM_HWIN hWinFocus;
+	BUTTON_Handle hbutton;
+	unsigned short i;
+	short        xSize;
+	short        ySize;
+	short NCode, Id;
+//	GUI_RECT rect;
+	//	int  day_max;
+	//hWinFocus = WM_GetFocussedWindow();
+	//IdWinFocus = WM_GetId(hWinFocus);
+
+	switch (pMsg->MsgId)
+	{
+	   case WM_CREATE:
+	   {
+		        if(BoardInf.KineticPara.Enable)
+					  {
+						   for (i = 0; i < GUI_COUNTOF(_aButtonReportKinetic); i++)
+					     {
+						       hbutton = BUTTON_CreateEx(_aButtonReportKinetic[i].xPos, _aButtonReportKinetic[i].yPos, _aButtonReportKinetic[i].xSize, _aButtonReportKinetic[i].ySize,
+							           hWin, WM_CF_SHOW, 0, ID_REPORT_BUTTON + i);
+							     if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+							     {
+									    BUTTON_SetFont(hbutton, GUI_FONT_BIG);
+									    BUTTON_SetText(hbutton, _aButtonReportKinetic[i].acLabelEn);
+							     }
+							     else
+							     {
+									    BUTTON_SetFont(hbutton, GUI_FONT_BIG_CH);
+									    BUTTON_SetText(hbutton, _aButtonReportKinetic[i].acLabelCh);
+							     }						 
+								   BUTTON_SetTextAlign(hbutton, GUI_TA_HCENTER | GUI_TA_VCENTER);
+								   BUTTON_SetFocussable(hbutton, 0);
+									  //不显示按钮
+									 if( (i==0)||(i==1) )
+									 {
+			                 WM_HideWindow(hbutton); 
+									 }
+					      }
+					  }
+					  else
+					  {
+						    for (i = 0; i < GUI_COUNTOF(_aButtonReport); i++)
+					      {
+						         hbutton = BUTTON_CreateEx(_aButtonReport[i].xPos, _aButtonReport[i].yPos, _aButtonReport[i].xSize, _aButtonReport[i].ySize,
+							           hWin, WM_CF_SHOW, 0, ID_REPORT_BUTTON +i);
+                     if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+				             {
+										     BUTTON_SetFont(hbutton, GUI_FONT_BIG);
+										     BUTTON_SetText(hbutton, _aButtonReport[i].acLabelEn);
+								     }
+							       else
+				             {
+					               BUTTON_SetFont(hbutton, GUI_FONT_BIG_CH);
+							           BUTTON_SetText(hbutton, _aButtonReport[i].acLabelCh);
+				             }						 
+						         BUTTON_SetTextAlign(hbutton, GUI_TA_HCENTER | GUI_TA_VCENTER);
+						         BUTTON_SetFocussable(hbutton, 0);
+										 //显示按钮
+			               WM_ShowWindow(hbutton); 
+					        }
+					  }
+				
+					  break;
+	   }
+		//删除按钮
+	case WM_DELETE:
+       
+		//WM_ShowWindow(ButtonZero[i]);
+		break;
+		//绘制背景
+	case WM_PAINT:
+		xSize = WM_GetWindowSizeX(hWin);
+		ySize = WM_GetWindowSizeY(hWin);
+		//上方第一行
+		GUI_SetColor(COLOR_TITLEBAR);
+		GUI_FillRect(0, 0, xSize - 1, CONTENTBAR_TITLE_HEIGHT - 1);
+		//左方内容栏
+		GUI_SetColor(COLOR_CONTENTBAR);
+		GUI_FillRect(0, CONTENTBAR_CONTENT_POSY, CONTENTBAR_CONTENT_WIDTH - 1, ySize - 1);
+		//右侧工具栏
+		GUI_SetColor(COLOR_TOOLSBAR);
+		GUI_FillRect(CONTENTBAR_CONTENT_WIDTH, CONTENTBAR_CONTENT_POSY, xSize - 1, ySize - 1);
+
+		//GUI_DrawBitmap(&bmMenuRight_120_46, QUALITY_CONC_SELECT_START_X, QUALITY_CONC_SELECT_START_Y - TITLESBAR_HEIGHT);
+     GUI_SetColor(COLOR_PICTURE);
+	   GUI_FillRect(QUALITY_CONC_SELECT_START_X, QUALITY_CONC_SELECT_START_Y- TITLESBAR_HEIGHT,QUALITY_CONC_SELECT_START_X+100, QUALITY_CONC_SELECT_START_Y- TITLESBAR_HEIGHT+45);
+	   GUI_DrawBitmap(&bmMenuRight_20_46, QUALITY_CONC_SELECT_START_X+100, QUALITY_CONC_SELECT_START_Y- TITLESBAR_HEIGHT);
+
+     
+
+		//GUI_DrawBitmap(&bmMenuLeft_101_46, FILTER_1_START_X, FILTER_1_START_Y - TITLESBAR_HEIGHT);
+		//GUI_DrawBitmap(&bmMenuLeft_101_46, FILTER_2_START_X, FILTER_2_START_Y - TITLESBAR_HEIGHT);
+		//GUI_DrawBitmap(&bmMenuLeft_101_46, MODE_START_X, MODE_START_Y - TITLESBAR_HEIGHT);
+
+		//GUI_DrawBitmap(&bmMenuRight_90_46, FILTER_1_R_START_X, FILTER_1_R_START_Y - TITLESBAR_HEIGHT);
+		//GUI_DrawBitmap(&bmMenuRight_90_46, FILTER_2_R_START_X, FILTER_2_R_START_Y - TITLESBAR_HEIGHT);
+		//GUI_DrawBitmap(&bmMenuRight_90_46, MODE_R_START_X, MODE_START_Y - TITLESBAR_HEIGHT);
+
+	
+		GUI_SetTextMode(GUI_TM_TRANS);
+
+		GUI_SetColor(COLOR_PAINT_TXT);
+
+		if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		{
+			GUI_SetFont(GUI_FONT_MED);
+		}
+		else
+		{
+			GUI_SetFont(GUI_FONT_MED_CH);
+		}
+		
+			//GUI_DispStringAt(STR_MEASURE_TITLE[SystemPrameter.SystemLanguage], CONTENTBAR_CAPTION_POSX, CONTENTBAR_CAPTION_POSY);//"Measurement parameters"
+		/*
+		rect.x0=TOOLS1_BUTTON_STARTX;
+		rect.y0=TOOLS1_BUTTON_STARTY(0);//+TITLESBAR_HEIGHT;
+        rect.x1=TOOLS1_BUTTON_ENDX;
+		rect.y1=TOOLS1_BUTTON_ENDY(0);//+TITLESBAR_HEIGHT;
+		if(BoardInf.QualityPara.AbsFlag)
+		{
+			strcpy(ConvertStr,STR_ABS[SystemPrameter.SystemLanguage]);
+		   // GUI_DispStringAt(STR_ABS[SystemPrameter.SystemLanguage], CONTENTBAR_CAPTION_POSX, CONTENTBAR_CAPTION_POSY);
+		}
+		else
+		{
+			strcpy(ConvertStr,STR_CONC[SystemPrameter.SystemLanguage]);
+			//GUI_DispStringAt(STR_CONC[SystemPrameter.SystemLanguage], CONTENTBAR_CAPTION_POSX, CONTENTBAR_CAPTION_POSY);
+		}
+		GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+
+		rect.x0=TOOLS1_BUTTON_STARTX;
+		rect.y0=TOOLS1_BUTTON_STARTY(1);//+TITLESBAR_HEIGHT;
+        rect.x1=TOOLS1_BUTTON_ENDX;
+		rect.y1=TOOLS1_BUTTON_ENDY(1);//+TITLESBAR_HEIGHT;
+		if(BoardInf.QualityPara.Enable)
+		{
+			strcpy(ConvertStr,STR_OPEN[SystemPrameter.SystemLanguage]);
+		   // GUI_DispStringAt(STR_ABS[SystemPrameter.SystemLanguage], CONTENTBAR_CAPTION_POSX, CONTENTBAR_CAPTION_POSY);
+		}
+		else
+		{
+			strcpy(ConvertStr,STR_CLOSE[SystemPrameter.SystemLanguage]);
+			//GUI_DispStringAt(STR_CONC[SystemPrameter.SystemLanguage], CONTENTBAR_CAPTION_POSX, CONTENTBAR_CAPTION_POSY);
+		}
+		GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+*/
+
+		GUI_SetColor(0x0);
+
+
+		DisplayReportInterface();
+		
+
+		  //if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		 // {
+			  //     GUI_SetFont(GUI_FONT_MED);
+		  //}
+		 /// //else
+		 // {
+				 //  	 GUI_SetFont(GUI_FONT_MED_CH);
+		 // }						 
+      if(ExpEnable==EXP_FILTER)
+		  {
+			   DisplayAnalysisFilterExpand();
+		  }
+		  else if(ExpEnable==EXP_LOG)
+		  {
+			   DisplayAnalysisLogExpand();
+		  }
+
+
+
+
+	//	if((NormalAnalysis.wcMode == ANALYSIS_MODE_CURVE) && BoardInf.bHasData)
+
+
+
+			//GUI_SetFont(GUI_FONT_SMALL);
+
+
+		break;
+
+	case WM_NOTIFY_PARENT:
+	{
+             Id = WM_GetId(pMsg->hWinSrc);    // Id of widget 
+						 NCode = pMsg->Data.v;               // Notification code 
+		
+		  if( (KeyPadAsc.UseFlag == KEYPAD_BUSY)||(KeyPadNum.UseFlag == KEYPAD_BUSY)||(PromptMenu.InterfaceStatus==PROMPT_MENU_BUSY) )
+			{
+				 break;
+			}
+			 if(TouchKey.KeyStatus)
+						 {
+							  break;
+						 }
+						 if (NCode == WM_NOTIFICATION_RELEASED ) //正常分析
+						 {
+							 //原始数据
+							  if( (Id==ID_REPORT_BUTTON0)&& (BoardInf.KineticPara.Enable==0) )
+							  {
+                  if(NormalAnalysis.wcMode != ANALYSIS_MODE_RAWDATA)
+									{
+								        NormalAnalysis.wcMode = ANALYSIS_MODE_RAWDATA;//原始数据
+								  		  WM_Invalidate(ReportWin);
+									}
+								 //Paint
+							  }
+							  //定性分析
+							  else if( (Id==ID_REPORT_BUTTON1)&& (BoardInf.KineticPara.Enable==0) )
+							  {
+								   if(NormalAnalysis.wcMode != ANALYSIS_MODE_INTERPRET && BoardInf.InterpretPara.Enable)
+									 {
+										  if(BoardInf.InterpretPara.nAnalysisResult[NormalAnalysis.FilterCurrent] == ANALYSIS_SUCCESS)
+											{
+								                 NormalAnalysis.wcMode =ANALYSIS_MODE_INTERPRET;  //定性分析
+								                 WM_Invalidate(ReportWin);
+											}
+											else if(BoardInf.InterpretPara.nAnalysisResult[(NormalAnalysis.FilterCurrent + 1)%3] == ANALYSIS_SUCCESS)
+					            {
+						                      NormalAnalysis.wcMode =ANALYSIS_MODE_INTERPRET;  //定性分析
+						                      NormalAnalysis.FilterCurrent = (NormalAnalysis.FilterCurrent + 1)%3;
+						                      WM_Invalidate(ReportWin);
+					            }
+											else if(BoardInf.InterpretPara.nAnalysisResult[(NormalAnalysis.FilterCurrent + 2)%3] == ANALYSIS_SUCCESS)
+					            {
+						                      NormalAnalysis.wcMode =ANALYSIS_MODE_INTERPRET;  //定性分析
+						                      NormalAnalysis.FilterCurrent = (NormalAnalysis.FilterCurrent + 2)%3;
+						                      WM_Invalidate(ReportWin);
+					            }
+											else
+					            {
+												   strcpy(PromptMenu.InputStr,ANALYSIS_ERROR_MESSAGE[SystemPrameter.SystemLanguage][BoardInf.InterpretPara.nAnalysisResult[NormalAnalysis.FilterCurrent]]);
+												   Prompt_Interface(PROMPT_WARMING);
+					            }
+									 }
+								 //Paint
+							  }
+							  //定量分析   动力学原始数据
+							  else if(Id==ID_REPORT_BUTTON2)
+							  {
+								    //  if(BoardInf.KineticPara.Enable==0) 
+									//  {
+										   if(NormalAnalysis.wcMode != ANALYSIS_MODE_ANALYSIS && BoardInf.KineticPara.Enable ==0 && BoardInf.KineticPara.Curve !=CURVE_NO)
+											 {
+												   if(NormalAnalysis.nAnalysisResult[NormalAnalysis.FilterCurrent] == ANALYSIS_SUCCESS)
+													 {
+								                            NormalAnalysis.wcMode =ANALYSIS_MODE_ANALYSIS;   //定量分析
+								                            WM_Invalidate(ReportWin);
+													 }
+													 else if(NormalAnalysis.nAnalysisResult[(NormalAnalysis.FilterCurrent + 1)%3] == ANALYSIS_SUCCESS)
+													 {
+						                                NormalAnalysis.wcMode =ANALYSIS_MODE_ANALYSIS;  //定量分析
+						                                NormalAnalysis.FilterCurrent = (NormalAnalysis.FilterCurrent + 1)%3;
+						                                WM_Invalidate(ReportWin);
+					                 }
+													 else if(NormalAnalysis.nAnalysisResult[(NormalAnalysis.FilterCurrent + 2)%3] == ANALYSIS_SUCCESS)
+													 {
+						                                NormalAnalysis.wcMode =ANALYSIS_MODE_ANALYSIS;  //定量分析
+						                                NormalAnalysis.FilterCurrent = (NormalAnalysis.FilterCurrent + 2)%3;
+						                                WM_Invalidate(ReportWin);
+					                 }
+													else
+					                 {
+
+														   strcpy(PromptMenu.InputStr,ANALYSIS_ERROR_MESSAGE[SystemPrameter.SystemLanguage][NormalAnalysis.nAnalysisResult[NormalAnalysis.FilterCurrent]]);
+												       Prompt_Interface(PROMPT_WARMING);
+					                 }
+											}//if(NormalAnalysis.wcMode != ANALYSIS_MODE_ANALYSIS && BoardInf.KineticPara.Enable ==0)
+								//	  }// if(BoardInf.KineticPara.Enable==0) 
+									 else  if( (NormalAnalysis.wcMode != ANALYSIS_MODE_RAWDATA)&& BoardInf.KineticPara.Enable)//动力学分析
+									 {
+								            NormalAnalysis.wcMode = ANALYSIS_MODE_RAWDATA;//原始数据
+
+								  		    WM_Invalidate(ReportWin);
+									}
+								 //Paint
+							  }
+							  //标准曲线  动力学分析
+							  else if(Id==ID_REPORT_BUTTON3)//
+							  {
+								    //  if(BoardInf.KineticPara.Enable==0) 
+									 // {
+										   if( (NormalAnalysis.wcMode != ANALYSIS_MODE_CURVE && BoardInf.KineticPara.Enable ==0)&&(BoardInf.KineticPara.Curve>=0) ) 
+											 {
+												   if(NormalAnalysis.nAnalysisResult[NormalAnalysis.FilterCurrent] == ANALYSIS_SUCCESS)
+													 {
+								                            NormalAnalysis.wcMode =ANALYSIS_MODE_CURVE;   //标准曲线
+								                            WM_Invalidate(ReportWin);
+													 }
+													 else if(NormalAnalysis.nAnalysisResult[(NormalAnalysis.FilterCurrent + 1)%3] == ANALYSIS_SUCCESS)
+													 {
+						                                   NormalAnalysis.wcMode =ANALYSIS_MODE_CURVE; //标准曲线
+						                                   NormalAnalysis.FilterCurrent = (NormalAnalysis.FilterCurrent + 1)%3;
+						                                   WM_Invalidate(ReportWin);
+					                 }
+													 else if(NormalAnalysis.nAnalysisResult[(NormalAnalysis.FilterCurrent + 2)%3] == ANALYSIS_SUCCESS)
+													 {
+						                                   NormalAnalysis.wcMode =ANALYSIS_MODE_CURVE; //标准曲线
+						                                   NormalAnalysis.FilterCurrent = (NormalAnalysis.FilterCurrent + 2)%3;
+						                                   WM_Invalidate(ReportWin);
+					                 }
+													 else
+					                 {
+														  strcpy(PromptMenu.InputStr,ANALYSIS_ERROR_MESSAGE[SystemPrameter.SystemLanguage][NormalAnalysis.nAnalysisResult[NormalAnalysis.FilterCurrent]]);
+												      Prompt_Interface(PROMPT_WARMING);
+					                 }
+											}//if(NormalAnalysis.wcMode != ANALYSIS_MODE_ANALYSIS && BoardInf.KineticPara.Enable ==0)
+									//  }// if(BoardInf.KineticPara.Enable==0) 
+									    else if( (NormalAnalysis.wcMode != ANALYSIS_MODE_ANALYSIS) && BoardInf.KineticPara.Enable)  //动力学分析
+									    {
+										    	if(BoardInf.KineticPara.nAnalysisResult[NormalAnalysis.FilterCurrent] == ANALYSIS_SUCCESS)
+					                {
+						                       NormalAnalysis.wcMode = ANALYSIS_MODE_ANALYSIS;
+					                         WM_Invalidate(ReportWin);
+												  }
+					                else if(BoardInf.KineticPara.nAnalysisResult[(NormalAnalysis.FilterCurrent + 1)%3] == ANALYSIS_SUCCESS)
+					                {
+													       NormalAnalysis.wcMode = ANALYSIS_MODE_ANALYSIS;
+														     NormalAnalysis.FilterCurrent = (NormalAnalysis.FilterCurrent + 1)%3;
+					                       WM_Invalidate(ReportWin);
+					                }
+			                    else if(BoardInf.KineticPara.nAnalysisResult[(NormalAnalysis.FilterCurrent + 2)%3] == ANALYSIS_SUCCESS)
+					                {
+													      NormalAnalysis.wcMode = ANALYSIS_MODE_ANALYSIS;
+														    NormalAnalysis.FilterCurrent = (NormalAnalysis.FilterCurrent + 2)%3;
+					                      WM_Invalidate(ReportWin);
+					                }
+								          else
+					                {
+												    strcpy(PromptMenu.InputStr,ANALYSIS_ERROR_MESSAGE[SystemPrameter.SystemLanguage][BoardInf.KineticPara.nAnalysisResult[NormalAnalysis.FilterCurrent]]);
+												    Prompt_Interface(PROMPT_WARMING);
+					                }
+									}//else if( (NormalAnalysis.wcMode != ANALYSIS_MODE_ANALYSIS) && BoardInf.KineticPara.Enable)  //动力学分析
+								// ReportMenu.CurrMenu=REPORT_MENU_CURVE;
+							//	 NormalAnalysis.wcMode =ANALYSIS_MODE_CURVE;       //标准曲线
+								// WM_Invalidate(ReportWin);
+								 //Paint
+							  }//  else if(Id==ID_REPORT_BUTTON3)//
+
+                               //质控分析   或   动力学曲线
+							  else if(Id==ID_REPORT_BUTTON4)
+							  {
+										    if(NormalAnalysis.wcMode != ANALYSIS_MODE_QC && (BoardInf.KineticPara.Enable==0)&&(BoardInf.QualityPara.Enable ) )//非动力学分析
+									      {
+										    	            if(BoardInf.QualityResult.nAnalysisResult[NormalAnalysis.FilterCurrent] == ANALYSIS_SUCCESS)
+					                            {
+						                                   NormalAnalysis.wcMode = ANALYSIS_MODE_QC;
+					                                     WM_Invalidate(ReportWin);
+												              }
+					                            else if(BoardInf.QualityResult.nAnalysisResult[(NormalAnalysis.FilterCurrent + 1)%3] == ANALYSIS_SUCCESS)
+					                            {
+													                 NormalAnalysis.wcMode = ANALYSIS_MODE_QC;
+														               NormalAnalysis.FilterCurrent = (NormalAnalysis.FilterCurrent + 1)%3;
+					                                 WM_Invalidate(ReportWin);
+					                             }
+			                                 else if(BoardInf.QualityResult.nAnalysisResult[(NormalAnalysis.FilterCurrent + 2)%3] == ANALYSIS_SUCCESS)
+					                             {
+													                 NormalAnalysis.wcMode = ANALYSIS_MODE_QC;
+														               NormalAnalysis.FilterCurrent = (NormalAnalysis.FilterCurrent + 2)%3;
+					                                 WM_Invalidate(ReportWin);
+					                             }
+								                       else
+					                             {
+ 												                    strcpy(PromptMenu.InputStr,ANALYSIS_ERROR_MESSAGE[SystemPrameter.SystemLanguage][BoardInf.QualityResult.nAnalysisResult[NormalAnalysis.FilterCurrent]]);
+												                    Prompt_Interface(PROMPT_WARMING);
+					                             }
+									          }//else if(NormalAnalysis.wcMode != ANALYSIS_MODE_QC && (BoardInf.KineticPara.Enable==0)&&(BoardInf.QualityPara.Enable ) )//非动力学分析
+									     else if(NormalAnalysis.wcMode != ANALYSIS_MODE_CURVE && BoardInf.KineticPara.Enable )//?
+									     {
+												  
+												   if(BoardInf.KineticPara.nAnalysisResult[NormalAnalysis.FilterCurrent] == ANALYSIS_SUCCESS)
+													 {
+								                            NormalAnalysis.wcMode =ANALYSIS_MODE_CURVE;   //定量分析
+								                            WM_Invalidate(ReportWin);
+													 }
+													 else if(BoardInf.KineticPara.nAnalysisResult[(NormalAnalysis.FilterCurrent + 1)%3] == ANALYSIS_SUCCESS)
+													 {
+						                                   NormalAnalysis.wcMode =ANALYSIS_MODE_CURVE;  //定量分析
+						                                   NormalAnalysis.FilterCurrent = (NormalAnalysis.FilterCurrent + 1)%3;
+						                                   WM_Invalidate(ReportWin);
+					                 }
+													 else if(BoardInf.KineticPara.nAnalysisResult[(NormalAnalysis.FilterCurrent + 2)%3] == ANALYSIS_SUCCESS)
+													 {
+						                                   NormalAnalysis.wcMode =ANALYSIS_MODE_CURVE;  //定量分析
+						                                   NormalAnalysis.FilterCurrent = (NormalAnalysis.FilterCurrent + 2)%3;
+						                                   WM_Invalidate(ReportWin);
+					                 }
+													 else
+					                 {
+														  strcpy(PromptMenu.InputStr,ANALYSIS_ERROR_MESSAGE[SystemPrameter.SystemLanguage][BoardInf.KineticPara.nAnalysisResult[NormalAnalysis.FilterCurrent]]);
+												      Prompt_Interface(PROMPT_WARMING);
+					                 }
+									}//else if(NormalAnalysis.wcMode != ANALYSIS_MODE_ANALYSIS && BoardInf.KineticPara.Enable ==0)
+							  }
+							  
+						
+							  else if (Id == ID_REPORT_BUTTON5)   //工具栏按钮   打印
+							  {
+								     PrintFile();
+									   //加入延时
+							  }
+					
+							  else if (Id == ID_REPORT_BUTTON6)   //工具栏按钮  导出报告
+							  {
+								    ExportReport_Interface();
+                    gSystem.TitleButtonEnable=0;
+									  gSystem.SystemInterface = MI_EXPORT_REPORT;
+							  }
+					 }
+					break;
+	}
+
+	default:
+		//		WM_DefaultProc(pMsg);
+		break;
+	}
+}
+
+
+
+void SetQCPara2(void)
+{
+	signed char i;
+	for(i = 0; i < QC_MAX; i++)
+	{
+       if(BoardInf.QualityPara.dTarget[0][i]!=0)  //2015-11-11改
+	   {
+	         BoardInf.QualityPara.dCV[0][i] = BoardInf.QualityPara.dSD[0][i] / BoardInf.QualityPara.dTarget[0][i];
+	   }
+	   else BoardInf.QualityPara.dCV[0][i] =0;
+
+	   if(BoardInf.QualityPara.dTarget[1][i]!=0)  //2015-11-11改
+	   {
+	          BoardInf.QualityPara.dCV[1][i] = BoardInf.QualityPara.dSD[1][i] / BoardInf.QualityPara.dTarget[1][i];
+	   }
+	   else BoardInf.QualityPara.dCV[1][i] =0;
+
+
+		BoardInf.QualityPara.dLowerLimit[0][i] = BoardInf.QualityPara.dTarget[0][i] - BoardInf.QualityPara.dSD[0][i] * QC_COEF;
+		BoardInf.QualityPara.dLowerLimit[1][i] = BoardInf.QualityPara.dTarget[1][i] - BoardInf.QualityPara.dSD[1][i] * QC_COEF;
+
+		BoardInf.QualityPara.dUpperLimit[0][i] = BoardInf.QualityPara.dTarget[0][i] + BoardInf.QualityPara.dSD[0][i] * QC_COEF;
+		BoardInf.QualityPara.dUpperLimit[1][i] = BoardInf.QualityPara.dTarget[1][i] + BoardInf.QualityPara.dSD[1][i] * QC_COEF;
+	}
+}
+
+
+void Report_Interface(void)
+{
+
+/*
+	int i;
+
+
+  UartInit();
+	BoardInf.Filter1Locate=0;
+	BoardInf.Filter1Locate=-1;
+	
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABS[0]=0.1;	
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABSError[0]=-0.01;
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABS[0]=0.5;	
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABSError[0]=-0.01;
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABS[0]=1.0;	
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABSError[0]=-0.01;
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABS[0]=1.5;	
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABSError[0]=-0.01;
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABS[0]=2.0;	
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABSError[0]=-0.01;
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABS[0]=2.5;	
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABSError[0]=-0.01;
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABS[0]=3.0;	
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABSError[0]=-0.01;
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABS[0]=3.5;	
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABSError[0]=-0.01;
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABS[0]=4.0;	
+	SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABSError[0]=-0.01;
+	
+	BoardInf.KineticPara.Enable=0;
+	SystemPrameter.AbsCaliEnable=0;///////////////////
+	
+	  if(BoardInf.KineticPara .Enable )
+		{
+			GetResultABS(1, BoardInf.KineticPara.kinetic_readings_practical - 1);
+		}
+		else
+		{
+			BoardInf.KineticPara.kinetic_readings_practical = 1;
+			GetResultABS(1, 0);
+		}
+		
+    GetCalibrationPara();
+		memcpy(dABSInit, dABS, sizeof(float) * FILTER_PLATE_MAX * TUBE_MAX * KINETIC_READINGS_MAX);
+
+		
+		if(SystemPrameter.AbsCaliEnable)//sys_para.bNotCalibrate
+		{
+			MakeABSCalibration();
+		}
+
+
+
+//板布局
+
+
+	  BoardInf.dConcentration[0]=2;
+    BoardInf.dConcentration[1]=5;
+    BoardInf.dConcentration[2]=10;
+    BoardInf.dConcentration[3]=20;
+    BoardInf.dConcentration[4]=30;
+    BoardInf.dConcentration[5]=0;
+		BoardInf.wcCurrentUnit=1;//备份浓度单位
+
+		for(i=0;i<96;i++)
+	  {
+       BoardInf.Layout.WellType[i] =WELLS_TYPE_UD;
+	     BoardInf.Layout.Num[i] = 0;
+	  }
+	
+	for(i=0;i<5;i++)
+	{
+       BoardInf.Layout.WellType[i] =WELLS_TYPE_SD;
+	     BoardInf.Layout.Num[i] = i;
+	}
+	//定性分析
+	
+  BoardInf.InterpretPara.Enable=1; //允许定性分析interpret_para.bOpened
+  BoardInf.InterpretPara.AbsFlag=1; //采用吸光度
+  BoardInf.InterpretPara.fCoef[0]=0.1;   //dCoef[3]
+  BoardInf.InterpretPara.fCoef[1]=0.2; 
+  BoardInf.InterpretPara.fCoef[2]=0.3; 
+  BoardInf.InterpretPara.fWeakPValue=0.3;  // interpret_para.dGreyValue
+  BoardInf.InterpretPara.GreatFlag=1; //采用大于号判定  interpret_para.bGreater
+  BoardInf.Layout.WellType[6] =WELLS_TYPE_PC;
+  BoardInf.Layout.WellType[7] =WELLS_TYPE_NC;
+
+
+
+
+
+
+
+   // NormalAnalysis.wcMode = ANALYSIS_MODE_CURVE;
+//	BoardInf.Curve=CURVE_LOGISTIC;//CURVE_CUBIC;//CURVE_PTOP;//CURVE_FACTOR;//CURVE_LINEAR;
+   BoardInf.KineticPara.Curve =CURVE_LOGISTIC;// CURVE_NO;
+   BoardInf.KineticPara.PreProcess = 1;
+  //gSystem.TitleButtonEnable = 1;
+
+
+
+
+
+
+
+	NormalAnalysis.FilterCurrent=0;
+  	NormalAnalysis.bLogX = 1;
+	NormalAnalysis.bLogY = 0;
+
+  
+
+
+
+
+
+
+
+
+
+
+//QC
+BoardInf.Layout.WellType[30] =WELLS_TYPE_QC;
+BoardInf.Layout.Num[30]=0;
+BoardInf.Layout.WellType[31] =WELLS_TYPE_QC;
+BoardInf.Layout.Num[31]=1;
+BoardInf.Layout.WellType[32] =WELLS_TYPE_QC;
+BoardInf.Layout.Num[32]=2;;
+BoardInf.Layout.WellType[33] =WELLS_TYPE_QC;
+BoardInf.Layout.Num[33]=3;
+BoardInf.Layout.WellType[34] =WELLS_TYPE_QC;
+BoardInf.Layout.Num[34]=4;
+
+BoardInf.Layout.WellType[40] =WELLS_TYPE_QC;
+BoardInf.Layout.Num[40]=0;
+BoardInf.Layout.WellType[41] =WELLS_TYPE_QC;
+BoardInf.Layout.Num[41]=1;
+BoardInf.Layout.WellType[42] =WELLS_TYPE_QC;
+BoardInf.Layout.Num[42]=2;;
+BoardInf.Layout.WellType[43] =WELLS_TYPE_QC;
+BoardInf.Layout.Num[43]=3;
+BoardInf.Layout.WellType[44] =WELLS_TYPE_QC;
+BoardInf.Layout.Num[44]=4;
+	
+
+  //浓度
+
+
+
+	BoardInf.QualityPara.dTarget[0][0]=0.1;
+    BoardInf.QualityPara.dTarget[0][1]=0.4;
+    BoardInf.QualityPara.dTarget[0][2]=0.5;
+	BoardInf.QualityPara.dTarget[0][3]=0.8;
+    BoardInf.QualityPara.dTarget[0][4]=1;
+    BoardInf.QualityPara.dTarget[0][5]=2;
+	BoardInf.QualityPara.dTarget[0][6]=3;
+    BoardInf.QualityPara.dTarget[0][7]=4;
+    BoardInf.QualityPara.dTarget[0][8]=5;
+
+	BoardInf.QualityPara.dSD[0][0]=0.01;
+    BoardInf.QualityPara.dSD[0][1]=0.05;
+    BoardInf.QualityPara.dSD[0][2]=0.1;
+	BoardInf.QualityPara.dSD[0][3]=1.5;
+    BoardInf.QualityPara.dSD[0][4]=2;
+    BoardInf.QualityPara.dSD[0][5]=2.5;
+	BoardInf.QualityPara.dSD[0][6]=3;
+    BoardInf.QualityPara.dSD[0][7]=3.5;
+    BoardInf.QualityPara.dSD[0][8]=4;
+
+
+
+	BoardInf.QualityPara.dTarget[1][0]=0.1;
+    BoardInf.QualityPara.dTarget[1][1]=0.4;
+    BoardInf.QualityPara.dTarget[1][2]=0.5;
+	BoardInf.QualityPara.dTarget[1][3]=0.8;
+    BoardInf.QualityPara.dTarget[1][4]=1;
+    BoardInf.QualityPara.dTarget[1][5]=2;
+	BoardInf.QualityPara.dTarget[1][6]=3;
+    BoardInf.QualityPara.dTarget[1][7]=4;
+    BoardInf.QualityPara.dTarget[1][8]=5;
+
+	BoardInf.QualityPara.dSD[1][0]=0.01;
+    BoardInf.QualityPara.dSD[1][1]=0.05;
+    BoardInf.QualityPara.dSD[1][2]=0.1;
+	BoardInf.QualityPara.dSD[1][3]=1.5;
+    BoardInf.QualityPara.dSD[1][4]=2;
+    BoardInf.QualityPara.dSD[1][5]=2.5;
+	BoardInf.QualityPara.dSD[1][6]=3;
+    BoardInf.QualityPara.dSD[1][7]=3.5;
+    BoardInf.QualityPara.dSD[1][8]=4;
+
+	//void CQualityDlg::SetQCPara(void)
+    SetQCPara2();
+	//memcpy(&BoardInf.QualityPara, &QualityParaBack,sizeof(QUALITY_PARA) ); //保存质控参数
+    BoardInf.QualityPara.Enable=1;
+   //BoardInf.InterpretPara.Enable=1;
+ //debug end
+
+
+
+
+
+
+//动力学分析
+	 BoardInf.KineticPara.Enable=1;
+     BoardInf.KineticPara.PreProcess=PRE_CALCULATE_M1_M2_SUB;
+	 BoardInf.KineticPara.Curve=CURVE_LINEAR;
+	 BoardInf.KineticPara.Readings=5;
+	 BoardInf.KineticPara.TimeInterval=1;
+
+//Para.
+	BoardInf.KineticPara.kinetic_analysis_mode=KINETIC_ANALYSIS_TIME_CHANGE;
+	BoardInf.KineticPara.BaseLinePoint=5;
+	BoardInf.KineticPara.BaseLineSel=3;
+	BoardInf.KineticPara.EndReadings=10;
+	BoardInf.KineticPara.FirstReadings=0;
+	BoardInf.KineticPara.Change=2;
+
+	BoardInf.KineticPara.kinetic_readings_practical=4;
+	BoardInf.KineticPara.kinetic_readings_analysis=4;
+
+
+
+
+  // 	reportReady=1;
+	//	if(board_inf.curentKinetic[0] == _T('O'))
+
+          BoardInf.bHasData=1;
+          ReportMenu.ReportReady=1;
+				  gSystem.SystemInterface = MI_REPORT;
+					gSystem.MenuRefreshFlag = 1;
+
+
+*/
+
+  BoardInf.QualityResult.nCurrentPageAnalysis=0;
+	ReportWin = WM_CreateWindowAsChild(CONTENTBAR_POSX, CONTENTBAR_POSY, CONTENTBAR_WIDTH, CONTENTBAR_HEIGHT, WM_HBKWIN, WM_CF_SHOW | WM_CF_STAYONTOP | WM_CF_MEMDEV, _cbReport, 0);
+	//WM_BringToTop(ReportWin);
+}
+
+
+
+void Report_Scan(void)
+{
+	
+	if (TouchKey.KeyStatus==0)
+	{
+		unsigned char i;
+	  //unsigned short nWavelength=0;
+	  GUI_PID_STATE TouchState;
+	 // int xPhys, yPhys;
+		
+	  GUI_PID_GetState(&TouchState);
+	if (TouchState.Pressed)
+	{
+		if (ExpEnable==0)  //初使状态，没有弹出扩展项
+		{
+            if ((TouchState.x>ANALYSIS_LOG_SELECT_START_X)&&(TouchState.x<ANALYSIS_LOG_SELECT_END_X) //2014-8-19项
+				    &&(TouchState.y>ANALYSIS_LOG_SELECT_START_Y)&&(TouchState.y<ANALYSIS_LOG_SELECT_END_Y)&& (BoardInf.KineticPara .Enable ==0))
+			     {
+				       if(NormalAnalysis.wcMode != ANALYSIS_MODE_ANALYSIS && NormalAnalysis.wcMode != ANALYSIS_MODE_CURVE)  //只有定量分析、标准曲线才有此按钮
+				       {
+					           return;
+				       }
+               ExpEnable=EXP_LOG;
+		           TouchKey.KeyStatus=1;
+				       WM_Invalidate(ReportWin);
+		       }
+           else if ((TouchState.x>ANALYSIS_FILTER_SELECT_START_X)&&(TouchState.x<ANALYSIS_FILTER_SELECT_END_X) //2014-8-19项
+				     &&(TouchState.y> ANALYSIS_FILTER_SELECT_START_Y)&&(TouchState.y< ANALYSIS_FILTER_SELECT_END_Y))
+			     {
+				      //单波长不用选
+				      if((NormalAnalysis.wcMode != ANALYSIS_MODE_RAWDATA && NormalAnalysis.wcMode != ANALYSIS_MODE_ANALYSIS
+					       && NormalAnalysis.wcMode != ANALYSIS_MODE_CURVE && NormalAnalysis.wcMode != ANALYSIS_MODE_INTERPRET
+					       && NormalAnalysis.wcMode != ANALYSIS_MODE_QC) || (BoardInf.Filter2Locate==-1) )
+				     {
+					       return;
+				     }
+			       ExpEnable=EXP_FILTER;////normal_analysis.bFilterSelect = !normal_analysis.bFilterSelect;			
+		         TouchKey.KeyStatus=1;
+				     WM_Invalidate(ReportWin);//// DisplayAnalysisFilterExpand();			
+			    }
+                //加按钮(在动力学用）
+			   else if((TouchState.x>PLUS_BUTTON_START_X)&&(TouchState.x<PLUS_BUTTON_END_X)
+				     &&(TouchState.y>PLUS_BUTTON_START_Y)&&(TouchState.y<PLUS_BUTTON_END_Y) && (NormalAnalysis.wcMode == ANALYSIS_MODE_RAWDATA
+				     || NormalAnalysis.wcMode == ANALYSIS_MODE_CURVE)
+				     && BoardInf.KineticPara.Enable)
+			   {
+				     if(NormalAnalysis.wcMode == ANALYSIS_MODE_RAWDATA)//动力学原始数据整板号
+				     {
+					        BoardInf.KineticPara.kinetic_reading_current++;
+					        if(BoardInf.KineticPara.kinetic_reading_current >= BoardInf.KineticPara.kinetic_readings_analysis)
+					       {
+						           BoardInf.KineticPara.kinetic_reading_current = 0;
+					       }
+				     }
+				    else  ////动力学曲线当前样本号
+					  {
+						   if(BoardInf.KineticPara.nCurrentSample >= TUBE_MAX)
+						   {
+							   BoardInf.KineticPara.nCurrentSample = 0;
+						   }
+						   else
+						   {
+							   BoardInf.KineticPara.nCurrentSample++;
+						   }
+					  }
+					  TouchKey.KeyStatus=1;
+					  WM_Invalidate(ReportWin);
+				 }
+            //右侧工具栏减(在动力学用）
+         else if((TouchState.x>MINUS_BUTTON_START_X)&&(TouchState.x<MINUS_BUTTON_END_X)
+				&&(TouchState.y>MINUS_BUTTON_START_Y)&&(TouchState.y<MINUS_BUTTON_END_Y) && (NormalAnalysis.wcMode == ANALYSIS_MODE_RAWDATA
+				|| NormalAnalysis.wcMode == ANALYSIS_MODE_CURVE)
+				&& BoardInf.KineticPara.Enable)
+			{
+				//动力学原始数据
+				if(NormalAnalysis.wcMode == ANALYSIS_MODE_RAWDATA)
+				{
+					if(BoardInf.KineticPara.kinetic_reading_current <= 0)  //动力学原始数据整板号
+					{
+						BoardInf.KineticPara.kinetic_reading_current = BoardInf.KineticPara.kinetic_readings_analysis - 1;
+					}
+					else
+					{
+						BoardInf.KineticPara.kinetic_reading_current--;
+					}
+				}
+				else //动力学曲线
+				{
+					if(BoardInf.KineticPara.nCurrentSample <= 0)   //动力学曲线当前样本号
+					{
+						BoardInf.KineticPara.nCurrentSample = TUBE_MAX;
+					}
+					else
+					{
+						BoardInf.KineticPara.nCurrentSample--;
+					}
+				}
+				 TouchKey.KeyStatus=1;
+				 WM_Invalidate(ReportWin);
+			}
+			//质控界面 上1页
+		  else   if ((TouchState.x>TABPAGE_LEFT_START_X-15)&&(TouchState.x<TABPAGE_LEFT_END_X+15)&&(TouchState.y>TABPAGE_LEFT_START_Y-15)
+				    &&(TouchState.y<TABPAGE_LEFT_END_Y+15)&&(NormalAnalysis.wcMode == ANALYSIS_MODE_QC) )
+			{
+				    if(BoardInf.QualityResult.nCurrentPageAnalysis <= 0 || BoardInf.QualityResult.nPageTotalAnalysis <= 1)
+				    {
+					         return;
+				    }
+						BoardInf.QualityResult.nCurrentPageAnalysis = 0;
+				    TouchKey.KeyStatus=1;
+					  WM_Invalidate(ReportWin);
+			}
+			//质控界面  下1页
+			else if ((TouchState.x>TABPAGE_RIGHT_START_X-15)&&(TouchState.x<TABPAGE_RIGHT_END_X+15)&&(TouchState.y>TABPAGE_RIGHT_START_Y-15)
+				   &&(TouchState.y<TABPAGE_RIGHT_END_Y+15)&&(NormalAnalysis.wcMode == ANALYSIS_MODE_QC))
+			{
+				    if(BoardInf.QualityResult.nCurrentPageAnalysis >=1 || BoardInf.QualityResult.nPageTotalAnalysis <= 1)
+				    {
+					      return;// 1;
+				    }
+				    TouchKey.KeyStatus=1;
+            BoardInf.QualityResult.nCurrentPageAnalysis = 1;
+					  WM_Invalidate(ReportWin);
+			}
+		}//if (ExpEnable==0)  //初使状态，没有弹出扩展项
+		else //if (ExpEnable)  //初使状态，没有弹出扩展项
+		{
+			  if (ExpEnable==EXP_LOG ) 
+				{
+						 if ((TouchState.x>ANALYSIS_LOG_SELECT_START_X - NORMAL_ANLYSIS_LOG_SELECT_WIDTH)&&(TouchState.x<ANALYSIS_LOG_SELECT_START_X) 
+					       &&(TouchState.y>ANALYSIS_LOG_SELECT_START_Y)&&(TouchState.y<ANALYSIS_LOG_SELECT_END_Y))
+						{
+							    unsigned short nStartX=ANALYSIS_LOG_SELECT_START_X - NORMAL_ANLYSIS_LOG_SELECT_WIDTH+20;
+                  unsigned char bLogX,bLogY;
+                  bLogX=NormalAnalysis.bLogX;
+							    bLogY=NormalAnalysis.bLogY;
+
+								for(i=0;i<4;i++)
+								{
+							             if ((TouchState.x>nStartX+i*NORMAL_ANLYSIS_LOG_SELECT_UNIT_WIDTH)&&(TouchState.x<nStartX+(i+1)*NORMAL_ANLYSIS_LOG_SELECT_UNIT_WIDTH) )
+										       {
+											                  NormalAnalysis.bLogX = i/2;//0;
+						                            NormalAnalysis.bLogY = i%2;//0;
+                                                    
+						                           DoNormalAnalysis();
+													             if(NormalAnalysis.nAnalysisResult[NormalAnalysis.FilterCurrent] != ANALYSIS_SUCCESS)
+						                           {
+													                  TouchKey.KeyStatus=1;
+					                                  WM_Invalidate(ReportWin);
+
+															              //增加提示框
+															              strcpy(PromptMenu.InputStr,ANALYSIS_ERROR_MESSAGE[SystemPrameter.SystemLanguage][NormalAnalysis.nAnalysisResult[NormalAnalysis.FilterCurrent]]);
+															              Prompt_Interface(PROMPT_WARMING);
+														
+							                               //MessageBox(ANALYSIS_ERROR_MESSAGE[sys_para.wcLanguage] /*2015-3-16*/[normal_analysis.nAnalysisResult[normal_analysis.wcFilterCurrent]]); //无分析结果
+							                              NormalAnalysis.bLogX = bLogX;
+							                              NormalAnalysis.bLogY = bLogY;
+							                              DoNormalAnalysis();
+							                                  //m_bMessageBox = true;
+						                           }
+												               break;
+										       }
+										
+								}//for(i=0;i<4;i++)
+						 }// if ((TouchState.x>ANALYSIS_LOG_SELECT_START_X - NORMAL_ANLYSIS_LOG_SELECT_WIDTH)&&(TouchState.x<ANALYSIS_LOG_SELECT_START_X) 
+					}//if (ExpEnable==EXP_LOG ) 
+					else if (ExpEnable==EXP_FILTER) 
+					 {
+						       	 if ((TouchState.x>ANALYSIS_FILTER_SELECT_START_X - NORMAL_ANLYSIS_RAWDATA_FILTER_SELECT_WIDTH)&&(TouchState.x<ANALYSIS_FILTER_SELECT_START_X) 
+					                &&(TouchState.y>ANALYSIS_FILTER_SELECT_START_Y)&&(TouchState.y<ANALYSIS_FILTER_SELECT_END_Y))
+						        {
+									         unsigned short nStartX = ANALYSIS_FILTER_SELECT_START_X - NORMAL_ANLYSIS_RAWDATA_FILTER_SELECT_WIDTH+15;
+                                        //Filter 1&2
+							             if ((TouchState.x>nStartX)&&(TouchState.x<nStartX+NORMAL_ANLYSIS_RAWDATA_FILTER_SELECT_UNIT_WIDTH) 
+											 &&(BoardInf.KineticPara.PreProcess<PRE_CALCULATE_MAX)&&(BoardInf.KineticPara.PreProcess>PRE_CALCULATE_NO)		)								
+										    {
+											            if(NormalAnalysis.nAnalysisResult[2] != ANALYSIS_SUCCESS && NormalAnalysis.wcMode == ANALYSIS_MODE_ANALYSIS)
+						                                {
+							                                        WM_Invalidate(ReportWin);
+																		   //增加提示框
+															         strcpy(PromptMenu.InputStr,ANALYSIS_ERROR_MESSAGE[SystemPrameter.SystemLanguage][NormalAnalysis.nAnalysisResult[2]]);
+															         Prompt_Interface(PROMPT_WARMING);
+						                                 }
+						                                 else
+						                                 {
+							                                          NormalAnalysis.FilterCurrent = 2;
+																	                      WM_Invalidate(ReportWin);
+							
+						                                  }
+										 }//if
+										 //Filter 1
+										 else  if ((TouchState.x>nStartX+NORMAL_ANLYSIS_RAWDATA_FILTER_SELECT_UNIT_WIDTH)&&(TouchState.x<nStartX+NORMAL_ANLYSIS_RAWDATA_FILTER_SELECT_UNIT_WIDTH*2) )								
+										 {
+											            if(NormalAnalysis.nAnalysisResult[0] != ANALYSIS_SUCCESS && NormalAnalysis.wcMode == ANALYSIS_MODE_ANALYSIS)
+						                                {
+							                                        WM_Invalidate(ReportWin);
+
+																			   //增加提示框
+															                       strcpy(PromptMenu.InputStr,ANALYSIS_ERROR_MESSAGE[SystemPrameter.SystemLanguage][NormalAnalysis.nAnalysisResult[0]]);
+							                                       Prompt_Interface(PROMPT_WARMING);
+						                                 }
+						                                 else
+						                                 {
+							                                          NormalAnalysis.FilterCurrent = 0;
+																	                      WM_Invalidate(ReportWin);
+						                                 }
+										 }//if
+										  //Filter 2
+										 else  if ((TouchState.x>nStartX+NORMAL_ANLYSIS_RAWDATA_FILTER_SELECT_UNIT_WIDTH*2)&&(TouchState.x<nStartX+NORMAL_ANLYSIS_RAWDATA_FILTER_SELECT_UNIT_WIDTH*3) )								
+										 {
+											            if(NormalAnalysis.nAnalysisResult[0] != ANALYSIS_SUCCESS && NormalAnalysis.wcMode == ANALYSIS_MODE_ANALYSIS)
+						                                {
+							                                        WM_Invalidate(ReportWin);
+																			              //增加提示框
+															                       strcpy(PromptMenu.InputStr,ANALYSIS_ERROR_MESSAGE[SystemPrameter.SystemLanguage][NormalAnalysis.nAnalysisResult[1]]);
+															                       Prompt_Interface(PROMPT_WARMING);
+						                                 }
+						                                 else
+						                                 {
+							                                          NormalAnalysis.FilterCurrent = 1;
+																	                      WM_Invalidate(ReportWin);
+						                                 }
+										 }//if
+										// else
+										// {
+										//	   WM_Invalidate(ReportWin);
+										// }
+
+						        }//	 if ((TouchState.x>ANALYSIS_FILTER_SELECT_START_X - NORMAL_ANLYSIS_RAWDATA_FILTER_SELECT_WIDTH)&&(TouchState.x<ANALYSIS_FILTER_SELECT_START_X) 
+					 }// else if (ExpEnable==EXP_FILTER) 
+
+                         ExpEnable = 0;
+				        WM_Invalidate(ReportWin);
+			            TouchKey.KeyStatus = 1;
+		      }//if (ExpEnable==0)  else if (ExpEnable)
+	}//if (TouchKey.KeyStatus)else if (TouchState.Pressed)
+}
+
+}
+
+
+
+
+void Report_Go(void)
+{
+	
+	if (TouchKey.KeyStatus)
+	{
+	  GUI_PID_STATE TouchState;
+
+	  GUI_PID_GetState(&TouchState);
+		if (TouchState.Pressed == 0)
+		{
+			TouchKey.KeyPressDelay++;
+			if (TouchKey.KeyPressDelay > TOUCH_RELEASE_DELAY)
+			{
+				TouchKey.KeyPressDelay = 0;
+				TouchKey.KeyStatus = 0;
+			}
+		}//if (TouchState.Pressed == 0)
+	
+		/*
+		//增加提示框
+//strcpy(PromptMenu.InputStr,ANALYSIS_ERROR_MESSAGE[SystemPrameter.SystemLanguage][NormalAnalysis.nAnalysisResult[NormalAnalysis.FilterCurrent]]);
+	Prompt_Interface(ANALYSIS_ERROR);
+														
+		//MessageBox(ANALYSIS_ERROR_MESSAGE[sys_para.wcLanguage] [normal_analysis.nAnalysisResult[normal_analysis.wcFilterCurrent]]); //无分析结果
+		NormalAnalysis.bLogX = bLogX;
+		NormalAnalysis.bLogY = bLogY;
+		DoNormalAnalysis();
+
+										
+					
+		//增加提示框
+//	strcpy(PromptMenu.InputStr,ANALYSIS_ERROR_MESSAGE[SystemPrameter.SystemLanguage][NormalAnalysis.nAnalysisResult[2]]);
+		Prompt_Interface(ANALYSIS_ERROR);
+		//MessageBox(ANALYSIS_ERROR_MESSAGE[sys_para.wcLanguage] [normal_analysis.nAnalysisResult[2]]); //无分析结果
+
+																			   //增加提示框
+															        // strcpy(PromptMenu.InputStr,ANALYSIS_ERROR_MESSAGE[SystemPrameter.SystemLanguage][NormalAnalysis.nAnalysisResult[0]]);
+															         Prompt_Interface(ANALYSIS_ERROR);
+							                                       //MessageBox(ANALYSIS_ERROR_MESSAGE[sys_para.wcLanguage][normal_analysis.nAnalysisResult[0]]); //无分析结果
+							                                       //m_bMessageBox = true;
+						                               
+									
+																			   //增加提示框
+															     //    strcpy(PromptMenu.InputStr,ANALYSIS_ERROR_MESSAGE[SystemPrameter.SystemLanguage][NormalAnalysis.nAnalysisResult[1]]);
+															         Prompt_Interface(ANALYSIS_ERROR);
+							                                       //MessageBox(ANALYSIS_ERROR_MESSAGE[sys_para.wcLanguage][normal_analysis.nAnalysisResult[1]]); //无分析结果
+			*/
+   }//if (TouchKey.KeyStatus)			//m_bMessageBox = true;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

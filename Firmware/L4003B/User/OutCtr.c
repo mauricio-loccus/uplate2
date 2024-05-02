@@ -1,0 +1,56 @@
+#include "includes.h"
+#include "MainTask.h"
+//#include "bsp_uart_fifo.h"
+BEEP_PRA BeepPra;
+void beep(unsigned char nb);
+void SystemBeep(void)
+{
+    if(BeepPra.BeepCount>0)
+    {
+        if((BeepPra.BeepOnTime==0)&&(BeepPra.BeepOffTime==0))
+        {
+            BeepPra.BeepOnTime=BEEP_ON_BASE;
+            BeepPra.BeepOffTime=BEEP_OFF_BASE;
+            BeepPra.BeepCount--;
+            // OUT_BEEP_PORT &= ~OUT_BEEP;			// ????
+            GPIO_ResetBits ( GPIOC, GPIO_Pin_0 );  //·äÃùÆ÷¹Ø±Õ
+        }
+
+        else if(BeepPra.BeepOnTime>0)				// ??????????
+        {
+            GPIO_SetBits   ( GPIOC, GPIO_Pin_0 );  //·äÃùÆ÷Ïì
+            // OUT_BEEP_PORT |= OUT_BEEP;		// ?????
+            BeepPra.BeepOnTime--;				// ???????
+        }
+        else if(BeepPra.BeepOffTime>0)
+        {
+            BeepPra.BeepOffTime--;
+            GPIO_ResetBits ( GPIOC, GPIO_Pin_0 );  //·äÃùÆ÷¹Ø±Õ
+            // OUT_BEEP_PORT &= ~OUT_BEEP;			// ????
+        }
+    }
+    else
+    {
+        // OUT_BEEP_PORT &= ~OUT_BEEP;			// ????
+        GPIO_ResetBits ( GPIOC, GPIO_Pin_0 );  //·äÃùÆ÷¹Ø±Õ
+        BeepPra.BeepCount=0;
+        BeepPra.BeepOnTime=0;
+        BeepPra.BeepOffTime=0;
+    }
+
+}
+
+void BeepOnCount(unsigned char nb)
+{
+    BeepPra.BeepCount =nb;
+    if(nb==0)
+    {
+        BeepPra.BeepOnTime =0;
+        BeepPra.BeepOffTime =0;
+    }
+    else
+    {
+        BeepPra.BeepOnTime =BEEP_ON_BASE;
+        BeepPra.BeepOffTime =BEEP_OFF_BASE;
+    }
+}

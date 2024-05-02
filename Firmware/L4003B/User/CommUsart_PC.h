@@ -1,0 +1,64 @@
+/*
+ ******************************************************************************
+ *	模块名称 : PC串口通讯
+ *	文件名称 :
+ *	版 本 号 : V1.00
+ *	说    明 :
+ *	修改记录 : 首次版本
+ *	日    期 : 2018.4.24
+ *  作    者 : 陆国金
+ *  说    明 :
+ ******************************************************************************
+*/
+
+#ifndef MODULES_COMM_USART_PC_H_
+#define MODULES_COMM_USART_PC_H_
+
+#include "stm32f4xx.h"
+#include "CommDef.h"
+
+#define COMM_UART_SEND_LEN_PC      (2000)  //每个发送缓冲器的数据量
+#define COMM_UART_LEN_MAX_PC       (100)	 //每个接收缓冲器的数据量
+
+/****************************************************************************************/
+#define COMM_SLA_LEN_PC           4      // 标记位长度
+#define COMM_DIVITION_LEN_PC      8      //区分字段 
+#define COMM_MAIN_COMMAND_LEN_PC  2      //主命令长度
+#define COMM_SUB_COMMAND_LEN_PC   2      //子命令长度
+#define COMM_DATA_LEN_PC          4      //数据长度
+#define COMM_CRC_LEN_PC           2      //检验位长度
+
+#define COMM_HEAD_LEN_PC  (COMM_SLA_LEN_PC+COMM_DIVITION_LEN_PC+COMM_MAIN_COMMAND_LEN_PC)//标记位+区分字段+主命令长度
+#define COMM_UART_DATA_LEN_MAX_PC  (COMM_UART_LEN_MAX_PC-COMM_HEAD_LEN_PC-COMM_SUB_COMMAND_LEN_PC-COMM_DATA_LEN_PC) //数据长度最大值
+
+/****************************************************************************************/
+#define COMM_SUB_COMMAND_POS_PC         (COMM_HEAD_LEN_PC)                            //子命令位置
+#define COMM_DATA_LEN_POS_PC            (COMM_SUB_COMMAND_POS_PC+COMM_SUB_COMMAND_LEN_PC)    //数据长度位置
+#define COMM_DATA_POS_PC                (COMM_DATA_LEN_POS_PC+COMM_DATA_LEN_PC)    //数据段位置
+/****************************************************************************************/
+
+
+//反馈状态
+enum
+{
+    UART_PC_OK=0,  //正确
+    UART_PC_ERR=1, //出错
+};
+
+typedef struct
+{
+    uint8 RecBuffer[COMM_UART_LEN_MAX_PC]; //接收缓冲器
+    uint16 RecPtr;                    //接收数据计数器
+    uint16 DataLen;                   //数据长度
+} COMM_USART_PC;
+extern COMM_USART_PC CommUsart_PC;  //串口接收数据
+
+extern const uint8 CONST_COMMAND_HEAD[COMM_SLA_LEN_PC];
+extern const uint16 CONST_MAIN_COMMAND[COMM_MAIN_COMMAND_LEN_PC];//AMR-100的主命令为0x7000
+
+/******************************************************************************/
+void CommUsartInit_PC(void);
+void CommSendCommand_PC(uint8 *dat, uint16 len);//串口发送数据
+void FrameReceived_PC(unsigned char c);
+
+#endif //#ifndef MODULES_COMM_USART_PC_H_

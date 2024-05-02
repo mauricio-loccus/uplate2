@@ -1,0 +1,373 @@
+﻿//#define _KEYPAD_NUM_H
+
+#include "MainTask.h"
+//#include "MainTask.h"
+#include  <stdarg.h>
+#include  <stdio.h>
+#include  <stdlib.h>
+#include  <math.h>
+
+KEYPAD_NUM KeyPadNum;
+
+//
+#define COLOR_BORDER           0xBD814F
+#define COLOR_KEYPAD0          0xA8D403
+#define COLOR_KEYPAD1          0xBF5C00
+//extern GUI_CONST_STORAGE GUI_BITMAP bmBmpNembDel;
+//?????
+/*
+#define BUTTON_COLOR_BK_DISABLED      0xe3e3e3
+#define BUTTON_COLOR_BK_PRESSED       0x3855a2
+#define BUTTON_COLOR_BK_UNPRESSED     0xd9e9ff
+
+#define BUTTON_COLOR_BORDER_DISABLED   0xb1aeae
+#define BUTTON_COLOR_BORDER_PRESSED    0x789fde
+#define BUTTON_COLOR_BORDER_UNPRESSED  0x789fde
+
+#define BUTTON_COLOR_TEXT_DISABLED      0xb1aeae
+#define BUTTON_COLOR_TEXT_PRESSED       0xfcfdff
+#define BUTTON_COLOR_TEXT_UNPRESSED     0x5b8bd8
+*/
+#define BUTTON_COLOR_BK_DISABLED      0xe3e3e3
+#define BUTTON_COLOR_BK_PRESSED       0xa25538
+#define BUTTON_COLOR_BK_UNPRESSED     0xffe9d9
+
+#define BUTTON_COLOR_BORDER_DISABLED   0xaeaeb1
+#define BUTTON_COLOR_BORDER_PRESSED    0xde9f78
+#define BUTTON_COLOR_BORDER_UNPRESSED  0xde9f78
+
+#define BUTTON_COLOR_TEXT_DISABLED      0xaeaeb1
+#define BUTTON_COLOR_TEXT_PRESSED       0xfffdfc
+#define BUTTON_COLOR_TEXT_UNPRESSED     0xd88b5b
+
+
+#define KEYPAD_POSX            545
+#define KEYPAD_POSY            125
+#define KEYPAD_WIDTH           251
+//#define KEYPAD_HEIGHT          330
+#define KEYPAD_HEIGHT          305
+
+//#define TXT_PROMPT_POSX          12// (KEYPAD_POSX+12)
+//#define TXT_PROMPT_POSY          10// (KEYPAD_POSY+20)
+//#define TXT_PROMPT_WIDTH         223
+//#define TXT_PROMPT_HEIGHT        40
+
+//#define EDIT_MESSAGE_POSX           (TXT_PROMPT_POSX)
+#define EDIT_MESSAGE_POSX           (10)
+//#define EDIT_MESSAGE_POSY           35//(KEYPAD_POSY+35)
+#define EDIT_MESSAGE_POSY           10//(KEYPAD_POSY+35)
+#define EDIT_MESSAGE_WIDTH           223
+#define EDIT_MESSAGE_HEIGHT          40
+
+#define BUTTON_STARTX           (EDIT_MESSAGE_POSX) 
+#define BUTTON_STARTY          ( EDIT_MESSAGE_POSY +EDIT_MESSAGE_HEIGHT+12)
+#define BUTTON_WIDTH           50
+#define BUTTON_HEIGHT           50
+#define BUTTON_DISX          (BUTTON_WIDTH+9) 
+#define BUTTON_DISY          (BUTTON_HEIGHT+9)
+#define BUTTON_ENTER_HEIGHT  109
+#define BUTTON_0_WIDTH       109
+
+WM_HWIN KeyPadNumWin = NULL;                //???? 
+
+//TEXT_Handle TxtPrompt;                      //???:1.?????
+//WM_HWIN hEdit;
+EDIT_Handle EditMessage;                    //?????????
+
+//static unsigned char s_SelectLangue = 1;	//0????,1????
+//static unsigned char s_LeftFlag = 0;	    //1??????????????,????
+//static unsigned char s_RightFlag = 0;	    //1??????????????,????
+//static unsigned char s_CapsLock = 0;        //0????,1????
+
+
+
+typedef struct {
+	int          xPos;
+	int          yPos;
+	int          xSize;
+	int          ySize;
+	const char * acLabel;                     //???????
+	char         FunctionKey;                      //????????,1:??????,0:??????
+} BUTTON_DATA2;
+
+static const BUTTON_DATA2 _aButtonData[] =
+{
+	//?1???
+	{ BUTTON_STARTX,                   BUTTON_STARTY, BUTTON_WIDTH, BUTTON_HEIGHT, "", 1 },      //???
+	{ BUTTON_STARTX + BUTTON_DISX, BUTTON_STARTY, BUTTON_WIDTH, BUTTON_HEIGHT, "1", 0 },
+	{ BUTTON_STARTX + BUTTON_DISX * 2, BUTTON_STARTY, BUTTON_WIDTH, BUTTON_HEIGHT, "2", 0 },
+	{ BUTTON_STARTX + BUTTON_DISX * 3, BUTTON_STARTY, BUTTON_WIDTH, BUTTON_HEIGHT, "3", 0 },
+	//?2???
+	{ BUTTON_STARTX, BUTTON_STARTY + BUTTON_DISY, BUTTON_WIDTH, BUTTON_HEIGHT, "Esc", 1 },
+	{ BUTTON_STARTX + BUTTON_DISX,     BUTTON_STARTY + BUTTON_DISY, BUTTON_WIDTH, BUTTON_HEIGHT, "4", 0 },
+	{ BUTTON_STARTX + BUTTON_DISX * 2, BUTTON_STARTY + BUTTON_DISY, BUTTON_WIDTH, BUTTON_HEIGHT, "5", 0 },
+	{ BUTTON_STARTX + BUTTON_DISX * 3, BUTTON_STARTY + BUTTON_DISY, BUTTON_WIDTH, BUTTON_HEIGHT, "6", 0 },
+	//?3???
+	{ BUTTON_STARTX, BUTTON_STARTY + BUTTON_DISY * 2, BUTTON_WIDTH, BUTTON_ENTER_HEIGHT, "Enter", 1 },
+	{ BUTTON_STARTX + BUTTON_DISX, BUTTON_STARTY + BUTTON_DISY*2, BUTTON_WIDTH, BUTTON_HEIGHT, "7", 0 },
+	{ BUTTON_STARTX + BUTTON_DISX * 2, BUTTON_STARTY + BUTTON_DISY*2, BUTTON_WIDTH, BUTTON_HEIGHT, "8", 0 },
+	{ BUTTON_STARTX + BUTTON_DISX * 3, BUTTON_STARTY + BUTTON_DISY*2, BUTTON_WIDTH, BUTTON_HEIGHT, "9", 0 },
+	//?4???
+	{ BUTTON_STARTX + BUTTON_DISX, BUTTON_STARTY + BUTTON_DISY*3, BUTTON_0_WIDTH, BUTTON_HEIGHT, "0", 0 },
+	{ BUTTON_STARTX + BUTTON_DISX * 3, BUTTON_STARTY + BUTTON_DISY*3, BUTTON_WIDTH, BUTTON_HEIGHT, ".", 0 },
+};
+
+
+unsigned char s_Key;
+char s_Textbuf[20] = { 0 };
+//????
+//unsigned char KeyPadNumMenuFlag;                 //??????
+
+//char KeyPadNumInputValue[KEYPAD_NUM_CHAR_MAX];   //?????
+//unsigned short KeyPadNumReturnValue;             //?????
+
+//unsigned char KeyPadNumUseFlag = KEYPAD_NUM_FREE;    //???????:1:???,0:???
+
+//???:  _cbKeyPadNum
+//????:????
+//??:    pMsg????
+//???:  ?
+
+
+void SetNumButtonSkin(void)
+{
+	BUTTON_SKINFLEX_PROPS   BUTTON_SKI_NORMAL = { { COLOR_BUTTON_DEFAULT, COLOR_BUTTON_DEFAULT, 0Xffffff }, { 0Xffffff, 0XFFffff }, { 0XFfffff, 0XFfffff }, 4 };
+	BUTTON_SKINFLEX_PROPS   BUTTON_SKI_PRESS = { { 0x777777, 0x777777, 0x777777 }, { 0x777777, 0x777777 }, { 0x777777, 0x777777 }, 4 };
+	BUTTON_SKINFLEX_PROPS   BUTTON_SKI_DISABLE = { { GUI_GRAY, 0xbbbbbb, 0xbbbbbb }, { 0xbbbbbb, 0xbbbbbb }, { 0xbbbbbb, 0xbbbbbb }, 4 };
+
+	BUTTON_SetDefaultSkin(BUTTON_SKIN_FLEX);
+	{
+		BUTTON_SetSkinFlexProps(&BUTTON_SKI_PRESS, BUTTON_SKINFLEX_PI_PRESSED);
+		BUTTON_SetSkinFlexProps(&BUTTON_SKI_NORMAL, BUTTON_SKINFLEX_PI_FOCUSSED);
+		BUTTON_SetSkinFlexProps(&BUTTON_SKI_NORMAL, BUTTON_SKINFLEX_PI_ENABLED);
+		BUTTON_SetSkinFlexProps(&BUTTON_SKI_DISABLE, BUTTON_SKINFLEX_PI_DISABLED);
+	}
+
+}
+
+ void _cbKeyPadNum(WM_MESSAGE * pMsg)
+{
+	WM_HWIN    hWin;
+	WM_HWIN    hButton;
+	int        Id;
+	int        NCode;
+	int        xSize;
+	int        ySize;
+	unsigned char  i;
+	//char s_Editbuf[100] = { 0 };
+	//char s_Edit[100] = { 0 };
+	hWin = pMsg->hWin;
+	switch (pMsg->MsgId)
+	{
+		//???????
+	case WM_CREATE:
+		SetNumButtonSkin();
+
+		EditMessage = EDIT_CreateEx(EDIT_MESSAGE_POSX, EDIT_MESSAGE_POSY, EDIT_MESSAGE_WIDTH, EDIT_MESSAGE_HEIGHT, hWin, WM_CF_SHOW | WM_CF_STAYONTOP, 0, KEYPAD_ID_EDIT, 8);
+		EDIT_SetFont(EditMessage, GUI_FONT_BIG);
+	    EDIT_EnableBlink(EditMessage, 600, 1);
+	  //if(KeyPadNum.InputValueStr[0]!='')
+		//{
+	if(strlen(KeyPadNum.InputValueStr)>0)
+	{
+		   EDIT_SetText(EditMessage, KeyPadNum.InputValueStr);
+	}
+		//}
+		if(KeyPadNum.MenuFlag==NUM_MENUFLAG_2NUM)
+		{
+			i=2;
+		}
+		else if(KeyPadNum.MenuFlag==NUM_MENUFLAG_3NUM)
+		{
+			i=3;
+		}
+		else if(KeyPadNum.MenuFlag==NUM_MENUFLAG_4NUM)
+		{
+			i=4;
+		}
+		else if(KeyPadNum.MenuFlag==NUM_MENU_FLAG)  //float
+		{
+			i=10;
+		}
+		else //if(KeyPadNum.MenuFlag==NUM_MENUFLAG_PASSWORD)
+		{
+			i=10;
+		}
+    
+		EDIT_SetMaxLen(EditMessage, i);
+		if(strlen(KeyPadNum.InputValueStr)>0)
+		{
+      EDIT_SetCursorAtChar(EditMessage, sizeof(KeyPadNum.InputValueStr)-1);
+	    EDIT_SetSel(EditMessage, 0, sizeof(KeyPadNum.InputValueStr)-1);
+		}
+		
+
+		
+		for (i = 0; i < GUI_COUNTOF(_aButtonData); i++)
+		{
+			  hButton = BUTTON_CreateEx(_aButtonData[i].xPos, _aButtonData[i].yPos, _aButtonData[i].xSize, _aButtonData[i].ySize,
+				          hWin, WM_CF_SHOW, 0, KEYPAD_NUM_ID_BUTTON + i);
+
+			  SetAsciiBUTTONColor(hButton);
+			  BUTTON_SetFont(hButton, GUI_FONT_BIG);//SIF_Font24);
+			  BUTTON_SetText(hButton, _aButtonData[i].acLabel);
+	
+        if(i==0)
+				{
+      	      BUTTON_SetBitmapEx(hButton,BUTTON_BI_UNPRESSED, &bmNumDel,12,15);
+			  }
+				BUTTON_SetTextAlign(hButton, GUI_TA_HCENTER | GUI_TA_VCENTER);
+		
+			  BUTTON_SetFocussable(hButton, 0);
+		}
+      BUTTON_SetDefaultSkinClassic();
+	    WM_SetFocus(EditMessage);
+		
+		break;
+		//????
+	case WM_DELETE:
+		WM_DeleteWindow(EditMessage);
+	
+	  SetButtonSkin();
+    KeyPadNum.UseFlag = KEYPAD_NUM_FREE;
+		break;
+		//????
+	case WM_PAINT:
+
+		SetNumButtonSkin();
+		xSize = WM_GetWindowSizeX(hWin);
+		ySize = WM_GetWindowSizeY(hWin);
+		GUI_SetColor(0xffffff);
+	  GUI_SetColor(0xE5CCBC);//(0xc9c5c1);
+		GUI_FillRect(0, 0, xSize - 1, ySize - 1);
+		GUI_SetColor(0xd68652);
+		GUI_DrawRect(0, 0, xSize - 1, ySize - 1);
+		GUI_DrawRect(1,1, xSize - 2, ySize - 2);
+		break;
+
+		//????????
+	case WM_NOTIFY_PARENT:
+		Id = WM_GetId(pMsg->hWinSrc);
+		NCode = pMsg->Data.v;
+	  if(TouchKey.KeyStatus)
+		{
+				break;
+		}
+		switch (NCode)
+		{
+		          case WM_NOTIFICATION_RELEASED:
+		          {
+								     
+								     if(Id==KEYPAD_ID_EDIT)
+										 {
+											 KeyPadNum.SelFlag=0;            
+										 }
+										 else if( (KeyPadNum.SelFlag)&& (Id != KEYPAD_NUM_ID_BUTTON + 8)&&(Id != KEYPAD_NUM_ID_BUTTON + 4) ) 
+										 {
+											    KeyPadNum.SelFlag=0; 
+											    strcpy(KeyPadNum.InputValueStr,"");
+												  EDIT_SetText(EditMessage, KeyPadNum.InputValueStr);
+											 //   EDIT_SetSel(EditMessage,-1,-1);
+												//EDIT_SetCursorAtChar(EditMessage, sizeof(KeyPadNum.InputValueStr)-1);
+										 }
+										 if (_aButtonData[Id - KEYPAD_NUM_ID_BUTTON].FunctionKey == 0)
+										 {
+											 if ((Id >= KEYPAD_NUM_ID_BUTTON) && (Id < KEYPAD_NUM_ID_BUTTON + KEYPAD_NUM_BUTTON_MAX))
+											 {
+												 s_Key = _aButtonData[Id - KEYPAD_NUM_ID_BUTTON].acLabel[0];
+
+												 s_Textbuf[0] = s_Key;
+												 s_Textbuf[1] = '\0';
+												 //if (editflag)MULTIEDIT_AddText(EditMessage, s_Textbuf);
+												 //else 
+												 EDIT_AddKey(EditMessage, s_Textbuf[0]);
+											 }
+										 }
+										 else
+										 {
+											 //???
+											 if (Id == (KEYPAD_NUM_ID_BUTTON + 0))
+											 {
+												 EDIT_AddKey(EditMessage, GUI_KEY_BACKSPACE);
+												 break;
+											 }
+											 else if (Id == (KEYPAD_NUM_ID_BUTTON + 8))//Enter
+											 {
+												 // flag_Advance_change=1;//fmc160931
+                         TouchKey.KeyStatus=1;	
+												 EDIT_GetText(EditMessage, KeyPadNum.InputValueStr, KEYPAD_NUM_CHAR_MAX);
+												 KeyPadNum.ReturnKey = KEYPAD_NUM_RETURN_ENTER;
+												 WM_DeleteWindow(KeyPadNumWin);
+											 }
+											 else if (Id == (KEYPAD_NUM_ID_BUTTON + 4))//Esc
+											 {
+												 TouchKey.KeyStatus=1;	
+												 KeyPadNum.ReturnKey = KEYPAD_NUM_RETURN_CANCEL;
+												 WM_DeleteWindow(KeyPadNumWin);
+											 }
+										 }
+										 break;
+		             }
+		             default:break;
+		}
+	default:break;
+	}
+}
+
+
+void KeyPadNum_Go(void)
+{
+	if (TouchKey.KeyStatus)
+	{
+		GUI_PID_STATE TouchState;
+
+	  GUI_PID_GetState(&TouchState);
+		if (TouchState.Pressed == 0)
+		{
+			TouchKey.KeyPressDelay++;
+			if (TouchKey.KeyPressDelay > TOUCH_RELEASE_DELAY)
+			{
+				TouchKey.KeyPressDelay = 0;
+				TouchKey.KeyStatus = 0;
+			}
+		}
+  }
+}
+
+//	? ? ?: KeyPadNum_Interface
+//	????: GUI???
+//	?    ?: ?
+//	? ? ?: ?
+void KeyPadNum_Interface(unsigned char menuflag)
+//void KeyPadNum_Interface(unsigned char flag)
+{  
+
+	 if (KeyPadNum.UseFlag != KEYPAD_NUM_FREE)
+	 {
+		  KeyPadNum.ReturnKey=KEYPAD_RETURN_CANCEL;
+		  return;
+	 }
+    
+	KeyPadNum.SelFlag=1; 
+	KeyPadNum.MenuFlag = menuflag;
+
+	//if (KeyPadNum.UseFlag == KEYPAD_NUM_FREE)
+	//{
+		KeyPadNum.UseFlag = KEYPAD_NUM_BUSY;               //???????
+		KeyPadNum.ReturnKey = KEYPAD_NUM_RETURN_CANCEL;
+		//????
+		KeyPadNumWin = WM_CreateWindowAsChild(KEYPAD_POSX, KEYPAD_POSY,KEYPAD_WIDTH, KEYPAD_HEIGHT, WM_HBKWIN, WM_CF_SHOW | WM_CF_STAYONTOP | WM_CF_MEMDEV, _cbKeyPadNum, 0);
+		WM_BringToTop(KeyPadNumWin);
+
+			do{
+				 Usb_check();
+				 GUI_Delay(10);
+				
+				 KeyPadNum_Go();
+			}while(KeyPadNum.UseFlag == KEYPAD_NUM_BUSY);
+	//}
+	//else
+	//{
+		//KeyPadNum.ReturnKey = KEYPAD_NUM_RETURN_CANCEL;
+	//}
+}

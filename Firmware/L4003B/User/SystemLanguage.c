@@ -1,0 +1,376 @@
+
+//程序已自检(存数据无效)
+#include "MainTask.h"
+
+
+
+const char STR_LANGUAGE[LANGUAGE_TYPES][15] = {"  Language", "  Idioma"};
+const char STR_SEL_LANGUAGE[LANGUAGE_TYPES][15] = {"  English", " Português"};
+const char STR_LANGUAGE_TITLE[LANGUAGE_TYPES][20] = {"Set language", "Idioma"};
+
+
+#define LANGUAGE_EXPAND_WIDTH 76
+
+
+
+const BUTTON_DATA _aButtonLanguage[] =
+{
+    { TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(3), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Ok", "Ok" },
+    { TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(4), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Back", "Voltar" },
+
+};
+
+//ExpEnable的值定义
+enum
+{
+    EXP_LANGUAGE=1,
+
+};
+static unsigned char ExpEnable;
+
+static unsigned char LanguageBack;                //系统语言
+
+LANGUAGE_CHANGE LanguageChange;
+WM_HWIN SystemLanguageWin = NULL;       //检测窗体
+
+void DisplayLanguageExpand(void)
+{
+    //char str[10];
+    GUI_RECT rect;
+    int i;
+
+    int start_x, start_y, wide, high;
+    start_x = FILTER_1_EXPAND_START_X ;
+    start_y = FILTER_1_EXPAND_START_Y - TITLESBAR_HEIGHT;
+    wide =LANGUAGE_EXPAND_WIDTH;// MODE_EXPAND_WIDTH1;
+    high = 40;
+    //GUI_DrawBitmap(&bmExpMenuRight_180_46, FILTER_1_EXPAND_START_X, FILTER_1_EXPAND_START_Y - TITLESBAR_HEIGHT);
+    GUI_SetColor(COLOR_EXP_PICTURE_FRAME);
+    GUI_DrawLine(start_x, start_y,start_x+160+20,start_y);
+    GUI_DrawLine(start_x, start_y+45,start_x+160+20,start_y+45);
+   GUI_SetColor(COLOR_EXP_PICTURE);
+    GUI_FillRect(start_x, start_y,start_x+160+20,start_y+45);
+    GUI_DrawBitmap(&bmExpMenuRight_20_46, start_x+160+20, start_y);
+
+    start_x +=3;
+    start_y += 3;
+    for (i = 0; i<2; i++)
+    {
+        //填充选中的底色
+        GUI_SetColor(COLOR_MODE_SEL_BK);
+
+
+        if (i == 0)
+        {
+            GUI_SetFont(GUI_FONT_BIG);
+            strcpy(ConvertStr,STR_SEL_LANGUAGE[LANGUAGE_EN]);//English
+        }
+        else
+        {
+            GUI_SetFont(GUI_FONT_BIG_CH);
+            strcpy(ConvertStr, STR_SEL_LANGUAGE[LANGUAGE_CH]);//中文
+        }
+
+        //填充选中的文字-白色
+        if ((LanguageBack==LANGUAGE_EN) && (i == 0)) 
+        {
+            GUI_FillRect(start_x, start_y, start_x + wide, start_y+high);
+            GUI_SetColor(COLOR_MODE_SEL_TXT);
+            //GUI_DrawCircle(RUNMENU_CIRCLE_POSX(i), RUNMENU_CIRCLE_POSY, RUNMENU_CIRCLE_RADIUS);
+        }
+				if((LanguageBack==LANGUAGE_CH) && (i == 1))
+				{
+            GUI_FillRect(start_x+5, start_y, start_x + wide+30, start_y+high);
+            GUI_SetColor(COLOR_MODE_SEL_TXT);
+            //GUI_DrawCircle(RUNMENU_CIRCLE_POSX(i), RUNMENU_CIRCLE_POSY, RUNMENU_CIRCLE_RADIUS);
+        }
+				
+				if (i == 0)
+        {	
+					start_x -=3;
+				}
+				else
+        {	
+					start_x +=5;
+					wide+=20;
+				}
+        rect.x0 = start_x;
+        rect.y0 = start_y - 1;
+        rect.x1 = start_x + wide;
+        rect.y1 = start_y + high;
+
+        start_x += wide;
+        //wide =66;// MODE_EXPAND_WIDTH2;
+
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+    }
+
+
+}
+
+
+
+void _cbLanguage(WM_MESSAGE * pMsg)
+{
+
+    //char str[10];
+    WM_HWIN hWin = pMsg->hWin;
+    WM_HWIN hWinFocus;
+    BUTTON_Handle hbutton;
+    unsigned char i;
+    int        xSize;
+    int        ySize;
+    short NCode, Id;
+    GUI_RECT rect;
+    //	int  day_max;
+    hWinFocus = WM_GetFocussedWindow();
+//	IdWinFocus = WM_GetId(hWinFocus);
+
+    switch (pMsg->MsgId)
+    {
+
+    case WM_CREATE:
+    {
+        for (i = 0; i < GUI_COUNTOF(_aButtonLanguage); i++)
+        {
+            hbutton = BUTTON_CreateEx(_aButtonLanguage[i].xPos, _aButtonLanguage[i].yPos, _aButtonLanguage[i].xSize, _aButtonLanguage[i].ySize,
+                                      hWin, WM_CF_SHOW, 0, ID_LANGUAGE_BUTTON + i);
+            if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+            {
+                BUTTON_SetFont(hbutton, GUI_FONT_BIG);
+                BUTTON_SetText(hbutton, _aButtonLanguage[i].acLabelEn);
+            }
+            else
+            {
+                BUTTON_SetFont(hbutton, GUI_FONT_BIG_CH);
+                BUTTON_SetText(hbutton, _aButtonLanguage[i].acLabelCh);
+            }
+            BUTTON_SetTextAlign(hbutton, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            BUTTON_SetFocussable(hbutton, 0);
+        }
+
+        break;
+    }
+    //删除按钮
+    case WM_DELETE:
+
+        //WM_ShowWindow(ButtonZero[i]);
+        break;
+        //绘制背景
+    case WM_PAINT:
+        xSize = WM_GetWindowSizeX(hWin);
+        ySize = WM_GetWindowSizeY(hWin);
+				WM_SetDesktopColor(0x291913);
+        //上方第一行
+        GUI_SetColor(COLOR_TITLEBAR);
+        GUI_FillRect(0, 0, xSize - 1, CONTENTBAR_TITLE_HEIGHT - 1);
+        //左方内容栏
+        GUI_SetColor(COLOR_CONTENTBAR);
+        GUI_FillRect(0, CONTENTBAR_CONTENT_POSY, CONTENTBAR_CONTENT_WIDTH - 1, ySize - 1);
+//==============================================================================================================
+        //barra de informação superior "toolbar
+//==============================================================================================================		
+        GUI_SetColor(COLOR_TOOLSBAR);
+        GUI_FillRect(CONTENTBAR_CONTENT_WIDTH, CONTENTBAR_CONTENT_POSY, xSize -1, ySize - 1);
+		    GUI_SetColor(GUI_GRAY);
+				GUI_DrawLine(0,0, xSize - 1,0);
+				GUI_DrawLine(0,CONTENTBAR_TITLE_HEIGHT - 1, xSize - 1,CONTENTBAR_TITLE_HEIGHT - 1);
+//==============================================================================================================
+
+        GUI_DrawBitmap(&bmMenuLeft_101_46, FILTER_1_START_X, FILTER_1_START_Y - TITLESBAR_HEIGHT);
+        //GUI_DrawBitmap(&bmMenuLeft_101_46, FILTER_2_START_X, FILTER_2_START_Y - TITLESBAR_HEIGHT);
+        //	GUI_DrawBitmap(&bmMenuLeft_101_46, MODE_START_X, MODE_START_Y - TITLESBAR_HEIGHT);
+
+        GUI_DrawBitmap(&bmMenuRight_90_46, FILTER_1_R_START_X+20, FILTER_1_R_START_Y - TITLESBAR_HEIGHT);
+				GUI_SetColor(COLOR_EXP_PICTURE);
+    GUI_FillRect(FILTER_1_R_START_X,  FILTER_1_R_START_Y - TITLESBAR_HEIGHT,FILTER_1_R_START_X+25,FILTER_1_R_START_Y - TITLESBAR_HEIGHT+45);
+        //GUI_DrawBitmap(&bmMenuRight_90_46, FILTER_2_R_START_X, FILTER_2_R_START_Y - TITLESBAR_HEIGHT);
+        //GUI_DrawBitmap(&bmMenuRight_90_46, MODE_R_START_X, MODE_START_Y - TITLESBAR_HEIGHT);
+
+
+        GUI_SetTextMode(GUI_TM_TRANS);
+
+        GUI_SetColor(COLOR_PAINT_TXT);
+        GUI_SetFont(GUI_FONT_BIG);
+        if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+        {
+             GUI_DispStringAt(STR_LANGUAGE_TITLE[SystemPrameter.SystemLanguage], CONTENTBAR_CAPTION_POSX, CONTENTBAR_CAPTION_POSY);//"Measurement parameters"
+
+        }
+        else
+        {
+            GUI_DispStringAt(STR_LANGUAGE_TITLE[SystemPrameter.SystemLanguage], CONTENTBAR_CAPTION_POSX, CONTENTBAR_CAPTION_POSY);//"Measurement parameters"
+
+        }
+
+        
+					
+
+
+
+        //GUI_SetFont(GUI_FONT_SMALL);
+
+
+        rect.x0 = FILTER_1_START_X+5;
+        rect.y0 = FILTER_1_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = FILTER_1_END_X+5;
+        rect.y1 = FILTER_1_END_Y - TITLESBAR_HEIGHT;
+        //strcpy(ConvertStr, "Filter 1");
+        GUI_DispStringInRect(STR_LANGUAGE[SystemPrameter.SystemLanguage], &rect, GUI_TA_VCENTER | GUI_TA_VCENTER);//"Filter 1"
+
+
+
+        if(LanguageBack==LANGUAGE_EN)
+        {
+            GUI_SetFont(GUI_FONT_BIG);
+        }
+        else
+        {
+            GUI_SetFont(GUI_FONT_BIG_CH);
+        }
+
+
+        rect.x0 = FILTER_1_R_START_X+5;
+        rect.y0 = FILTER_1_R_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = FILTER_1_R_END_X+5;
+        rect.y1 = FILTER_1_R_END_Y - TITLESBAR_HEIGHT;
+        GUI_DispStringInRect(STR_SEL_LANGUAGE[LanguageBack], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Normal"
+
+
+
+        //	GUI_SetFont(GUI_FONT_MED);
+        if (ExpEnable==EXP_LANGUAGE)
+        {
+            DisplayLanguageExpand();
+        }
+
+        break;
+
+    case WM_NOTIFY_PARENT:
+    {
+        if(RemoteInfo_PC.RemoteFlag)
+        {
+            break;
+        }
+        if( (KeyPadAsc.UseFlag == KEYPAD_BUSY)||(KeyPadNum.UseFlag == KEYPAD_BUSY)||(PromptMenu.InterfaceStatus==PROMPT_MENU_BUSY) )
+        {
+            break;
+        }
+        if(TouchKey.KeyStatus)
+        {
+            break;
+        }
+        Id = WM_GetId(pMsg->hWinSrc);    // Id of widget
+        NCode = pMsg->Data.v;               // Notification code
+        if (NCode == WM_NOTIFICATION_RELEASED)
+        {
+            if (Id == ID_LANGUAGE_BUTTON)   //工具栏第4个按钮  Enter
+            {
+                SystemPrameter.SystemLanguage =LanguageBack;
+
+                LanguageChange.Title=1;
+                LanguageChange.Protocol=1;
+                LanguageChange.Report=1;
+                LanguageChange.Setting=1;
+                LanguageChange.Help=1;
+                //E2pSaveSystemPra();
+                SpiSaveSystemPra();
+                WM_DeleteWindow(SystemLanguageWin);
+                WM_ShowWindow(SettingWin);
+
+                gSystem.SystemInterface = MI_SET;
+                gSystem.TitleButtonEnable = 1;
+                gSystem.MenuRefreshFlag = 1;
+                TouchKey.KeyStatus=1;
+            }
+            else if (Id == ID_LANGUAGE_BUTTON+1)   //工具栏第5个按钮  Cancel
+            {
+                WM_DeleteWindow(SystemLanguageWin);
+                WM_ShowWindow(SettingWin);
+
+                gSystem.SystemInterface = MI_SET;
+                gSystem.TitleButtonEnable = 1;
+                TouchKey.KeyStatus=1;
+                gSystem.MenuRefreshFlag = 1;
+            }
+        }
+        break;
+    }
+
+    default:
+        //		WM_DefaultProc(pMsg);
+        break;
+    }
+}
+
+void SystemLanguage_Interface(void)
+{
+    ExpEnable = 0;
+    LanguageBack=SystemPrameter.SystemLanguage;
+
+    SystemLanguageWin = WM_CreateWindowAsChild(CONTENTBAR_POSX, CONTENTBAR_POSY, CONTENTBAR_WIDTH, CONTENTBAR_HEIGHT, WM_HBKWIN, WM_CF_SHOW | WM_CF_STAYONTOP | WM_CF_MEMDEV, _cbLanguage, 0);
+    WM_BringToTop(SystemLanguageWin);
+}
+
+
+void SystemLanguage_Scan(void)
+{
+    if (TouchKey.KeyStatus==0)
+    {
+        GUI_PID_STATE TouchState;
+
+        GUI_PID_GetState(&TouchState);
+        if (TouchState.Pressed)
+        {
+            if (ExpEnable==0)  //初使状态，没有弹出扩展项
+            {
+                if ((TouchState.x >= FILTER_1_R_START_X) && (TouchState.x <= FILTER_1_R_END_X) &&
+                        (TouchState.y >= FILTER_1_R_START_Y) && (TouchState.y <= FILTER_1_R_END_Y))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_LANGUAGE;
+                    WM_Invalidate(SystemLanguageWin);
+                }
+            }
+
+            else if (ExpEnable == EXP_LANGUAGE) //模式扩展
+            {
+                if ((TouchState.x >= FILTER_1_EXPAND_START_X) && (TouchState.x <= FILTER_1_EXPAND_END_X) &&
+                        (TouchState.y >= FILTER_1_EXPAND_START_Y) && (TouchState.y <= FILTER_1_EXPAND_END_Y))
+                {
+                    if ((TouchState.x >= FILTER_1_EXPAND_START_X) && (TouchState.x < FILTER_1_EXPAND_START_X + LANGUAGE_EXPAND_WIDTH))//_EXPAND_WIDTH1))  //正常
+                    {
+                        LanguageBack=0;
+                    }
+                    else if ((TouchState.x >= FILTER_1_EXPAND_START_X + LANGUAGE_EXPAND_WIDTH) && (TouchState.x <= MODE_EXPAND_START_X + LANGUAGE_EXPAND_WIDTH + LANGUAGE_EXPAND_WIDTH))
+                    {
+                        LanguageBack=1;
+                    }
+                }
+                //未选自动退出
+                ExpEnable = 0;
+                TouchKey.KeyStatus = 1;
+                WM_Invalidate(SystemLanguageWin);
+
+            }
+        }//if (TouchState.Pressed)
+    }
+}
+
+void SystemLanguage_Go(void)
+{
+    if (TouchKey.KeyStatus)
+    {
+        GUI_PID_STATE TouchState;
+        GUI_PID_GetState(&TouchState);
+        if (TouchState.Pressed == 0)
+        {
+            TouchKey.KeyPressDelay++;
+            if (TouchKey.KeyPressDelay > TOUCH_RELEASE_DELAY)
+            {
+                TouchKey.KeyPressDelay = 0;
+                TouchKey.KeyStatus = 0;
+            }
+        }
+    }//if (TouchKey.KeyStatus)
+}

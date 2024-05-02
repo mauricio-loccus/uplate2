@@ -1,0 +1,16 @@
+﻿[]
+Coordinates=129,71,111,33
+Visible=True
+
+[inputEdit]
+Coordinates=45,70,58,33
+
+[btnCancel]
+Coordinates=129,1,64,51
+
+[Label1]
+Coordinates=64,1,46,51
+
+[btnOK]
+Coordinates=0,0,45,51
+

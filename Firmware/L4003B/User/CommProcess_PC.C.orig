@@ -1,0 +1,738 @@
+/**********************************************************************************
+1.文件功能描述
+本程序实现串口数据收发,端口:(引脚:PA9 PA10)
+2.具体函数
+  2.1私有函数
+
+  
+  2.2公有函数
+ 
+
+3.IO说明
+  1)
+  2)
+4. 创建日期-版本-姓名
+   2017/01/23-V3.00-陆国金 void CAS112_V10Dlg::comReceiveproFromPc(void)
+*************************************************************************************/
+
+#include  "MainTask.h"
+#include "CommProcess_PC.h"
+//#include "CommUsart_PC.h"
+//#include "CommStack_PC.h"
+//#include "Common.h"
+#include "string.h"
+
+/*************************************************************************************/
+#define UART_RE_SEND_TIME_MAX    3 //串口重发时间
+#define UART_RE_SEND_COUNT_MAX   3 //串口重发次数
+
+/*************************************************************************************/
+UART_INFO_PC UartInfo_PC;
+REMOTE_INFO_PC RemoteInfo_PC;  //
+COMM_STATUS_PC CommStatus_PC;  //通读状态
+
+
+
+
+
+
+//-----------------------------------------------------------------//
+//	功    能:串口重发PC初使化
+//	入口参数:cmd发送的命令
+//	出口参数:
+//	全局变量:
+//	备    注:
+//-----------------------------------------------------------------//
+void UartCommInit(void)
+{
+	CommStatus_PC.CurrentCommand=0;
+	CommStatus_PC.SentFlag=1;
+	CommStatus_PC.RepeatSendCount=0;
+	CommStatus_PC.Timeout=0;
+}
+
+
+//-----------------------------------------------------------------//
+//	功    能:串口重发PC初使化
+//	入口参数:cmd发送的命令
+//	出口参数:
+//	全局变量:
+//	备    注:
+//-----------------------------------------------------------------//
+void UartResendPrepared(unsigned short cmd)
+{
+	CommStatus_PC.CurrentCommand=cmd;
+	CommStatus_PC.SentFlag=1;
+	//CommStatus_PC.RepeatSendCount=0;
+	CommStatus_PC.Timeout=0;
+	
+	
+	
+	//run_status.nRunMode = RUN_MODE_INTENSITY_TEST;
+	//run_status.nTimeOut = INTENSITY_TEST_TIMEOUT;
+	
+}
+
+
+//-----------------------------------------------------------------//
+//	功    能:计算接收数据的校验和
+//	入口参数:*pCommand接收的数据,ptr接收的数据长度-校验长度
+//	出口参数:校验和
+//	全局变量:
+//	备    注:
+//-----------------------------------------------------------------//
+uint16 GetRxCheckSum_PC(unsigned char *pCommand, unsigned short ptr) 
+{
+	unsigned short nSum = 0;
+	unsigned short i;
+
+	for (i = 0; i < ptr; i++)
+	{
+		nSum += (unsigned short)pCommand[i];
+	}
+  return(nSum);
+}
+
+//-----------------------------------------------------------------//
+//	功    能:计算发送数据的校验和
+//	入口参数:*pCommand发送的数据,ptr发送的数据长度-校验长度
+//	出口参数:
+//	全局变量:
+//	备    注:
+//-----------------------------------------------------------------//
+void GetTxCheckSum_PC(unsigned char *pCommand, unsigned short ptr) 
+{
+	unsigned short nSum = 0;
+	unsigned short i;
+
+	for (i = 0; i < ptr; i++)
+	{
+		nSum += (unsigned short)pCommand[i];
+	}
+  pCommand[ptr++] = nSum>>8;
+	pCommand[ptr++] = nSum&0xff;
+}
+
+
+/******************************************************************************
+ *	函 数 名: 初始化调试串口
+ *	功能说明: 
+ *	形    参: 
+ *	返 回 值:
+*******************************************************************************/
+void CommInit_PC(void)
+{
+	/*Initialize Comm-USART4*/
+	CommUsartInit_PC();
+  UartCommInit();
+	/* Initialize FIFO : Send and receive */
+	FIFOCommInit_PC(&FIFO_RxData_PC);
+}
+
+ 
+//-----------------------------------------------------------------//
+//	功能:串口主动发送命令,要求对方有应答
+//	入口参数: cmd命令字,*dat从数据段开始
+//	出口参数:
+//  备注:
+//-----------------------------------------------------------------//
+void UartCmdSend_PC(uint16 cmd) 
+{
+  unsigned short ptr=0;
+	unsigned char i,j;
+	unsigned int val;
+	unsigned char *pCommand;
+	pCommand=&UartInfo_PC.SendBuffer[0];
+		
+	ptr=AddCommandHead_PC(cmd,pCommand,COMM_DATA_LEN_POS_PC);
+	switch(cmd)
+	{
+		   case COMMAND_UNCONNECT_PC:        //断开
+			 {
+				  
+				  //无数据
+				  break;
+			 }
+			 case COMMAND_MEASURE_END_PC:      //吸光度检测结束
+		   {
+				  //当前板号 1~
+				  val=RemoteInfo_PC.PlateCurrent+1; 
+				  pCommand[ptr++] = (val>>24)&0xff;  //
+          pCommand[ptr++] = (val>>16)&0xff;
+          pCommand[ptr++] = (val>>8)&0xff;
+          pCommand[ptr++] =  val&0xff;
+				
+				  //当前循环 1~
+				  if(BoardInf.KineticPara.Enable)
+					{
+				      val=BoardInf.KineticPara.kinetic_readings_practical+1;
+					}
+					else
+					{
+						  val=BoardInf.KineticPara.kinetic_readings_practical;
+					}
+				  pCommand[ptr++] = (val>>24)&0xff;//循环次数
+          pCommand[ptr++] = (val>>16)&0xff;
+          pCommand[ptr++] = (val>>8)&0xff;
+          pCommand[ptr++] =  val&0xff;
+				
+					//滤光片数
+					if(BoardInf.Filter2Locate>FILTER_NO)val=2;
+					else val=1;
+				  pCommand[ptr++] = (val>>24)&0xff;  //
+          pCommand[ptr++] = (val>>16)&0xff;
+          pCommand[ptr++] = (val>>8)&0xff;
+          pCommand[ptr++] =  val&0xff;
+				  
+					
+         //96孔板的数据
+	       for(j = 0; j < 2; j++)
+	       {
+					    if( (BoardInf.Filter2Locate>FILTER_NO) && (j > 0) )
+		          {
+			            break;
+		          }
+
+	            for(i = 0; i < TUBE_MAX; i++)
+	            {
+								  if(BoardInf.KineticPara.Enable)
+					        {
+				              val=BoardInf.KineticPara.kinetic_readings_practical;
+					        }
+					        else
+					        {
+						          val=0;
+					        }
+								  FloatValue.f_val=dABSInit[val][j][i];//待确认
+								//	FloatValue.f_val=1;
+                  pCommand[ptr++]=FloatValue.c_val[3];  
+	                pCommand[ptr++]=FloatValue.c_val[2]; 
+	                pCommand[ptr++]=FloatValue.c_val[1]; 
+	                pCommand[ptr++]=FloatValue.c_val[0]; 
+	            }
+	       }
+	
+				  //如果是一个滤光片,发96*4字节,如果是2个滤光片,则发96*2*4个字节
+			    break;
+			}  
+			case COMMAND_CURR_BOARD_END_PC:   //当前板结束
+		  {
+				  val=RemoteInfo_PC.PlateCurrent+1; 
+				  pCommand[ptr++] = (val>>24)&0xff;  //
+          pCommand[ptr++] = (val>>16)&0xff;
+          pCommand[ptr++] = (val>>8)&0xff;
+          pCommand[ptr++] =  val&0xff;
+			    break;
+			}
+			 case COMMAND_ERRCODE_PC:         //故障代码
+			 {
+				  pCommand[ptr++] = (gSystem.SystemErrCode>>24)&0xff;
+          pCommand[ptr++] = (gSystem.SystemErrCode>>16)&0xff;
+          pCommand[ptr++] = (gSystem.SystemErrCode>>8)&0xff;
+          pCommand[ptr++] = gSystem.SystemErrCode&0xff;
+				  break;
+			 }
+			 default:return;
+	}
+	GetTxCheckSum_PC(pCommand, ptr);
+	ptr+=COMM_CRC_LEN_PC;
+	
+	UartResendPrepared(cmd);//向PC机发送数据
+
+	
+	//发送数据
+	CommSendCommand_PC(pCommand,ptr);
+}
+
+
+
+
+
+
+
+unsigned short AddCommandHead_PC( unsigned short nCommandSecond, unsigned char  *pCommand,unsigned short nLength)
+{
+	  unsigned short ptr = 0;
+    //标记位(帧头 4字节)
+	  memcpy(pCommand, CONST_COMMAND_HEAD, COMM_SLA_LEN_PC);
+	  ptr += COMM_SLA_LEN_PC;
+	
+	  //区分字段(仪器号 8字节)
+	  pCommand[ptr++] = 0;
+    pCommand[ptr++] = 0;
+    pCommand[ptr++] = 0;
+    pCommand[ptr++] = 0;
+    pCommand[ptr++] = 0;
+    pCommand[ptr++] = 0;
+    pCommand[ptr++] = 0;
+    pCommand[ptr++] = 0;
+	  
+	  //主命令 (2字节)
+	  pCommand[ptr++] = CONST_MAIN_COMMAND[0];
+	  pCommand[ptr++] = CONST_MAIN_COMMAND[1];
+	
+	  //子命令 (2字节)
+	  pCommand[ptr++] = nCommandSecond>>8;
+	  pCommand[ptr++] = nCommandSecond&0xff;
+		
+		//数据长度 (4字节)
+		pCommand[ptr++] = 0;
+		pCommand[ptr++] = 0;
+	  pCommand[ptr++] = nLength>>8;
+	  pCommand[ptr++] = nLength&0xff;
+		return ptr;
+}
+//连接响应命令
+void PrepareConnectResponseCommand(uint16 cmd,unsigned char *pCommand) 
+{
+  unsigned short ptr=0;
+	unsigned char i;
+	
+	ptr=AddCommandHead_PC(cmd,pCommand,COMM_DATA_LEN_POS_PC);
+	//连接标志
+	pCommand[ptr++]=0;
+	pCommand[ptr++]=0;
+	pCommand[ptr++]=0;
+	if(run_status.task_busy) //下位机忙
+  {
+		  pCommand[ptr++]=1;   //1表示连接失败
+	}
+	else
+	{
+		  pCommand[ptr++]=0;   //连接成功
+	}
+	
+	//失败原因
+	pCommand[ptr++]=0;
+	pCommand[ptr++]=0;
+	pCommand[ptr++]=0;
+	pCommand[ptr++]=MACHINE_BUSY;
+	
+	//仪器序列号
+	for(i=0;i<8;i++)
+	{
+	   pCommand[ptr++]='1'+i;
+	}
+	
+  //滤光片参数
+	for(i = 0; i < FILTER_MAX; i++)
+	{
+		 pCommand[ptr++]=0;
+		 pCommand[ptr++]=0;
+		 pCommand[ptr++]=FilterLun.Filter[i]>>8;
+		 pCommand[ptr++]=FilterLun.Filter[i]&0xff;
+	}
+
+	
+	GetRxCheckSum_PC(pCommand, ptr);
+	ptr+=COMM_CRC_LEN_PC;
+	//发送数据
+	CommSendCommand_PC(pCommand,ptr);
+}
+
+//断开响应命令-
+void PrepareResponseCommand(uint16 cmd,unsigned char *pCommand,unsigned char okflag) 
+{
+  unsigned short ptr=0;
+	
+	ptr=AddCommandHead_PC(cmd,pCommand,COMM_DATA_LEN_POS_PC);
+  
+	//失败原因
+	if( (cmd==COMMAND_UNCONNECT_ACK_PC)||(cmd==COMMAND_RUN_ACK_PC)||(cmd==COMMAND_PLATEIN_ACK_PC)
+		||(cmd==COMMAND_PLATEOUT_ACK_PC) ||(cmd==COMMAND_NEXT_PLATE_ACK_PC)||(cmd==COMMAND_MEASURE_PARA_ACK_PC) 
+	  ||(cmd==COMMAND_KINETIC_ACK_PC)  ||(cmd==COMMAND_KINETIC_ACK_PC)  )
+	{
+	   pCommand[ptr++]=0;
+	   pCommand[ptr++]=0;
+	   pCommand[ptr++]=0;
+	   pCommand[ptr++]=okflag;//成功
+	}
+	else if(cmd==COMMAND_STOP_ACK_PC)
+	{
+		 //无数据段
+	}
+	
+	GetRxCheckSum_PC(pCommand, ptr);
+	ptr+=COMM_CRC_LEN_PC;
+	//发送数据
+	CommSendCommand_PC(pCommand,ptr);
+}
+
+
+
+
+//-----------------------------------------------------------------//
+//	功能:串口收到来自PC命令后进行初使化
+//	入口参数: cmd命令字,*dat从数据段开始
+//	出口参数:
+//  备注:
+//-----------------------------------------------------------------//
+void UartCmdProcess_PC(unsigned short cmd,uint8 *dat)
+{
+	switch(cmd)
+	{
+	    case COMMAND_CONNECT_ACK_PC:  //连接
+		  {
+			    //run_status.nRunMode = RUN_MODE_IDLE;RemoteInfo_PC.bRemote=1;
+		      PrepareConnectResponseCommand(cmd,&UartInfo_PC.SendBuffer[0]);
+				
+				  BackupMachineStatus();    //备份仪器数据
+					Remote_Interface();		    //显示连接PC界面
+			    break;
+			}
+			case COMMAND_UNCONNECT_ACK_PC://断开
+		  {
+			    //run_status.nRunMode = RUN_MODE_IDLE;RemoteInfo_PC.bRemote=0;
+				  PrepareResponseCommand(cmd,&UartInfo_PC.SendBuffer[0],UART_PC_OK);
+				  //收到PC发过来的断开命令后恢复界面软件的状态
+				  RestoreMachineStatus();    //恢复仪器数据
+					run_status.nRunMode = RUN_MODE_IDLE;
+				  if ( RemoteInfo_PC.RunningFlag==RUNNING_FLAG_RUN) //停止下位机
+				  {
+								RemoteInfo_PC.RunningFlag=0;
+					      MCU_StartStop(0);
+					}
+					run_status.task_busy=0;
+				  RemoteInfo_PC.RemoteFlag=0;
+					DeletePCMenu();
+					gSystem.MenuRefreshFlag=1;
+					gSystem.TitleButtonEnable=1;
+							
+							
+			    break;
+			}
+			case COMMAND_RUN_ACK_PC:      //运行
+		  {
+				   if(RemoteInfo_PC.RemoteFlag)
+					 {
+						  
+				       run_status.doorState = dat[3];//运行结束板出标志.int类型,只取第4位
+						   if(run_status.doorState>1)run_status.doorState=1;
+				       PrepareResponseCommand(cmd,&UartInfo_PC.SendBuffer[0],UART_PC_OK);
+			         MCU_StartStop(1);          //????
+			         run_status.task_busy=1;    //task_busy==1?,???????
+					 }
+					 else
+					 {
+						  PrepareResponseCommand(cmd,&UartInfo_PC.SendBuffer[0],UART_PC_ERR);
+					 }
+			    break;
+			}
+			case COMMAND_STOP_ACK_PC:     //停止
+		  {
+				  if(RemoteInfo_PC.RemoteFlag)
+					{
+			
+							PrepareResponseCommand(cmd,&UartInfo_PC.SendBuffer[0],UART_PC_OK);
+						
+							if ( (run_status.task_busy==1 )&&(run_status.nRunMode != RUN_MODE_SELFTEST) ) 
+							{
+								 run_status.nRunMode = RUN_MODE_IDLE;
+								 MCU_StartStop(0);
+								 run_status.task_busy=0;
+							 
+							}
+				  }
+          else
+					{
+						 PrepareResponseCommand(cmd,&UartInfo_PC.SendBuffer[0],UART_PC_ERR);
+					}						
+			    break;
+			}
+			case COMMAND_PLATEIN_ACK_PC:  //板进
+		  {
+				  //run_status.task_busy=0;
+			    //run_status.nRunMode = RUN_MODE_IDLE;
+				 // PrepareResponseCommand(cmd,&UartInfo_PC.SendBuffer[0]);
+
+				  if( ((run_status.task_busy==0)&&(run_status.nRunMode != RUN_MODE_SELFTEST))&&(RemoteInfo_PC.RemoteFlag) )
+				  {
+						  //run_status.doorState=0; //板进
+						  if(run_status.doorState)run_status.doorState=0;
+							else run_status.doorState=1;
+						  openClosedoor(run_status.doorState);//执行板进命令
+						  PrepareResponseCommand(cmd,&UartInfo_PC.SendBuffer[0],UART_PC_OK);
+					}
+					else
+					{
+						  PrepareResponseCommand(cmd,&UartInfo_PC.SendBuffer[0],UART_PC_ERR);
+					}
+
+				  break;
+				}
+
+
+			case COMMAND_PLATEOUT_ACK_PC:  //板出
+		  {
+				  //run_status.task_busy=0;
+			    //run_status.nRunMode = RUN_MODE_IDLE;
+				  if( ((run_status.task_busy==0)&&(run_status.nRunMode != RUN_MODE_SELFTEST) )&&(RemoteInfo_PC.RemoteFlag) )
+				  {
+						  //run_status.doorState=1;  //板出
+						  if(run_status.doorState)run_status.doorState=0;
+							else run_status.doorState=1;
+						  openClosedoor(run_status.doorState);//执行板进命令
+						  PrepareResponseCommand(cmd,&UartInfo_PC.SendBuffer[0],UART_PC_OK);
+					}
+					else
+					{
+						  PrepareResponseCommand(cmd,&UartInfo_PC.SendBuffer[0],UART_PC_ERR);
+					}
+			    break;
+			}
+			case COMMAND_NEXT_PLATE_ACK_PC://下一板已准备好
+		  {
+				  //Remote_PC.PlateNumber= UartRevDataPC[3];//运行结束板出标志.int类型,只取第4位
+				  if( (RemoteInfo_PC.PlateCurrent+1<dat[3])&&(RemoteInfo_PC.RemoteFlag) )
+					{
+						RemoteInfo_PC.PlateCurrent=dat[3];
+				    PrepareResponseCommand(cmd,&UartInfo_PC.SendBuffer[0],UART_PC_OK);
+						MCU_StartStop(1);          //
+			      run_status.task_busy=1;    //task_busy==1
+				  }
+					else
+					{
+						 PrepareResponseCommand(cmd,&UartInfo_PC.SendBuffer[0],UART_PC_ERR);
+					}
+			    break;
+			}
+			case COMMAND_MEASURE_PARA_ACK_PC: //测量步骤参数传递
+		  {
+				   if(RemoteInfo_PC.RemoteFlag) 
+					 {
+							 //detect_inf.doorOpen= UartRevDataPC[3];	 //板数
+							 RemoteInfo_PC.PlateCurrent=0;
+							 RemoteInfo_PC.PlateTotal=dat[3];
+						   if(RemoteInfo_PC.PlateTotal>100)RemoteInfo_PC.PlateTotal=100;//
+							 BoardInf.Filter1Locate=(signed char)dat[7]-1;  //主波长位置
+						   if(BoardInf.Filter1Locate<FILTER_NO)BoardInf.Filter1Locate=FILTER_NO;
+						   else if(BoardInf.Filter1Locate>=FILTER_MAX)BoardInf.Filter1Locate=FILTER_MAX-1;
+							 BoardInf.Filter2Locate=(signed char)dat[11]-1; //辐波长位置
+						   if(BoardInf.Filter2Locate<FILTER_NO)BoardInf.Filter2Locate=FILTER_NO;
+						   else if(BoardInf.Filter2Locate>=FILTER_MAX)BoardInf.Filter2Locate=FILTER_MAX-1;
+							 BoardInf.DetectMode=dat[15];   //测量模式
+					     if(BoardInf.DetectMode>1)BoardInf.DetectMode=1;
+							 BoardInf.ShakeEnable=dat[19]; //振动开启
+							 BoardInf.ShakeSpeed=dat[23];  //振动速度
+						   if(BoardInf.ShakeSpeed<1)BoardInf.ShakeSpeed=1;
+						   else if(BoardInf.ShakeSpeed>3)BoardInf.ShakeSpeed=3;
+						   BoardInf.ShakeSpeed=BoardInf.ShakeSpeed-1;//SHAKE_SPEED_SLOW
+							 BoardInf.ShakeTime=( ((unsigned long)dat[24]<<24)||((unsigned long)dat[25]<<16)
+													||((unsigned long)dat[26]<<8)||(unsigned long)dat[27]); //振动时间
+							 
+							 BoardInf.ShakeMode=SHAKE_FIRST;//默认值
+							 //发送数据
+							 PrepareResponseCommand(cmd,&UartInfo_PC.SendBuffer[0],UART_PC_OK);
+				   }
+					 else
+					 {
+						  PrepareResponseCommand(cmd,&UartInfo_PC.SendBuffer[0],UART_PC_ERR);
+					 }
+			     break;
+			}
+			case COMMAND_KINETIC_ACK_PC:  //多板动力学测量
+			{
+				if(RemoteInfo_PC.RemoteFlag) 
+				{
+					 RemoteInfo_PC.PlateCurrent=0;
+				   BoardInf.KineticPara.Readings=dat[3];  //循环数
+					 if(BoardInf.KineticPara.Readings>KINETIC_READINGS_MAX)BoardInf.KineticPara.Readings=KINETIC_READINGS_MAX;//
+				   BoardInf.KineticPara.TimeInterval=((uint32)dat[4]<<24)+((uint32)dat[5]<<16)+((uint32)dat[6]<<8)+ dat[7];  //动力学间隔时间
+				 //  BoardInf.BoardNum=dat[11];  //总的板数
+				   BoardInf.Filter1Locate=(signed char)dat[15]-1;  //主波长位置
+					 if(BoardInf.Filter1Locate<FILTER_NO)BoardInf.Filter1Locate=FILTER_NO;
+					 else if(BoardInf.Filter1Locate>=FILTER_MAX)BoardInf.Filter1Locate=FILTER_MAX-1;
+			     BoardInf.Filter2Locate=(signed char)dat[19]-1;  //辐波长位置
+					 if(BoardInf.Filter2Locate<FILTER_NO)BoardInf.Filter2Locate=FILTER_NO;
+					 else if(BoardInf.Filter2Locate>=FILTER_MAX)BoardInf.Filter2Locate=FILTER_MAX-1;
+			     BoardInf.DetectMode=dat[23];   //测量模式
+			     if(BoardInf.DetectMode>1)BoardInf.DetectMode=1;
+					
+			     BoardInf.ShakeEnable=dat[27]; //振动开启
+			     BoardInf.ShakeSpeed=dat[31];  //振动速度
+					 if(BoardInf.ShakeSpeed<1)BoardInf.ShakeSpeed=1;
+					 else if(BoardInf.ShakeSpeed>3)BoardInf.ShakeSpeed=3;
+					 BoardInf.ShakeSpeed=BoardInf.ShakeSpeed-1;//SHAKE_SPEED_SLOW
+			     BoardInf.ShakeTime=( ((unsigned long)dat[35]<<24)||((unsigned long)dat[36]<<16)
+				              ||((unsigned long)dat[37]<<8)||(unsigned long)dat[38]); //振动时间
+					 
+					 BoardInf.ShakeMode=SHAKE_FIRST;//默认值
+					 //发送数据
+					 PrepareResponseCommand(cmd,&UartInfo_PC.SendBuffer[0],UART_PC_OK);
+				 }
+				 else
+				 {
+					 PrepareResponseCommand(cmd,&UartInfo_PC.SendBuffer[0],UART_PC_ERR);
+				 }
+					 break;
+		  }
+			case COMMAND_VIEW_ACK_PC:           //心跳包
+			{
+				  PrepareResponseCommand(cmd,&UartInfo_PC.SendBuffer[0],UART_PC_OK);
+				  break;
+			}
+			default:
+			{
+				  break;
+			}
+		}
+}
+
+void WaitPCResponse(void)//串口发出数据后等待应答
+{
+	  uint32 dat;
+		 //下位机向PC发出数据后等待应答
+		 if(CommStatus_PC.SentFlag && RemoteInfo_PC.RemoteFlag)
+		 {
+				 CommStatus_PC.CurrentCommand=0; //取消重发
+				 CommStatus_PC.SentFlag=0;
+			 
+				 //分析数据段
+				 dat=((uint16)UartInfo_PC.RecBuffer[COMM_DATA_POS_PC+2]<<8)+UartInfo_PC.RecBuffer[COMM_DATA_LEN_PC+3];
+				 if(dat>0)//>0表示出错
+				 {
+						 if( (UartInfo_PC.Cmd==COMMAND_MEASURE_END_PC)||(UartInfo_PC.Cmd==COMMAND_CURR_BOARD_END_PC)
+							 ||(UartInfo_PC.Cmd==COMMAND_UNCONNECT_PC) ) //COMMAND_ERRCODE_PC
+						 {
+								 //重发
+								 UartCmdSend_PC(UartInfo_PC.Cmd);
+						 }
+				 }
+				 else//PC已收到应答
+				 {
+						 if(UartInfo_PC.Cmd== COMMAND_MEASURE_END_PC && run_status.nRunMode == RUN_MODE_IDLE)
+						 {
+							 if(RemoteInfo_PC.PlateCurrent+1 >= RemoteInfo_PC.PlateTotal)
+							 {
+									 RemoteInfo_PC.RunningFlag=RUNNING_FLAG_FINISH;
+									 UartCmdSend_PC(COMMAND_CURR_BOARD_END_PC);//检测结束,发送当前板结束命令给PC
+							 }
+							 else //开始下一板检测-start
+							 {
+									if(run_status.nRunMode == RUN_MODE_MEASURE)	//BoardInf.KineticPara.kinetic_reading_current
+									{
+											 if(BoardInf.KineticPara.Enable)//???
+											 {
+													if(BoardInf.KineticPara.kinetic_time_current>0)
+													{
+														 BoardInf.KineticPara.kinetic_time_current--;
+													}
+													else if(run_status.bHasData)
+													{
+															run_status.bHasData = 0;
+															if( (BoardInf.ShakeEnable)&&(BoardInf.ShakeMode==SHAKE_EACH) ) //
+															{
+																 SendShakeProtocol();
+															}
+															else
+															{
+																 MCU_SendRun();
+															}
+													}//else if(run_status.bHasData)
+											}//if(BoardInf.KineticPara.Enable)//???
+									}//if(run_status.nRunMode == RUN_MODE_MEASURE)	
+							 }//else //开始下一板检测-start 
+						}//if(UartInfo_PC.Cmd== COMMAND_MEASURE_END_PC && run_status.nRunMode == RUN_MODE_IDLE)
+						else if(UartInfo_PC.Cmd== COMMAND_UNCONNECT_PC && run_status.nRunMode == RUN_MODE_IDLE)//运行过程中不能断开
+						{
+								RemoteInfo_PC.RemoteFlag=0;
+								UartCmdSend_PC(UartInfo_PC.Cmd);//回
+						}//else if(UartInfo_PC.Cmd== COMMAND_UNCONNECT_PC && run_status.nRunMode == RUN_MODE_IDLE)
+			}	//else//PC已收到应答	
+	 }//if(CommStatus_PC.SentFlag && RemoteInfo_PC.RemoteFlag)
+}
+	 
+					 
+			 
+			 
+	/******************************************************************************
+ *	函 数 名: Comm_Process_PC  void CommRxDataSend_PC(void);
+ *	功能说明: 查询PC串口接收队列中是否有需要处理的数据
+ *	形    参: 
+ *	返 回 值:
+*******************************************************************************/
+void CommProcess_PC(void)
+{
+	uint8 Status;
+	uint8 i;
+	uint16 sum;
+
+	// 从FIFO中获取数据并处理
+	Status = FIFO_RxDataGet_PC(&FIFO_RxData_PC,&UartInfo_PC.RecBuffer[0]);
+	
+	// Get Successfully 
+	if(Status == SUCCESS)
+	{
+		  for(i=0;i<COMM_SLA_LEN_PC;i++)//标记位
+		  {
+	              if(UartInfo_PC.RecBuffer[i]!=CONST_COMMAND_HEAD[i])	  //标记位不同,出错                                    
+	              {
+	                    return;
+					      }
+	    }     
+			
+			//接收子命令,长度为2
+		   UartInfo_PC.Cmd=((uint16)UartInfo_PC.RecBuffer[COMM_SUB_COMMAND_POS_PC]<<8)+UartInfo_PC.RecBuffer[COMM_SUB_COMMAND_POS_PC+1];
+			 
+			//接收数据长度,长度为2
+		   UartInfo_PC.DataLen=((uint16)UartInfo_PC.RecBuffer[COMM_DATA_LEN_POS_PC+2]<<8)+UartInfo_PC.RecBuffer[COMM_DATA_LEN_POS_PC+3];
+			 if(UartInfo_PC.DataLen>COMM_UART_DATA_LEN_MAX_PC) //数据段长度过大
+			 { 
+				    return;
+			 }
+			 
+			
+			 //校验和,长度为2
+			 i=COMM_DATA_POS_PC+UartInfo_PC.DataLen-COMM_CRC_LEN_PC;
+			 sum=((uint16)UartInfo_PC.RecBuffer[i]<<8)+UartInfo_PC.RecBuffer[i+1];
+			 if(GetRxCheckSum_PC(UartInfo_PC.RecBuffer, COMM_DATA_POS_PC+UartInfo_PC.DataLen-COMM_CRC_LEN_PC)!=sum)
+			 {
+				  return;
+			 }
+			 
+			 
+			 if(UartInfo_PC.Cmd<COMMAND_START_PC)//应答PC
+			 {
+			     //串口数据处理
+			     UartCmdProcess_PC(UartInfo_PC.Cmd,&UartInfo_PC.RecBuffer[COMM_DATA_POS_PC]);
+			 }
+			 else
+			 {
+			     WaitPCResponse();//串口发出数据后等待应答
+			 }
+	}//if(Status == SUCCESS)
+}
+
+
+
+
+
+//-----------------------------------------------------------------//
+//	功能:PC串口重发子函数
+//	入口参数: cmd命令字,
+//	出口参数:
+//  备注:
+//-----------------------------------------------------------------//
+void UartReSend(void)
+{
+					if( (CommStatus_PC.CurrentCommand>=COMMAND_START_PC)&&(CommStatus_PC.CurrentCommand<=COMMAND_END_PC) )
+		      {
+						      if(CommStatus_PC.Timeout<UART_RE_SEND_COUNT_MAX)CommStatus_PC.Timeout++;//超时计数器
+						      else 
+									{
+										 CommStatus_PC.Timeout=UART_RE_SEND_TIME_MAX;
+										 CommStatus_PC.RepeatSendCount++;
+										 if(CommStatus_PC.RepeatSendCount<UART_RE_SEND_COUNT_MAX)
+										 {
+											     UartCmdSend_PC(CommStatus_PC.CurrentCommand); 
+										 }
+										 else 
+										 {
+											     CommStatus_PC.RepeatSendCount=0;
+											     //gSystem.SystemErrCode |= ERRCODE_UART;
+										 }
+										 UartResendPrepared(CommStatus_PC.CurrentCommand);//清串口重发变量
+									}
+					}//if( (CommStatus_PC.CurrentCmd==cmd)&&(CommStatus_PC.CurrentCmd>0) )
+}
+

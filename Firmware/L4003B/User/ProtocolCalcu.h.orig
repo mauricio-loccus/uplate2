@@ -1,0 +1,72 @@
+
+#ifndef __PROTOCOL_CALCU_H
+#define __PROTOCOL_CALCU_H
+
+//#define PRE_CALCULATE_MAX  6
+extern const char *PRE_CALCULATE_STR[];
+
+extern const char CALCULATE_MAIN_TITLE[LANGUAGE_TYPES][30];
+extern const char CALCULATE_READINGS[LANGUAGE_TYPES][20];
+extern const char CALCULATE_CURVES[LANGUAGE_TYPES][10];
+extern const char CALCULATE_INTERVAL[LANGUAGE_TYPES][15];
+extern const char CALCULATE_KINETIC[LANGUAGE_TYPES][10];
+extern const char CALCULATE_PREPROCESS[LANGUAGE_TYPES][12];
+
+
+//BaseLineSel
+enum
+{
+    BASE_LINE_BEGIN=0,
+    BASE_LINE_END,
+};
+
+#define PRE_CALCULATE_NO -1
+enum
+{
+    PRE_CALCULATE_M1_M2_SUB=0,
+    PRE_CALCULATE_M1_M2_DIV,
+    PRE_CALCULATE_M1_M2_ADD,
+    PRE_CALCULATE_M1_M2_MUX,
+    PRE_CALCULATE_M2_M1_SUB,
+    PRE_CALCULATE_M2_M1_DIV,
+    PRE_CALCULATE_MAX,
+};
+#define CURVE_NO   -1
+
+#ifdef SOFTWARE_DN
+enum
+{
+    CURVE_LINEAR=0,
+    CURVE_LOGISTIC,
+    CURVE_CUBIC,
+    CURVE_PTOP,
+    CURVE_FACTOR,
+	  CURVE_LOGITLOG,
+    CURVE_MAX,
+};
+#else
+enum
+{
+    CURVE_LINEAR=0,
+    CURVE_LOGISTIC,
+    CURVE_CUBIC,
+    CURVE_PTOP,
+    CURVE_FACTOR,
+    CURVE_MAX,
+};
+#endif
+
+//#define CURVE_MAX  5
+extern const char *CURVE_STR[];
+
+
+
+
+#define KINETIC_ENABLE_SEL_WIDTH  80
+
+void ChangeReadingsRun(void);//运行前确认一下读数
+void ChangeReadings(void);
+void ProtocolCalc_Go(void);
+void ProtocolCalc_Scan(void);
+void ProtocolCalc_Interface(void);
+#endif

@@ -1,0 +1,1100 @@
+/*
+unsigned char NandGenerateNewFile(void);  //²úÉúÐÂÎÄ¼þ(Ð´ÈëNandFlash)
+void FindCurrBlockEnd(void);              //²éÕÒÖÕÖ¹¿é
+unsigned char FindBlankBlock(void);       //²éÕÒ¿Õ¿é
+unsigned char FindCurrBlock(void);        //¸ùÕÒµ±Ç°¿éº
+unsigned char NandSaveFile(unsigned char new_addr_flag);//±£´æ1¸öÎÄ¼þ
+
+unsigned char NandOpenOneFile(void);      //´ÓNandFlash´ò¿ªÒ»¸öÎÄ¼þ
+void NandReadAllHead(void);               //¶ÁÈ¡ËùÓÐÎÄ¼þÍ·
+unsigned char NandDeleteFile(void);       //É¾³ý1¸öÎÄ¼þ
+
+
+void InitDefaultFile(void);               //³õÊ¹»¯Ä¬ÈÏÎÄ¼þ
+void GetDefaultFileName(void);            //»ñÈ¡ÎÄ¼þÃû
+unsigned char InitNewParaFile(void);               //³õÊ¹»¯ÐÂ½¨µÄÎÄ¼þ²ÎÊý
+*/
+
+#include "MainTask.h"
+#include "bsp.h"
+
+
+const char STR_NAND_FULL[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {"NandFlsh is full.", "存贮已满。"}; //2015-3-16
+
+
+
+
+union  FLOAT_VAL FloatValue;
+
+TASK_MANAGE  TaskManage;
+
+unsigned char valid_buf[VALID_SPARE_SIZE];
+
+ // unsigned short ptr=0;
+////	unsigned char i,j,k,page_num;
+  //float f_temp;
+
+  //unsigned char x[4];
+
+
+//**************************
+//3个结构体： 文件、步骤、选项生成新文件
+//gSystem.CurrBlock为当前写入的块号
+unsigned char NandGenerateNewFile(void)
+{
+	//int i,j=0,len,back[6],k;
+	//int back_f[6];
+	//float back_f[6];
+	//const char name1[]="bb.txt",start[]="AS154_S",name[]="NAME:",step[]="STEP:",time[]="TIME:",status[]="STATUS:",option[]="OPTION:",end[]="AS154_E";
+  unsigned int ptr=0;
+	unsigned char i,j,k,page_num;
+//头行
+	//板名
+	
+  ptr=0;
+	data_buf[ptr++]='S';//以S开头
+	//uint8_t  data_buf[SPI_PAGE]
+
+	
+	//len=strlen(BoardInf.Name);
+	for(i=0;i<PROGRAM_NAME_LENGTH;i++)
+	{
+		 ProgramName[gSystem.ProgramMax].Name[i]=BoardInf.Name[i];//程序名
+	   data_buf[ptr++]=BoardInf.Name[i];
+	}
+	data_buf[ptr++]=BoardInf.bHasData;
+	//是否带数据标志
+	ProgramName[gSystem.ProgramMax].HasData=BoardInf.bHasData;
+	
+	data_buf[ptr++]=SystemTimePra.Year>>8;
+	data_buf[ptr++]=SystemTimePra.Year&0xff;
+	ProgramName[gSystem.ProgramMax].DateTime.Year=CurrProgramName.DateTime.Year;
+	data_buf[ptr++]=SystemTimePra.Month;
+	ProgramName[gSystem.ProgramMax].DateTime.Month=CurrProgramName.DateTime.Month;
+	data_buf[ptr++]=SystemTimePra.Day;
+	ProgramName[gSystem.ProgramMax].DateTime.Day=CurrProgramName.DateTime.Day;
+	data_buf[ptr++]=SystemTimePra.Hour;
+	ProgramName[gSystem.ProgramMax].DateTime.Hour=CurrProgramName.DateTime.Hour;
+	data_buf[ptr++]=SystemTimePra.Min;
+	ProgramName[gSystem.ProgramMax].DateTime.Min=CurrProgramName.DateTime.Min;
+	data_buf[ptr++]=SystemTimePra.Sec;
+	ProgramName[gSystem.ProgramMax].DateTime.Sec=CurrProgramName.DateTime.Sec;
+	
+		
+
+			
+			
+	
+	data_buf[ptr++]=gSystem.CurrBlock>>8;
+	data_buf[ptr++]=gSystem.CurrBlock&0xff;
+	
+	//检测
+	 data_buf[ptr++]=BoardInf.Filter1Locate;
+	 data_buf[ptr++]=BoardInf.Filter2Locate;
+   data_buf[ptr++]=BoardInf.DetectMode;
+	//振动
+	 data_buf[ptr++]=BoardInf.ShakeEnable;
+	 data_buf[ptr++]=BoardInf.ShakeSpeed;
+   data_buf[ptr++]=(BoardInf.ShakeTime>>24)&0xff;
+	 data_buf[ptr++]=(BoardInf.ShakeTime>>16)&0xff;
+	 data_buf[ptr++]=(BoardInf.ShakeTime>>8)&0xff;
+	 data_buf[ptr++]=(BoardInf.ShakeTime)&0xff;
+	//定性
+	 data_buf[ptr++]=BoardInf.InterpretPara.Enable;   //允许定性分析
+	 data_buf[ptr++]=BoardInf.InterpretPara.AbsFlag;  //采用吸光度
+	 FloatValue.f_val=BoardInf.InterpretPara.fWeakPValue;   //弱阳性
+	 data_buf[ptr++]=FloatValue.c_val[0];
+	 data_buf[ptr++]=FloatValue.c_val[1];
+	 data_buf[ptr++]=FloatValue.c_val[2];
+	 data_buf[ptr++]=FloatValue.c_val[3];
+	 
+	 data_buf[ptr++]=BoardInf.InterpretPara.GreatFlag; 
+	 for(i=0;i<3;i++)
+	 {
+		   //FloatConvertChar(BoardInf.InterpretPara.fCoef[i],x);
+		   FloatValue.f_val=BoardInf.InterpretPara.fCoef[i];
+       data_buf[ptr++]=FloatValue.c_val[0];
+	     data_buf[ptr++]=FloatValue.c_val[1];
+	     data_buf[ptr++]=FloatValue.c_val[2];
+	     data_buf[ptr++]=FloatValue.c_val[3];
+	}
+	//板布局
+	for(i=0;i<TUBE_MAX;i++)
+	{
+			 data_buf[ptr++]=BoardInf.Layout.WellType[i];
+       data_buf[ptr++]= BoardInf.Layout.Num[i];
+	}
+	//动力学
+	data_buf[ptr++]=BoardInf.KineticPara.Enable;
+  data_buf[ptr++]=BoardInf.KineticPara.PreProcess;
+	data_buf[ptr++]=BoardInf.KineticPara.Curve;
+	data_buf[ptr++]=BoardInf.KineticPara.Readings;
+	
+	data_buf[ptr++]=(BoardInf.KineticPara.TimeInterval>>24)&0xff;//32bit
+	data_buf[ptr++]=(BoardInf.KineticPara.TimeInterval>>16)&0xff;
+	data_buf[ptr++]=(BoardInf.KineticPara.TimeInterval>>8)&0xff;
+	data_buf[ptr++]=(BoardInf.KineticPara.TimeInterval)&0xff;
+ //Para.
+	data_buf[ptr++]=BoardInf.KineticPara.kinetic_analysis_mode;
+	data_buf[ptr++]=BoardInf.KineticPara.BaseLinePoint;
+	data_buf[ptr++]=BoardInf.KineticPara.BaseLineSel;
+	data_buf[ptr++]=BoardInf.KineticPara.EndReadings;
+	data_buf[ptr++]=BoardInf.KineticPara.FirstReadings;
+	
+	FloatValue.f_val=BoardInf.KineticPara.Change;
+	 //FloatConvertChar(BoardInf.KineticPara.Change,x);
+   data_buf[ptr++]=FloatValue.c_val[0];
+	 data_buf[ptr++]=FloatValue.c_val[1];
+	 data_buf[ptr++]=FloatValue.c_val[2];
+	 data_buf[ptr++]=FloatValue.c_val[3];
+	
+  //是否带数据
+   //data_buf[ptr++]=BoardInf.bHasData;
+	 data_buf[ptr++]=BoardInf.bHasRawData[0];
+	 data_buf[ptr++]=BoardInf.bHasRawData[1];
+	 
+   //浓度参数
+	 for(i=0;i<CALIBRATOR_CONCENTRATION_MAX;i++)
+	 {
+		   FloatValue.f_val=BoardInf.dConcentration[i];
+		   //FloatConvertChar(BoardInf.dConcentration[i],x);
+		   data_buf[ptr++]=FloatValue.c_val[0];
+	     data_buf[ptr++]=FloatValue.c_val[1];
+	     data_buf[ptr++]=FloatValue.c_val[2];
+	     data_buf[ptr++]=FloatValue.c_val[3];
+	 }
+	 data_buf[ptr++]=BoardInf.wcCurrentUnit;
+	 
+	 
+	 
+  //质控									 
+	data_buf[ptr++]=BoardInf.QualityPara.Enable; //??????
+	data_buf[ptr++]=BoardInf.QualityPara.AbsFlag; //?????,0????,1?????
+	
+	for(i=0;i<2;i++)
+	{
+		 for(j=0;j<QC_MAX;j++)
+		 {
+			 
+			//  FloatConvertChar(BoardInf.QualityPara.dTarget[i][j],x);
+			  FloatValue.f_val=BoardInf.QualityPara.dTarget[i][j];
+			  data_buf[ptr++]=FloatValue.c_val[0];
+	      data_buf[ptr++]=FloatValue.c_val[1];
+	      data_buf[ptr++]=FloatValue.c_val[2];
+	      data_buf[ptr++]=FloatValue.c_val[3];
+			 
+			  //FloatConvertChar(BoardInf.QualityPara.dSD[i][j],x);
+			  FloatValue.f_val=BoardInf.QualityPara.dSD[i][j];
+			  data_buf[ptr++]=FloatValue.c_val[0];
+	      data_buf[ptr++]=FloatValue.c_val[1];
+	      data_buf[ptr++]=FloatValue.c_val[2];
+	      data_buf[ptr++]=FloatValue.c_val[3];
+			 
+			  FloatValue.f_val=BoardInf.QualityPara.dCV[i][j];
+			 // FloatConvertChar(BoardInf.QualityPara.dCV[i][j],x);
+			  data_buf[ptr++]=FloatValue.c_val[0];
+	      data_buf[ptr++]=FloatValue.c_val[1];
+	      data_buf[ptr++]=FloatValue.c_val[2];
+	      data_buf[ptr++]=FloatValue.c_val[3];
+			 
+			 // FloatConvertChar(BoardInf.QualityPara.dUpperLimit[i][j],x);
+			  FloatValue.f_val=BoardInf.QualityPara.dUpperLimit[i][j];
+			  data_buf[ptr++]=FloatValue.c_val[0];
+	      data_buf[ptr++]=FloatValue.c_val[1];
+	      data_buf[ptr++]=FloatValue.c_val[2];
+	      data_buf[ptr++]=FloatValue.c_val[3];
+				
+				FloatValue.f_val=BoardInf.QualityPara.dLowerLimit[i][j];
+				//FloatConvertChar(BoardInf.QualityPara.dLowerLimit[i][j],x);
+			  data_buf[ptr++]=FloatValue.c_val[0];
+	      data_buf[ptr++]=FloatValue.c_val[1];
+	      data_buf[ptr++]=FloatValue.c_val[2];
+	      data_buf[ptr++]=FloatValue.c_val[3];
+		 }
+   }
+	 data_buf[ptr++]='E';
+	 
+	 FMC_NAND_EraseBlock(gSystem.CurrBlock);
+	 for( ;ptr<NAND_PAGE_SIZE;ptr++)
+	 {
+				data_buf[ptr]=0xff;
+	 }
+	 page_num=0;
+	 if(FMC_NAND_WritePage(data_buf, (unsigned int)gSystem.CurrBlock*NAND_BLOCK_SIZE, 0, NAND_PAGE_SIZE)!=NAND_OK)//ptr
+	 {
+		   return NAND_FAIL;
+	 }	
+   page_num++;
+	 ptr=0;
+	 
+	 
+	 if(BoardInf.bHasData)//带数据
+	 {
+		  if(BoardInf.KineticPara.Enable)
+	    {
+		     BoardInf.KineticPara.kinetic_readings_practical=BoardInf.KineticPara.Readings;
+	    }
+	    else
+	    {
+		    BoardInf.KineticPara.kinetic_readings_practical=1;
+	    }
+		  for(i = 0; i < FILTER_PLATE_MAX; i++)
+		  {
+			  if(BoardInf.bHasRawData[i]==0)
+			  {
+				  break;
+			  }
+			
+			  for(k = 0; k < BoardInf.KineticPara.kinetic_readings_practical; k++)//
+			  {
+				  for(j = 0; j < TUBE_MAX; j++)
+				  {
+					   //FloatConvertChar(dABSInit[k][i][j],x);
+						 FloatValue.f_val=dABSInit[k][i][j];
+			       data_buf[ptr++]=FloatValue.c_val[0];
+	           data_buf[ptr++]=FloatValue.c_val[1];
+	           data_buf[ptr++]=FloatValue.c_val[2];
+	           data_buf[ptr++]=FloatValue.c_val[3];
+					   if(ptr==NAND_PAGE_SIZE)//2048
+					   {
+						   ptr=0;
+						   if(FMC_NAND_WritePage(data_buf, (unsigned int)NAND_BLOCK_SIZE*gSystem.CurrBlock+(unsigned int)page_num, 0, NAND_PAGE_SIZE)!=NAND_OK)
+	             {
+		              return NAND_FAIL;
+	             }
+							 page_num++;
+					   }
+					//stuFile.Write(&(dABSInit[k][i][j]),sizeof(float));
+				  }
+			  }
+		  }
+		//for(int j = 0; j < TUBE_MAX; j++)
+		//{
+			//stuFile.Write(&(dABSInitBack[j]),sizeof(float));
+		//}
+			 data_buf[ptr++]='E';
+	     for( ;ptr<NAND_PAGE_SIZE;ptr++)
+	     {
+				  data_buf[ptr]=0xff;
+	     }
+       if(FMC_NAND_WritePage(data_buf, (unsigned int)NAND_BLOCK_SIZE*gSystem.CurrBlock+(unsigned int)page_num, 0, NAND_PAGE_SIZE)!=NAND_OK)
+	     {
+		      return NAND_FAIL;
+	     }
+			 page_num++;
+	 }
+	 //标注为已用块
+	 if(NAND_MarkUsedBlock(gSystem.CurrBlock)!=NAND_OK)
+	 {
+		  NAND_MarkUsedBlock(gSystem.CurrBlock);
+		  return NAND_FAIL;
+	 }
+	 
+	 
+	 	
+		//成功返回，保存块地址
+		ProgramName[gSystem.ProgramMax].BlockAddr=gSystem.CurrBlock;
+	  gSystem.ProgramMax++;
+    if(gSystem.ProgramMax>PROGRAM_MAX)
+	  {
+		    gSystem.ProgramMax=PROGRAM_MAX;
+	  }
+			
+	 return NAND_OK;
+}
+//查找块尾 gSystem.CurrBlock
+void FindCurrBlockEnd(void)
+{
+	 unsigned short i;
+	 gSystem.CurrBlock=0;
+	 for(i=0;i<gSystem.ProgramMax;i++)
+	 {
+		   if(ProgramName[i].BlockAddr>gSystem.CurrBlock)
+			 {
+				   gSystem.CurrBlock=ProgramName[i].BlockAddr;
+			 }
+	 }
+	 gSystem.CurrBlock=gSystem.CurrBlock+1;  //NandFlash的当前块号
+}
+//查找空块
+//gSystem.CurrBlock
+unsigned char FindBlankBlock(void)
+{
+	 unsigned short i,j;
+	 unsigned char findflag=0;
+	 for(j=1;j<FILE_NAND_BLOCK_END;j++)
+	 {
+		  findflag=1;
+	    for(i=0;i<gSystem.ProgramMax;i++)
+	    {
+		      if(ProgramName[i].BlockAddr==j)//块号已用掉
+			    {
+				      findflag=0;
+						  break;
+			    }
+	    }
+			if(findflag)
+			{
+				 gSystem.CurrBlock=j; 
+				 return FIND_OK;
+			}
+	}
+	return FIND_ERR;
+	// gSystem.CurrBlock=gSystem.CurrBlock+1;  //NandFlash的当前块号
+}
+unsigned char FindCurrBlock(void)
+{
+	FindCurrBlockEnd();
+	if(gSystem.CurrBlock>=FILE_NAND_BLOCK_END)
+	{
+		  if(FindBlankBlock()==FIND_ERR)//gSystem.CurrBlock
+			{
+				//NandFlash full
+				 return RETURN_FALSE;
+			}
+		 
+	}
+	return RETURN_TRUE;
+}
+unsigned char NandSaveFile(unsigned char new_addr_flag)
+{
+	 unsigned char i;
+	 for(i=0;i<100;i++)
+	 {
+		  if(new_addr_flag)
+			{
+	        if(FindCurrBlock()==RETURN_FALSE) //指定下一个空块
+					{
+						//提示NandFlash已满
+						  strcpy(PromptMenu.InputStr,STR_NAND_FULL[SystemPrameter.SystemLanguage]);
+	            Prompt_Interface(PROMPT_WARMING);
+						  return NAND_FAIL;
+					}
+			}
+	    if(NandGenerateNewFile()==NAND_OK)
+	    {
+		       return NAND_OK;
+	    }
+	 }
+	// strcpy(PromptMenu.InputStr,STR_NAND_FULL[SystemPrameter.SystemLanguage]);
+	 //Prompt_Interface(PROMPT_WARMING);
+	 return NAND_FAIL;
+//	 u8 SaveProgram(void)
+}
+
+
+//打开文件
+unsigned char NandOpenOneFile(void)//u8 Read_Spi_File(void)
+{
+  unsigned short ptr=0;
+	unsigned char i,j,k,page_num;
+	//float f_temp;
+
+	//板名
+	ptr=0;
+	page_num=0;
+	if(FMC_NAND_ReadPage(data_buf, (unsigned int)NAND_BLOCK_SIZE*gSystem.CurrBlock, 0, NAND_PAGE_SIZE)!=NAND_OK)
+	{
+		gSystem.SystemErrCode|=ERRCODE_NAND_FLASH;
+
+		return NAND_FAIL;
+	}	
+	page_num++;
+	if(data_buf[ptr++]!='S')//以S开头
+	{
+		gSystem.SystemErrCode|=ERRCODE_NAND_FLASH;
+		return NAND_FAIL;
+	}
+	
+					 
+	//len=data_buf[ptr++];
+	for(i=0;i<PROGRAM_NAME_LENGTH;i++)
+	{
+	   BoardInf.Name[i]=data_buf[ptr++]; 
+	}
+	BoardInf.Name[PROGRAM_NAME_LENGTH]=0;//最后为0表示字符串
+	//是否带数据
+  BoardInf.bHasData=data_buf[ptr++]; 
+
+	BoardInf.DateTime.Year=data_buf[ptr++];
+	BoardInf.DateTime.Year=SystemTimePra.Year<<8;
+	BoardInf.DateTime.Year+=data_buf[ptr++];
+	if(BoardInf.DateTime.Year>2099)BoardInf.DateTime.Year=2099;
+	else if(BoardInf.DateTime.Year<2000)BoardInf.DateTime.Year=2000;
+	BoardInf.DateTime.Month=data_buf[ptr++];
+	if(BoardInf.DateTime.Month>12)BoardInf.DateTime.Month=12;
+	else if(BoardInf.DateTime.Month<1)BoardInf.DateTime.Month=1;
+	BoardInf.DateTime.Day=data_buf[ptr++];
+	if(BoardInf.DateTime.Day>31)BoardInf.DateTime.Day=31;
+	else if(BoardInf.DateTime.Day<1)BoardInf.DateTime.Day=1;
+	BoardInf.DateTime.Hour=data_buf[ptr++];
+	if(BoardInf.DateTime.Hour>23)BoardInf.DateTime.Hour=23;
+	else if(BoardInf.DateTime.Hour<0)BoardInf.DateTime.Hour=0;
+	BoardInf.DateTime.Min=data_buf[ptr++];
+	if(BoardInf.DateTime.Min>59)BoardInf.DateTime.Min=59;
+	else if(BoardInf.DateTime.Min<0)BoardInf.DateTime.Min=0;
+	BoardInf.DateTime.Sec=data_buf[ptr++];
+	if(BoardInf.DateTime.Sec>59)BoardInf.DateTime.Sec=59;
+	else if(BoardInf.DateTime.Sec<0)BoardInf.DateTime.Sec=0;
+	
+	//CurrProgramName.DateTime.Year=data_buf[ptr++];
+	//CurrProgramName.DateTime.Year=SystemTimePra.Year<<8;
+	//CurrProgramName.DateTime.Year+=data_buf[ptr++];
+	
+	//CurrProgramName.DateTime.Month=data_buf[ptr++];
+	//CurrProgramName.DateTime.Day=data_buf[ptr++];
+	//CurrProgramName.DateTime.Hour=data_buf[ptr++];
+	//CurrProgramName.DateTime.Min=data_buf[ptr++];
+	//CurrProgramName.DateTime.Sec=data_buf[ptr++];
+	
+	
+	CurrProgramName.BlockAddr=data_buf[ptr++];
+	CurrProgramName.BlockAddr=CurrProgramName.BlockAddr<<8;
+	CurrProgramName.BlockAddr+=data_buf[ptr++];
+	if(gSystem.CurrBlock!=CurrProgramName.BlockAddr)
+	{
+		 return NAND_FAIL;
+	}
+	//;//////////////////lgj171116 debug
+	
+	//检测
+	 BoardInf.Filter1Locate=data_buf[ptr++];
+	 if(BoardInf.Filter1Locate>=FILTER_MAX)
+	 {
+		  BoardInf.Filter1Locate=FILTER_NO;
+	 }
+	 BoardInf.Filter2Locate=data_buf[ptr++];
+	 if(BoardInf.Filter2Locate>=FILTER_MAX)
+	 {
+		  BoardInf.Filter2Locate=FILTER_NO;
+	 }
+   BoardInf.DetectMode=data_buf[ptr++];
+	
+	//振动
+	 BoardInf.ShakeEnable=data_buf[ptr++];
+	 BoardInf.ShakeSpeed=data_buf[ptr++];
+	 BoardInf.ShakeTime=(((unsigned long)data_buf[ptr+0])<<24)+(((unsigned long)data_buf[ptr+1])<<16)+(((unsigned long)data_buf[ptr+2])<<8)+data_buf[ptr+3];
+	 ptr=ptr+4;
+	 if(BoardInf.ShakeTime>SHAKE_TIME_MAX)
+	 {
+		   BoardInf.ShakeTime=SHAKE_TIME_MAX;
+	 }
+	 else  if(BoardInf.ShakeTime<SHAKE_TIME_MIN)
+	 {
+		   BoardInf.ShakeTime=SHAKE_TIME_MIN;
+	 }
+	//定性
+	 BoardInf.InterpretPara.Enable=data_buf[ptr++];   //允许定性分析
+	 BoardInf.InterpretPara.AbsFlag=data_buf[ptr++];  //采用吸光度
+	 
+	 FloatValue.c_val[0]=data_buf[ptr++];  //弱阳性
+	 FloatValue.c_val[1]=data_buf[ptr++]; 
+	 FloatValue.c_val[2]=data_buf[ptr++]; 
+	 FloatValue.c_val[3]=data_buf[ptr++]; 
+	 BoardInf.InterpretPara.fWeakPValue=FloatValue.f_val;
+	 if(BoardInf.InterpretPara.fWeakPValue > WEAK_P_MAX)
+	 {
+          BoardInf.InterpretPara.fWeakPValue= WEAK_P_MAX;
+	 }
+	 else if(BoardInf.InterpretPara.fWeakPValue < WEAK_P_MIN)
+	 {
+          BoardInf.InterpretPara.fWeakPValue= WEAK_P_MIN;
+	 }
+	 BoardInf.InterpretPara.GreatFlag=data_buf[ptr++]; 
+	 for(i=0;i<3;i++)
+	 {
+		   FloatValue.c_val[0]=data_buf[ptr++];
+	     FloatValue.c_val[1]=data_buf[ptr++];
+	     FloatValue.c_val[2]=data_buf[ptr++];
+	     FloatValue.c_val[3]=data_buf[ptr++];
+		   BoardInf.InterpretPara.fCoef[i]=FloatValue.f_val;
+		   //CharConvertFloat(x,BoardInf.InterpretPara.fCoef[i]);
+		 
+		 	 if(BoardInf.InterpretPara.fCoef[i] > INTERPRET_COEF_MAX)
+				{
+            BoardInf.InterpretPara.fCoef[i] = INTERPRET_COEF_MAX;
+				}
+				else if(BoardInf.InterpretPara.fCoef[i] < 0)
+				{
+					 BoardInf.InterpretPara.fCoef[i]=0;
+				}
+	}
+	//板布局
+	for(i=0;i<TUBE_MAX;i++)
+	{
+			 BoardInf.Layout.WellType[i]=data_buf[ptr++];
+		   if(BoardInf.Layout.WellType[i]>=WELLS_TYPE_MAX)
+			 {
+				  BoardInf.Layout.WellType[i]=WELLS_TYPE_UD;
+			 }
+			 
+       BoardInf.Layout.Num[i]=data_buf[ptr++];
+		 
+		   
+	}
+	//动力学
+	BoardInf.KineticPara.Enable=data_buf[ptr++];
+  BoardInf.KineticPara.PreProcess=data_buf[ptr++];
+	if ((BoardInf.KineticPara.PreProcess>=PRE_CALCULATE_MAX) || (BoardInf.KineticPara.PreProcess <PRE_CALCULATE_NO ))
+	{
+		BoardInf.KineticPara.PreProcess =PRE_CALCULATE_NO;
+	}
+	BoardInf.KineticPara.Curve=data_buf[ptr++];
+	if ((BoardInf.KineticPara.Curve>=CURVE_MAX) && (BoardInf.KineticPara.Curve <CURVE_NO))
+	{
+		 BoardInf.KineticPara.Curve =CURVE_NO;
+	}
+	BoardInf.KineticPara.Readings=data_buf[ptr++];
+	if(BoardInf.KineticPara.Readings > KINETIC_READINGS_MAX)
+	{
+          BoardInf.KineticPara.Readings = KINETIC_READINGS_MAX;
+	}
+	else if(BoardInf.KineticPara.Readings < KINETIC_READINGS_MIN)
+	{
+          BoardInf.KineticPara.Readings = KINETIC_READINGS_MIN;
+	}
+	
+	BoardInf.KineticPara.TimeInterval=(((unsigned long)data_buf[ptr+0])<<24)+(((unsigned long)data_buf[ptr+1])<<16)+(((unsigned long)data_buf[ptr+2])<<8)+data_buf[ptr+3];
+	if(BoardInf.KineticPara.TimeInterval>KINETIC_INTERFAL_TIME_MAX)
+	{
+		BoardInf.KineticPara.TimeInterval=KINETIC_INTERFAL_TIME_MAX;
+	}
+	
+	ptr=ptr+4;
+ //Para.
+	BoardInf.KineticPara.kinetic_analysis_mode=data_buf[ptr++];
+	//if(BoardInf.KineticPara.kinetic_analysis_mode>KINETIC_ANALYSIS_MAX)
+	BoardInf.KineticPara.BaseLinePoint=data_buf[ptr++];
+	BoardInf.KineticPara.BaseLineSel=data_buf[ptr++];
+	BoardInf.KineticPara.EndReadings=data_buf[ptr++];
+	BoardInf.KineticPara.FirstReadings=data_buf[ptr++];
+	ChangeReadingsRun();
+	
+	FloatValue.c_val[0]=data_buf[ptr++];
+	FloatValue.c_val[1]=data_buf[ptr++];
+	FloatValue.c_val[2]=data_buf[ptr++];
+	FloatValue.c_val[3]=data_buf[ptr++];
+	BoardInf.KineticPara.Change=FloatValue.f_val;
+  //CharConvertFloat(&x[0],BoardInf.KineticPara.Change);
+	if(BoardInf.KineticPara.Change>CONCENTRATION_MAX)
+								{
+									 BoardInf.KineticPara.Change=CONCENTRATION_MAX;
+								}
+								else if(BoardInf.KineticPara.Change<0)
+								{
+									  BoardInf.KineticPara.Change=0;
+								}
+
+ //是否带数据
+  // data_buf[ptr++]=BoardInf.bHasData;
+	 BoardInf.bHasRawData[0]=data_buf[ptr++];
+	 BoardInf.bHasRawData[1]=data_buf[ptr++];
+	
+	//浓度参数
+	 for(i=0;i<CALIBRATOR_CONCENTRATION_MAX;i++)
+	 {
+		   FloatValue.c_val[0]=data_buf[ptr++];
+	     FloatValue.c_val[1]=data_buf[ptr++];
+	     FloatValue.c_val[2]=data_buf[ptr++];
+	     FloatValue.c_val[3]=data_buf[ptr++];
+		   BoardInf.dConcentration[i]=FloatValue.f_val;
+		  // CharConvertFloat(&x[0],BoardInf.dConcentration[i]);
+		  if(BoardInf.dConcentration[i]>CONCENTRATION_MAX)
+			{
+							BoardInf.dConcentration[i]=CONCENTRATION_MAX;
+			}
+			else if(BoardInf.dConcentration[i]<0)
+			{
+							BoardInf.dConcentration[i]=0;
+			}
+
+	 }
+	 BoardInf.wcCurrentUnit=data_buf[ptr++];
+	 if(BoardInf.wcCurrentUnit>=CALIBRATOR_CONCENTRATION_UNIT_MAX)
+	 {
+		   BoardInf.wcCurrentUnit=4;//
+	 }
+	 
+  //质控									 
+	BoardInf.QualityPara.Enable=data_buf[ptr++];
+	BoardInf.QualityPara.AbsFlag=data_buf[ptr++]; 
+	
+	for(i=0;i<2;i++)
+	{
+		 for(j=0;j<QC_MAX;j++)
+		 {
+			//  float 
+			  //f_temp=0;
+			 
+			  FloatValue.c_val[0]=data_buf[ptr++];
+	      FloatValue.c_val[1]=data_buf[ptr++];
+	      FloatValue.c_val[2]=data_buf[ptr++];
+	      FloatValue.c_val[3]=data_buf[ptr++];
+				BoardInf.QualityPara.dTarget[i][j]=FloatValue.f_val;
+ 
+			  
+			  FloatValue.c_val[0]=data_buf[ptr++];
+	      FloatValue.c_val[1]=data_buf[ptr++];
+	      FloatValue.c_val[2]=data_buf[ptr++];
+	      FloatValue.c_val[3]=data_buf[ptr++];
+			  BoardInf.QualityPara.dSD[i][j]=FloatValue.f_val;
+				
+				
+			  FloatValue.c_val[0]=data_buf[ptr++];
+	      FloatValue.c_val[1]=data_buf[ptr++];
+	      FloatValue.c_val[2]=data_buf[ptr++];
+	      FloatValue.c_val[3]=data_buf[ptr++];
+			  BoardInf.QualityPara.dCV[i][j]=FloatValue.f_val;
+				
+			  FloatValue.c_val[0]=data_buf[ptr++];
+	      FloatValue.c_val[1]=data_buf[ptr++];
+	      FloatValue.c_val[2]=data_buf[ptr++];
+	      FloatValue.c_val[3]=data_buf[ptr++];
+			  BoardInf.QualityPara.dUpperLimit[i][j]=FloatValue.f_val;
+				
+			  FloatValue.c_val[0]=data_buf[ptr++];
+	      FloatValue.c_val[1]=data_buf[ptr++];
+	      FloatValue.c_val[2]=data_buf[ptr++];
+	      FloatValue.c_val[3]=data_buf[ptr++];
+				BoardInf.QualityPara.dLowerLimit[i][j]=FloatValue.f_val;
+		 }
+   }
+	if(data_buf[ptr++]!='E')
+	{
+		 gSystem.SystemErrCode|=ERRCODE_NAND_FLASH;
+		 return NAND_FAIL;
+	}
+	
+	
+	
+	//NandFlash数据读
+	 if(BoardInf.bHasData)//带数据
+	 {
+		   if(BoardInf.KineticPara.Enable)
+	    {
+		     BoardInf.KineticPara.kinetic_readings_practical=BoardInf.KineticPara.Readings;
+	    }
+	    else
+	    {
+		    BoardInf.KineticPara.kinetic_readings_practical=1;
+	    }
+			
+		   if(FMC_NAND_ReadPage(data_buf, (unsigned int)NAND_BLOCK_SIZE*gSystem.CurrBlock+page_num, 0, NAND_PAGE_SIZE)!=NAND_OK)
+	     {
+		        return NAND_FAIL;
+	     }	
+			 page_num++;
+			 ptr=0;
+			 
+		  for(i = 0; i < FILTER_PLATE_MAX; i++)
+		  {
+			  if(BoardInf.bHasRawData[i]==0)
+			  {
+				  break;
+			  }
+			
+			  for(k = 0; k < BoardInf.KineticPara.kinetic_readings_practical; k++)
+			  {
+				  for(j = 0; j < TUBE_MAX; j++)
+				  {
+			       FloatValue.c_val[0]=data_buf[ptr++];
+	           FloatValue.c_val[1]=data_buf[ptr++];
+	           FloatValue.c_val[2]=data_buf[ptr++];
+	           FloatValue.c_val[3]=data_buf[ptr++];
+						 dABSInit[k][i][j]=FloatValue.f_val;
+						// CharConvertFloat(&x[0],dABSInit[k][i][j]);
+					   if(ptr==NAND_PAGE_SIZE)//2048
+					   {
+						   ptr=0;
+							 if(FMC_NAND_ReadPage(data_buf, (unsigned int)NAND_BLOCK_SIZE*gSystem.CurrBlock+page_num, 0, NAND_PAGE_SIZE)!=NAND_OK)
+	             {
+		              return NAND_FAIL;
+	             }	
+							 page_num++;
+					   }
+					//stuFile.Write(&(dABSInit[k][i][j]),sizeof(float));
+				  }
+			  }
+				
+		  }
+		//for(int j = 0; j < TUBE_MAX; j++)
+		//{
+			//stuFile.Write(&(dABSInitBack[j]),sizeof(float));
+		//}	
+			
+			 if(data_buf[ptr++]!='E')
+	      {
+				    gSystem.SystemErrCode|=ERRCODE_NAND_FLASH;
+		        return NAND_FAIL;
+	      }
+	 }
+	 
+	 memcpy(dABS, dABSInit, sizeof(float) * FILTER_PLATE_MAX * TUBE_MAX * KINETIC_READINGS_MAX);//备份检测数据
+	 return NAND_OK;
+}
+
+//读取所有程序头文件(从NandFlash的1-1999个块)
+void NandReadAllHead(void)
+{
+   unsigned short ptr=0,i;
+   unsigned int block_num;
+   unsigned char findflag=0;
+
+	//板名
+  gSystem.ProgramMax=0;
+	for(block_num=1;block_num<FILE_NAND_BLOCK_END;block_num++)  //FILE_NAND_BLOCK_END
+	{
+		 if(FMC_NAND_ReadSpare(valid_buf, NAND_BLOCK_SIZE*block_num, 0, VALID_SPARE_SIZE)!=NAND_OK)
+	   {
+		     break;
+	   }
+     else if( (valid_buf[USED_OFFSET]==0xff)||(valid_buf[BI_OFFSET]!=0xff) )		 //(valid_buf[BI_OFFSET]!=0xff)为坏块
+		 {
+       continue;
+		 }			 
+	   if(FMC_NAND_ReadPage(data_buf, NAND_BLOCK_SIZE*block_num, 0, NAND_PAGE_SIZE)!=NAND_OK)
+	   {
+		    break;
+	   }	
+		 ptr=0;
+	   if(data_buf[ptr++]!='S')//以S开头
+	   {
+		    continue;
+	   }
+		 
+			//程序名
+			for(i=0;i<PROGRAM_NAME_LENGTH;i++)
+		  {
+					ProgramName[gSystem.ProgramMax].Name[i]=data_buf[ptr++];	 
+		  } 
+			ProgramName[gSystem.ProgramMax].Name[PROGRAM_NAME_LENGTH-1]=0;//最后为0表示字符串
+			//是否带数据标志
+		  ProgramName[gSystem.ProgramMax].HasData=data_buf[ptr++];
+			//日期时间值
+		  ProgramName[gSystem.ProgramMax].DateTime.Year=data_buf[ptr++];
+			ProgramName[gSystem.ProgramMax].DateTime.Year=ProgramName[gSystem.ProgramMax].DateTime.Year<<8;
+	    ProgramName[gSystem.ProgramMax].DateTime.Year+=data_buf[ptr++];
+			ProgramName[gSystem.ProgramMax].DateTime.Month=data_buf[ptr++];
+			ProgramName[gSystem.ProgramMax].DateTime.Day=data_buf[ptr++];
+			ProgramName[gSystem.ProgramMax].DateTime.Hour=data_buf[ptr++];
+			ProgramName[gSystem.ProgramMax].DateTime.Min=data_buf[ptr++];
+			ProgramName[gSystem.ProgramMax].DateTime.Sec=data_buf[ptr++];
+			
+				if(ProgramName[gSystem.ProgramMax].DateTime.Year>2099)ProgramName[gSystem.ProgramMax].DateTime.Year=2099;
+	else if(ProgramName[gSystem.ProgramMax].DateTime.Year<2000)ProgramName[gSystem.ProgramMax].DateTime.Year=2000;
+
+	if(ProgramName[gSystem.ProgramMax].DateTime.Month>12)ProgramName[gSystem.ProgramMax].DateTime.Month=12;
+	else if(ProgramName[gSystem.ProgramMax].DateTime.Month<1)ProgramName[gSystem.ProgramMax].DateTime.Month=1;
+
+	if(ProgramName[gSystem.ProgramMax].DateTime.Day>31)ProgramName[gSystem.ProgramMax].DateTime.Day=31;
+	else if(ProgramName[gSystem.ProgramMax].DateTime.Day<1)ProgramName[gSystem.ProgramMax].DateTime.Day=1;
+	
+	if(ProgramName[gSystem.ProgramMax].DateTime.Hour>23)ProgramName[gSystem.ProgramMax].DateTime.Hour=23;
+	else if(ProgramName[gSystem.ProgramMax].DateTime.Hour<0)ProgramName[gSystem.ProgramMax].DateTime.Hour=0;
+
+	if(ProgramName[gSystem.ProgramMax].DateTime.Min>59)ProgramName[gSystem.ProgramMax].DateTime.Min=59;
+	else if(ProgramName[gSystem.ProgramMax].DateTime.Min<0)ProgramName[gSystem.ProgramMax].DateTime.Min=0;
+
+	if(ProgramName[gSystem.ProgramMax].DateTime.Sec>59)ProgramName[gSystem.ProgramMax].DateTime.Sec=59;
+	else if(ProgramName[gSystem.ProgramMax].DateTime.Sec<0)ProgramName[gSystem.ProgramMax].DateTime.Sec=0;
+	
+	
+			ProgramName[gSystem.ProgramMax].BlockAddr=data_buf[ptr++];
+			ProgramName[gSystem.ProgramMax].BlockAddr=ProgramName[gSystem.ProgramMax].BlockAddr<<8;
+			ProgramName[gSystem.ProgramMax].BlockAddr+=data_buf[ptr++];
+
+			if( (ProgramName[gSystem.ProgramMax].BlockAddr>FILE_NAND_BLOCK_END)||(ProgramName[gSystem.ProgramMax].BlockAddr<1) )
+			{
+				continue;
+			}
+			if(findflag==0)
+			{
+			   if(strcmp(ProgramName[gSystem.ProgramMax].Name,"Demo_1")==0)//0表示相同
+			   {
+				    gSystem.CurrBlock=ProgramName[gSystem.ProgramMax].BlockAddr;
+					  findflag=1;
+			   }
+		  }	 
+			gSystem.ProgramMax++;
+			if(gSystem.ProgramMax>=PROGRAM_MAX)
+			{
+				gSystem.ProgramMax=PROGRAM_MAX;
+				break;
+			}
+	}
+	
+	  //lgj171116 debug
+	  if( (gSystem.ProgramMax>0)&&(findflag==0) )
+		{
+			  gSystem.CurrBlock=ProgramName[gSystem.ProgramMax-1].BlockAddr;
+		}
+		else
+		{
+			gSystem.CurrBlock=1;
+		}
+}
+
+
+
+unsigned char NandDeleteFile(void)
+{
+	 unsigned short ptr;
+	 for(ptr=0;ptr<NAND_BLOCK_SIZE;ptr++)
+	 {
+				data_buf[ptr]=0xff;
+	 }
+	 if(FMC_NAND_EraseBlock(gSystem.CurrBlock)!=NAND_OK)
+	// if(NAND_MarkUsedBlock(gSystem.CurrBlock)!=NAND_OK)
+   //if(FMC_NAND_WritePage(data_buf, (unsigned int)NAND_BLOCK_SIZE*gSystem.CurrBlock, 0, NAND_PAGE_SIZE)!=NAND_OK) //把首页清成0xff
+	 {
+		   //NAND_MarkBadBlock(gSystem.CurrBlock);
+			 //{
+		       return NAND_FAIL;
+			// }
+	 }
+	 return NAND_OK;
+}
+
+
+void InitDefaultFile(void) 
+{
+	unsigned char i;
+	memset(&BoardInf, 0, sizeof(BOARD_INF));
+	//strcpy(BoardInf.Name,"Demo_1");
+	strcpy(BoardInf.Name,CurrProgramName.Name);
+  BoardInf.Filter1Locate=0;//主波长滤光片405
+	BoardInf.Filter2Locate=-1;//副波长滤光片No
+  BoardInf.DetectMode=MODE_NORMAL;  //"Normal"
+  //振动参数初始化
+  BoardInf.ShakeEnable=0;
+	BoardInf.ShakeSpeed=SHAKE_SPEED_SLOW;
+  BoardInf.ShakeTime=0;
+	//定性分析判定条件初始化
+	BoardInf.InterpretPara.Enable=0;
+	BoardInf.InterpretPara.AbsFlag=1;  //吸光度
+	BoardInf.InterpretPara.GreatFlag=1;//大于
+	BoardInf.InterpretPara.fWeakPValue=0.0;
+	BoardInf.InterpretPara.fCoef[0] = 1.0;
+	BoardInf.InterpretPara.fCoef[1] = 0.0;
+	BoardInf.InterpretPara.fCoef[2] = 0.0;
+  
+	//板布局
+	for(i=0;i<TUBE_MAX;i++)
+	{
+			 BoardInf.Layout.WellType[i]=WELLS_TYPE_UD;//"EP"
+       BoardInf.Layout.Num[i]=0;
+	}
+  
+	for(i = 0; i < CALIBRATOR_CONCENTRATION_MAX; i++)
+	{
+		BoardInf.dConcentration[i] =0.0;
+	}
+	BoardInf.wcCurrentUnit=4;//浓度单位(Ul/ul)
+	
+	//动力学
+	BoardInf.KineticPara.Enable=0;  //关闭动力学
+  BoardInf.KineticPara.PreProcess=PRE_CALCULATE_NO;
+	BoardInf.KineticPara.Curve=CURVE_NO;
+	BoardInf.KineticPara.Readings=2;
+	BoardInf.KineticPara.TimeInterval=0;
+ //Para.
+	BoardInf.KineticPara.kinetic_analysis_mode=KINETIC_ANALYSIS_AVERAGE_RATE;
+	BoardInf.KineticPara.BaseLinePoint=1;
+	BoardInf.KineticPara.BaseLineSel=BASE_LINE_BEGIN;
+	BoardInf.KineticPara.EndReadings=0;
+	BoardInf.KineticPara.FirstReadings=0;
+	BoardInf.KineticPara.Change=0.0;
+	
+	//质控分析判定条件初始化							 
+	BoardInf.QualityPara.Enable=0;
+	BoardInf.QualityPara.AbsFlag=1; 
+	
+	NormalAnalysis.wcMode = ANALYSIS_MODE_RAWDATA; 
+  BoardInf.bHasData=0;
+	BoardInf.bHasRawData[0]=0;
+  BoardInf.bHasRawData[0]=0;
+  memset(&dABS, 0, sizeof(dABS));
+	//memset(&raw_data, 0, sizeof(RAW_DATA));
+	//BoardInf.KineticPara.bBeginning = true;
+	//memset(&remote_info_PC, 0, sizeof(REMOTE_INFO));
+	//memset(&remote_info_PAD, 0, sizeof(REMOTE_INFO));
+}
+
+
+
+void GetDefaultFileName(void)
+{
+	 unsigned char index,j;
+	//strcpy(ConvertStr,BoardInf.Name);
+	//strcat(ConvertStr,".erf");
+	if( (strcmp(BoardInf.Name,"Demo_1")==0)||(strcmp(BoardInf.Name,"Demo_2")==0)||(strcmp(BoardInf.Name,"Demo_3")==0) ) //文件名相同
+	{
+		  strcpy(KeyPadAsc.InputValueStr,"");
+	}
+	else  //文件名
+	{
+		  strcpy(KeyPadAsc.InputValueStr,BoardInf.Name);
+		  index=strlen(KeyPadAsc.InputValueStr);
+		  j=index;
+		  if(index>3) //lgj171213 debug 3
+			{
+				 for(j=1;j<index;j++)
+				 {
+					  if(KeyPadAsc.InputValueStr[j]=='_')
+						{
+							 break;
+						}
+				 }
+				 if( (index<PROGRAM_NAME_LENGTH-3)&&(j==index) )
+				 {
+					  KeyPadAsc.ID=0;
+		        strcat(KeyPadAsc.InputValueStr,"_");
+				    sprintf(StrTemp,"%02d",KeyPadAsc.ID);  //待改进
+		        strcat(KeyPadAsc.InputValueStr,StrTemp);
+					 // return;
+				 }
+				 else if( (j<=index-3)&&  //lgj171213 debug 2
+					  (KeyPadAsc.InputValueStr[j+1]>='0')&&(KeyPadAsc.InputValueStr[j+1]<='9')&&
+				    (KeyPadAsc.InputValueStr[j+2]>='0')&&(KeyPadAsc.InputValueStr[j+2]<='9')&&
+				    (KeyPadAsc.InputValueStr[j+3]==0) )
+				 {
+					   ConvertStr[0]=KeyPadAsc.InputValueStr[j+1];
+					   ConvertStr[1]=KeyPadAsc.InputValueStr[j+2];
+					   ConvertStr[2]=0;
+					   KeyPadAsc.ID=atoi(ConvertStr); 
+				 }
+				 else
+				 {
+					   strcpy(KeyPadAsc.InputValueStr,"");
+					   return;
+				 }
+			}
+			else
+			{
+				    KeyPadAsc.ID=0;
+		        strcat(KeyPadAsc.InputValueStr,"_");
+				    sprintf(StrTemp,"%02d",KeyPadAsc.ID);//待改进
+		        strcat(KeyPadAsc.InputValueStr,StrTemp);
+				
+		//	if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		 // {
+			 //  sprintf(ConvertStr,"%02d - %02d - %04d",SystemTimePraBack.Month,SystemTimePraBack.Day,SystemTimePraBack.Year);
+		 // }
+		 // else
+		 // {
+		   // sprintf(ConvertStr,"%04d - %02d - %02d",SystemTimePraBack.Year,SystemTimePraBack.Month,SystemTimePraBack.Day); 
+		 // }
+			}
+			
+			
+			while(1)
+			{
+					      KeyPadAsc.InputValueStr[j+1]=0;
+					      KeyPadAsc.InputValueStr[j+2]=0;
+					      KeyPadAsc.ID++;
+					      if(KeyPadAsc.ID<1)
+						    {
+							     KeyPadAsc.ID=1;
+						    }
+						    else if(KeyPadAsc.ID>99)
+						    {
+							     strcpy(KeyPadAsc.InputValueStr,"");
+							     return;
+						    }
+						
+						    sprintf(StrTemp,"%02d",KeyPadAsc.ID);//待改进
+		            strcat(KeyPadAsc.InputValueStr,StrTemp);
+						    if(strlen(KeyPadAsc.InputValueStr)>=PROGRAM_NAME_LENGTH)//超出15个字符
+						    {
+							     strcpy(KeyPadAsc.InputValueStr,"");
+							     return;
+						    }
+						    strcpy(CmpFileName,KeyPadAsc.InputValueStr);
+						    if(check_same_name(0)==0)//无相同文件名
+						    {
+							      return;
+						    }
+				}
+			
+			
+			
+			
+			
+	}
+}
+
+unsigned char RestoreFactory(void)
+{
+	   InitDefaultFile();
+	   gSystem.CreateFlag=0;
+	   gSystem.CurrBlock=0;
+	   gSystem.ProgramMax=0;
+	CurrProgramName.DateTime.Year=SystemTimePra.Year;
+	               CurrProgramName.DateTime.Month=SystemTimePra.Month;
+	               CurrProgramName.DateTime.Day=SystemTimePra.Day;
+	               CurrProgramName.DateTime.Hour=SystemTimePra.Hour;
+	               CurrProgramName.DateTime.Min=SystemTimePra.Min;
+	               CurrProgramName.DateTime.Sec=SystemTimePra.Sec;
+	  //1
+	   strcpy(BoardInf.Name,"Demo_1");
+	   BoardInf.Filter1Locate=1;//主波长滤光片450
+	   BoardInf.Filter2Locate=-1;//副波长滤光片No
+     BoardInf.KineticPara.PreProcess=PRE_CALCULATE_NO;
+	   BoardInf.KineticPara.Curve=CURVE_LINEAR;
+	
+	   	  
+				
+		 NandSaveFile(1);//查找新地址保存文件
+	   ProgramName[gSystem.ProgramMax].BlockAddr=gSystem.CurrBlock;	
+	   gSystem.ProgramMax=1;
+	
+	//2
+	   strcpy(BoardInf.Name,"Demo_2");
+	   BoardInf.Filter1Locate=2;//主波长滤光片450
+	   BoardInf.Filter2Locate=-1;//副波长滤光片No
+     BoardInf.KineticPara.PreProcess=PRE_CALCULATE_NO;
+	   BoardInf.KineticPara.Curve=CURVE_LINEAR;
+	
+		 NandSaveFile(1);//查找新地址保存文件
+		 ProgramName[gSystem.ProgramMax].BlockAddr=gSystem.CurrBlock;	
+	   gSystem.ProgramMax=2;
+		 
+	//3
+	   gSystem.CreateFlag=0;
+	   strcpy(BoardInf.Name,"Demo_3");
+	   BoardInf.Filter1Locate=1;//主波长滤光片450
+	   BoardInf.Filter2Locate=3;//副波长滤光片No
+     BoardInf.KineticPara.PreProcess=PRE_CALCULATE_M1_M2_SUB;
+	   BoardInf.KineticPara.Curve=CURVE_LINEAR;
+	
+		 NandSaveFile(1);//查找新地址保存文件
+		 ProgramName[gSystem.ProgramMax].BlockAddr=gSystem.CurrBlock;	
+		 gSystem.ProgramMax=3;
+		 return 0;
+	
+}
+unsigned char InitNewParaFile(void)
+{
+//	gSystem.Curr
+	GetDefaultFileName();
+	
+	//2.弹出键盘输入文件名
+	KeyPadAscii_Interface(0);
+	if(KeyPadAsc.ReturnKey==KEYPAD_RETURN_ENTER)
+	{
+		  strcpy(CurrProgramName.Name,KeyPadAsc.InputValueStr);
+		  gSystem.CreateFlag=1;//创键标志
+		  InitDefaultFile();
+		  return RETURN_TRUE;
+		  //BoardInf.bHasData=0;
+		 // if(BoardInf.bHasData)
+			//{
+				// SaveProgramAndData();//在NandFlash下保存程序和数据
+			//}
+			//else
+			//{
+				//  SaveProgram();      //在SpiFlash下保存程序
+			//}
+	}
+	return RETURN_FALSE;
+}

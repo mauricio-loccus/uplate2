@@ -1,0 +1,425 @@
+
+
+
+
+
+#define COLOR_TITLEBAR       0x291913//0x291913 // BARRA A BAIXO DOS BOTÕES PRINCIMAIS 
+#define COLOR_TOOLSBAR       0x3e302b//0xffffff//COR DA LATERAL DIREITA ONDE ESTÁ O BOTÃO DE VOLTAR
+#define COLOR_CONTENTBAR     0x291913   // COR DO PLANO DE FUNDO
+//ÎÄ×ÖÉ«¶¨Òå
+
+#define COLOR_TITLE_WORD     0xffffff				//±êÌâÀ¸ÎÄ×Ö
+
+#define COLOR_CONTENT_WORD   0x000000				//ÕýÎÄÀ¸ÎÄ×Ö
+#define COLOR_TOOLS_WORD     0xffffff				//¹¤¾ßÀ¸ÎÄ×Ö
+#define COLOR_STATUS_WORD    0xffffff				//×´Ì¬À¸ÎÄ×Ö
+//°´Å¥¿Ø¼þ
+//#define COLOR_BUTTON_DEFAULT  0x5485d5				//°´Å¥Õý³£É«
+//#define COLOR_BUTTON_PRESS    0x2b4f9f				//°´Å¥°´ÏÂÉ«
+#define COLOR_BUTTON_DEFAULT  0x3e302b//0xd58554//0xd58554				//°´Å¥Õý³£É«     
+#define COLOR_BUTTON_PRESS    0x96842c//0x9f4f2b				//°´Å¥°´ÏÂÉ«
+#define COLOR_BUTTON_DISABLE  COLOR_BUTTON_DEFAULT //°´Å¥½ûÖ¹É«
+//#define COLOR_BUTTON_DISABLE  0x949694 //°´Å¥½ûÖ¹É«
+//#define COLOR_BUTTON_FRAME_DEFAULT 0x7aa4e2			//°´Å¥±ß¿òÕý³£É«
+//#define COLOR_BUTTON_FRAME_PRESS   0x5f81bf			//°´Å¥±ß¿ò°´ÏÂÉ«
+#define COLOR_BUTTON_FRAME_DEFAULT 0xeed72d//0xe2a47a			//°´Å¥±ß¿òÕý³£É«
+#define COLOR_BUTTON_FRAME_PRESS   0xeed72d//0xbf815f			//°´Å¥±ß¿ò°´ÏÂÉ«
+#define COLOR_BUTTON_FRAME_DISABLE GUI_GRAY //COLOR_BUTTON_FRAME_DEFAULT   //°´Å¥±ß¿ò½ûÖ¹É«
+
+#define COLOR_BUTTON_WORD_DEFAULT 0xffffff						//°´Å¥ÎÄ×ÖÕý³£É«
+#define COLOR_BUTTON_WORD_PRESS   COLOR_BUTTON_WORD_DEFAULT     //°´Å¥ÎÄ×Ö°´ÏÂÉ«
+#define COLOR_BUTTON_WORD_DISABLE 0x949694						//°´Å¥ÎÄ×Ö½ûÖ¹É«
+//#define COLOR_BUTTON_WORD_DISABLE  COLOR_BUTTON_DEFAULT						//°´Å¥ÎÄ×Ö½ûÖ¹É«
+//ListView¿Ø¼þ
+//#define COLOR_LISTVIEW_FRAME      0xcedbe7						//±í±ß¿òÉ«
+#define COLOR_LISTVIEW_FRAME      0xe7dbce						//±í±ß¿òÉ«
+#define COLOR_LISTVIEW_BK         0xffffFF						//±í±³¾°É«
+//#define COLOR_LISTVIEW_BK_SEL     0xd6e3f9						//±íÑ¡ÖÐÊ±µÄ±³¾°É«
+#define COLOR_LISTVIEW_BK_SEL     0XEEEEEE//0xf9e3d6						//±íÑ¡ÖÐÊ±µÄ±³¾°É«
+//#define COLOR_LISTVIEW_BK_SELFOCUS 0xd6e3f9						//±íÑ¡ÖÐÊ±ÓÐ½¹µãµÄ±³¾°É«
+#define COLOR_LISTVIEW_BK_SELFOCUS 0xf9e3d6						//±íÑ¡ÖÐÊ±ÓÐ½¹µãµÄ±³¾°É«
+#define COLOR_LISTVIEW_WORD       0xffffFF//0x000000						//±íÎÄ×ÖÉ«
+
+#define COLOR_LISTVIEW_HEADER      0x3e302b//0x291913//0xd68652							//±íÍ·É«  ºÍÎÄ¼þ·´ÏÂ5286D6
+#define COLOR_LISTVIEW_HEADER_WORD 0xffffff						//±íÍ·ÎÄ×ÖÉ«
+#define COLOR_LISTVIEW_HEADER_FRAME  COLOR_LISTVIEW_FRAME		//±íÍ·±ß¿òÉ«
+//¹¤¾ßÀ¸±³¾°É«
+#define COLOR_TOOLSBAR_BK         0x3e302b// 0xffebde
+
+#define MENU_HIDE  0
+#define MENU_SHOW  1
+
+enum {KEYPAD_NAME=0,KEYPAD_STEP};
+
+enum
+{
+    ID_KEY_TITLE_PROTOCOL=(GUI_ID_USER+1),
+    ID_KEY_TITLE_REPORT,
+    ID_KEY_TITLE_SET,
+    ID_KEY_TITLE_HELP,
+
+    ID_KEY_TOOLS_BUTTON0,
+    ID_KEY_TOOLS_BUTTON1,
+    ID_KEY_TOOLS_BUTTON2,
+    ID_KEY_TOOLS_BUTTON3,
+    ID_KEY_TOOLS_BUTTON4, //
+    ID_KEY_TOOLS_BUTTON5,
+    ID_KEY_TOOLS_BUTTON6,
+    ID_KEY_TOOLS_BUTTON7,
+
+    ID_PROTOCOL_BUTTON0,
+    ID_PROTOCOL_BUTTON1,
+    ID_PROTOCOL_BUTTON2,
+    ID_PROTOCOL_BUTTON3,
+    ID_PROTOCOL_BUTTON4,
+
+    ID_PROTOCOL_BUTTON5,
+    ID_PROTOCOL_BUTTON6,
+    ID_PROTOCOL_BUTTON7,
+    ID_PROTOCOL_BUTTON8,
+    ID_PROTOCOL_BUTTON9,
+
+
+
+    //°ïÖú²Ëµ¥ID
+    ID_HELP_BUTTON0,
+    ID_HELP_BUTTON1,
+    ID_HELP_BUTTON2,
+    ID_HELP_BUTTON3,
+    ID_HELP_BUTTON4,
+    ID_HELP_BUTTON5,
+
+
+    ID_HELP_TEXT0,
+    ID_HELP_TEXT1,
+    ID_HELP_TEXT2,
+    ID_HELP_TEXT3,
+
+
+    //¼ì²â²Ëµ¥ID
+    ID_MEASURE_BUTTON0,
+    ID_MEASURE_BUTTON1,
+    ID_MEASURE_BUTTON2,
+    ID_MEASURE_BUTTON3,
+    ID_MEASURE_BUTTON4,
+
+    ID_SHAKE_BUTTON0,
+    ID_SHAKE_BUTTON1,
+
+    ID_INTER_BUTTON0,
+    ID_INTER_BUTTON1,
+
+    ID_LAYOUT_BUTTON0,
+    ID_LAYOUT_BUTTON1,
+    ID_LAYOUT_BUTTON2,
+
+    ID_CONCENTRATION_BUTTON0,
+    ID_CONCENTRATION_BUTTON1,
+
+    ID_CALC_BUTTON0,
+    ID_CALC_BUTTON1,
+    ID_CALC_BUTTON2,
+
+    ID_KINETIC_BUTTON0,
+    ID_KINETIC_BUTTON1,
+
+
+    ID_REPORT_BUTTON0,
+    ID_REPORT_BUTTON1,
+    ID_REPORT_BUTTON2,
+    ID_REPORT_BUTTON3,
+    ID_REPORT_BUTTON4,
+
+    ID_REPORT_BUTTON5,
+    ID_REPORT_BUTTON6,
+
+
+
+    ID_EXPORT_BUTTON0,
+    ID_EXPORT_BUTTON1,
+
+
+    ID_LANGUAGE_BUTTON0,
+    ID_LANGUAGE_BUTTON1,
+    ID_LANGUAGE_BUTTON2,
+    ID_LANGUAGE_BUTTON3,
+    ID_LANGUAGE_BUTTON4,
+    ID_LANGUAGE_BUTTON5,
+
+    ID_SYSTEM_UPDATE_BUTTON0,
+    ID_SYSTEM_UPDATE_BUTTON1,
+    ID_SYSTEM_UPDATE_BUTTON2,
+    ID_SYSTEM_UPDATE_BUTTON3,
+
+
+
+
+    ID_PROGBAR,
+
+
+
+    ID_TXT_TITLE,
+
+
+    //ID_BUTTON_ENTER,  //lgj170823
+    // ID_BUTTON_CANCEL,
+    ID_BUTTON_YES,
+    ID_BUTTON_NO,
+    ID_BUTTON_CANCEL,
+		
+    ID_TEXT_PROMPT,
+
+    ID_TEXT_CLOCK,
+
+
+
+    KEYPAD_ID_TEXT,
+    KEYPAD_ID_EDIT,
+
+    KEYPAD_NUM_ID_BUTTON0,
+    KEYPAD_NUM_ID_BUTTON1,
+    KEYPAD_NUM_ID_BUTTON2,
+    KEYPAD_NUM_ID_BUTTON3,
+    KEYPAD_NUM_ID_BUTTON4,
+    KEYPAD_NUM_ID_BUTTON5,
+    KEYPAD_NUM_ID_BUTTON6,
+    KEYPAD_NUM_ID_BUTTON7,
+    KEYPAD_NUM_ID_BUTTON8,
+    KEYPAD_NUM_ID_BUTTON9,
+    KEYPAD_NUM_ID_BUTTON10,
+    KEYPAD_NUM_ID_BUTTON11,
+    KEYPAD_NUM_ID_BUTTON12,
+    KEYPAD_NUM_ID_BUTTON13,
+
+    KEYPAD_ASCII_ID_TEXT,
+    KEYPAD_ASCII_ID_EDIT,
+    KEYPAD_ASCII_ID_BUTTON0,
+};
+
+#define ID_KEY_TOOLS_BUTTON   ID_KEY_TOOLS_BUTTON0
+#define ID_PROTOCOL_BUTTON    ID_PROTOCOL_BUTTON0
+#define ID_HELP_BUTTON        ID_HELP_BUTTON0
+#define ID_HELP_TEXT          ID_HELP_TEXT0
+#define ID_MEASURE_BUTTON     ID_MEASURE_BUTTON0
+#define ID_SHAKE_BUTTON        ID_SHAKE_BUTTON0
+#define ID_INTER_BUTTON      ID_INTER_BUTTON0
+#define ID_QUALITY_BUTTON     ID_INTER_BUTTON0
+#define ID_LAYOUT_BUTTON      ID_LAYOUT_BUTTON0
+
+#define ID_CALC_BUTTON          ID_CALC_BUTTON0
+#define ID_KINETIC_BUTTON      ID_KINETIC_BUTTON0
+#define ID_CONCENTRATION_BUTTON      ID_CONCENTRATION_BUTTON0
+#define ID_REPORT_BUTTON       ID_REPORT_BUTTON0
+
+
+#define ID_EXPORT_BUTTON   ID_EXPORT_BUTTON0
+
+#define ID_LANGUAGE_BUTTON          ID_LANGUAGE_BUTTON0
+#define ID_FILTER_BUTTON          ID_LANGUAGE_BUTTON0
+#define ID_DATETIME_BUTTON     ID_LANGUAGE_BUTTON0
+#define ID_PRINTER_BUTTON       ID_LANGUAGE_BUTTON0
+#define ID_MAINTENACE_BUTTON  ID_LANGUAGE_BUTTON0
+
+#define ID_OPEN_BUTTON               ID_LANGUAGE_BUTTON0
+
+#define  ID_SYSTEM_UPDATE_BUTTON     (ID_SYSTEM_UPDATE_BUTTON0)
+
+
+
+//Êý×Ö¼üÅÌÖÐµÄIDÂë
+#define KEYPAD_NUM_ID_BUTTON  (KEYPAD_NUM_ID_BUTTON0)
+#define KEYPAD_NUM_BUTTON_MAX  (14)
+
+
+
+//Ascii¼üÅÌÖÐµÄIDÂë
+#define KEYPAD_ASCII_ID_BUTTON  (KEYPAD_ASCII_ID_BUTTON0)
+#define KEYPAD_ASCII_BUTTON_MAX  (33)
+
+
+
+//±êÌâÀ¸Î»ÖÃºê¶¨Òå
+#define TITLESBAR_POSX            0   //±êÌâÀ¸5¸ö°´¼üµ×Í¼µÄXÎ»ÖÃ
+#define TITLESBAR_POSY            0   //±êÌâÀ¸5¸ö°´¼üµ×Í¼µÄYÎ»ÖÃ
+#define TITLEBAR_WIDTH            800   //±êÌâÀ¸5¸ö°´¼üµ×Í¼µÄ¿í¶È
+#define TITLESBAR_HEIGHT          70   //±êÌâÀ¸5¸ö°´¼üµ×Í¼µÄ¸ß¶È
+
+#define TITLE_BUTTON_POSX         0   //±êÌâÀ¸5¸ö°´¼üµÄXÎ»ÖÃ
+#define TITLE_BUTTON_POSY         0   //±êÌâÀ¸5¸ö°´¼üµÄYÎ»ÖÃ
+#define TITLE_BUTTON_WIDTH        200  //±êÌâÀ¸5¸ö°´¼üµÄ¿í¶È
+#define TITLE_BUTTON_HEIGHT       70   //±êÌâÀ¸5¸ö°´¼üµÄ¸ß¶È
+//ÔËÐÐ°´Å¥
+#define TITLE_PROTOCOL_POSX            TITLE_BUTTON_POSX
+#define TITLE_PROTOCOL_POSY            TITLE_BUTTON_POSY
+#define TITLE_PROTOCOL_WIDTH           TITLE_BUTTON_WIDTH
+#define TITLE_PROTOCOL_HEIGHT          TITLE_BUTTON_HEIGHT
+//¹ÜÀí°´Å¥
+#define TITLE_REPORT_POSX        (TITLE_PROTOCOL_POSX+TITLE_PROTOCOL_WIDTH)
+#define TITLE_REPORT_POSY         TITLE_PROTOCOL_POSY
+#define TITLE_REPORT_WIDTH        TITLE_BUTTON_WIDTH
+#define TITLE_REPORT_HEIGHT       TITLE_PROTOCOL_HEIGHT
+//ÏµÍ³°´Å¥
+#define TITLE_SET_POSX        (TITLE_REPORT_POSX+TITLE_REPORT_WIDTH)
+#define TITLE_SET_POSY         TITLE_BUTTON_POSY
+#define TITLE_SET_WIDTH        TITLE_BUTTON_WIDTH
+#define TITLE_SET_HEIGHT       TITLE_BUTTON_HEIGHT
+
+//°ïÖú°´Å¥
+#define TITLE_HELP_POSX           (TITLE_SET_POSX+TITLE_SET_WIDTH)
+#define TITLE_HELP_POSY            TITLE_BUTTON_POSY
+#define TITLE_HELP_WIDTH           TITLE_BUTTON_WIDTH
+#define TITLE_HELP_HEIGHT          TITLE_BUTTON_HEIGHT
+
+
+
+//±êÌâÀ¸±êÌâÎÄ×ÖÎ»ÖÃ
+#define  TITLEBAR_CAPTION_POSX     20
+//#define  TITLEBAR_CAPTION_POSY     (TITLEBAR_CONTENT_POSY+8)//???????Y68
+
+#define  TITLEBAR_CAPTION_POSY     (8)//???????Y68
+#define  TITLEBAR_CAPTION_WIDTH    (150)
+#define  TITLEBAR_CAPTION_HEIGHT     30
+
+
+
+
+//ÄÚÈÝÀ¸Î»ÖÃ¶¨Òå
+//ÕýÎÄÀ¸µ×Í¼Î»ÖÃ
+#define CONTENTBAR_POSX                 0
+#define CONTENTBAR_POSY                (TITLESBAR_HEIGHT)//(70)
+#define CONTENTBAR_WIDTH               800
+#define CONTENTBAR_HEIGHT              (365)  //480-70-45
+
+
+
+#define  CONTENT_POSX     0//////////////////
+#define  CONTENT_POSY     0//(TITLESBAR_HEIGHT)//???????Y68 
+#define  CONTENT_WIDTH    (TITLEBAR_WIDTH)
+#define  CONTENT_HEIGHT     52
+
+
+
+
+//?????????
+#define  CONTENTBAR_TITLE_POSX     0
+#define  CONTENTBAR_TITLE_POSY     0//(TITLESBAR_HEIGHT)//???????Y68 
+#define  CONTENTBAR_TITLE_WIDTH    (TITLEBAR_WIDTH)
+#define  CONTENTBAR_TITLE_HEIGHT     52
+//?????????
+#define CONTENTBAR_CAPTION_POSX     (CONTENTBAR_TITLE_POSX+20)
+#define CONTENTBAR_CAPTION_POSY     (CONTENTBAR_TITLE_POSY+17)
+//?????????
+#define CONTENTBAR_CAPTION_BK_POSX     (CONTENTBAR_TITLE_POSX+10)
+#define CONTENTBAR_CAPTION_BK_POSY     (CONTENTBAR_TITLE_POSY+10)
+#define CONTENTBAR_CAPTION_BK_WIDTH    (255)//Question 8
+#define CONTENTBAR_CAPTION_BK_HEIGHT   (32)
+
+
+//?????????
+#define  CONTENTBAR_CONTENT_POSX     0
+#define  CONTENTBAR_CONTENT_POSY     (CONTENTBAR_TITLE_HEIGHT)//???????Y68 
+#define  CONTENTBAR_CONTENT_WIDTH    (638)
+#define  CONTENTBAR_CONTENT_HEIGHT   (318)
+
+//?????????
+//#define  CONTENTBAR_TOOLS_POSX     0
+//#define  CONTENTBAR_TOOLS_POSY     (CONTENTBAR_TITLE_HEIGHT)//???????Y68
+//#define  CONTENTBAR_CONTENT_WIDTH    (660)
+//#define  CONTENTBAR_CONTENT_HEIGHT    (318)
+
+
+
+
+//??????LISTVIEW???
+#define CONTENT_PROGRAM_FILE_POSX  (CONTENT_POSX+10)
+#define CONTENT_PROGRAM_FILE_POSY  (CONTENT_POSY+10)//(68+52)
+#define CONTENT_PROGRAM_FILE_WIDTH (CONTENT_WIDTH-20)
+#define CONTENT_PROGRAM_FILE_HEIGHT (CONTENT_HEIGHT-20)
+
+#define CONTENT_PROGRAM_ROW_MAX  7
+#define CONTENT_PROGRAM_COL_MAX  5
+
+#define CONTENT_HEADER_HEIGHT  37
+#define CONTENT_ROW_HEIGHT     39
+
+#define CONTENT_COL_WIDTH_NO        60
+#define CONTENT_COL_WIDTH_NAME      207
+//#define CONTENT_COL_WIDTH_NAME   200
+#define CONTENT_COL_WIDTH_DATETIME   210
+#define CONTENT_COL_WIDTH_SHORTCUT   60
+#define CONTENT_COL_WIDTH_LOCK       60
+#define CONTENT_COL_WIDTH_SCROLLBAR  36
+
+
+//???????
+#define TOOLSBAR_POSX               660
+#define TOOLSBAR_POSY               (TITLESBAR_HEIGHT+TITLEBAR_CONTENT_HEIGHT)//(68+52)
+#define TOOLSBAR_WIDTH              140
+#define TOOLSBAR_HEIGHT             318
+//???????
+#define TOOLS_BUTTON_POSX         (TOOLSBAR_POSX+10)  //670
+#define TOOLS_BUTTON_POSY         (TOOLSBAR_POSY+20)  //140
+#define TOOLS_BUTTON_WIDTH        (120)
+#define TOOLS_BUTTON_HEIGHT        (40)
+
+#define TOOLS_BUTTON_DISY          (55)  //??Y?????
+
+
+
+
+//????????
+#define STATUSBAR_POSX            0   //????X??
+//#define STATUSBAR_POSY          438   //????Y??
+#define STATUSBAR_POSY          435   //????Y??
+#define STATUSBAR_WIDTH         638   //??????
+#define STATUSBAR_HEIGHT        45   //
+//#define STATUSBAR_HEIGHT        42   //
+
+#define STATUS_CLOCK_POSX        650//468
+#define STATUS_CLOCK_POSY      (STATUSBAR_POSY+16)
+#define STATUS_CLOCK_WIDTH     178
+#define STATUS_CLOCK_HEIGHT    16
+
+#define STATUS_LOGO_POSX      (STATUSBAR_WIDTH)
+#define STATUS_LOGO_POSY      (STATUSBAR_POSY)
+#define STATUS_LOGO_WIDTH     162
+#define STATUS_LOGO_HEIGHT    45
+
+
+#define STATUS_NAVIGATION_POSX   5
+#define STATUS_NAVIGATION_POSY   440
+#define STATUS_NAVIGATION_WIDTH  400
+#define STATUS_NAVIGATION_HEIGHT 30
+
+#define STATUS_CONTENT_POSX      250
+#define STATUS_CONTENT_POSY      440
+#define STATUS_CONTENT_WIDTH     200
+#define STATUS_CONTENT_HEIGHT    30
+
+
+
+
+//±êÌâÀ¸ÖÐµÄ°´Å¥Î»ºÅ¶¨Òå
+#define  TITLE_PROTOCOL    0
+#define  TITLE_REPORT  1
+#define  TITLE_SET  2
+//#define  TITLE_UVLIGHT 3
+#define  TITLE_HELP    3
+//±êÌâÀ¸ÖÐµÄ°´Å¥×î´óÖµ
+#define  TITLE_MAX     4
+
+//¹¤¾ßÀ¸ÖÐµÄ°´Å¥Î»ºÅ¶¨Òå
+#define TOOLS_BUTTON_0         0
+#define TOOLS_BUTTON_1         1
+#define TOOLS_BUTTON_2         2
+#define TOOLS_BUTTON_3         3
+#define TOOLS_BUTTON_4         4
+//¹¤¾ßÀ¸ÖÐµÄ°´Å¥×î´óÖµ
+#define TOOLS_BUTTON_MAX     5
+
+
+#ifndef	_APP_GUI_H_
+#define	_APP_GUI_H_
+
+
+#endif

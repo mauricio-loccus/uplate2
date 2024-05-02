@@ -1,0 +1,426 @@
+
+
+
+#define COLOR_TXT_BK			      0xffffff   						 //???????
+//#define COLOR_TXT			         0x5286d6   						 //????????
+#define COLOR_TXT			         0xd68652   						 //????????
+
+#define COLOR_TXT_BK_SEL        COLOR_TXT    //???????
+#define COLOR_TXT_SEL		        COLOR_TXT_BK			 				 //???????
+
+#define COLOR_UNIT			        0x9c9a9c   						 //???
+#define COLOR_PROMPT            0x000000
+
+
+
+#define COLOR_SYSTEMTIME_TXT_BK			   0xffffff   						 //???????
+//#define COLOR_SYSTEMTIME_TXT			     0x5286d6   						 //????????
+#define COLOR_SYSTEMTIME_TXT			     0xd68652   						 //????????
+
+#define COLOR_SYSTEMTIME_TXT_BK_SEL    COLOR_SYSTEMTIME_TXT    //???????
+#define COLOR_SYSTEMTIME_TXT_SEL		   0xffffff				 				 //???????
+
+#define COLOR_SYSTEMTIME_UNIT			     0x9c9a9c   						 //???
+
+
+#define COLOR_SYSTEMTIME_LINE			     0x9c9a9c   						 //???
+
+#define TIME_OFFSETX       6
+#define TIME_OFFSETY       10
+
+
+
+
+
+//界面Color宏定义
+//1.底色定义
+//#define COLOR_TITLEBAR       0x5286d6				//标题栏的底色
+//#define COLOR_TOOLSBAR       0xdeebff				//工具栏的底色
+#define COLOR_TITLEBAR       0xd68652				//标题栏的底色
+#define COLOR_TOOLSBAR       0xffebde				//工具栏的底色
+#define COLOR_CONTENTBAR     0xffffff				//内容栏的底色
+//文字色定义
+
+#define COLOR_TITLE_WORD     0xffffff				//标题栏文字
+#define COLOR_CONTENT_WORD   0x000000				//正文栏文字
+#define COLOR_TOOLS_WORD     0xffffff				//工具栏文字
+#define COLOR_STATUS_WORD    0xffffff				//状态栏文字
+//按钮控件
+//#define COLOR_BUTTON_DEFAULT  0x5485d5				//按钮正常色     
+//#define COLOR_BUTTON_PRESS    0x2b4f9f				//按钮按下色
+#define COLOR_BUTTON_DEFAULT  0xd58554				//按钮正常色     
+#define COLOR_BUTTON_PRESS    0x9f4f2b				//按钮按下色
+#define COLOR_BUTTON_DISABLE  COLOR_BUTTON_DEFAULT //按钮禁止色
+//#define COLOR_BUTTON_DISABLE  0x949694 //按钮禁止色
+//#define COLOR_BUTTON_FRAME_DEFAULT 0x7aa4e2			//按钮边框正常色
+//#define COLOR_BUTTON_FRAME_PRESS   0x5f81bf			//按钮边框按下色
+#define COLOR_BUTTON_FRAME_DEFAULT 0xe2a47a			//按钮边框正常色
+#define COLOR_BUTTON_FRAME_PRESS   0xbf815f			//按钮边框按下色
+#define COLOR_BUTTON_FRAME_DISABLE COLOR_BUTTON_FRAME_DEFAULT   //按钮边框禁止色
+
+#define COLOR_BUTTON_WORD_DEFAULT 0xffffff						//按钮文字正常色
+#define COLOR_BUTTON_WORD_PRESS   COLOR_BUTTON_WORD_DEFAULT     //按钮文字按下色
+#define COLOR_BUTTON_WORD_DISABLE 0x949694						//按钮文字禁止色
+//#define COLOR_BUTTON_WORD_DISABLE  COLOR_BUTTON_DEFAULT						//按钮文字禁止色
+//ListView控件
+//#define COLOR_LISTVIEW_FRAME      0xcedbe7						//表边框色
+#define COLOR_LISTVIEW_FRAME      0xe7dbce						//表边框色
+#define COLOR_LISTVIEW_BK         0xffffFF						//表背景色
+//#define COLOR_LISTVIEW_BK_SEL     0xd6e3f9						//表选中时的背景色
+#define COLOR_LISTVIEW_BK_SEL     0xf9e3d6						//表选中时的背景色
+//#define COLOR_LISTVIEW_BK_SELFOCUS 0xd6e3f9						//表选中时有焦点的背景色
+#define COLOR_LISTVIEW_BK_SELFOCUS 0xf9e3d6						//表选中时有焦点的背景色
+#define COLOR_LISTVIEW_WORD       0xffffFF//0x000000						//表文字色
+
+#define COLOR_LISTVIEW_HEADER      0xd68652							//表头色  和文件反下5286D6
+#define COLOR_LISTVIEW_HEADER_WORD 0xffffff						//表头文字色
+#define COLOR_LISTVIEW_HEADER_FRAME  COLOR_LISTVIEW_FRAME		//表头边框色
+//工具栏背景色
+#define COLOR_TOOLSBAR_BK          0xffebde
+
+#define MENU_HIDE  0
+#define MENU_SHOW  1
+ 
+enum{KEYPAD_NAME=0,KEYPAD_STEP};
+
+#define ID_KEY_TITLE_RUN     (GUI_ID_USER+0x01)
+#define ID_KEY_TITLE_MANAGE  (GUI_ID_USER+0x02)
+#define ID_KEY_TITLE_SYSTEM  (GUI_ID_USER+0x03)
+#define ID_KEY_TITLE_UVLIGHT (GUI_ID_USER+0x04)
+#define ID_KEY_TITLE_HELP    (GUI_ID_USER+0x05)
+
+#define ID_KEY_TOOLS_BUTTON  (GUI_ID_USER+0x06)  
+#define ID_KEY_TOOLS_BUTTON0  (GUI_ID_USER+0x06) 
+#define ID_KEY_TOOLS_BUTTON1  (GUI_ID_USER+0x07) 
+#define ID_KEY_TOOLS_BUTTON2  (GUI_ID_USER+0x08) 
+#define ID_KEY_TOOLS_BUTTON3  (GUI_ID_USER+0x09) 
+#define ID_KEY_TOOLS_BUTTON4  (GUI_ID_USER+10) 
+
+#define ID_TXT_TITLE            (GUI_ID_USER+11)   //标题栏文本ID
+#define ID_KEY_TOOLS_LISTVIEW  (GUI_ID_USER+12) 
+ #define ID_KEY_TOOLS_STEP_LISTVIEW  (GUI_ID_USER+500)   
+
+
+//数字键盘中的ID码
+#define KEYPAD_NUM_ID_BUTTON  (GUI_ID_USER + 13)
+#define KEYPAD_NUM_BUTTON_MAX  (14)
+#define KEYPAD_NUM_ID_TEXT    (GUI_ID_USER + 28)
+#define KEYPAD_NUM_ID_EDIT    (GUI_ID_USER + 29)
+//Ascii键盘中的ID码
+#define KEYPAD_ASCII_ID_BUTTON  (GUI_ID_USER + 30)
+#define KEYPAD_ASCII_BUTTON_MAX  (33)
+#define KEYPAD_ASCII_ID_TEXT    (GUI_ID_USER + 64)
+#define KEYPAD_ASCII_ID_EDIT    (GUI_ID_USER + 65)
+#define KEYPAD_ASCII_ID_EDIT_ONE    (GUI_ID_USER + 66)
+#define KEYPAD_ASCII_ID_EDIT_TWO    (GUI_ID_USER + 80)
+#define KEYPAD_ASCII_ID_BUTTON_NEXT  (GUI_ID_USER + 100)
+
+//系统时期时间
+#define ID_SYSTEMTIME_IDLE     (GUI_ID_USER)   //不用的ID
+
+#define SYSTEMTIME_DATE_ID_EDIT     (GUI_ID_USER + 101)
+#define SYSTEMTIME_TIME_ID_EDIT     (GUI_ID_USER + 102)
+
+#define SYSTEMTIME_DATE_BUTTON_ADD  (GUI_ID_USER + 103)
+#define SYSTEMTIME_DATE_BUTTON_SUB  (GUI_ID_USER + 104)
+#define SYSTEMTIME_TIME_BUTTON_ADD  (GUI_ID_USER + 105)
+#define SYSTEMTIME_TIME_BUTTON_SUB  (GUI_ID_USER + 106)
+
+
+#define ID_SYSTEMTIME_YEAR     (GUI_ID_USER + 107)
+#define ID_SYSTEMTIME_MONTH    (GUI_ID_USER + 108)
+#define ID_SYSTEMTIME_DAY      (GUI_ID_USER + 109)
+#define ID_SYSTEMTIME_HOUR     (GUI_ID_USER + 110)
+#define ID_SYSTEMTIME_MIN      (GUI_ID_USER + 111)
+#define ID_SYSTEMTIME_SEC      (GUI_ID_USER + 112)
+
+/*
+#define ID_IDLE                       (GUI_ID_USER)   //不用的ID
+#define ID_MOTION_BUTTON              (GUI_ID_USER+113)
+#define ID_MOTION_BUTTON_0            (GUI_ID_USER+114) //运动参数
+#define ID_MOTION_BUTTON_1            (GUI_ID_USER+115) //低温校准
+#define ID_MOTION_BUTTON_2            (GUI_ID_USER+116) //高温校准
+#define ID_MOTION_BUTTON_3            (GUI_ID_USER+117) //零位校准
+#define ID_MOTION_BUTTON_4            (GUI_ID_USER+118) //行程校准
+#define ID_MOTION_BUTTON_5            (GUI_ID_USER+119) //加热孔位
+*/
+#define ID_IDLE                       (GUI_ID_USER)   //???ID
+#define ID_ADVANCE_BUTTON              (GUI_ID_USER+113)
+#define ID_ADVANCE_BUTTON_0            (GUI_ID_USER+113) //????
+#define ID_ADVANCE_BUTTON_1            (GUI_ID_USER+114) //????
+#define ID_ADVANCE_BUTTON_2            (GUI_ID_USER+115) //????
+#define ID_ADVANCE_BUTTON_3            (GUI_ID_USER+116) //????
+#define ID_ADVANCE_BUTTON_4            (GUI_ID_USER+117) //????
+#define ID_ADVANCE_BUTTON_5            (GUI_ID_USER+118) //????
+
+
+#define ID_ZERO_EDIT_H                 (GUI_ID_USER+120)
+#define ID_ZERO_EDIT_ROD               (GUI_ID_USER+121)
+#define ID_ZERO_EDIT_MAGNETIC          (GUI_ID_USER+122)
+
+
+//#define ID_MOTION_BUTTON              (GUI_ID_USER+123)
+#define ID_MOTION_TEXT                (GUI_ID_USER+140)
+#define  ID_MOTION_EDIT               (GUI_ID_USER+160)
+
+
+//#define  ID_ZERO_TEXT                  ID_MOTION_TEXT
+#define  ID_ZERO_TEXT                   (GUI_ID_USER+180)  //3???
+#define  ID_ZERO_PROMPT                (GUI_ID_USER+183)  //7???
+#define  ID_ZERO_BUTTON                (GUI_ID_USER+190)  //10???
+
+#define  ID_DIS_BUTTON                 (GUI_ID_USER+400)  //3个按钮 lgj160908 
+
+//#define  ID_ZERO_PROMPT                ID_MOTION_EDIT 
+/*
+#define  ID_ZERO_TEXT                  ID_MOTION_TEXT
+#define  ID_ZERO_BUTTON                ID_MOTION_BUTTON
+#define  ID_ZERO_PROMPT                ID_MOTION_EDIT 
+*/
+
+
+#define ID_UVLIGHT_TIME_HOUR          (GUI_ID_USER+200)
+#define ID_UVLIGHT_TIME_MIN           (GUI_ID_USER+201)
+#define ID_KEY_UVLIGHT_ADD            (GUI_ID_USER+202) 
+#define ID_KEY_UVLIGHT_SUB            (GUI_ID_USER+203)
+
+
+#define ID_ADJ_PROMPT_TEMP            (GUI_ID_USER+220)
+#define ID_ADJ_SETTEMP                (GUI_ID_USER+240)
+#define ID_ADJ_PRATEMP                (GUI_ID_USER+260)
+#define ID_ADJ_BUTTON                 (GUI_ID_USER+270)
+
+
+//#define  ID_ZERO_PROMPT                ID_MOTION_EDIT 
+#define ID_ADJ_DIS                    (GUI_ID_USER+297) 
+#define ID_HOLE_CRACK                 (GUI_ID_USER+298)  //10???     
+#define ID_HOLE_WASH                  (GUI_ID_USER+299)  //10???   
+#define ID_TXT_REMAIN_TIME             (GUI_ID_USER+300)
+#define ID_TXT_TIME_PROMPT             (GUI_ID_USER+301)
+#define  ID_EDIT_PROGRAM_NAME          (GUI_ID_USER+302)//fmc160923
+
+
+
+//程序管理 确认取消
+#define   ID_BUTTON_YES        (GUI_ID_USER+204)
+#define   ID_BUTTON_NO        (GUI_ID_USER+205)
+//#define  ID_RADIO_LANGUAGE_CH  (GUI_ID_USER + 115)  
+//#define  ID_RADIO_LANGUAGE_EN  (GUI_ID_USER + 116) 
+#define   ID_OPTION_BUTTON                 (GUI_ID_USER+206)//206-209
+#define   ID_OPTION_HEAT_SET_CHECKBOX        (GUI_ID_USER+210)  //210-217 8?
+
+
+#define   ID_OPTION_HEATING_UP_CHECKBOX      (GUI_ID_USER+218)  //210  
+#define  ID_OPTION_HEATING_UP_RADIO          (GUI_ID_USER+219)  //219
+#define  ID_OPTION_MANGETIC_RADIO           (GUI_ID_USER+220)  //220
+#define  ID_OPTION_MAGNETIC_EDIT            (GUI_ID_USER+221)  //220
+#define  ID_OPTION_HEATINGUP_EDIT1          (GUI_ID_USER+222)  
+#define  ID_OPTION_HEATINGUP_EDIT2          (GUI_ID_USER+223) 
+
+#define  ID_OPTION_DOWN_RADIO1               (GUI_ID_USER+224) 
+#define  ID_OPTION_DOWN_RADIO2              (GUI_ID_USER+225) 
+#define  ID_OPTION_HEATINGDOWN_EDIT         (GUI_ID_USER+226) 
+
+
+
+
+
+//lgj161013 start
+//#define  ID_SYSTEM_INOUT_BUTTON              (GUI_ID_USER+227) //+2 //fmc160818
+#define  ID_SYSTEM_UPDATE_BUTTON                   (GUI_ID_USER+228) //+2 //fmc160818
+#define  ID_PROGBAR                             (GUI_ID_USER+231)
+//lgj161013 end
+
+
+
+
+
+#define ID_KEY2_TOOLS_BUTTON0                (GUI_ID_USER+250)  //219
+#define ID_KEY2_TOOLS_BUTTON1                (GUI_ID_USER+251)  //219
+#define ID_KEY2_TOOLS_BUTTON2                (GUI_ID_USER+252)  //219
+#define ID_KEY2_TOOLS_BUTTON3                (GUI_ID_USER+253)  //219
+#define ID_KEY2_TOOLS_BUTTON4                (GUI_ID_USER+254)  //219
+
+#define   ID_AdvanceTxt        (GUI_ID_USER+309)  //309--315fmc160928
+
+//  _TitleButton[TITLE_RUN] = BUTTON_Create(0, 0, 160, 68,ID_KEY_TITLE_RUN, WM_CF_SHOW|WM_CF_HASTRANS );
+// _TitleButton[TITLE_MANAGE] = BUTTON_Create(90,400,90,35,ID_KEY_TITLE_MANAGE,WM_CF_SHOW|WM_CF_HASTRANS );	 //x0=185=(480-90)/2
+// _TitleButton[TITLE_SYSTEM] = BUTTON_Create(180,400,70, 35,ID_KEY_TITLE_SYSTEM,  WM_CF_SHOW|WM_CF_HASTRANS );
+// _TitleButton[TITLE_UVLIGHT] = BUTTON_Create(270,400,70, 35,ID_KEY_TITLE_UVLIGHT,  WM_CF_SHOW|WM_CF_HASTRANS );
+// _TitleButton[TITLE_HELP] = BUTTON_Create(360,400,70, 35,ID_KEY_TITLE_HELP,  WM_CF_SHOW|WM_CF_HASTRANS );
+
+
+
+//lgj161013 start
+#define   PROMPT_ID_TEXT        (GUI_ID_USER+350) 
+#define   PROMPT_ID_TEXT2        (GUI_ID_USER+350+1) 
+
+
+//lgj161013 end
+
+
+
+//标题栏位置宏定义
+#define TITLESBAR_POSX            0   //标题栏5个按键底图的X位置
+#define TITLESBAR_POSY            0   //标题栏5个按键底图的Y位置
+#define TITLEBAR_WIDTH            800   //标题栏5个按键底图的宽度
+#define TITLESBAR_HEIGHT          68   //标题栏5个按键底图的高度
+
+#define TITLE_BUTTON_POSX         0   //标题栏5个按键的X位置
+#define TITLE_BUTTON_POSY         0   //标题栏5个按键的Y位置
+#define TITLE_BUTTON_WIDTH        160  //标题栏5个按键的宽度
+#define TITLE_BUTTON_HEIGHT       68   //标题栏5个按键的高度
+//运行按钮
+#define TITLE_RUN_POSX            TITLE_BUTTON_POSX
+#define TITLE_RUN_POSY            TITLE_BUTTON_POSY
+#define TITLE_RUN_WIDTH           TITLE_BUTTON_WIDTH 
+#define TITLE_RUN_HEIGHT          TITLE_BUTTON_HEIGHT 
+//管理按钮
+#define TITLE_MANAGE_POSX        (TITLE_RUN_POSX+TITLE_RUN_WIDTH)
+#define TITLE_MANAGE_POSY         TITLE_RUN_POSY
+#define TITLE_MANAGE_WIDTH        TITLE_BUTTON_WIDTH 
+#define TITLE_MANAGE_HEIGHT       TITLE_RUN_HEIGHT
+//系统按钮
+#define TITLE_SYSTEM_POSX        (TITLE_MANAGE_POSX+TITLE_MANAGE_WIDTH)
+#define TITLE_SYSTEM_POSY         TITLE_BUTTON_POSY
+#define TITLE_SYSTEM_WIDTH        TITLE_BUTTON_WIDTH 
+#define TITLE_SYSTEM_HEIGHT       TITLE_BUTTON_HEIGHT 
+//紫外灯按钮
+#define TITLE_UVLIGHT_POSX        (TITLE_SYSTEM_POSX+TITLE_SYSTEM_WIDTH)
+#define TITLE_UVLIGHT_POSY        TITLE_BUTTON_POSY
+#define TITLE_UVLIGHT_WIDTH       TITLE_BUTTON_WIDTH 
+#define TITLE_UVLIGHT_HEIGHT      TITLE_BUTTON_HEIGHT 
+//帮助按钮
+#define TITLE_HELP_POSX           (TITLE_UVLIGHT_POSX+TITLE_UVLIGHT_WIDTH)
+#define TITLE_HELP_POSY            TITLE_BUTTON_POSY
+#define TITLE_HELP_WIDTH           TITLE_BUTTON_WIDTH 
+#define TITLE_HELP_HEIGHT          TITLE_BUTTON_HEIGHT 
+
+//标题栏内容底图位置
+#define  TITLEBAR_CONTENT_POSX     0
+#define  TITLEBAR_CONTENT_POSY     (TITLESBAR_HEIGHT)//标题栏内容位置Y68 
+#define  TITLEBAR_CONTENT_WIDTH    (TITLEBAR_WIDTH)
+#define  TITLEBAR_CONTENT_HEIGHT     52
+
+//标题栏标题文字位置
+#define  TITLEBAR_CAPTION_POSX     20
+#define  TITLEBAR_CAPTION_POSY     (TITLEBAR_CONTENT_POSY+8)//标题栏内容位置Y68 
+#define  TITLEBAR_CAPTION_WIDTH    (150)
+#define  TITLEBAR_CAPTION_HEIGHT     30
+
+//"剩余运行时间"  Remainning time
+#define  TITLEBAR_TIME_PROMPT_POSX     573
+#define  TITLEBAR_TIME_PROMPT_POSY     (TITLEBAR_CAPTION_POSY)    //标题栏剩余运行时间提示位置Y68 
+#define  TITLEBAR_TIME_PROMPT_WIDTH    (110)
+#define  TITLEBAR_TIME_PROMPT_HEIGHT    (TITLEBAR_CAPTION_HEIGHT)
+
+#define  TITLEBAR_RUNTIME_POSX      700
+#define  TITLEBAR_RUNTIME_POSY      (TITLEBAR_CAPTION_POSY)    //标题栏内容位置Y68 
+#define  TITLEBAR_RUNTIME_WIDTH    (90)
+#define  TITLEBAR_RUNTIME_HEIGHT    (TITLEBAR_CAPTION_HEIGHT)
+
+
+//内容栏位置定义
+//正文栏底图位置
+#define CONTENT_POSX                 0
+#define CONTENT_POSY                (TITLESBAR_HEIGHT+TITLEBAR_CONTENT_HEIGHT)//(68+52)
+#define CONTENT_WIDTH               660
+#define CONTENT_HEIGHT              318
+//程序管理中的LISTVIEW宏定义
+#define CONTENT_PROGRAM_FILE_POSX  (CONTENT_POSX+10)
+#define CONTENT_PROGRAM_FILE_POSY  (CONTENT_POSY+10)//(68+52)
+#define CONTENT_PROGRAM_FILE_WIDTH (CONTENT_WIDTH-20)
+#define CONTENT_PROGRAM_FILE_HEIGHT (CONTENT_HEIGHT-20)
+
+#define CONTENT_PROGRAM_ROW_MAX  7
+#define CONTENT_PROGRAM_COL_MAX  5
+
+#define CONTENT_HEADER_HEIGHT  37
+#define CONTENT_ROW_HEIGHT     39
+
+#define CONTENT_COL_WIDTH_NO        60
+#define CONTENT_COL_WIDTH_NAME      207
+//#define CONTENT_COL_WIDTH_NAME   200
+#define CONTENT_COL_WIDTH_DATETIME   210
+#define CONTENT_COL_WIDTH_SHORTCUT   60+4//fmc160907 显示有间隙
+#define CONTENT_COL_WIDTH_LOCK       60
+#define CONTENT_COL_WIDTH_SCROLLBAR  36
+
+
+//工具栏底图位置
+#define TOOLSBAR_POSX               660
+#define TOOLSBAR_POSY               (TITLESBAR_HEIGHT+TITLEBAR_CONTENT_HEIGHT)//(68+52)
+#define TOOLSBAR_WIDTH              140
+#define TOOLSBAR_HEIGHT             318   //120+318 =438
+//工具栏按钮位置
+#define TOOLS_BUTTON_POSX         (TOOLSBAR_POSX+10)  //670
+#define TOOLS_BUTTON_POSY         (TOOLSBAR_POSY+20)  //140
+#define TOOLS_BUTTON_WIDTH        (120)
+#define TOOLS_BUTTON_HEIGHT        (40)
+
+#define TOOLS_BUTTON_DISY          (55)  //按钮Y方向的距离
+
+
+
+
+//状态栏位置宏定义
+#define STATUSBAR_POSX            0   //状态栏的X位置
+//#define STATUSBAR_POSY          438   //状态栏的Y位置
+#define STATUSBAR_POSY          438   //状态栏的Y位置
+//#define STATUSBAR_POSY          441   //状态栏的Y位置
+#define STATUSBAR_WIDTH         660   //状态栏的宽度
+//#define STATUSBAR_HEIGHT        45   //
+#define STATUSBAR_HEIGHT        42   //
+
+//时钟图标位置
+#define STATUS_CLOCK_BMP_POSX     460
+#define STATUS_CLOCK_BMP_POSY     (STATUSBAR_POSY+13)
+
+#define STATUS_CLOCK_POSX        480
+#define STATUS_CLOCK_POSY      (STATUSBAR_POSY+13)
+#define STATUS_CLOCK_WIDTH     178
+#define STATUS_CLOCK_HEIGHT    16
+
+#define STATUS_LOGO_POSX      (STATUSBAR_WIDTH)
+//#define STATUS_LOGO_POSY      (STATUSBAR_POSY)
+#define STATUS_LOGO_POSY      (438)
+#define STATUS_LOGO_WIDTH     140
+#define STATUS_LOGO_HEIGHT    42
+
+
+#define STATUS_NAVIGATION_POSX   5
+#define STATUS_NAVIGATION_POSY   445
+#define STATUS_NAVIGATION_WIDTH  400
+#define STATUS_NAVIGATION_HEIGHT 30
+
+#define STATUS_CONTENT_POSX      250
+#define STATUS_CONTENT_POSY      445
+#define STATUS_CONTENT_WIDTH     200
+#define STATUS_CONTENT_HEIGHT    30
+
+
+
+//标题栏中的按钮位号定义 
+#define  TITLE_RUN     0
+#define  TITLE_MANAGE  1
+#define  TITLE_SYSTEM  2
+#define  TITLE_UVLIGHT 3
+#define  TITLE_HELP    4
+//标题栏中的按钮最大值
+#define  TITLE_MAX     5
+
+//工具栏中的按钮位号定义 
+#define TOOLS_BUTTON_0         0
+#define TOOLS_BUTTON_1         1
+#define TOOLS_BUTTON_2         2
+#define TOOLS_BUTTON_3         3
+#define TOOLS_BUTTON_4         4
+//工具栏中的按钮最大值
+#define TOOLS_BUTTON_MAX     5
+
+
+#ifndef	_APP_GUI_H_
+   #define	_APP_GUI_H_
+
+
+#endif

@@ -1,0 +1,140 @@
+
+#include "bsp.h"
+
+#include "UartSerial_PC.h"
+
+
+
+/**********************************************************************************
+1.文件功能描述
+本程序实现串口数据收发,端口:(引脚:PA9 PA10)
+2.具体函数
+  2.1私有函数
+
+
+  2.2公有函数
+
+
+3.IO说明
+  1)
+  2)
+4. 创建日期-版本-姓名
+   2017/01/23-V3.00-陆国金 void CAS112_V10Dlg::comReceiveproFromPc(void)
+*************************************************************************************/
+
+
+#define REV_SLA_LEN_PC   4             // 标记位长度
+const unsigned char ConstCommandHead[REV_SLA_LEN_PC] = {0xfa, 0xfb, 0xfc, 0xfd};
+
+#define REV_DIVITION_LEN_PC 8          //区分字段 
+#define REV_MAIN_COMMAND_LEN_PC  2     //主命令长度
+#define REV_SUB_COMMAND_LEN_PC   2     //子命令长度
+const unsigned short ConstCommandMain[REV_MAIN_COMMAND_LEN_PC] = {0x70,0x00};//AMR-100的主命令为0x7000
+
+
+#define REV_HEAD_LEN_PC  (REV_SLA_LEN_PC+REV_DIVITION_LEN_PC+REV_MAIN_COMMAND_LEN_PC)//标记位+区分字段+主命令长度
+
+
+REMOTE_INFO_PC RemoteInfo_PC;
+//
+
+
+void BackupMachineStatus(void)
+{
+    memcpy(&Board_Inf_Back, &board_inf, sizeof(BOARD_INF));
+    memcpy(dABSBack, dABSInit, sizeof(double) * KINETIC_READINGS_MAX * FILTER_PLATE_MAX * TUBE_MAX);
+}
+
+void RestoreMachineStatus(void)
+{
+    run_status.doorState=SystemPrameter.DoorOpen;
+    memcpy(&board_inf, &board_inf_back, sizeof(BOARD_INF));
+    memcpy(dABSInit, dABSBack, sizeof(double) * KINETIC_READINGS_MAX * FILTER_PLATE_MAX * TUBE_MAX);
+    memcpy(dABS, dABSBack, sizeof(double) * KINETIC_READINGS_MAX * FILTER_PLATE_MAX * TUBE_MAX);
+}
+
+
+
+
+
+
+
+
+
+void PrepareUnconnectCommand(unsigned char *pCommand)
+{
+    unsigned short ptr=0;
+
+    AddCommandHead(pCommand, PC_COMMAND_UNCONNECT, PC_COMMAND_UNCONNECT_LEN, &ptr);
+
+    GetCheckSum(pCommand, ptr);
+    comm_status.nCommandLength = nNext;
+    CommandPrepared(COMMAND_UNCONNECT);
+    memcpy(m_cTxBufferBack, pCommand, EXTERNAL_TX_BUFFER_MAX);
+}
+
+
+
+
+//收到PC机命令后的处理程序
+void UartProcess_PC(void)
+{
+    if(UartInf_PC.cmd==COMMAND_RUN_PC)     //运行
+    {
+        if( (run_status.task_busy==0)&&(run_status.nRunMode != RUN_MODE_SELFTEST) )
+        {
+            if (BoardInf.Filter1Locate <0)
+            {
+                strcpy(PromptMenu.InputStr,STR_SEL_FILTER[SystemPrameter.SystemLanguage]);
+                Prompt_Interface(PROMPT_WARMING);
+                return;
+            }
+            else if(FilterLun.Filter[BoardInf.Filter1Locate]==0)
+            {
+                strcpy(PromptMenu.InputStr,STR_SEL_FILTER[SystemPrameter.SystemLanguage]);
+                Prompt_Interface(PROMPT_WARMING);
+                return;
+            }
+
+
+            memcpy(&BoardInfBack, &BoardInf, sizeof(BOARD_INF));
+
+            run_status.bHasDataBack=run_status.bHasData;
+            MCU_StartStop(1);
+            run_status.task_busy=1;
+        }
+    }
+    if (UartInf_PC.cmd==COMMAND_STOP_PC)   //停止
+    {
+        //if (run_status.nRunMode==1 && !remote_info_PAD.bRemote && !remote_info_PC.bRemote)
+        if ( (run_status.task_busy==1 )&&(run_status.nRunMode != RUN_MODE_SELFTEST) )
+        {
+            run_status.nRunMode = RUN_MODE_IDLE;
+            MCU_StartStop(0);
+            run_status.task_busy=0;
+            //run_status.task_busy=2;
+            //gSystem.HasDataFlag=gSystem.BeforeHasDataFlag;
+            run_status.bHasData=run_status.bHasDataBack;
+            memcpy(&BoardInf, &BoardInfBack, sizeof(BOARD_INF)); //还原数据
+            DeletePromptMenu();
+            gSystem.MenuRefreshFlag=1;
+            gSystem.TitleButtonEnable=1;
+        }
+    }
+    else if( (UartInf_PC.cmd==COMMAND_PLATEIN_PC)||(UartInf_PC.cmd==COMMAND_PLATEOUT_PC) )//板进或板出
+    {
+        if( (run_status.task_busy==0)&&(run_status.nRunMode != RUN_MODE_SELFTEST) )
+        {
+            if(UartInf_PC.cmd==COMMAND_PLATEIN_PC)
+            {
+                run_status.doorState=1;
+            }
+            else
+            {
+                run_status.doorState=0;
+            }
+
+            openClosedoor(run_status.doorState);
+        }
+    }
+}

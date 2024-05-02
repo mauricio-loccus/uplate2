@@ -1,0 +1,440 @@
+
+#include "bsp.h"
+#include "usbh_bsp_msc.h"
+#include "MainTask.h"
+
+static unsigned char 	m_bRawData;
+static unsigned char 	m_bInter;
+static unsigned char 	m_bQuality;
+static unsigned char 	m_bQC;
+static unsigned char 	m_bResult;
+
+static unsigned char ExpEnable;
+
+enum
+{
+	EXP_EXPORT=1,
+};
+
+
+const char EXPORT_REPORT_MAIN_TITLE[LANGUAGE_TYPES][40] = {"Setting for export report" , "导出报告设置"};
+//const int BUTTON_REPORT_EXPORT_START_X[LANGUAGE_TYPES] = {32, 26};
+//const char BUTTON_REPORT_EXPORT[LANGUAGE_TYPES][10] = {"Export", "数据导出"};
+
+const char CALCULATE_PARAMETER[LANGUAGE_TYPES][15] = {"Protocol", "报告参数"};
+//正常分析导出内容
+const char BUTTON_REPORT_RAW_DATA[LANGUAGE_TYPES][15] = {"Raw data", "原始数据"};
+const char BUTTON_REPORT_INTERPRET[LANGUAGE_TYPES][15] = {"Interpret", "定性分析"};
+const char BUTTON_REPORT_ANALYSIS[LANGUAGE_TYPES][15] = {"Analysis", "定量分析"};
+const char BUTTON_REPORT_KINETIC_ANALYSIS[LANGUAGE_TYPES][15] = {"Analysis", "分析结果"};
+const char BUTTON_REPORT_QC[LANGUAGE_TYPES][15] = {"QC", "质控分析"};
+//动力学分析导出内容
+
+
+
+
+
+WM_HWIN ExportReportWin = NULL;   
+extern WM_HWIN ReportWin;
+
+
+const BUTTON_DATA _aButtonExportReport[] =
+{
+	{ TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(3), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Export", "数据导出" },
+	{ TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(4), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Back", "返回" },
+
+};
+
+
+
+
+
+
+void ExportReportFunction(void)
+{
+	  
+	  SetParameterContent();   //设置参数
+
+		if(m_bRawData)           //设置原始数据
+		{
+			  SetRawDataContent();
+		}
+
+		if(BoardInf.KineticPara.Enable)
+		{
+			if(m_bResult)         //设置动力学分析结果(注：标准曲线不输出)
+			{
+				SetResultContent();
+			}
+		}
+		else
+		{
+			if(m_bQuality)       //设置定量分析
+			{
+				SetQualityContent();
+			}
+
+			if(m_bInter)     //设置定性分析
+			{
+				SetInterContent();
+			}
+
+			if(m_bQC)   //设置质控分析结果
+			{
+				SetQCContent();
+			}
+		}
+
+		//调用文件系统写入U盘
+		if(ExportOneProgram()==0)//返回成功
+		{
+		    if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		    {
+            strcpy(PromptMenu.InputStr,"The current data is exported OK.");
+	      }
+		    else
+		    {
+			      strcpy(PromptMenu.InputStr,"当前数据导出成功。");
+		    }
+		}
+		else
+		{
+			  if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		    {
+              strcpy(PromptMenu.InputStr,"The current data is exported Fail.");
+	      }
+		    else
+		    {
+			       strcpy(PromptMenu.InputStr,"当前数据导出失败。");
+		    }
+		}
+		Prompt_Interface(PROMPT_STATUS);
+}
+	
+
+
+void _cbExportReport(WM_MESSAGE * pMsg)
+{
+	WM_HWIN hWin = pMsg->hWin;
+//	WM_HWIN hWinFocus;
+	BUTTON_Handle hbutton;
+	unsigned char i;
+	int        xSize;
+	int        ySize;
+	short NCode, Id;
+
+	//	int  day_max;
+	//hWinFocus = WM_GetFocussedWindow();
+	//IdWinFocus = WM_GetId(hWinFocus);
+
+	switch (pMsg->MsgId)
+	{
+	   case WM_CREATE:
+	   {
+					  for (i = 0; i < GUI_COUNTOF(_aButtonExportReport); i++)
+					  {
+						   hbutton = BUTTON_CreateEx(_aButtonExportReport[i].xPos, _aButtonExportReport[i].yPos, _aButtonExportReport[i].xSize, _aButtonExportReport[i].ySize,
+							     hWin, WM_CF_SHOW, 0, ID_EXPORT_BUTTON + i);
+                 if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+				         {
+					              BUTTON_SetFont(hbutton, GUI_FONT_BIG);
+							          BUTTON_SetText(hbutton, _aButtonExportReport[i].acLabelEn);
+				         }
+				         else
+				         {
+					             BUTTON_SetFont(hbutton, GUI_FONT_BIG_CH);
+							         BUTTON_SetText(hbutton, _aButtonExportReport[i].acLabelCh);
+				         }						 
+						     BUTTON_SetTextAlign(hbutton, GUI_TA_HCENTER | GUI_TA_VCENTER);
+						     BUTTON_SetFocussable(hbutton, 0);
+					  }
+					  break;
+	   }
+		//删除按钮
+	case WM_DELETE:
+       
+		//WM_ShowWindow(ButtonZero[i]);
+		break;
+		//绘制背景
+	case WM_PAINT:
+		xSize = WM_GetWindowSizeX(hWin);
+		ySize = WM_GetWindowSizeY(hWin);
+		//上方第一行
+		GUI_SetColor(COLOR_TITLEBAR);
+		GUI_FillRect(0, 0, xSize - 1, CONTENTBAR_TITLE_HEIGHT - 1);
+		//左方内容栏
+		GUI_SetColor(COLOR_CONTENTBAR);
+		GUI_FillRect(0, CONTENTBAR_CONTENT_POSY, CONTENTBAR_CONTENT_WIDTH - 1, ySize - 1);
+		//右侧工具栏
+		GUI_SetColor(COLOR_TOOLSBAR);
+		GUI_FillRect(CONTENTBAR_CONTENT_WIDTH, CONTENTBAR_CONTENT_POSY, xSize - 1, ySize - 1);
+
+
+
+		//GUI_DrawBitmap(&bmMenuLeft_101_46, FILTER_1_START_X, FILTER_1_START_Y - TITLESBAR_HEIGHT);
+	//	GUI_DrawBitmap(&bmMenuLeft_101_46, FILTER_2_START_X, FILTER_2_START_Y - TITLESBAR_HEIGHT);
+	//	GUI_DrawBitmap(&bmMenuLeft_101_46, MODE_START_X, MODE_START_Y - TITLESBAR_HEIGHT);
+
+		//GUI_DrawBitmap(&bmMenuRight_120_46, FILTER_1_R_START_X, FILTER_1_R_START_Y - TITLESBAR_HEIGHT);
+	//	GUI_DrawBitmap(&bmMenuRight_320_46, FILTER_2_R_START_X, FILTER_2_R_START_Y - TITLESBAR_HEIGHT);
+		 //GUI_DrawBitmap(&bmMenuRight_90_46, MODE_R_START_X, MODE_START_Y - TITLESBAR_HEIGHT);
+
+	
+		GUI_SetTextMode(GUI_TM_TRANS);
+
+		GUI_SetColor(COLOR_PAINT_TXT);
+		if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+		{
+			GUI_SetFont(GUI_FONT_BIG);
+		}
+		else
+		{
+			GUI_SetFont(GUI_FONT_BIG_CH);
+		}
+		
+	   GUI_DispStringAt(EXPORT_REPORT_MAIN_TITLE[SystemPrameter.SystemLanguage], CONTENTBAR_CAPTION_POSX, CONTENTBAR_CAPTION_POSY);
+		
+		 GUI_SetColor(0x0);
+		 //报告参数
+		 GUI_DispStringAt(CALCULATE_PARAMETER[SystemPrameter.SystemLanguage], 15, EXPORT_CHECK1_POSY - TITLESBAR_HEIGHT);
+		
+		
+		
+		 
+     //原始数据
+     if(m_bRawData)
+		 {
+			   GUI_DrawBitmap(&bmCheckOn, EXPORT_CHECK1_STARTX, EXPORT_CHECK1_STARTY - TITLESBAR_HEIGHT);
+		 }
+		 else
+		 {
+			  GUI_DrawBitmap(&bmCheckOff, EXPORT_CHECK1_STARTX, EXPORT_CHECK1_STARTY - TITLESBAR_HEIGHT);
+		 }
+		 GUI_DispStringAt(BUTTON_REPORT_RAW_DATA[SystemPrameter.SystemLanguage], EXPORT_CHECK1_POSX, EXPORT_CHECK1_POSY - TITLESBAR_HEIGHT);
+
+		 if(BoardInf.KineticPara.Enable)
+		 {
+		     //动力学分析
+         if(m_bResult)
+		     {
+			       GUI_DrawBitmap(&bmCheckOn, EXPORT_CHECK2_STARTX, EXPORT_CHECK2_STARTY - TITLESBAR_HEIGHT);
+		     }
+		     else
+		     {
+			      GUI_DrawBitmap(&bmCheckOff, EXPORT_CHECK2_STARTX, EXPORT_CHECK2_STARTY - TITLESBAR_HEIGHT);
+		     }
+		     GUI_DispStringAt(BUTTON_REPORT_KINETIC_ANALYSIS[SystemPrameter.SystemLanguage], EXPORT_CHECK2_POSX, EXPORT_CHECK2_POSY - TITLESBAR_HEIGHT);
+		 }
+		 else
+		 {
+			   if(m_bQuality)
+		     {
+			      GUI_DrawBitmap(&bmCheckOn, EXPORT_CHECK2_STARTX, EXPORT_CHECK2_STARTY - TITLESBAR_HEIGHT);
+		     }
+		     else
+		     {
+			      GUI_DrawBitmap(&bmCheckOff, EXPORT_CHECK2_STARTX, EXPORT_CHECK2_STARTY - TITLESBAR_HEIGHT);
+		     }
+		     GUI_DispStringAt(BUTTON_REPORT_ANALYSIS[SystemPrameter.SystemLanguage], EXPORT_CHECK2_POSX, EXPORT_CHECK2_POSY - TITLESBAR_HEIGHT);
+		 
+		 
+		  //定性分析
+     if(m_bInter)
+		 {
+			   GUI_DrawBitmap(&bmCheckOn, EXPORT_CHECK3_STARTX, EXPORT_CHECK3_STARTY - TITLESBAR_HEIGHT);
+		 }
+		 else
+		 {
+			  GUI_DrawBitmap(&bmCheckOff, EXPORT_CHECK3_STARTX, EXPORT_CHECK3_STARTY - TITLESBAR_HEIGHT);
+		 }
+		 GUI_DispStringAt(BUTTON_REPORT_INTERPRET[SystemPrameter.SystemLanguage], EXPORT_CHECK3_POSX, EXPORT_CHECK3_POSY - TITLESBAR_HEIGHT);
+
+	
+		  //定性分析
+     if(m_bQC)
+		 {
+			  GUI_DrawBitmap(&bmCheckOn, EXPORT_CHECK4_STARTX, EXPORT_CHECK4_STARTY - TITLESBAR_HEIGHT);
+		 }
+		 else
+		 {
+			  GUI_DrawBitmap(&bmCheckOff, EXPORT_CHECK4_STARTX, EXPORT_CHECK4_STARTY - TITLESBAR_HEIGHT);
+		 }
+		 GUI_DispStringAt(BUTTON_REPORT_QC[SystemPrameter.SystemLanguage], EXPORT_CHECK4_POSX, EXPORT_CHECK4_POSY - TITLESBAR_HEIGHT);
+    }
+		break;
+
+	case WM_NOTIFY_PARENT:
+	{
+
+						 Id = WM_GetId(pMsg->hWinSrc);    // Id of widget 
+						 NCode = pMsg->Data.v;               // Notification code 
+		         if( (KeyPadAsc.UseFlag == KEYPAD_BUSY)||(KeyPadNum.UseFlag == KEYPAD_BUSY)||(PromptMenu.InterfaceStatus==PROMPT_MENU_BUSY) )
+			       {
+				        break;
+			       }
+						 if(TouchKey.KeyStatus)
+						 {
+							  break;
+						 }
+						 if (NCode == WM_NOTIFICATION_RELEASED)
+						 {
+							  if( (Id == ID_EXPORT_BUTTON)&&(ExpEnable != EXP_EXPORT) )   //工具栏第4个按钮  Export
+							  {
+                       TouchKey.KeyStatus = 1;
+					             //如果USB未插入
+									     if(flag_usb_disk_connect==0)
+					             {
+												     strcpy(PromptMenu.InputStr,TEST_INFO_MESSAGE[SystemPrameter.SystemLanguage][TEST_INFO_USB_ERROR]);
+	                           Prompt_Interface(PROMPT_WARMING);
+					             }
+											 else
+											 {
+						               ExpEnable = EXP_EXPORT;
+						           }
+							  }
+							  else if (Id == ID_EXPORT_BUTTON+1)   //工具栏第5个按钮  Back
+							  {
+									     WM_DeleteWindow(ExportReportWin);
+									     WM_ShowWindow(ReportWin);/////////////////////////////////
+
+								       gSystem.SystemInterface = MI_REPORT;/////////////////
+								       gSystem.TitleButtonEnable = 1;//////////////////////////
+									     TouchKey.KeyStatus=1;
+								  }
+							  }
+							 break;
+	}
+
+	default:
+		//		WM_DefaultProc(pMsg);
+		break;
+	}
+}
+
+
+
+void ExportReport_Interface(void)
+{
+	
+	//ExpEnable = 0;
+
+	//SystemPrameterBack.PrintHeaderEnable=SystemPrameter.PrintHeaderEnable;
+	//strcpy(SystemPrameterBack.StrPrintHeader,SystemPrameter.StrPrintHeader);
+	m_bRawData = 0;
+	m_bInter = 0; 
+	m_bQuality = 0;
+	m_bQC = 0;
+  m_bResult = 0;	
+/*
+	strcpy(ConvertStr,"光");
+	strcat(ConvertStr,"强");
+	strcpy(CsvConvertStr,ConvertStr);
+	PrintChar();
+	
+	
+	strcpy(ConvertStr,"/n");
+	strcat(ConvertStr,"光");
+	strcat(ConvertStr,"强");
+	strcat(ConvertStr,"/n");
+	strcat(ConvertStr,"405nm");
+	strcpy(CsvConvertStr,ConvertStr);
+	PrintChar();
+	*/
+	ExportReportWin = WM_CreateWindowAsChild(CONTENTBAR_POSX, CONTENTBAR_POSY, CONTENTBAR_WIDTH, CONTENTBAR_HEIGHT, WM_HBKWIN, WM_CF_SHOW | WM_CF_STAYONTOP | WM_CF_MEMDEV, _cbExportReport, 0);
+	WM_BringToTop(ExportReportWin);
+}
+
+
+
+
+void ExportReport_Scan(void)
+{
+	if(TouchKey.KeyStatus==0)
+	{
+
+		 GUI_PID_STATE TouchState;
+	   GUI_PID_GetState(&TouchState);
+	
+	   if(TouchState.Pressed)
+	   {
+				 //原始数据          
+			   if ((TouchState.x >= EXPORT_CHECK1_STARTX-8) && (TouchState.x <= EXPORT_CHECK1_ENDX) &&
+				    (TouchState.y >= EXPORT_CHECK1_STARTY-8) && (TouchState.y <= EXPORT_CHECK1_ENDY))
+			   {
+					  TouchKey.KeyStatus=1;
+					  if(m_bRawData==0)m_bRawData=1;
+					  else m_bRawData=0;
+					  WM_Invalidate(ExportReportWin);
+				}
+				else if ((TouchState.x >= EXPORT_CHECK2_STARTX-8) && (TouchState.x <= EXPORT_CHECK2_ENDX) &&
+					(TouchState.y >= EXPORT_CHECK2_STARTY-8) && (TouchState.y <= EXPORT_CHECK2_ENDY))
+				{
+					   TouchKey.KeyStatus=1;
+					   if(BoardInf.KineticPara.Enable)
+						 {
+							   if(m_bResult==0)m_bResult=1;
+							   else m_bResult=0;
+						 }
+						 else
+						 {
+							   if(m_bQuality==0)m_bQuality=1;
+							   else m_bQuality=0;
+						 }
+					  //if(m_RawData==0)m_bRawData=1;
+					  //else m_bRawData=0;
+					   WM_Invalidate(ExportReportWin);
+				}
+				else if ((TouchState.x >= EXPORT_CHECK3_STARTX-8) && (TouchState.x <= EXPORT_CHECK3_ENDX) &&
+					(TouchState.y >= EXPORT_CHECK3_STARTY-8) && (TouchState.y <= EXPORT_CHECK3_ENDY))
+				{
+					if(BoardInf.KineticPara.Enable==0)
+					{
+					    TouchKey.KeyStatus=1;
+					    if(m_bInter==0)m_bInter=1;
+							else m_bInter=0;
+					    WM_Invalidate(ExportReportWin);
+					}
+			  }
+				else if ((TouchState.x >= EXPORT_CHECK4_STARTX-8) && (TouchState.x <= EXPORT_CHECK4_ENDX) &&
+					(TouchState.y >= EXPORT_CHECK4_STARTY-8) && (TouchState.y <= EXPORT_CHECK4_ENDY))
+				{
+					if(BoardInf.KineticPara.Enable==0)
+					{
+					    TouchKey.KeyStatus=1;
+					    if(m_bQC==0)m_bQC=1;
+							else m_bQC=0;
+					    WM_Invalidate(ExportReportWin);
+					}
+			  }
+		 
+	  }//if(TouchState.Pressed)
+  }
+}
+
+
+void ExportReport_Go(void)
+{
+	if(TouchKey.KeyStatus)
+	{
+		 GUI_PID_STATE TouchState;
+	   GUI_PID_GetState(&TouchState);
+	
+		 if (TouchState.Pressed == 0)
+		 {
+			  TouchKey.KeyPressDelay++;
+			  if (TouchKey.KeyPressDelay > TOUCH_RELEASE_DELAY)
+			  {
+				  TouchKey.KeyPressDelay = 0;
+				  TouchKey.KeyStatus = 0;
+			  }
+		 }
+	}
+	
+	if(ExpEnable == EXP_EXPORT)
+	{
+		  //m_nInterval = 5000;
+			ExportReportFunction();
+		  ExpEnable =0;
+	}
+}
+

@@ -1,0 +1,4493 @@
+/*
+*********************************************************************************************************
+*
+*	模块名称 : SD卡Fat文件系统演示模块。
+*	文件名称 : demo_sdio_fatfs.c
+*	版    本 : V1.0
+*	说    明 : 该例程移植FatFS文件系统（版本 R0.09b），演示如何创建文件、读取文件、创建目录和删除文件
+*			并测试了文件读写速度。
+*
+*	修改记录 :
+*		版本号  日期        作者     说明
+*		V1.0    2013-02-01 armfly  正式发布
+*
+*	Copyright (C), 2013-2014, 安富莱电子 www.armfly.com
+*
+*********************************************************************************************************
+*/
+/*
+unsigned char read_all_program_head(void)
+unsigned char ExportOneProgram(void)
+u8  creat_spi_program_table(char *buf)
+
+
+u8 read_one_ProgramStep(char *name)//promp
+void get_data(int nb,int cent)
+u8 delete_one_file(void)
+u8 Save_Program(void)
+u8 Program_SaveAs(void);//fmc160831
+int generate_new_file(void)
+u8  creat_program_table(char *buf,int len)
+u8 read_and_check_ProgramStep(int flag)
+*/
+
+
+//f_lseek(&file,address);写入偏移量
+//demo_fatfs.h
+#include "MainTask.h"
+#include "bsp.h"
+#include "ff.h"			/* FatFS文件系统模块*/
+//#include "demo_fatfs.h"
+#include "usbh_bsp_msc.h"
+#include "usbh_hid_core.h"
+//#include "GUI.h"
+//#include "SystemPrameter.h"
+
+//#include "Systemprompt.h"
+//#include "StrConvert.h"
+//#include "FilterSet.h"
+
+#define FILE_HEAD_LENCH 100
+
+#define FS_VOLUME_NAND1   "1:/"
+#define FS_VOLUME_USB1		"2:/"
+#define FS_VOLUME_SPI1		"3:/"
+
+#define CHAR_ADD  0x20
+
+// #include "MainTask.h"
+unsigned char read_all_program_head(void);//
+extern  uint8_t sf_WriteBuffer(uint8_t* _pBuf, uint32_t _uiWriteAddr, uint16_t _usWriteSize);
+extern int Step_nb;  //程序步骤数
+//extern int flag_update_busy;
+
+
+extern uint8_t s_spiBuf[4*1024];
+
+#define  SPI_ABS_ADDRESS            12*1024*1024//12 13M存ABS,原点
+#define  SPI_SYS_ADDRESS            (12*1024*1024+32*1024)
+
+#define  SPI_PROGRAM_ADDRESS        13*1024*1024//14 15M存程序
+#define  PROGRAM_PARAMETES_ADDRESS  15*1024*1024//最后16M存数据
+
+
+uint8_t  data_buf[SPI_PAGE] __attribute__((at(SDRAM_SPI_PAGE_BUF)));
+
+
+//extern unsigned char flag_usb_hs;//0 ?? 1U? 2?? 3??? 4??
+//extern unsigned char flag_usb_fs;//0 ?? 1U? 2?? 3??? 4PC??
+
+
+
+//#include "MainTask.h"
+//#include "usb_bsp_msc.h"		/* usb底层驱动 */
+/* 用于测试读写速度 */
+#define TEST_FILE_LEN			(2*1024*1024)	/* 用于测试的文件长度 */
+#define BUF_SIZE				(4*1024)		/* 每次读写SD卡的最大数据长度 */
+uint8_t g_TestBuf[BUF_SIZE] __attribute__((at(SDRAM_SPI1_PAGE_BUF)));;
+char *update103_buf;
+//PROGRAMSTEP UsbProgramStep[STEPNODE_MAX];
+//PROGRAMNAME UsbProgramName[PROGRAM_MAX];
+//int Step_nb=0;//程序文件里STEP数
+int usb_program_number,spi_program_number;//U盘有效文件数
+FIL file;
+FATFS fs;  //fmc
+FATFS fs_usb,fs_spi;
+FIL file_spi,file_usb;
+unsigned char flag_usb_init=0;//fmc180210
+
+
+char update_file_name[20];
+char lfname[256];
+char path[32];
+//unsigned long WriteFileSize;
+
+
+GUI_HMEM hMem1,hMem2,hMem3;
+//extern unsigned char ProgramMax;
+//#define program_buf_len 1024*4//FMC160921
+//char program_buf[program_buf_len];//程序文件缓存
+extern unsigned char flag_start_update,flag_update_one_ok;
+//u8 read_one_ProgramStep(char *name);
+/* 仅允许本文件内调用的函数声明 */
+static void DispMenu(void);
+//static void ViewRootDir(char *_ucVolume);
+//static void CreateNewFile(char *_ucVolume);
+//static void ReadFileData(char *_ucVolume);
+//static void CreateDir(char *_ucVolume);
+//static void DeleteDirFile(char *_ucVolume);
+//static void WriteFileTest(void);
+//static void CreateNewFile_1k(char *_ucVolume);
+//extern void Refresh_Pragram_Row( void);
+
+//void ReadFile_background(char *ad);
+//u8 delete_one_file(void);
+//extern u8 read_eep_progrm(void);
+//extern u8 Write_eep_progrm(void);
+//extern u8 del_eep_progrm(void);
+extern void refresh_PROGBAR(int cent);
+extern void beep(void );
+u8 Usb_Copy1(void);
+// void ReadFile_ziti(char *ad);
+
+void DemoFatFS(void);
+u8 Save_Program(void);
+int program_int_buf[20];
+
+//extern void USB_POWER_GPIO_Config ( void );//输出口配置
+FRESULT f_mkfs (const TCHAR* path, BYTE sfd, UINT au);
+
+/*
+*********************************************************************************************************
+*	函 数 名: DispMenu
+*	功能说明: 显示操作提示菜单
+*	形    参：无
+*	返 回 值: 无
+*********************************************************************************************************
+*/
+static void DispMenu(void)
+{
+    printf("\r\n------------------------------------------------\r\n");
+    printf("请选择操作命令:\r\n");
+    printf("0 - 返回上一级\r\n");
+    printf("1 - 显示根目录下的文件列表\r\n");
+    printf("2 - 创建一个新文件armfly.txt\r\n");
+    printf("3 - 读armfly.txt文件的内容\r\n");
+    printf("4 - 创建目录\r\n");
+    printf("5 - 删除文件和目录\r\n");
+    printf("6 - 读写文件速度测试\r\n");
+    printf("7 - NAND Flash 低级格式化\r\n");
+}
+
+/*
+*********************************************************************************************************
+*	函 数 名: ViewRootDir
+*	功能说明: 显示SD卡根目录下的文件名
+*	形    参: _ucVolume : 磁盘卷标 0 - 2
+*	返 回 值: 无
+*********************************************************************************************************
+*/
+
+
+//**************************
+/* static void ViewRootDir(char *_ucVolume)
+{
+	// 本函数使用的局部变量占用较多，请修改启动文件，保证堆栈空间够用
+	FRESULT result;
+	//FATFS fs;
+	DIR DirInf;
+	FILINFO FileInf;
+	uint32_t cnt = 0;
+	char lfname[256];
+	char path[32];
+
+
+	result = f_mount(&fs, _ucVolume, 0);
+	if (result != FR_OK)
+	{
+		printf("挂载文件系统失败 (%d)\r\n", result);
+	}
+
+
+	sprintf(path, "%s/", _ucVolume);
+	result = f_opendir(&DirInf, path);
+	if (result != FR_OK)
+	{
+		printf("打开根目录失败 (%d)\r\n", result);
+		return;
+	}
+
+
+	FileInf.lfname = lfname;
+	FileInf.lfsize = 256;
+
+	printf("属性        |  文件大小 | 短文件名 | 长文件名\r\n");
+	for (cnt = 0; ;cnt++)
+	{
+		result = f_readdir(&DirInf,&FileInf);
+		if (result != FR_OK || FileInf.fname[0] == 0)
+		{
+			break;
+		}
+
+		if (FileInf.fname[0] == '.')
+		{
+			continue;
+		}
+
+		// 判断是文件还是子目录
+		if (FileInf.fattrib & AM_DIR)
+		{
+			printf("(0x%02d)目录  ", FileInf.fattrib);
+		}
+		else
+		{
+			printf("(0x%02d)文件  ", FileInf.fattrib);
+		}
+
+		// 打印文件大小, 最大4G
+		printf(" %10d", FileInf.fsize);
+
+		printf("  %s |", FileInf.fname);	// 短文件名
+
+		printf("  %s\r\n", (char *)FileInf.lfname);	// 长文件名
+	}
+
+	// 卸载文件系统
+	f_mount(NULL,_ucVolume, 0);
+}*/
+
+
+
+
+
+
+
+
+void Create_USB_Dir(char *_ucVolume)
+{
+    // 本函数使用的局部变量占用较多，请修改启动文件，保证堆栈空间够用
+    FRESULT result;
+//	FATFS fs;
+    //char path[32];
+// DIR DirInf;
+
+    // 挂载文件系统
+    result = f_mount(&fs, _ucVolume, 0);
+    if (result != FR_OK)
+    {
+        //printf("挂载文件系统失败 (%d)\r\n", result);
+        //f_mount(NULL,_ucVolume, 0);
+        //return;
+        goto err;
+    }
+
+
+
+    // 创建目录/Dir1
+    sprintf(path, "%s/", _ucVolume);
+    //if ( f_opendir(&DirInf, path)!= FR_OK)
+    //{
+    // goto err;
+//	}
+    strcat(path,DIR_USB_PROGRAM_INPUT);
+    result = f_mkdir(path);
+    if (result == FR_OK)
+    {
+        //	printf("f_mkdir %s Ok\r\n", path);
+        ;
+    }
+    else if (result == FR_EXIST)
+    {
+        //printf("%s 目录已经存在(%d)\r\n",path, result);
+        ;
+    }
+    else
+    {
+        //printf("f_mkdir %s 失败 (%d)\r\n",path, result);
+        //return;
+        ;
+    }
+    /*
+    	// 创建目录/Dir2
+    	sprintf(path, "%s/input", _ucVolume);
+    	result = f_mkdir(path);
+    	if (result == FR_OK)
+    	{
+    		//printf("f_mkdir %s Ok\r\n", path);
+    		;
+    	}
+    	else if (result == FR_EXIST)
+    	{
+    	//	printf("%s 目录已经存在(%d)\r\n", path, result);
+    		;
+    	}
+    	else
+    	{
+    	//	printf("f_mkdir %s 失败 (%d)\r\n", path, result);
+    		return;
+    	}
+    */
+    /* 创建子目录 /Dir1/Dir1_1	   注意：创建子目录Dir1_1时，必须先创建好Dir1 */
+    /*sprintf(path, "%s//Dir1/Dir1_1", _ucVolume);
+    result = f_mkdir(path);
+    if (result == FR_OK)
+    {
+    	printf("f_mkdir %s 成功\r\n", path);
+    }
+    else if (result == FR_EXIST)
+    {
+    	printf("%s 目录已经存在 (%d)\r\n",path, result);
+    }
+    else
+    {
+    	printf("f_mkdir %s 失败 (%d)\r\n",path, result);
+    	return;
+    }*/
+err:
+    // 卸载文件系统
+    f_mount(NULL,_ucVolume, 0);
+//	f_mount(NULL,FS_VOLUME_USB, 0);
+    //f_mount(NULL,FS_VOLUME_SPI, 0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/*void ReadFile_ziti(char *ad)
+{
+	// 本函数使用的局部变量占用较多，请修改启动文件，保证堆栈空间够用
+	FRESULT result;
+//	FATFS fs;
+//	FIL file;
+	DIR DirInf;
+	uint32_t bw;
+	//char buf[128];
+	char path[32];
+	char tt[2]={"3:"};
+	char *_ucVolume;
+   _ucVolume=tt;
+ 	// 挂载文件系统
+	result = f_mount(&fs, _ucVolume, 0);
+	if (result != FR_OK)
+	{
+		printf("挂载文件系统失败(%d)\r\n", result);
+	}
+
+
+	sprintf(path, "%s/", _ucVolume);
+	result = f_opendir(&DirInf, path);
+	if (result != FR_OK)
+	{
+		printf("打开根目录失败(%d)\r\n", result);
+		return;
+	}
+
+
+	sprintf(path, "%s/yahe19.sif", _ucVolume);//文件名从这里复制到path  FMC
+	result = f_open(&file, path, FA_OPEN_EXISTING | FA_READ);
+	if (result !=  FR_OK)
+	{
+		printf("Don't Find File : %s\r\n", path);
+		return;
+	}
+
+
+	result = f_read(&file,ad, file.fsize, &bw);
+	if (bw > 0)
+	{
+		//buf[bw] = 0;
+		//printf("\r\n%s 文件内容 : \r\n%s\r\n", path,buf);
+	}
+	else
+	{
+		printf("\r\n %s文件内容 : \r\n", path);
+	}
+
+
+	f_close(&file);
+
+	f_mount(NULL,_ucVolume, 0);
+}*/
+
+
+/*
+*********************************************************************************************************
+*	函 数 名: CreateDir
+*	功能说明: 在SD卡根目录创建Dir1和Dir2目录，在Dir1目录下创建子目录Dir1_1
+*	形    参：无
+*	返 回 值: 无
+*********************************************************************************************************
+*/
+static void CreateDir(char *_ucVolume)
+{
+    /* 本函数使用的局部变量占用较多，请修改启动文件，保证堆栈空间够用 */
+    FRESULT result;
+//	FATFS fs;
+    char path[32];
+
+    /* 挂载文件系统 */
+    result = f_mount(&fs, _ucVolume, 0);			/* Mount a logical drive */
+    if (result != FR_OK)
+    {
+        printf("挂载文件系统失败 (%d)\r\n", result);
+    }
+
+    /* 创建目录/Dir1 */
+    sprintf(path, "%s/Dir1", _ucVolume);
+    result = f_mkdir(path);
+    if (result == FR_OK)
+    {
+        printf("f_mkdir %s Ok\r\n", path);
+    }
+    else if (result == FR_EXIST)
+    {
+        printf("%s 目录已经存在(%d)\r\n",path, result);
+    }
+    else
+    {
+        printf("f_mkdir %s 失败 (%d)\r\n",path, result);
+        return;
+    }
+
+    /* 创建目录/Dir2 */
+    sprintf(path, "%s/Dir2", _ucVolume);
+    result = f_mkdir(path);
+    if (result == FR_OK)
+    {
+        printf("f_mkdir %s Ok\r\n", path);
+    }
+    else if (result == FR_EXIST)
+    {
+        printf("%s 目录已经存在(%d)\r\n", path, result);
+    }
+    else
+    {
+        printf("f_mkdir %s 失败 (%d)\r\n", path, result);
+        return;
+    }
+
+    /* 创建子目录 /Dir1/Dir1_1	   注意：创建子目录Dir1_1时，必须先创建好Dir1 */
+    sprintf(path, "%s//Dir1/Dir1_1", _ucVolume);
+    result = f_mkdir(path);
+    if (result == FR_OK)
+    {
+        printf("f_mkdir %s 成功\r\n", path);
+    }
+    else if (result == FR_EXIST)
+    {
+        printf("%s 目录已经存在 (%d)\r\n",path, result);
+    }
+    else
+    {
+        printf("f_mkdir %s 失败 (%d)\r\n",path, result);
+        return;
+    }
+
+    /* 卸载文件系统 */
+    f_mount(NULL,_ucVolume, 0);
+}
+
+/*
+*********************************************************************************************************
+*	函 数 名: DeleteDirFile
+*	功能说明: 删除SD卡根目录下的 armfly.txt 文件和 Dir1，Dir2 目录
+*	形    参：无
+*	返 回 值: 无
+*********************************************************************************************************
+*/
+static void DeleteDirFile(char *_ucVolume)
+{
+    /* 本函数使用的局部变量占用较多，请修改启动文件，保证堆栈空间够用 */
+    FRESULT result;
+//	FATFS fs;
+    char FileName[13];
+    uint8_t i;
+    char path[32];
+
+    /* 挂载文件系统 */
+    result = f_mount(&fs, _ucVolume, 0);			/* Mount a logical drive */
+    if (result != FR_OK)
+    {
+        //	printf("挂载文件系统失败 (%d)\r\n", result);
+    }
+
+
+    /* 删除目录/Dir1 【因为还存在目录非空（存在子目录)，所以这次删除会失败】*/
+    sprintf(path, "%s/Dir1", _ucVolume);
+    result = f_unlink(path);
+    if (result == FR_OK)
+    {
+        //printf("删除目录%s成功\r\n", path);
+    }
+    else if (result == FR_NO_FILE)
+    {
+        //printf("没有发现文件或目录 :%s\r\n", path);
+    }
+    else
+    {
+        //printf("删除%s失败(错误代码 = %d) 文件只读或目录非空\r\n",path, result);
+    }
+
+    /* 先删除目录/Dir1/Dir1_1 */
+    sprintf(path, "%s/Dir1/Dir1_1", _ucVolume);
+    result = f_unlink(path);
+    if (result == FR_OK)
+    {
+//		printf("删除子目录%s成功\r\n", path);
+    }
+    else if ((result == FR_NO_FILE) || (result == FR_NO_PATH))
+    {
+        //printf("没有发现文件或目录 :%s\r\n", path);
+    }
+    else
+    {
+        //	printf("删除子目录%s失败(错误代码 = %d) 文件只读或目录非空\r\n", path, result);
+    }
+
+    /* 先删除目录/Dir1 */
+    sprintf(path, "%s/Dir1", _ucVolume);
+    result = f_unlink(path);
+    if (result == FR_OK)
+    {
+        //printf("删除目录%s成功\r\n", path);
+    }
+    else if (result == FR_NO_FILE)
+    {
+        //	printf("没有发现文件或目录 :%s\r\n", path);
+    }
+    else
+    {
+        //	printf("删除%s失败(错误代码 = %d) 文件只读或目录非空\r\n",path, result);
+    }
+
+    /* 删除目录/Dir2 */
+    sprintf(path, "%s/Dir2", _ucVolume);
+    result = f_unlink(path);
+    if (result == FR_OK)
+    {
+        //	printf("删除目录 %s 成功\r\n", path);
+    }
+    else if (result == FR_NO_FILE)
+    {
+        //	printf("没有发现文件或目录 :%s\r\n", path);
+    }
+    else
+    {
+        //	printf("删除%s失败(错误代码 = %d) 文件只读或目录非空\r\n", path, result);
+    }
+
+    /* 删除文件 armfly.txt */
+    sprintf(path, "%s/armfly.txt", _ucVolume);
+    result = f_unlink(path);
+    if (result == FR_OK)
+    {
+        //	printf("删除文件 armfly.txt 成功\r\n");
+    }
+    else if (result == FR_NO_FILE)
+    {
+        //	printf("没有发现文件或目录 :%s\r\n", "armfly.txt");
+    }
+    else
+    {
+        //printf("删除armfly.txt失败(错误代码 = %d) 文件只读或目录非空\r\n", result);
+    }
+
+    /* 删除文件 speed1.txt */
+    for (i = 0; i < 20; i++)
+    {
+        sprintf(FileName, "%s/Speed%02d.txt", _ucVolume, i);	/* 每写1次，序号递增 */
+        result = f_unlink(FileName);
+        if (result == FR_OK)
+        {
+            //	printf("删除文件%s成功\r\n", FileName);
+        }
+        else if (result == FR_NO_FILE)
+        {
+            //	printf("没有发现文件:%s\r\n", FileName);
+        }
+        else
+        {
+            //printf("删除%s文件失败(错误代码 = %d) 文件只读或目录非空\r\n", FileName, result);
+        }
+    }
+
+    /* 卸载文件系统 */
+    f_mount(NULL,_ucVolume, 0);
+}
+
+/*
+*********************************************************************************************************
+*	函 数 名: WriteFileTest
+*	功能说明: 测试文件读写速度
+*	形    参：无
+*	返 回 值: 无
+*********************************************************************************************************
+*/
+//static
+void WriteFileTest(void)
+{
+    /* 本函数使用的局部变量占用较多，请修改启动文件，保证堆栈空间够用 */
+    FRESULT result;
+//	FATFS fs;
+    //FIL file;
+    DIR DirInf;
+    uint32_t bw;
+    uint32_t i,k;
+    uint32_t runtime1,runtime2,timelen;
+    uint8_t err = 0;
+    char TestFileName[13];
+    static uint8_t s_ucTestSn = 0;
+
+    for (i = 0; i < sizeof(g_TestBuf); i++)
+    {
+        g_TestBuf[i] = (i / 512) + '0';
+    }
+
+    /* 挂载文件系统 */
+    result = f_mount(&fs, FS_VOLUME_NAND, 0);			/* Mount a logical drive */
+    if (result != FR_OK)
+    {
+        printf("挂载文件系统失败 (%d)\r\n", result);
+    }
+
+    /* 打开根文件夹 */
+    result = f_opendir(&DirInf, FS_VOLUME_NAND1);//"1:/"); /* 如果不带参数，则从当前目录开始 */
+    if (result != FR_OK)
+    {
+        printf("打开根目录失败 (%d)\r\n", result);
+        //	return;
+    }
+
+    /* 打开文件 */
+    sprintf(TestFileName, "1:/Speed%02d.txt", s_ucTestSn++);		/* 每写1次，序号递增 */
+    result = f_open(&file, TestFileName, FA_CREATE_ALWAYS | FA_WRITE);
+
+    /* 写一串数据 */
+    printf("开始写文件%s %dKB ...\r\n", TestFileName, TEST_FILE_LEN / 1024);
+//	runtime1 = bsp_GetRunTime();	/* 读取系统运行时间 */
+    for (i = 0; i < TEST_FILE_LEN / BUF_SIZE; i++)
+    {
+        result = f_write(&file, g_TestBuf, sizeof(g_TestBuf), &bw);
+        if (result == FR_OK)
+        {
+            if (((i + 1) % 8) == 0)
+            {
+                printf(".");
+            }
+        }
+        else
+        {
+            err = 1;
+            printf("%s文件写失败\r\n", TestFileName);
+            break;
+        }
+    }
+//	runtime2 = bsp_GetRunTime();	/* 读取系统运行时间 */
+
+    if (err == 0)
+    {
+        timelen = (runtime2 - runtime1);
+        printf("\r\n  写耗时 : %dms   平均写速度 : %dB/S (%dKB/S)\r\n",
+               timelen,
+               (TEST_FILE_LEN * 1000) / timelen,
+               ((TEST_FILE_LEN / 1024) * 1000) / timelen);
+    }
+
+    f_close(&file);		/* 关闭文件*/
+
+
+    /* 开始读文件测试 */
+    result = f_open(&file, TestFileName, FA_OPEN_EXISTING | FA_READ);
+    if (result !=  FR_OK)
+    {
+        printf("没有找到文件: %s\r\n", TestFileName);
+        return;
+    }
+
+    printf("开始读文件 %dKB ...\r\n", TEST_FILE_LEN / 1024);
+//	runtime1 = bsp_GetRunTime();	/* 读取系统运行时间 */
+    for (i = 0; i < TEST_FILE_LEN / BUF_SIZE; i++)
+    {
+        result = f_read(&file, g_TestBuf, sizeof(g_TestBuf), &bw);
+        if (result == FR_OK)
+        {
+            if (((i + 1) % 8) == 0)
+            {
+                printf(".");
+            }
+
+            /* 比较写入的数据是否正确，此语句会导致读卡速度结果降低到 3.5MBytes/S */
+            for (k = 0; k < sizeof(g_TestBuf); k++)
+            {
+                if (g_TestBuf[k] != (k / 512) + '0')
+                {
+                    err = 1;
+                    printf("Speed1.txt 文件读成功，但是数据出错\r\n");
+                    break;
+                }
+            }
+            if (err == 1)
+            {
+                break;
+            }
+        }
+        else
+        {
+            err = 1;
+            printf("Speed1.txt 文件读失败\r\n");
+            break;
+        }
+    }
+//	runtime2 = bsp_GetRunTime();	/* 读取系统运行时间 */
+
+    if (err == 0)
+    {
+        timelen = (runtime2 - runtime1);
+        printf("\r\n  读耗时 : %dms   平均读速度 : %dB/S (%dKB/S)\r\n", timelen,
+               (TEST_FILE_LEN * 1000) / timelen, ((TEST_FILE_LEN / 1024) * 1000) / timelen);
+    }
+
+    /* 关闭文件*/
+    f_close(&file);
+
+    /* 卸载文件系统 */
+    f_mount(NULL,FS_VOLUME_NAND, 0);
+}
+
+/***************************** 安富莱电子 www.armfly.com (END OF FILE) *********************************/
+/*
+*********************************************************************************************************
+*	函 数 名: FileFormat
+*	功能说明: 文件系统格式化
+*	形    参：无
+*	返 回 值: 无
+*********************************************************************************************************
+*/
+void FileFormat_spi(void)
+{
+    // 本函数使用的局部变量占用较多，请修改启动文件，保证堆栈空间够用
+    FRESULT result;
+//	FATFS fs;
+
+    printf("开始进行低级格式化，时间大约1分钟，耐心等待\r\n");
+    sf_EraseChip();
+    printf("低级格式化完成\r\n");
+    // 挂载文件系统
+    result = f_mount(&fs, FS_VOLUME_SPI, 0);
+    if (result != FR_OK)
+    {
+        //	printf("挂载文件系统失败 (%s)\r\n", FR_Table[result]);
+    }
+    else
+    {
+        //	printf("挂载文件系统成功 (%s)\r\n", FR_Table[result]);
+    }
+
+    // 第一次使用必须进行格式化 //
+    result = f_mkfs(FS_VOLUME_SPI,0,0);
+    if (result != FR_OK)
+    {
+//		printf("格式化失败 (%s)\r\n", FR_Table[result]);
+    }
+    else
+    {
+        //	printf("格式化成功 (%s)\r\n", FR_Table[result]);
+    }
+
+    //卸载文件系统 //
+    result  = f_mount(NULL, FS_VOLUME_SPI, 0);
+    if (result != FR_OK)
+    {
+//		printf("卸载文件系统失败 (%s)\r\n", FR_Table[result]);
+    }
+    else
+    {
+        //	printf("卸载文件系统成功 (%s)\r\n", FR_Table[result]);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+*********************************************************************************************************
+*	函 数 名: CreateNewFile
+*	功能说明: 在SD卡创建一个新文件，文件内容填写“www.armfly.com”
+*	形    参：无
+*	返 回 值: 无
+*********************************************************************************************************
+*/
+
+//***************************
+static void CreateNewFile(char *_ucVolume)
+{
+    /* 本函数使用的局部变量占用较多，请修改启动文件，保证堆栈空间够用 */
+    FRESULT result;
+//	FATFS fs;
+//	FIL file;
+    DIR DirInf;
+    uint32_t bw;
+    char path[32];
+
+    /* 挂载文件系统 */
+    result = f_mount(&fs, _ucVolume, 0);			/* Mount a logical drive */
+    if (result != FR_OK)
+    {
+        //printf("挂载文件系统失败 (%d)\r\n", result);
+    }
+
+    /* 打开根文件夹 */
+    sprintf(path, "%s/", _ucVolume);
+    result = f_opendir(&DirInf, path);
+    if (result != FR_OK)
+    {
+//		printf("打开根目录失败 (%d)\r\n", result);
+        return;
+    }
+
+    /* 打开文件 */
+    sprintf(path, "%s/armfly.txt", _ucVolume);
+    result = f_open(&file, path, FA_CREATE_ALWAYS | FA_WRITE);
+
+    /* 写一串数据 */
+    result = f_write(&file, "FatFS Write Demo   www.armfly.com \r\n", 34, &bw);
+    if (result == FR_OK)
+    {
+        printf("%s 文件写入成功\r\n", path);
+    }
+    else
+    {
+        printf("%s 文件写入失败\r\n", path);
+    }
+
+    /* 关闭文件*/
+    f_close(&file);
+
+    /* 卸载文件系统 */
+    f_mount(NULL,_ucVolume, 0);
+}
+static void CreateNewFile_1k(char *_ucVolume)
+{
+    /* 本函数使用的局部变量占用较多，请修改启动文件，保证堆栈空间够用 */
+    FRESULT result;
+//	FATFS fs;
+//	FIL file;
+    DIR DirInf;
+    uint32_t bw;
+    char path[32];
+    char tt[1024];
+    uint32_t i;
+    /* 挂载文件系统 */
+    result = f_mount(&fs, _ucVolume, 0);			/* Mount a logical drive */
+    if (result != FR_OK)
+    {
+        //	printf("挂载文件系统失败 (%d)\r\n", result);
+    }
+
+    /* 打开根文件夹 */
+    sprintf(path, "%s/", _ucVolume);
+    result = f_opendir(&DirInf, path);
+    if (result != FR_OK)
+    {
+//		printf("打开根目录失败 (%d)\r\n", result);
+        return;
+    }
+
+    /* 打开文件 */
+    sprintf(path, "%s/armfly.txt", _ucVolume);
+    result = f_open(&file, path, FA_CREATE_ALWAYS | FA_WRITE);
+// result =f_open(&file, path, FA_WRITE);
+    /* 写一串数据 */
+    for(i=0; i<1024; i++)
+        tt[i]=0x30;
+    result = f_write(&file, tt, 1024, &bw);
+    //f_lseek(&file,5);
+//	f_close(&file);
+//	sprintf(path, "%s/", _ucVolume);
+//	result = f_opendir(&DirInf, path);
+    //sprintf(path, "%s/armfly.txt", _ucVolume);
+    //result = f_open(&file, path, FA_CREATE_ALWAYS | FA_WRITE);
+
+    /*for(i=0;i<1024;i++)
+        tt[i]=0x33;
+    f_lseek(&file,4);
+    result = f_write(&file, tt, 10, &bw);*/
+    if (result == FR_OK)
+    {
+        printf("%s 文件写入成功\r\n", path);
+    }
+    else
+    {
+        printf("%s 文件写入失败\r\n", path);
+    }
+
+    /* 关闭文件*/
+    f_close(&file);
+
+    /* 卸载文件系统 */
+    f_mount(NULL,_ucVolume, 0);
+}
+
+/*
+*********************************************************************************************************
+*	函 数 名: ReadFileData
+*	功能说明: 读取文件armfly.txt前128个字符，并打印到串口
+*	形    参：无
+*	返 回 值: 无
+*********************************************************************************************************
+*/
+static void ReadFileData(char *_ucVolume)
+{
+    /*
+    FRESULT result;
+
+    DIR DirInf;
+    uint32_t bw;
+    char buf[128];
+    char path[32];
+
+
+    result = f_mount(&fs, _ucVolume, 0);
+    if (result != FR_OK)
+    {
+    	printf("挂载文件系统失败(%d)\r\n", result);
+    }
+
+
+    sprintf(path, "%s/", _ucVolume);
+    result = f_opendir(&DirInf, path);
+    if (result != FR_OK)
+    {
+    	printf("打开根目录失败(%d)\r\n", result);
+    	return;
+    }
+
+
+    sprintf(path, "%s/armfly.txt", _ucVolume);
+    result = f_open(&file, path, FA_OPEN_EXISTING | FA_READ);
+    if (result !=  FR_OK)
+    {
+    	printf("Don't Find File : %s\r\n", path);
+    	return;
+    }
+
+    result = f_read(&file, &buf, sizeof(buf) - 1, &bw);
+    if (bw > 0)
+    {
+    	buf[bw] = 0;
+    	printf("\r\n%s 文件内容 : \r\n%s\r\n", path,buf);
+    }
+    else
+    {
+    	printf("\r\n %s文件内容 : \r\n", path);
+    }
+
+
+    f_close(&file);
+
+
+    f_mount(NULL,_ucVolume, 0);
+    */
+}
+
+
+
+
+/*{#define FS_VOLUME_SD		"0:"
+#define FS_VOLUME_NAND		"1:"
+#define FS_VOLUME_USB		"2:"
+#define FS_VOLUME_SPI		"3:"*/
+//***************************
+//测试用
+void Usb_Copy(void)
+{   uint8_t cmd;
+    USBH_Process(&USB_OTG_Core, &USB_Host);
+
+//		if (comGetChar(COM7, &cmd))	/* 从串口读入一个字符(非阻塞方式) */
+    {
+        printf("\r\n");
+        switch (cmd)
+        {
+        case '1':
+//          Usb_Copy1();
+            //printf("【1 -TT 显示U盘根目录文继】\r\n");
+            //ViewRootDir(FS_VOLUME_USB);		/* 显示U盘根目录下的文件名 */
+            //		printf("【1 - 显示SPI根目录文件】\r\n");
+            //		ViewRootDir(FS_VOLUME_SPI	);		/* 显示U盘根目录下的文件名 */
+            break;
+
+        case '2':
+
+//				 printf("【2 - CreateNewFile】U盘写1K字节\r\n");
+            CreateNewFile_1k(FS_VOLUME_USB);//写1K字节到U盘
+            //	printf("【2 - CreateNewFile】SPI\r\n");
+            //	  CreateNewFile(FS_VOLUME_SPI);//
+            break;
+
+        case '3':
+            //printf("【3 - ReadFileData】\r\n");
+            //ReadFileData(FS_VOLUME_SD);		/* 读取根目录下armfly.txt的内容 */
+            //	ReadFileData(FS_VOLUME_NAND);		/* 读取根目录下armfly.txt的内容 */
+            ReadFileData(FS_VOLUME_USB);		/* 读取根目录下armfly.txt的内容 */
+            ReadFileData(FS_VOLUME_SPI);
+            break;
+        }
+
+    }
+}
+//*************************
+//取出一个程序文件中名字，步骤数，修改时间保存到EEP表给LISTVIEW用
+u8  creat_program_table(char *buf,int len)
+{
+
+    return 0;
+
+}
+//*****************************************
+
+//从U盘里把程序文件拷贝到SPI FLASH,并且存文件表到EEP
+/*u8 Usb_Copy1(void)
+{
+
+    FRESULT fr;
+    UINT br, bw;
+	u8 falg_err;
+	FRESULT result;
+	//FATFS fs;
+	DIR DirInf[2];
+	FILINFO FileInf_Usb,FileInf_Spi;
+	uint32_t cnt = 0;
+	char lfname[256];
+	char path_spi[32],path_usb[32];
+
+	//char str1[]="%s/",str2[]="%s/",name[50];
+
+	  falg_err=0;
+    // **************************挂载文件
+    if(f_mount(&fs_usb, FS_VOLUME_USB1, 0)!= FR_OK)
+			 return 1;  //失败
+    if(f_mount(&fs_spi, FS_VOLUME_SPI1, 0)!= FR_OK)
+        return 1;  //失败
+
+		// *************************打开spi根文件夹
+	  //sprintf(path_spi, "%s/",FS_VOLUME_SPI);
+		strcpy(path_spi, FS_VOLUME_SPI1);
+	  result = f_opendir(&DirInf[1], path_spi);
+	  if (result != FR_OK)
+		  return 2; //打开根目录失败
+	  // 打开USB根文件夹
+	  //sprintf(path_usb, "%s/", FS_VOLUME_USB);
+		strcpy(path_usb, FS_VOLUME_USB1);
+	  if ( f_opendir(&DirInf[0], path_usb)!= FR_OK)
+		   return  2;
+    // ***********************读取当前文件夹下的文件和目录
+	  FileInf_Usb.lfname = lfname;
+	  FileInf_Usb.lfsize = 256;
+
+	  for (cnt = 0; ;cnt++)
+	  {
+	  	result = f_readdir(&DirInf[0],&FileInf_Usb);
+		  if (result != FR_OK || FileInf_Usb.fname[0] == 0)
+		  {
+				falg_err=3;
+				break;//没有文件
+			}
+		  if (FileInf_Usb.fname[0] == '.')
+			    continue;
+
+		   //判断是文件还是子目录
+		  if (FileInf_Usb.fattrib & AM_DIR)
+		      continue;  //目录
+
+     //打开文件
+			strcpy(path_usb, FS_VOLUME_USB1);
+	    strcat(path_usb,FileInf_Usb.fname);
+
+	    //sprintf(path_usb,FileInf_Usb.fname,FS_VOLUME_USB);//"%s/armfly.txt"
+	    result = f_open(&file_usb,path_usb, FA_OPEN_EXISTING | FA_READ);
+	    if (result !=  FR_OK)
+		  {
+				falg_err=4;
+				break;       //没有文件
+			}	   //找不到文件
+
+
+	    result = f_read(&file_usb, &program_buf, file_usb.fsize, &bw);
+	    if (bw > 0)
+	    {
+	    	program_buf[bw] = 0;
+		  //  printf("\r\n%s 文件内容 : \r\n%s\r\n", path,buf);
+	    }
+			f_close(&file_usb);
+			//if(program_buf[0]=='A'&&program_buf[0]=='S'&&program_buf[0]=='1'&&program_buf[0]=='5'&&program_buf[0]=='4')
+           continue;//不是程序文件，继续读下一个文件 as154文件
+	    //sprintf(path_spi,FileInf_Usb.fname, FS_VOLUME_SPI);//"%s/aa.txt"
+			strcpy(path_spi, FS_VOLUME_SPI1);
+	    strcat(path_spi,FileInf_Usb.fname);
+	    result = f_open(&file_spi, path_spi, FA_CREATE_ALWAYS | FA_WRITE);
+
+	    //写USB文件到SPI
+	    result = f_write(&file_spi, &program_buf, file_usb.fsize, &bw);
+	    if (result != FR_OK)
+		 {
+				falg_err=4;
+				break;//没有文件
+			}	   //文件写入失败
+			f_close(&file_spi);//FS_LOCK 能够控制同时打开文件的个数 3
+			// *********************
+//			creat_program_table(program_buf,file_usb.fsize); //取出一个程序文件中名字，步骤数，修改时间保存到EEP表给LISTVIEW用
+		}
+		//read_eep_progrm();
+
+		// ************************
+      // 关闭文件系统 FIL file_spi,file_usb;
+      f_close(&file_spi);
+      f_close(&file_usb);
+			f_mount(NULL,FS_VOLUME_USB, 0);
+      f_mount(NULL,FS_VOLUME_SPI, 0);
+		  read_eep_progrm();
+		  Refresh_Pragram_Row(); //刷新
+      return falg_err;
+}*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void USB_POWER_GPIO_Config ( void )//输出口配置
+{
+    /*定义一个GPIO_InitTypeDef类型的结构体*/
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+
+    // 配置 LED1 引脚
+    RCC_AHB1PeriphClockCmd( RCC_AHB1Periph_GPIOH, ENABLE );
+
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+    GPIO_Init (GPIOA, & GPIO_InitStructure );	//*/
+
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+    GPIO_Init (GPIOA, & GPIO_InitStructure );	//*/
+    //GPIO_ResetBits ( GPIOA, GPIO_Pin_0 );  =0
+    GPIO_SetBits   ( GPIOA, GPIO_Pin_0 );  //=1
+    GPIO_SetBits   ( GPIOA, GPIO_Pin_9 );
+    /* 配置 LED2 引脚 */
+    /*RCC_AHB1PeriphClockCmd( RCC_AHB1Periph_GPIOH, ENABLE );
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
+    GPIO_Init ( macLED2_GPIO_PORT, & GPIO_InitStructure );	*/
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//*************************************
+unsigned char ReadFile_background(char *ad,unsigned char picture_flag)
+{
+    // 本函数使用的局部变量占用较多，请修改启动文件，保证堆栈空间够用
+    unsigned char flag_err;
+    FRESULT result;
+
+    DIR DirInf;
+    uint32_t bw;
+
+    //char path[32];
+    char tt[2]= {"3:"};
+    char *_ucVolume;
+    _ucVolume=tt;
+
+    flag_err=0;
+    // 挂载文件系统
+    if (f_mount(&fs, _ucVolume, 0) != FR_OK)
+    {
+        flag_err=1;
+        goto err;
+        //printf("挂载文件系统失败(%d)\r\n", result);
+    }
+
+    // 打开根文件夹
+    sprintf(path, "%s/", _ucVolume);
+    if (f_opendir(&DirInf, path) != FR_OK)// 1: 表示盘符
+    {
+        flag_err=2;
+        goto err;
+        //printf("打开根目录失败(%d)\r\n", result);
+        //return;
+    }
+
+    // 打开文件
+//	if(AdvancePra.OemFlag==OEM_AOSHENG)
+    if(picture_flag==BK_LOADING)
+    {
+        sprintf(path, "%s/Loading.jpg", _ucVolume);
+    }
+    else if(picture_flag==BK_LOADING_HELP)
+    {
+        sprintf(path, "%s/Loading_Help.jpg", _ucVolume);
+    }
+    else if(picture_flag==BK_LOADING_LOGO)
+    {
+        sprintf(path, "%s/Loading_Logo.jpg", _ucVolume);
+    }
+    else if(picture_flag==BK_LOADING_FILTER)
+    {
+        sprintf(path, "%s/Loading_Filter.jpg", _ucVolume);
+    }
+    else if(picture_flag==BK_LOADING_BK)
+    {
+        sprintf(path, "%s/Loading_BK.jpg", _ucVolume);
+    }
+    else if(picture_flag==BK_LOADING_UD)
+    {
+        sprintf(path, "%s/Loading_UD.jpg", _ucVolume);
+    }
+    else if(picture_flag==BK_LOADING_EP)
+    {
+        sprintf(path, "%s/Loading_EP.jpg", _ucVolume);
+    }
+    else if(picture_flag==BK_LOADING_NC)
+    {
+        sprintf(path, "%s/Loading_NC.jpg", _ucVolume);
+    }
+    else if(picture_flag==BK_LOADING_PC)
+    {
+        sprintf(path, "%s/Loading_PC.jpg", _ucVolume);
+    }
+    else if(picture_flag==BK_LOADING_SD)
+    {
+        sprintf(path, "%s/Loading_SD.jpg", _ucVolume);
+    }
+    else if(picture_flag==BK_LOADING_QC)
+    {
+        sprintf(path, "%s/Loading_QC.jpg", _ucVolume);
+    }
+    if (f_open(&file, path, FA_OPEN_EXISTING | FA_READ) !=  FR_OK)
+    {
+
+        flag_err=3;
+        goto err;
+        //	printf("Don't Find File : %s\r\n", path);
+        //return;
+    }
+
+    // 读取文件
+    result = f_read(&file,ad, file.fsize, &bw);
+    if (bw > 0)
+    {
+        //buf[bw] = 0;
+        //printf("\r\n%s 文件内容 : \r\n%s\r\n", path,buf);
+    }
+    else
+    {
+        f_close(&file);
+        flag_err=4;
+        goto err;
+        //	printf("\r\n %s文件内容 : \r\n", path);
+    }
+    flag_err=0;
+    f_close(&file);
+err:
+    // 关闭文件
+
+
+    // 卸载文件系统
+    f_mount(NULL,_ucVolume, 0);
+    return(flag_err);
+}
+
+
+
+
+
+unsigned char ReadFileFromUSB_BG(char *ad,unsigned char picture_flag)
+{
+    // 本函数使用的局部变量占用较多，请修改启动文件，保证堆栈空间够用
+    unsigned char flag_err;
+    FRESULT result;
+//	FATFS fs;
+//	FIL file;
+    //DIR DirInf;
+    DIR DirInf;
+    uint32_t bw;
+
+    //char buf[128];
+    //char path_usb[32];
+    //char tt[2]={"3:"};
+    //char *_ucVolume;
+//  _ucVolume=tt;
+
+
+
+
+
+
+    flag_err=0;
+//挂载文件
+    if(f_mount(&fs_usb, FS_VOLUME_USB, 0)!= FR_OK)
+    {
+        flag_err=1;
+        goto err;
+    }
+    //return 1;  //失败
+
+    //打开主目录
+    sprintf(path, "%s/", FS_VOLUME_USB);
+    if ( f_opendir(&DirInf, path)!= FR_OK)
+    {
+        flag_err=2;
+        goto err;
+    }
+
+    // return  2;
+
+
+
+    // 打开文件
+//	if(AdvancePra.OemFlag==OEM_AOSHENG)
+    if(picture_flag==BK_LOADING)
+    {
+        sprintf(path, "%s/Loading.jpg", FS_VOLUME_USB);//文件名从这里复制到path  FMC
+    }
+    else if(picture_flag==BK_LOADING_HELP)
+    {
+        sprintf(path, "%s/Loading_Help.jpg", FS_VOLUME_USB);//文件名从这里复制到path  FMC
+    }
+    else if(picture_flag==BK_LOADING_LOGO)
+    {
+        sprintf(path, "%s/Loading_Logo.jpg", FS_VOLUME_USB);
+    }
+    else if(picture_flag==BK_LOADING_FILTER)
+    {
+        sprintf(path, "%s/Loading_Filter.jpg", FS_VOLUME_USB);
+    }
+    else if(picture_flag==BK_LOADING_BK)
+    {
+        sprintf(path, "%s/Loading_BK.jpg", FS_VOLUME_USB);
+    }
+    else if(picture_flag==BK_LOADING_UD)
+    {
+        sprintf(path, "%s/Loading_UD.jpg", FS_VOLUME_USB);
+    }
+    else if(picture_flag==BK_LOADING_EP)
+    {
+        sprintf(path, "%s/Loading_EP.jpg", FS_VOLUME_USB);
+    }
+    else if(picture_flag==BK_LOADING_NC)
+    {
+        sprintf(path, "%s/Loading_NC.jpg", FS_VOLUME_USB);
+    }
+    else if(picture_flag==BK_LOADING_PC)
+    {
+        sprintf(path, "%s/Loading_PC.jpg", FS_VOLUME_USB);
+    }
+    else if(picture_flag==BK_LOADING_SD)
+    {
+        sprintf(path, "%s/Loading_SD.jpg", FS_VOLUME_USB);
+    }
+    else if(picture_flag==BK_LOADING_QC)
+    {
+        sprintf(path, "%s/Loading_QC.jpg", FS_VOLUME_USB);
+    }
+    else
+    {
+        flag_err=2;
+        goto err;
+    }
+
+    //else if(AdvancePra.OemFlag==OEM_OTHER)
+    //     sprintf(path, "%s/loading_other.jpg", _ucVolume);//文件名从这里复制到path  FMC
+    //else// if(AdvancePra.OemFlag==OEM_NEUTRAL)
+    //     sprintf(path, "%s/loading_neutral.jpg", _ucVolume);//文件名从这里复制到path  FMC
+    result = f_open(&file, path, FA_OPEN_EXISTING | FA_READ);
+    if (result !=  FR_OK)
+    {
+        flag_err=3;
+        goto err;
+        //printf("Don't Find File : %s\r\n", fs_usb);
+        //return;
+    }
+
+    // 读取文件
+    result = f_read(&file,ad, file.fsize, &bw);
+    if (bw > 0)
+    {
+        //ad[bw] = 0;
+        //printf("\r\n%s 文件内容 : \r\n%s\r\n", path,buf);
+    }
+    else
+    {
+        f_close(&file);
+        flag_err=4;
+        goto err;
+        //	printf("\r\n %s文件内容 : \r\n", fs_usb);
+    }
+    flag_err=0;
+    f_close(&file);
+err:
+    // 关闭文件
+    // 卸载文件系统
+    f_mount(NULL,FS_VOLUME_USB, 0);
+    return flag_err;
+}
+unsigned char WriteFile_background(char *_ucVolume,unsigned long len,unsigned char picture_flag)
+{
+    /* 本函数使用的局部变量占用较多，请修改启动文件，保证堆栈空间够用 */
+    unsigned char flag_err;
+    FRESULT result;
+//	FATFS fs;
+//	FIL file;
+    DIR DirInf;
+    uint32_t bw;
+    //char path[32];
+
+    flag_err=0;
+    // 挂载文件系统
+    result = f_mount(&fs, FS_VOLUME_SPI, 0);			// Mount a logical drive
+    if (result != FR_OK)
+    {
+        flag_err=1;
+        goto err;
+        //	printf("挂载文件系统失败 (%d)\r\n", result);
+    }
+
+    // 打开根文件夹
+    sprintf(path, "%s/", FS_VOLUME_SPI);
+    result = f_opendir(&DirInf, path);
+    if (result != FR_OK)
+    {
+        flag_err=2;
+        goto err;
+        //printf("打开根目录失败 (%d)\r\n", result);
+        //return;
+    }
+
+
+    // 打开文件
+    if(picture_flag==BK_LOADING)
+    {
+        sprintf(path, "%s/Loading.jpg", FS_VOLUME_SPI);
+    }
+    else  if(picture_flag==BK_LOADING_HELP)
+    {
+        sprintf(path, "%s/Loading_Help.jpg", FS_VOLUME_SPI);
+    }
+    else if(picture_flag==BK_LOADING_LOGO)
+    {
+        sprintf(path, "%s/Loading_Logo.jpg", FS_VOLUME_SPI);
+    }
+    else if(picture_flag==BK_LOADING_FILTER)
+    {
+        sprintf(path, "%s/Loading_Filter.jpg", FS_VOLUME_SPI);
+    }
+    else if(picture_flag==BK_LOADING_BK)
+    {
+        sprintf(path, "%s/Loading_BK.jpg", FS_VOLUME_SPI);
+    }
+    else if(picture_flag==BK_LOADING_UD)
+    {
+        sprintf(path, "%s/Loading_UD.jpg", FS_VOLUME_SPI);
+    }
+    else if(picture_flag==BK_LOADING_EP)
+    {
+        sprintf(path, "%s/Loading_EP.jpg", FS_VOLUME_SPI);
+    }
+    else if(picture_flag==BK_LOADING_NC)
+    {
+        sprintf(path, "%s/Loading_NC.jpg", FS_VOLUME_SPI);
+    }
+    else if(picture_flag==BK_LOADING_PC)
+    {
+        sprintf(path, "%s/Loading_PC.jpg", FS_VOLUME_SPI);
+    }
+    else if(picture_flag==BK_LOADING_SD)
+    {
+        sprintf(path, "%s/Loading_SD.jpg", FS_VOLUME_SPI);
+    }
+    else if(picture_flag==BK_LOADING_QC)
+    {
+        sprintf(path, "%s/Loading_QC.jpg", FS_VOLUME_SPI);
+    }
+    else
+    {
+        flag_err=2;
+        goto err;
+    }
+
+    if(f_open(&file, path,  FA_OPEN_EXISTING | FA_WRITE)!=FR_OK)
+    {
+        if(f_open(&file, path, FA_CREATE_ALWAYS | FA_WRITE)!=FR_OK)
+        {
+            flag_err=3;
+            goto err;
+        }
+    }
+
+    /* 写一串数据 */
+    result = f_write(&file, _ucVolume, len, &bw);
+    if (result == FR_OK)
+    {
+        ;
+        //printf("%s 文件写入成功\r\n", path);
+    }
+    else
+    {
+        f_close(&file);
+        flag_err=3;
+        goto err;
+        //printf("%s 文件写入失败\r\n", path);
+    }
+
+    flag_err=0;
+    f_close(&file);
+err:
+
+    /* 卸载文件系统 */
+    //f_mount(NULL,_ucVolume, 0);
+    f_mount(NULL,FS_VOLUME_SPI, 0);
+    return flag_err;
+
+}
+
+
+
+unsigned char CopyStartupPicture(void)
+{
+    unsigned char i,flag_err;
+    GUI_HMEM hMem;
+    char *_acBuffer2;
+
+    flag_err=0;
+    hMem=GUI_ALLOC_AllocZero(800*480*3+100);
+    _acBuffer2=GUI_ALLOC_h2p(hMem);
+
+    for(i=0; i<11; i++) //这里为2个图片(启动1个，帮助1个)
+    {
+        //	OSSchedLock(&err);
+        if(ReadFileFromUSB_BG(_acBuffer2,i))//读取文件
+        {
+            //无开机图片文件
+            flag_err=1;
+            break;
+        }
+        else if (WriteFile_background(_acBuffer2, file.fsize,i))//写入文件
+        {
+            flag_err=2;
+            break;
+        }
+    }
+
+
+    GUI_ALLOC_Free(hMem);
+    return flag_err;
+}
+
+
+
+
+//U盘初始化
+void Usb_Init(void)
+{
+    //USBH_Init(&USB_OTG_Core,USB_OTG_HS_CORE_ID,&USB_Host,&USBH_MSC_cb,&USRH_cb);
+    StartUpPra.EnableUsbCheck=0;
+    usbh_CloseMassStorage();
+    USBH_Init(&USB_OTG_Core  ,USB_OTG_HS_CORE_ID,&USB_Host  ,&USBH_MSC_cb,&USRH_cb);
+    USBH_Init(&USB_OTG_CoreWM,USB_OTG_FS_CORE_ID,&USB_HostWM,&HID_cb     ,&USRH_cbWM);//modify 20180210 two usb
+
+
+    StartUpPra.EnableUsbCheck=1;
+}
+//****************************
+void Usb_check(void)
+{
+    //USBH_Process(&USB_OTG_Core, &USB_Host);//
+
+    USBH_Process(&USB_OTG_Core, &USB_Host);//WM HOST 上USB口
+    USBH_ProcessWM(&USB_OTG_CoreWM, &USB_HostWM);// WM FS 下USB口 //modify 20180210 two usb
+
+    //if(flag_usb_fs==1)//fmcusb
+    //{
+    //Prompt_Interface(PROMPT_USB_DISK_ERR);//debug
+    //}
+    //***********
+    if(flag_usb_fs!=2&&flag_usb_hs!=2)
+    {
+        GUI_CURSOR_Hide();//fmcusb  显示鼠标
+    }
+    //***********
+    if(flag_usb_hs>0||flag_usb_fs>0)
+    {
+        if(flag_usb_hs==1||flag_usb_fs==1)
+        {
+            flag_usb_disk_connect=1;
+        }
+        flag_usb_init=1;
+    }
+    else
+    {
+        flag_usb_disk_connect=0;
+
+        if(flag_usb_init==1)
+        {   flag_usb_init=0;
+            Usb_Init();
+        }
+    }
+}
+void check_usb_connect(void)
+{
+    if (HCD_IsDeviceConnected(&USB_OTG_Core)==0 && HCD_IsDeviceConnected(&USB_OTG_CoreWM)==0)
+        flag_usb_disk_connect=0;
+    /*
+    if (HCD_IsDeviceConnected(&USB_OTG_Core)==0)
+    {
+    	  flag_usb_disk_connect=0;
+    	  flag_usb_hs=0;
+    }*/
+}
+
+
+//**************************
+//3个结构体： 文件、步骤、选项生成新文件
+int GenerateNewFile(void)
+{
+    //int i,j=0,len,back[6],k;
+    //int back_f[6];
+    //float back_f[6];
+    //const char name1[]="bb.txt",start[]="AS154_S",name[]="NAME:",step[]="STEP:",time[]="TIME:",status[]="STATUS:",option[]="OPTION:",end[]="AS154_E";
+    unsigned int ptr=0;
+    unsigned char i,j;
+    //float f_temp;
+//头行
+    //板名
+
+    data_buf[ptr++]='S';//以S开头
+    //len=strlen(BoardInf.Name);
+    for(i=0; i<PROGRAM_NAME_LENGTH; i++)
+    {
+        data_buf[ptr++]=BoardInf.Name[i];
+    }
+
+    //检测
+    data_buf[ptr++]=BoardInf.Filter1Locate;
+    data_buf[ptr++]=BoardInf.Filter2Locate;
+    data_buf[ptr++]=BoardInf.DetectMode;
+    //振动
+    data_buf[ptr++]=BoardInf.ShakeEnable;
+    data_buf[ptr++]=BoardInf.ShakeSpeed;
+    data_buf[ptr++]=(BoardInf.ShakeTime>>24)&0xff;
+    data_buf[ptr++]=(BoardInf.ShakeTime>>16)&0xff;
+    data_buf[ptr++]=(BoardInf.ShakeTime>>8)&0xff;
+    data_buf[ptr++]=(BoardInf.ShakeTime)&0xff;
+    //定性
+    data_buf[ptr++]=BoardInf.InterpretPara.Enable;   //允许定性分析
+    data_buf[ptr++]=BoardInf.InterpretPara.AbsFlag;  //采用吸光度
+
+    FloatValue.f_val=BoardInf.InterpretPara.fWeakPValue;  //弱阳性
+    data_buf[ptr++]=FloatValue.c_val[0];
+    data_buf[ptr++]=FloatValue.c_val[1];
+    data_buf[ptr++]=FloatValue.c_val[2];
+    data_buf[ptr++]=FloatValue.c_val[3];
+
+    data_buf[ptr++]=BoardInf.InterpretPara.GreatFlag;
+    for(i=0; i<3; i++)
+    {
+        FloatValue.f_val=BoardInf.InterpretPara.fCoef[i];
+        data_buf[ptr++]=FloatValue.c_val[0];
+        data_buf[ptr++]=FloatValue.c_val[1];
+        data_buf[ptr++]=FloatValue.c_val[2];
+        data_buf[ptr++]=FloatValue.c_val[3];
+
+
+    }
+#ifdef SOFTWARE_DN
+    data_buf[ptr++]=BoardInf.InterpretPara.Mode;
+    for(i=0; i<3; i++)
+    {
+        FloatValue.f_val=BoardInf.InterpretPara.fCoef_DN[i];
+        data_buf[ptr++]=FloatValue.c_val[0];
+        data_buf[ptr++]=FloatValue.c_val[1];
+        data_buf[ptr++]=FloatValue.c_val[2];
+        data_buf[ptr++]=FloatValue.c_val[3];
+
+
+    }
+#endif
+    //板布局
+    for(i=0; i<TUBE_MAX; i++)
+    {
+        data_buf[ptr++]=BoardInf.Layout.WellType[i];
+        data_buf[ptr++]= BoardInf.Layout.Num[i];
+    }
+    //动力学
+    data_buf[ptr++]=BoardInf.KineticPara.Enable;
+    data_buf[ptr++]=BoardInf.KineticPara.PreProcess;
+    data_buf[ptr++]=BoardInf.KineticPara.Curve;
+    data_buf[ptr++]=BoardInf.KineticPara.Readings;
+
+    data_buf[ptr++]=(BoardInf.KineticPara.TimeInterval>>24)&0xff;//32bit
+    data_buf[ptr++]=(BoardInf.KineticPara.TimeInterval>>16)&0xff;
+    data_buf[ptr++]=(BoardInf.KineticPara.TimeInterval>>8)&0xff;
+    data_buf[ptr++]=(BoardInf.KineticPara.TimeInterval)&0xff;
+//Para.
+    data_buf[ptr++]=BoardInf.KineticPara.kinetic_analysis_mode;
+    data_buf[ptr++]=BoardInf.KineticPara.BaseLinePoint;
+    data_buf[ptr++]=BoardInf.KineticPara.BaseLineSel;
+    data_buf[ptr++]=BoardInf.KineticPara.EndReadings;
+    data_buf[ptr++]=BoardInf.KineticPara.FirstReadings;
+
+    FloatValue.f_val=BoardInf.KineticPara.Change;
+    // FloatConvertChar(BoardInf.KineticPara.Change,x);
+    data_buf[ptr++]=FloatValue.c_val[0];
+    data_buf[ptr++]=FloatValue.c_val[1];
+    data_buf[ptr++]=FloatValue.c_val[2];
+    data_buf[ptr++]=FloatValue.c_val[3];
+
+    //质控
+    data_buf[ptr++]=BoardInf.QualityPara.Enable; //??????
+    data_buf[ptr++]=BoardInf.QualityPara.AbsFlag; //?????,0????,1?????
+
+    for(i=0; i<2; i++)
+    {
+        for(j=0; j<QC_MAX; j++)
+        {
+            FloatValue.f_val=BoardInf.QualityPara.dTarget[i][j];
+            data_buf[ptr++]=FloatValue.c_val[0];
+            data_buf[ptr++]=FloatValue.c_val[1];
+            data_buf[ptr++]=FloatValue.c_val[2];
+            data_buf[ptr++]=FloatValue.c_val[3];
+
+            FloatValue.f_val=BoardInf.QualityPara.dSD[i][j];
+            data_buf[ptr++]=FloatValue.c_val[0];
+            data_buf[ptr++]=FloatValue.c_val[1];
+            data_buf[ptr++]=FloatValue.c_val[2];
+            data_buf[ptr++]=FloatValue.c_val[3];
+
+
+            FloatValue.f_val=BoardInf.QualityPara.dCV[i][j];
+            data_buf[ptr++]=FloatValue.c_val[0];
+            data_buf[ptr++]=FloatValue.c_val[1];
+            data_buf[ptr++]=FloatValue.c_val[2];
+            data_buf[ptr++]=FloatValue.c_val[3];
+
+            FloatValue.f_val=BoardInf.QualityPara.dUpperLimit[i][j];
+            data_buf[ptr++]=FloatValue.c_val[0];
+            data_buf[ptr++]=FloatValue.c_val[1];
+            data_buf[ptr++]=FloatValue.c_val[2];
+            data_buf[ptr++]=FloatValue.c_val[3];
+
+            FloatValue.f_val=BoardInf.QualityPara.dLowerLimit[i][j];
+            data_buf[ptr++]=FloatValue.c_val[0];
+            data_buf[ptr++]=FloatValue.c_val[1];
+            data_buf[ptr++]=FloatValue.c_val[2];
+            data_buf[ptr++]=FloatValue.c_val[3];
+        }
+    }
+    data_buf[ptr++]='E';
+    return(ptr);
+}
+
+
+
+//保存程序文件 写3个结构体表，并且更新EEP 程序文件表
+u8 SaveProgram(void)
+{
+
+//    FRESULT fr;          /* FatFs function common result code */
+    UINT bw;         /* File read/write count */
+    u8 falg_err;
+    FRESULT result;
+    int fsize;
+    //FATFS fs;
+    DIR DirInf;
+//	FILINFO FileInf_Usb,FileInf_Spi;
+//	uint32_t cnt = 0;
+//	char lfname[256];
+    //char path_spi[32];//?path_usb[32];
+
+
+// CurrProgramName.DateTime.Year= SystemTimePra.Year;
+//	CurrProgramName.DateTime.Month= SystemTimePra.Month;
+//	CurrProgramName.DateTime.Day= SystemTimePra.Day;
+//	CurrProgramName.DateTime.Hour= SystemTimePra.Hour;
+//	CurrProgramName.DateTime.Min= SystemTimePra.Min;
+//	CurrProgramName.DateTime.Sec= SystemTimePra.Sec;
+//	if(flag_new_file)                                   //FMC160922 老文件不改
+    //   CurrProgramName.ShortCutFlag= SHORTCUT_OPEN;  //FMC160922
+//	CurrProgramName.LockFlag= LOCK_OPEN;//FMC160827
+    //************************************将3个结构体生成新文件 CurrProgramName.Name
+    fsize=GenerateNewFile();
+
+    if(f_mount(&fs_spi, FS_VOLUME_SPI1, 0)!= FR_OK)
+    {
+        falg_err=4;
+        goto err;
+    }
+    //打开spi根文件夹
+    strcpy(path, FS_VOLUME_SPI1);
+    result = f_opendir(&DirInf, path);
+    if (result != FR_OK)
+    {
+        falg_err=4;
+        goto err;
+    }
+    strcpy(path, FS_VOLUME_SPI1);
+    strcat(path,BoardInf.Name);
+    strcat(path,".erf");//fmc160914
+    result = f_open(&file_spi, path, FA_CREATE_ALWAYS | FA_WRITE);
+    if (result != FR_OK)
+    {
+        falg_err=4;
+        goto err;
+    }
+    //文件到SPI
+    result = f_write(&file_spi, data_buf, fsize, &bw);
+    if (result != FR_OK)
+    {
+        f_close(&file_spi);
+        falg_err=4;
+        goto err;
+    }	   //文件写入失败
+    //	f_close(&file_spi);//FS_LOCK 能够控制同时打开文件的个数 3
+    //  f_mount(NULL,FS_VOLUME_SPI, 0);
+
+    //if(Write_eep_progrm())
+    //	   return 1;
+    falg_err=0;
+    f_close(&file_spi);
+err:
+    //f_close(&file_spi);//FS_LOCK 能够控制同时打开文件的个数 3
+    f_mount(NULL,FS_VOLUME_SPI, 0);
+    return falg_err;
+}
+//****************************
+//删除,CurrProgramName.Name文件  输出0成功
+u8 DeleteOneFile(char name[])
+{
+    /* 本函数使用的局部变量占用较多，请修改启动文件，保证堆栈空间够用 */
+    FRESULT result;
+//	FATFS fs;
+//	char FileName[13];
+//	uint8_t i;
+    //char path[32];
+
+    /* 挂载文件系统 */
+    result = f_mount(&fs, FS_VOLUME_SPI, 0);			/* Mount a logical drive */
+    if (result != FR_OK)
+        return 1;
+
+    //删除文件
+
+    //sprintf(path, "%s/%s ", FS_VOLUME_SPI1,name);
+    sprintf(path, "%s/%s%s ", FS_VOLUME_SPI,name,".erf");
+    result = f_unlink(path);
+    f_mount(NULL,FS_VOLUME_SPI, 0);	/* 卸载文件系统 */
+    if (result != FR_OK&&result != FR_NO_FILE)
+        return 5;
+//	if(del_eep_progrm())//删除EEP表
+//	   return 6;
+    return 0;
+}
+
+
+//读取所有程序头文件
+unsigned char UsbReadAllProgramHead(void)
+{
+    UINT  bw;         // File read/write count
+    u8 falg_err;
+    FRESULT result;
+    int i,k;
+
+    DIR DirInf;
+    FILINFO FileInf;
+    unsigned short cnt = 0;
+    unsigned short ptr;
+
+    //char lfname[256];
+// char path[32];
+
+
+    //gSystem.UsbProgramMax=0;
+    falg_err=0;
+
+    if (f_mount(&fs, FS_VOLUME_USB, 0) != FR_OK)   // Mount a logical drive
+    {
+        falg_err=1;
+        goto err;
+    }
+    sprintf(path, "%s/", FS_VOLUME_USB);           //打开根目录
+    if (f_opendir(&DirInf, path) != FR_OK)
+    {
+        falg_err=2;
+        goto err;
+    }
+
+    //*************************打开子目录
+    strcat(path,DIR_USB_PROGRAM_INPUT);  //Items目录下
+    if ( f_opendir(&DirInf, path)!= FR_OK)
+    {
+        falg_err=2;
+        goto err;
+    }
+
+
+    FileInf.lfname = lfname;
+    FileInf.lfsize = 256;
+//    nb=0;
+
+
+    gSystem.UsbProgramMax=0;
+    for (cnt = 0; ; cnt++)
+    {
+        //清空文件名
+        for(i=0; i<PROGRAM_NAME_LENGTH; i++)
+        {
+            FileInf.fname[i]=0;
+        }
+        //文件满，正常返回
+        if(gSystem.UsbProgramMax>=PROGRAM_MAX)
+        {
+            return 0;
+        }
+        //读取根目录下的文件
+        result = f_readdir(&DirInf,&FileInf); 		//读取目录项，索引自动下移
+        if (result != FR_OK || FileInf.fname[0] == 0)
+        {
+            //falg_err=3;
+            break;//没有文件了，退出
+        }
+        if (FileInf.fname[0] == '.')
+            continue;
+
+        //判断是文件还是目录
+        if (FileInf.fattrib & AM_DIR)
+        {
+            continue;  //目录
+        }
+        //查找扩展名是否为erf
+        for(i=0; i<PROGRAM_NAME_LENGTH; i++)
+        {
+            if(FileInf.fname[i]=='.')
+                break;
+        }
+        if(FileInf.fname[i+1]!='e'||FileInf.fname[i+2]!='r'||FileInf.fname[i+3]!='f')
+        {
+            if(FileInf.fname[i+1]!='E'||FileInf.fname[i+2]!='R'||FileInf.fname[i+3]!='F')
+            {
+                continue;  //不是程序文件
+            }
+        }
+
+        //打开文件
+        strcpy(path, FS_VOLUME_USB1);
+        strcat(path,DIR_USB_PROGRAM_INPUT);  //Items目录下
+        strcat(path,"/");
+        strcat(path,FileInf.fname);
+        if (f_open(&file,path, FA_OPEN_EXISTING | FA_READ) !=  FR_OK)
+        {
+            f_close(&file);/////
+            falg_err=4;
+            goto err;
+        }
+
+        //读取文件
+        result = f_read(&file, data_buf,file.fsize , &bw);//file.fsize FILE_HEAD_LENCH
+        if (bw > 0)//bw为读取的字节数
+        {
+            data_buf[bw] = 0;
+        }
+
+        f_close(&file);/////////////
+        if(data_buf[0]!='S')
+        {
+            f_close(&file);
+            falg_err=5;
+            goto err;
+        }
+        //程序名
+        ptr=1;
+
+        //程序名
+        k=data_buf[ptr++];
+        if( (k>PROGRAM_NAME_LENGTH)||(k<1) )
+        {
+            f_close(&file);
+            falg_err=5;
+            goto err;
+        }
+        for(i=0; i<k; i++)
+        {
+            UsbProgramName[gSystem.UsbProgramMax].Name[i]=data_buf[ptr++];
+        }
+        UsbProgramName[gSystem.UsbProgramMax].Name[k]=0;//最后为0表示字符串
+        //是否带数据标志
+        UsbProgramName[gSystem.UsbProgramMax].HasData=data_buf[ptr++];
+        //日期时间值
+        UsbProgramName[gSystem.UsbProgramMax].DateTime.Year=data_buf[ptr++];
+        UsbProgramName[gSystem.UsbProgramMax].DateTime.Year=ProgramName[gSystem.UsbProgramMax].DateTime.Year<<8;
+        UsbProgramName[gSystem.UsbProgramMax].DateTime.Year+=data_buf[ptr++];
+        UsbProgramName[gSystem.UsbProgramMax].DateTime.Month=data_buf[ptr++];
+        UsbProgramName[gSystem.UsbProgramMax].DateTime.Day=data_buf[ptr++];
+        UsbProgramName[gSystem.UsbProgramMax].DateTime.Hour=data_buf[ptr++];
+        UsbProgramName[gSystem.UsbProgramMax].DateTime.Min=data_buf[ptr++];
+        UsbProgramName[gSystem.UsbProgramMax].DateTime.Sec=data_buf[ptr++];
+
+        //ProgramName[gSystem.UsbProgramMax].BlockAddr=data_buf[ptr++];
+        //ProgramName[gSystem.UsbProgramMax].BlockAddr=ProgramName[gSystem.UsbProgramMax].BlockAddr<<8;
+        //	ProgramName[gSystem.UsbProgramMax].BlockAddr+=data_buf[ptr++];
+
+        ///if( (ProgramName[gSystem.UsbProgramMax].BlockAddr>FILE_NAND_BLOCK_END)||(ProgramName[gSystem.UsbProgramMax].BlockAddr<1) )
+        //{
+        //continue;
+        //	}
+        //if(findflag==0)
+        //{
+        //if(strcmp(ProgramName[gSystem.UsbProgramMax].Name,"Demo_1")==0)//0表示相同
+        // {
+        //  gSystem.CurrBlock=ProgramName[gSystem.UsbProgramMax].BlockAddr;
+        //  findflag=1;
+        // }
+        //}
+        gSystem.UsbProgramMax++;
+        if(gSystem.UsbProgramMax>=PROGRAM_MAX)
+        {
+            gSystem.UsbProgramMax=PROGRAM_MAX;
+            break;
+        }
+
+
+
+
+
+
+
+        /*
+        for(i=0;i<PROGRAM_NAME_LENGTH;i++)
+        {
+        	ProgramName[gSystem.UsbProgramMax].Name[i]=data_buf[ptr++];
+        }
+        //是否带数据标志
+        ProgramName[gSystem.UsbProgramMax].HasData=data_buf[ptr++];
+        //日期时间值
+        ProgramName[gSystem.UsbProgramMax].DateTime.Year=data_buf[ptr++];
+        ProgramName[gSystem.UsbProgramMax].DateTime.Month=data_buf[ptr++];
+        ProgramName[gSystem.UsbProgramMax].DateTime.Day=data_buf[ptr++];
+        ProgramName[gSystem.UsbProgramMax].DateTime.Hour=data_buf[ptr++];
+        ProgramName[gSystem.UsbProgramMax].DateTime.Min=data_buf[ptr++];
+        ProgramName[gSystem.UsbProgramMax].DateTime.Sec=data_buf[ptr++];
+        gSystem.UsbProgramMax++;*/
+    }
+    //f_close(&file);
+    falg_err=0;//正常返回
+    //return 0;
+
+err:
+
+    f_mount(NULL,FS_VOLUME_SPI, 0);
+    return falg_err;
+
+}
+
+
+
+
+
+/*
+//导出.erf或.dat文件
+unsigned char ExportOneFile(void)
+{
+  UINT  bw;
+	u8 falg_err;
+	FRESULT result;
+	DIR DirInf;
+	//char path_usb[32];
+
+    falg_err=0;
+    if(f_mount(&fs_usb, FS_VOLUME_USB, 0)!= FR_OK)
+		{
+			 falg_err=1;
+		   goto err;
+		}
+
+	 if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+	 {
+			sprintf(StrTemp,"%02d%02d%04d",BoardInf.DateTime.Month,BoardInf.DateTime.Day,BoardInf.DateTime.Year);
+	 }
+	 else
+	 {
+		  sprintf(StrTemp,"%04d%02d%02d",BoardInf.DateTime.Year,BoardInf.DateTime.Month,BoardInf.DateTime.Day);
+	 }
+	 sprintf(ConvertStr,"%02d%02d%02d",BoardInf.DateTime.Hour,BoardInf.DateTime.Min,BoardInf.DateTime.Sec);
+	 strcat(StrTemp,ConvertStr);
+	  sprintf(ConvertStr, "%s/", FS_VOLUME_USB);	//path_usb
+
+	  if ( f_opendir(&DirInf, ConvertStr)!= FR_OK)
+		{
+		   falg_err=2;
+			 goto err;
+	  }
+		//
+		//sprintf(path_usb, "%s%s%s", FS_VOLUME_USB1,CurrProgramName.Name,".csv");
+
+		strcat(ConvertStr,BoardInf.Name);
+		strcat(ConvertStr,"_");
+		strcat(ConvertStr,StrTemp);
+		//if(BoardInf.bHasData)
+		//{
+			//  strcat(ConvertStr,".dat");
+		//}
+		//else
+		//{
+			  strcat(ConvertStr,".erf"); //注只能导出程序文件
+		//}
+
+		if(f_open(&file_usb, ConvertStr, FA_OPEN_EXISTING | FA_READ)==FR_OK)//有相同的文件名
+	  {
+			 falg_err=3;
+			 goto err;
+		}
+
+
+		if(f_open(&file_usb, ConvertStr, FA_CREATE_ALWAYS | FA_WRITE)!= FR_OK)
+	  {
+			 falg_err=4;
+			 goto err;
+		}
+		result = f_write(&file_usb, CsvConvertStr, strlen(CsvConvertStr), &bw);
+	  if (result != FR_OK)
+		{
+		   falg_err=5;
+			 goto err;
+	  }
+		err:
+      falg_err=0;
+      f_close(&file_usb);
+			f_mount(NULL,FS_VOLUME_USB, 0);
+
+      return falg_err;
+}
+
+*/
+
+unsigned char UsbInputFileData(void)
+{
+    unsigned short ptr=0;
+    unsigned char i,j,page_num;
+
+
+
+    //板名
+    if(data_buf[ptr++]!='S')//以S开头
+    {
+        //	gSystem.SystemErrCode|=ERRCODE_NAND_FLASH;
+        return RETURN_FALSE;
+    }
+
+    j=data_buf[ptr++];
+    if( (j>PROGRAM_NAME_LENGTH)||(j<1) )
+    {
+        return RETURN_FALSE;
+    }
+    for(i=0; i<j; i++)
+    {
+        BoardInf.Name[i]=data_buf[ptr++];
+
+    }
+    BoardInf.Name[j]=0;
+    //len=data_buf[ptr++];
+    //for(i=0;i<PROGRAM_NAME_LENGTH;i++)
+    //{
+    //   BoardInf.Name[i]=data_buf[ptr++];
+    //}
+    //是否带数据
+    BoardInf.bHasData=data_buf[ptr++]-CHAR_ADD;
+
+    BoardInf.DateTime.Year=(data_buf[ptr++]-CHAR_ADD)*(short)1000;
+    BoardInf.DateTime.Year+=(data_buf[ptr++]-CHAR_ADD)*(short)100;
+    BoardInf.DateTime.Year+=(data_buf[ptr++]-CHAR_ADD)*(short)10;
+    BoardInf.DateTime.Year+=(data_buf[ptr++]-CHAR_ADD);
+
+    BoardInf.DateTime.Month=(data_buf[ptr++]-CHAR_ADD)*(short)10;
+    BoardInf.DateTime.Month+=(data_buf[ptr++]-CHAR_ADD);
+    BoardInf.DateTime.Day=(data_buf[ptr++]-CHAR_ADD)*(short)10;
+    BoardInf.DateTime.Day=(data_buf[ptr++]-CHAR_ADD);
+    BoardInf.DateTime.Hour=(data_buf[ptr++]-CHAR_ADD)*(short)10;
+    BoardInf.DateTime.Hour=(data_buf[ptr++]-CHAR_ADD);
+    BoardInf.DateTime.Min=(data_buf[ptr++]-CHAR_ADD)*(short)10;
+    BoardInf.DateTime.Min=(data_buf[ptr++]-CHAR_ADD);
+    BoardInf.DateTime.Sec=(data_buf[ptr++]-CHAR_ADD)*(short)10;
+    BoardInf.DateTime.Sec=(data_buf[ptr++]-CHAR_ADD);
+
+
+    CurrProgramName.BlockAddr=(data_buf[ptr++]-CHAR_ADD)*(short)1000;
+    CurrProgramName.BlockAddr+=(data_buf[ptr++]-CHAR_ADD)*(short)100;
+    CurrProgramName.BlockAddr+=(data_buf[ptr++]-CHAR_ADD)*(short)10;
+    CurrProgramName.BlockAddr+=(data_buf[ptr++]-CHAR_ADD);
+
+    //if(gSystem.CurrBlock!=CurrProgramName.BlockAddr)
+    //{
+    // return NAND_FAIL;
+    //}
+    //;//////////////////lgj171116 debug
+
+    //检测
+    BoardInf.Filter1Locate=data_buf[ptr++]-CHAR_ADD;
+    if(BoardInf.Filter1Locate>=FILTER_MAX)
+    {
+        BoardInf.Filter1Locate=FILTER_NO;
+    }
+    BoardInf.Filter2Locate=data_buf[ptr++]-CHAR_ADD;
+    if(BoardInf.Filter2Locate>=FILTER_MAX)
+    {
+        BoardInf.Filter2Locate=FILTER_NO;
+    }
+    BoardInf.DetectMode=data_buf[ptr++]-CHAR_ADD;
+
+    //振动
+    BoardInf.ShakeEnable=data_buf[ptr++]-CHAR_ADD;
+    BoardInf.ShakeSpeed=data_buf[ptr++]-CHAR_ADD;
+
+    BoardInf.ShakeTime=(data_buf[ptr++]-CHAR_ADD)*(int)100000;
+    BoardInf.ShakeTime+=(data_buf[ptr++]-CHAR_ADD)*(int)10000;
+    BoardInf.ShakeTime+=(data_buf[ptr++]-CHAR_ADD)*(int)1000;
+    BoardInf.ShakeTime+=(data_buf[ptr++]-CHAR_ADD)*(int)100;
+    BoardInf.ShakeTime+=(data_buf[ptr++]-CHAR_ADD)*(int)10;
+    BoardInf.ShakeTime+=(data_buf[ptr++]-CHAR_ADD);
+    if(BoardInf.ShakeTime>SHAKE_TIME_MAX)
+    {
+        BoardInf.ShakeTime=SHAKE_TIME_MAX;
+    }
+    else  if(BoardInf.ShakeTime<SHAKE_TIME_MIN)
+    {
+        BoardInf.ShakeTime=SHAKE_TIME_MIN;
+    }
+
+    BoardInf.ShakeMode=data_buf[ptr++]-CHAR_ADD;
+    //定性
+    BoardInf.InterpretPara.Enable=data_buf[ptr++]-CHAR_ADD;   //允许定性分析
+    BoardInf.InterpretPara.AbsFlag=data_buf[ptr++]-CHAR_ADD;  //采用吸光度
+
+    //BoardInf.InterpretPara.fWeakPValue=data_buf[ptr++];  //弱阳性
+    FloatValue.c_val[0]=(data_buf[ptr++]-CHAR_ADD)*10;
+    FloatValue.c_val[0]+=(data_buf[ptr++]-CHAR_ADD);
+    FloatValue.c_val[1]=(data_buf[ptr++]-CHAR_ADD)*10;
+    FloatValue.c_val[1]+=(data_buf[ptr++]-CHAR_ADD);
+    FloatValue.c_val[2]=(data_buf[ptr++]-CHAR_ADD)*10;
+    FloatValue.c_val[2]+=(data_buf[ptr++]-CHAR_ADD);
+    FloatValue.c_val[3]=(data_buf[ptr++]-CHAR_ADD)*10;
+    FloatValue.c_val[3]+=(data_buf[ptr++]-CHAR_ADD);
+    BoardInf.InterpretPara.fWeakPValue=FloatValue.f_val;
+    if(BoardInf.InterpretPara.fWeakPValue > WEAK_P_MAX)
+    {
+        BoardInf.InterpretPara.fWeakPValue= WEAK_P_MAX;
+    }
+    else if(BoardInf.InterpretPara.fWeakPValue < WEAK_P_MIN)
+    {
+        BoardInf.InterpretPara.fWeakPValue= WEAK_P_MIN;
+    }
+    BoardInf.InterpretPara.GreatFlag=data_buf[ptr++]-CHAR_ADD;
+    for(i=0; i<3; i++)
+    {
+        FloatValue.c_val[0]=(data_buf[ptr++]-CHAR_ADD)*10;
+        FloatValue.c_val[0]+=(data_buf[ptr++]-CHAR_ADD);
+        FloatValue.c_val[1]=(data_buf[ptr++]-CHAR_ADD)*10;
+        FloatValue.c_val[1]+=(data_buf[ptr++]-CHAR_ADD);
+        FloatValue.c_val[2]=(data_buf[ptr++]-CHAR_ADD)*10;
+        FloatValue.c_val[2]+=(data_buf[ptr++]-CHAR_ADD);
+        FloatValue.c_val[3]=(data_buf[ptr++]-CHAR_ADD)*10;
+        FloatValue.c_val[3]+=(data_buf[ptr++]-CHAR_ADD);
+        BoardInf.InterpretPara.fCoef[i]=FloatValue.f_val;
+        if(BoardInf.InterpretPara.fCoef[i] > INTERPRET_COEF_MAX)
+        {
+            BoardInf.InterpretPara.fCoef[i] = INTERPRET_COEF_MAX;
+        }
+        else if(BoardInf.InterpretPara.fCoef[i] < 0)
+        {
+            BoardInf.InterpretPara.fCoef[i]=0;
+        }
+
+
+    }
+#ifdef SOFTWARE_DN
+    BoardInf.InterpretPara.Mode=data_buf[ptr++]-CHAR_ADD;
+    if( (BoardInf.InterpretPara.Mode!=SHAKE_FIRST)&&(BoardInf.InterpretPara.Mode!=SHAKE_EACH) )
+    {
+        BoardInf.InterpretPara.Mode=SHAKE_FIRST;
+    }
+    for(i=0; i<3; i++)
+    {
+        FloatValue.c_val[0]=(data_buf[ptr++]-CHAR_ADD)*10;
+        FloatValue.c_val[0]+=(data_buf[ptr++]-CHAR_ADD);
+        FloatValue.c_val[1]=(data_buf[ptr++]-CHAR_ADD)*10;
+        FloatValue.c_val[1]+=(data_buf[ptr++]-CHAR_ADD);
+        FloatValue.c_val[2]=(data_buf[ptr++]-CHAR_ADD)*10;
+        FloatValue.c_val[2]+=(data_buf[ptr++]-CHAR_ADD);
+        FloatValue.c_val[3]=(data_buf[ptr++]-CHAR_ADD)*10;
+        FloatValue.c_val[3]+=(data_buf[ptr++]-CHAR_ADD);
+        BoardInf.InterpretPara.fCoef_DN[i]=FloatValue.f_val;
+        if(BoardInf.InterpretPara.fCoef_DN[i] > INTERPRET_COEF_MAX)
+        {
+            BoardInf.InterpretPara.fCoef_DN[i] = INTERPRET_COEF_MAX;
+        }
+        else if(BoardInf.InterpretPara.fCoef_DN[i] < 0)
+        {
+            BoardInf.InterpretPara.fCoef_DN[i]=0;
+        }
+    }
+#endif
+    //板布局
+    for(i=0; i<TUBE_MAX; i++)
+    {
+        BoardInf.Layout.WellType[i]=data_buf[ptr++]-CHAR_ADD;
+        if(BoardInf.Layout.WellType[i]>=WELLS_TYPE_MAX)
+        {
+            BoardInf.Layout.WellType[i]=WELLS_TYPE_UD;
+        }
+        BoardInf.Layout.Num[i]=data_buf[ptr++]-CHAR_ADD;
+        if( (BoardInf.Layout.WellType[i]==WELLS_TYPE_SD)&&(BoardInf.Layout.Num[i]>SD_MAX-1) )
+        {
+            BoardInf.Layout.Num[i]=SD_MAX-1;
+        }
+        else if( (BoardInf.Layout.WellType[i]==WELLS_TYPE_QC)&&(BoardInf.Layout.Num[i]>QC_MAX-1) )
+        {
+            BoardInf.Layout.Num[i]=QC_MAX-1;
+        }
+    }
+    //动力学
+    BoardInf.KineticPara.Enable=data_buf[ptr++]-CHAR_ADD;
+    BoardInf.KineticPara.PreProcess=data_buf[ptr++]-CHAR_ADD;
+    if ((BoardInf.KineticPara.PreProcess>=PRE_CALCULATE_MAX) || (BoardInf.KineticPara.PreProcess <PRE_CALCULATE_NO ))
+    {
+        BoardInf.KineticPara.PreProcess =PRE_CALCULATE_NO;
+    }
+    BoardInf.KineticPara.Curve=data_buf[ptr++]-CHAR_ADD;
+    if ((BoardInf.KineticPara.Curve>=CURVE_MAX) && (BoardInf.KineticPara.Curve <CURVE_NO))
+    {
+        BoardInf.KineticPara.Curve =CURVE_NO;
+    }
+    BoardInf.KineticPara.Readings=data_buf[ptr++]-CHAR_ADD;
+    if(BoardInf.KineticPara.Readings > KINETIC_READINGS_MAX)
+    {
+        BoardInf.KineticPara.Readings = KINETIC_READINGS_MAX;
+    }
+    else if(BoardInf.KineticPara.Readings < KINETIC_READINGS_MIN)
+    {
+        BoardInf.KineticPara.Readings = KINETIC_READINGS_MIN;
+    }
+
+
+    BoardInf.KineticPara.TimeInterval=(data_buf[ptr++]-CHAR_ADD)*(int)100000;
+    BoardInf.KineticPara.TimeInterval+=(data_buf[ptr++]-CHAR_ADD)*(int)10000;
+    BoardInf.KineticPara.TimeInterval+=(data_buf[ptr++]-CHAR_ADD)*(int)1000;
+    BoardInf.KineticPara.TimeInterval+=(data_buf[ptr++]-CHAR_ADD)*(int)100;
+    BoardInf.KineticPara.TimeInterval+=(data_buf[ptr++]-CHAR_ADD)*(int)10;
+    BoardInf.KineticPara.TimeInterval+=(data_buf[ptr++]-CHAR_ADD);
+    //BoardInf.KineticPara.TimeInterval=(((unsigned long)data_buf[ptr+0])<<24)+(((unsigned long)data_buf[ptr+1])<<16)+(((unsigned long)data_buf[ptr+2])<<8)+data_buf[ptr+3];
+    if(BoardInf.KineticPara.TimeInterval>KINETIC_INTERFAL_TIME_MAX)
+    {
+        BoardInf.KineticPara.TimeInterval=KINETIC_INTERFAL_TIME_MAX;
+    }
+
+//	ptr=ptr+4;
+//Para.
+    BoardInf.KineticPara.kinetic_analysis_mode=data_buf[ptr++]-CHAR_ADD;
+    //if(BoardInf.KineticPara.kinetic_analysis_mode>KINETIC_ANALYSIS_MAX)
+    BoardInf.KineticPara.BaseLinePoint=data_buf[ptr++]-CHAR_ADD;
+    BoardInf.KineticPara.BaseLineSel=data_buf[ptr++]-CHAR_ADD;
+    BoardInf.KineticPara.EndReadings=data_buf[ptr++]-CHAR_ADD;
+    BoardInf.KineticPara.FirstReadings=data_buf[ptr++]-CHAR_ADD;
+    ChangeReadingsRun();
+
+    FloatValue.c_val[0]=(data_buf[ptr++]-CHAR_ADD)*10;
+    FloatValue.c_val[0]+=(data_buf[ptr++]-CHAR_ADD);
+    FloatValue.c_val[1]=(data_buf[ptr++]-CHAR_ADD)*10;
+    FloatValue.c_val[1]+=(data_buf[ptr++]-CHAR_ADD);
+    FloatValue.c_val[2]=(data_buf[ptr++]-CHAR_ADD)*10;
+    FloatValue.c_val[2]+=(data_buf[ptr++]-CHAR_ADD);
+    FloatValue.c_val[3]=(data_buf[ptr++]-CHAR_ADD)*10;
+    FloatValue.c_val[3]+=(data_buf[ptr++]-CHAR_ADD);
+    BoardInf.KineticPara.Change=FloatValue.f_val;
+// CharConvertFloat(&x[0],BoardInf.KineticPara.Change);
+    if(BoardInf.KineticPara.Change>CONCENTRATION_MAX)
+    {
+        BoardInf.KineticPara.Change=CONCENTRATION_MAX;
+    }
+    else if(BoardInf.KineticPara.Change<0)
+    {
+        BoardInf.KineticPara.Change=0;
+    }
+
+//是否带数据
+    // data_buf[ptr++]=BoardInf.bHasData;
+    BoardInf.bHasRawData[0]=data_buf[ptr++]-CHAR_ADD;
+    BoardInf.bHasRawData[1]=data_buf[ptr++]-CHAR_ADD;
+
+    //浓度参数
+    for(i=0; i<CALIBRATOR_CONCENTRATION_MAX; i++)
+    {
+        FloatValue.c_val[0]=(data_buf[ptr++]-CHAR_ADD)*10;
+        FloatValue.c_val[0]+=(data_buf[ptr++]-CHAR_ADD);
+        FloatValue.c_val[1]=(data_buf[ptr++]-CHAR_ADD)*10;
+        FloatValue.c_val[1]+=(data_buf[ptr++]-CHAR_ADD);
+        FloatValue.c_val[2]=(data_buf[ptr++]-CHAR_ADD)*10;
+        FloatValue.c_val[2]+=(data_buf[ptr++]-CHAR_ADD);
+        FloatValue.c_val[3]=(data_buf[ptr++]-CHAR_ADD)*10;
+        FloatValue.c_val[3]+=(data_buf[ptr++]-CHAR_ADD);
+        BoardInf.dConcentration[i]=FloatValue.f_val;
+        //CharConvertFloat(&FloatValue.c_val[0],BoardInf.dConcentration[i]);
+        if(BoardInf.dConcentration[i]>CONCENTRATION_MAX)
+        {
+            BoardInf.dConcentration[i]=CONCENTRATION_MAX;
+        }
+        else if(BoardInf.dConcentration[i]<0)
+        {
+            BoardInf.dConcentration[i]=0;
+        }
+
+    }
+    BoardInf.wcCurrentUnit=data_buf[ptr++]-CHAR_ADD;
+    if(BoardInf.wcCurrentUnit>=CALIBRATOR_CONCENTRATION_UNIT_MAX)
+    {
+        BoardInf.wcCurrentUnit=4;//
+    }
+
+    //质控
+    BoardInf.QualityPara.Enable=data_buf[ptr++]-CHAR_ADD;
+    BoardInf.QualityPara.AbsFlag=data_buf[ptr++]-CHAR_ADD;
+
+    for(i=0; i<2; i++)
+    {
+        for(j=0; j<QC_MAX; j++)
+        {
+            FloatValue.c_val[0]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[0]+=(data_buf[ptr++]-CHAR_ADD);
+            FloatValue.c_val[1]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[1]+=(data_buf[ptr++]-CHAR_ADD);
+            FloatValue.c_val[2]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[2]+=(data_buf[ptr++]-CHAR_ADD);
+            FloatValue.c_val[3]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[3]+=(data_buf[ptr++]-CHAR_ADD);
+            BoardInf.QualityPara.dTarget[i][j]=FloatValue.f_val;
+            // CharConvertFloat(&x[0],BoardInf.QualityPara.dTarget[i][j]);
+
+            FloatValue.c_val[0]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[0]+=(data_buf[ptr++]-CHAR_ADD);
+            FloatValue.c_val[1]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[1]+=(data_buf[ptr++]-CHAR_ADD);
+            FloatValue.c_val[2]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[2]+=(data_buf[ptr++]-CHAR_ADD);
+            FloatValue.c_val[3]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[3]+=(data_buf[ptr++]-CHAR_ADD);
+            BoardInf.QualityPara.dSD[i][j]=FloatValue.f_val;
+            // CharConvertFloat(&x[0],BoardInf.QualityPara.dSD[i][j]);
+
+            FloatValue.c_val[0]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[0]+=(data_buf[ptr++]-CHAR_ADD);
+            FloatValue.c_val[1]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[1]+=(data_buf[ptr++]-CHAR_ADD);
+            FloatValue.c_val[2]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[2]+=(data_buf[ptr++]-CHAR_ADD);
+            FloatValue.c_val[3]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[3]+=(data_buf[ptr++]-CHAR_ADD);
+            BoardInf.QualityPara.dCV[i][j]=FloatValue.f_val;
+            //CharConvertFloat(&x[0],BoardInf.QualityPara.dCV[i][j]);
+
+            FloatValue.c_val[0]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[0]+=(data_buf[ptr++]-CHAR_ADD);
+            FloatValue.c_val[1]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[1]+=(data_buf[ptr++]-CHAR_ADD);
+            FloatValue.c_val[2]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[2]+=(data_buf[ptr++]-CHAR_ADD);
+            FloatValue.c_val[3]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[3]+=(data_buf[ptr++]-CHAR_ADD);
+            BoardInf.QualityPara.dUpperLimit[i][j]=FloatValue.f_val;
+            // CharConvertFloat(&x[0],BoardInf.QualityPara.dUpperLimit[i][j]);
+
+            FloatValue.c_val[0]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[0]+=(data_buf[ptr++]-CHAR_ADD);
+            FloatValue.c_val[1]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[1]+=(data_buf[ptr++]-CHAR_ADD);
+            FloatValue.c_val[2]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[2]+=(data_buf[ptr++]-CHAR_ADD);
+            FloatValue.c_val[3]=(data_buf[ptr++]-CHAR_ADD)*10;
+            FloatValue.c_val[3]+=(data_buf[ptr++]-CHAR_ADD);
+            BoardInf.QualityPara.dLowerLimit[i][j]=FloatValue.f_val;
+            //CharConvertFloat(&x[0],BoardInf.QualityPara.dLowerLimit[i][j]);
+        }
+    }
+    //lugj modify start 171207
+    BoardInf.bHasData=0;      //是否带数据
+    BoardInf.bHasRawData[0]=0;
+    BoardInf.bHasRawData[1]=0;
+    //lugj modify end 171207
+
+    if(data_buf[ptr++]!='E')
+    {
+        // gSystem.SystemErrCode|=ERRCODE_NAND_FLASH;
+        return RETURN_FALSE;
+    }
+
+    return RETURN_TRUE;
+
+}
+//导入一个文件  CurrProgramName.Name
+unsigned char UsbOpenOneFile(void)//u8 Read_Spi_File(void)
+{
+
+
+    uint32_t bw;
+    unsigned char falg_err;
+    FRESULT result;
+    DIR DirInf;
+    //char lfname[256];
+// char path_usb[32];
+
+    falg_err=0;
+    if(f_mount(&fs_usb, FS_VOLUME_USB, 0)!= FR_OK)
+    {
+        falg_err=1;
+        goto err;
+    }
+
+    sprintf(path, "%s/", FS_VOLUME_USB);
+    if ( f_opendir(&DirInf, path)!= FR_OK)
+    {
+        falg_err=2;
+        goto err;
+    }
+    //打开子目录
+    strcat(path,DIR_USB_PROGRAM_INPUT);
+
+    if ( f_opendir(&DirInf, path)!= FR_OK)
+    {
+        falg_err=3;
+        goto err;
+    }
+    //sprintf(path_usb, "%s%s%s", FS_VOLUME_USB1,CurrProgramName.Name,".csv");
+    //	FileInf_Usb.lfname = lfname;
+    // FileInf_Usb.lfsize = 256;
+    //sprintf(path_usb, "%s/", DIR_USB_PROGRAM_INPUT);
+
+    strcat(path,"/");
+    strcat(path,CurrProgramName.Name);//
+    strcat(path,".erf");
+    result = f_open(&file_usb,path, FA_OPEN_EXISTING | FA_READ);
+    if (result !=  FR_OK)
+    {
+        falg_err=4;
+        goto err;
+    }
+
+
+    result = f_read(&file_usb, data_buf, file_usb.fsize, &bw);//&data_buf
+    if (bw > 0)
+    {
+        // data_buf[bw] = 0;
+    }
+    //f_close(&file_usb);
+    if(UsbInputFileData()==RETURN_FALSE) //出据出错
+    {
+        // f_close(&file_usb);
+        falg_err=5;
+        goto err;
+    }
+
+    falg_err=0;
+
+err:
+    f_close(&file_usb);
+    f_mount(NULL,FS_VOLUME_USB, 0);
+
+    return falg_err;
+}
+//导入一个标准值文件
+unsigned char UsbOpenFile_read_data(void)//导入一个标准值文件
+{
+    char   charbuf[12];
+    u16 wi,ci,ni,i,j,k,temp;
+    u8 channel=0;
+    uint32_t bw;
+    unsigned char falg_err=0;
+    FRESULT result;
+    DIR DirInf;
+    char file_name[20]="Sta.txt";
+
+    if(f_mount(&fs_usb, FS_VOLUME_USB, 0)!= FR_OK)
+    {
+        falg_err=1;
+        goto err;
+    }
+
+    sprintf(path, "%s/", FS_VOLUME_USB);
+    if ( f_opendir(&DirInf, path)!= FR_OK)
+    {
+        falg_err=2;
+        goto err;
+    }
+    //打开子目录
+    /*
+    strcat(path,DIR_USB_PROGRAM_INPUT);
+    if ( f_opendir(&DirInf, path)!= FR_OK)
+    {
+    falg_err=3;
+    goto err;
+    }
+    */
+    //strcat(path,"/");
+    strcat(path,file_name);//
+    result = f_open(&file_usb,path, FA_OPEN_EXISTING | FA_READ);
+    if (result !=  FR_OK)
+    {
+        falg_err=4;
+        goto err;
+    }
+
+
+    result = f_read(&file_usb, data_buf, file_usb.fsize, &bw);//&data_buf
+    if (bw > 0)
+    {
+
+        for(i=0; i<8; i++)
+        {
+            SystemPrameter.AbsCali[i].dABS_flag=0;
+            for(j=0; j<9; j++)
+            {
+                SystemPrameter.AbsCali[i].dABS[j]=-1;
+            }
+        }
+        ni=0;
+        ci=0;
+        for(i=0; i<12; i++)
+        {
+            charbuf[i]='\0';
+        }
+        for(wi=0; wi<bw-1; wi++)
+        {
+            if((data_buf[wi]==0xA3)&&(data_buf[wi+1]==0xAC))
+            {
+                if(ni==0)
+                {
+                    channel=atoi(charbuf)-1;
+                    SystemPrameter.AbsCali[channel].dABS_flag=1;
+                }
+                else  //ni>0
+                {
+                    SystemPrameter.AbsCali[channel].dABS[ni-1]= atof(charbuf);
+                }
+                ni++;
+                wi=wi+1;
+                ci=0;
+                for(i=0; i<12; i++)
+                {
+                    charbuf[i]='\0';
+                }
+            }
+            else if((data_buf[wi]==0x0D)&&(data_buf[wi+1]==0x0A))//((data_buf[wi]==0x20)&&(data_buf[wi]==0x0d)&&(data_buf[wi]==0x0a))
+            {
+                SystemPrameter.AbsCali[channel].dABS[ni-1]= atof(charbuf);  //最后一个
+                ci=0;
+                for(i=0; i<12; i++)
+                {
+                    charbuf[i]='\0';
+                }
+                wi=wi+1;
+                ni=0;
+            }
+            else
+            {
+                charbuf[ci]=data_buf[wi];
+                ci++;
+            }
+        }
+    }
+
+    falg_err=0;
+
+err:
+    f_close(&file_usb);
+    f_mount(NULL,FS_VOLUME_USB, 0);
+
+    return falg_err;
+}
+
+//**************************
+//根据板内容产生写入USB的板文件存入CsvConvertStr
+unsigned char SpiGenerateBoardFile(void)
+{
+    //int i,j=0,len,back[6],k;
+    //int back_f[6];
+    //float back_f[6];
+    //const char name1[]="bb.txt",start[]="AS154_S",name[]="NAME:",step[]="STEP:",time[]="TIME:",status[]="STATUS:",option[]="OPTION:",end[]="AS154_E";
+    unsigned int ptr=0;
+    unsigned char i,j,k,page_num;
+    //char x[4];
+//头行
+    //板名
+
+    CsvConvertStr[ptr++]='S';//以S开头
+    //uint8_t  data_buf[SPI_PAGE]
+
+
+    //len=strlen(BoardInf.Name);
+    j=strlen(&BoardInf.Name[0]);
+    CsvConvertStr[ptr++]=j;
+    for(i=0; i<j; i++)
+    {
+        CsvConvertStr[ptr++]=BoardInf.Name[i];
+    }
+
+
+    CsvConvertStr[ptr++]=BoardInf.bHasData+CHAR_ADD;
+
+    sprintf(ConvertStr,"%4d",BoardInf.DateTime.Year);
+    CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[2]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[3]+CHAR_ADD;
+
+    sprintf(ConvertStr,"%2d",BoardInf.DateTime.Month);
+    CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+
+    sprintf(ConvertStr,"%2d",BoardInf.DateTime.Day);
+    CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+
+    sprintf(ConvertStr,"%2d",BoardInf.DateTime.Hour);
+    CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+
+    sprintf(ConvertStr,"%2d",BoardInf.DateTime.Min);
+    CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+
+    sprintf(ConvertStr,"%2d",BoardInf.DateTime.Sec);
+    CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+
+
+    sprintf(ConvertStr,"%4d",gSystem.CurrBlock);
+    CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[2]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[3]+CHAR_ADD;
+
+
+    //检测
+    CsvConvertStr[ptr++]=BoardInf.Filter1Locate+CHAR_ADD;
+    CsvConvertStr[ptr++]=BoardInf.Filter2Locate+CHAR_ADD;
+    CsvConvertStr[ptr++]=BoardInf.DetectMode+CHAR_ADD;
+    //振动
+    CsvConvertStr[ptr++]=BoardInf.ShakeEnable+CHAR_ADD;
+    CsvConvertStr[ptr++]=BoardInf.ShakeSpeed+CHAR_ADD;
+
+    sprintf(ConvertStr,"%6d",BoardInf.ShakeTime);
+    CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[2]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[3]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[4]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[5]+CHAR_ADD;
+
+    CsvConvertStr[ptr++]=BoardInf.ShakeMode+CHAR_ADD;
+    //定性
+    CsvConvertStr[ptr++]=BoardInf.InterpretPara.Enable+CHAR_ADD;   //允许定性分析
+    CsvConvertStr[ptr++]=BoardInf.InterpretPara.AbsFlag+CHAR_ADD;  //采用吸光度
+
+    FloatValue.f_val=BoardInf.InterpretPara.fWeakPValue;
+    sprintf(ConvertStr,"%2d",FloatValue.c_val[0]);
+    CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+    sprintf(ConvertStr,"%2d",FloatValue.c_val[1]);
+    CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+    sprintf(ConvertStr,"%2d",FloatValue.c_val[2]);
+    CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+    sprintf(ConvertStr,"%2d",FloatValue.c_val[3]);
+    CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+
+
+    CsvConvertStr[ptr++]=BoardInf.InterpretPara.GreatFlag+CHAR_ADD;
+    for(i=0; i<3; i++)
+    {
+        FloatValue.f_val=BoardInf.InterpretPara.fCoef[i];
+        sprintf(ConvertStr,"%2d",FloatValue.c_val[0]);
+        CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+        CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+        sprintf(ConvertStr,"%2d",FloatValue.c_val[1]);
+        CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+        CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+        sprintf(ConvertStr,"%2d",FloatValue.c_val[2]);
+        CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+        CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+        sprintf(ConvertStr,"%2d",FloatValue.c_val[3]);
+        CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+        CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+    }
+
+#ifdef SOFTWARE_DN
+    CsvConvertStr[ptr++]=BoardInf.InterpretPara.Mode+CHAR_ADD;
+    for(i=0; i<3; i++)
+    {
+        FloatValue.f_val=BoardInf.InterpretPara.fCoef_DN[i];
+        sprintf(ConvertStr,"%2d",FloatValue.c_val[0]);
+        CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+        CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+        sprintf(ConvertStr,"%2d",FloatValue.c_val[1]);
+        CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+        CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+        sprintf(ConvertStr,"%2d",FloatValue.c_val[2]);
+        CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+        CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+        sprintf(ConvertStr,"%2d",FloatValue.c_val[3]);
+        CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+        CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+    }
+#endif
+    //板布局
+    for(i=0; i<TUBE_MAX; i++)
+    {
+        CsvConvertStr[ptr++]=BoardInf.Layout.WellType[i]+CHAR_ADD;
+        CsvConvertStr[ptr++]= BoardInf.Layout.Num[i]+CHAR_ADD;
+    }
+    //动力学
+    CsvConvertStr[ptr++]=BoardInf.KineticPara.Enable+CHAR_ADD;
+    CsvConvertStr[ptr++]=BoardInf.KineticPara.PreProcess+CHAR_ADD;
+    CsvConvertStr[ptr++]=BoardInf.KineticPara.Curve+CHAR_ADD;
+    CsvConvertStr[ptr++]=BoardInf.KineticPara.Readings+CHAR_ADD;
+
+
+    sprintf(ConvertStr,"%6d",BoardInf.KineticPara.TimeInterval);
+    CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[2]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[3]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[4]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[5]+CHAR_ADD;
+
+//Para.
+    CsvConvertStr[ptr++]=BoardInf.KineticPara.kinetic_analysis_mode+CHAR_ADD;
+    CsvConvertStr[ptr++]=BoardInf.KineticPara.BaseLinePoint+CHAR_ADD;
+    CsvConvertStr[ptr++]=BoardInf.KineticPara.BaseLineSel+CHAR_ADD;
+    CsvConvertStr[ptr++]=BoardInf.KineticPara.EndReadings+CHAR_ADD;
+    CsvConvertStr[ptr++]=BoardInf.KineticPara.FirstReadings+CHAR_ADD;
+
+    //FloatConvertChar(BoardInf.KineticPara.Change,x);
+    FloatValue.f_val=BoardInf.KineticPara.Change;
+    sprintf(ConvertStr,"%2d",FloatValue.c_val[0]);
+    CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+    sprintf(ConvertStr,"%2d",FloatValue.c_val[1]);
+    CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+    sprintf(ConvertStr,"%2d",FloatValue.c_val[2]);
+    CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+    sprintf(ConvertStr,"%2d",FloatValue.c_val[3]);
+    CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+
+
+    //是否带数据
+    //data_buf[ptr++]=BoardInf.bHasData;
+    CsvConvertStr[ptr++]=BoardInf.bHasRawData[0]+CHAR_ADD;
+    CsvConvertStr[ptr++]=BoardInf.bHasRawData[1]+CHAR_ADD;
+
+    //浓度参数
+    for(i=0; i<CALIBRATOR_CONCENTRATION_MAX; i++)
+    {
+        //FloatConvertChar(BoardInf.dConcentration[i],x);
+        FloatValue.f_val=BoardInf.dConcentration[i];
+        sprintf(ConvertStr,"%2d",FloatValue.c_val[0]);
+        CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+        CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+        sprintf(ConvertStr,"%2d",FloatValue.c_val[1]);
+        CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+        CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+        sprintf(ConvertStr,"%2d",FloatValue.c_val[2]);
+        CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+        CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+        sprintf(ConvertStr,"%2d",FloatValue.c_val[3]);
+        CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+        CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+    }
+    CsvConvertStr[ptr++]=BoardInf.wcCurrentUnit+CHAR_ADD;
+
+
+
+    //质控
+    CsvConvertStr[ptr++]=BoardInf.QualityPara.Enable+CHAR_ADD; //??????
+    CsvConvertStr[ptr++]=BoardInf.QualityPara.AbsFlag+CHAR_ADD; //?????,0????,1?????
+
+    for(i=0; i<2; i++)
+    {
+        for(j=0; j<QC_MAX; j++)
+        {
+            //FloatConvertChar(BoardInf.QualityPara.dTarget[i][j],x);
+            FloatValue.f_val=BoardInf.QualityPara.dTarget[i][j];
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[0]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[1]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[2]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[3]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+
+            // FloatConvertChar(BoardInf.QualityPara.dSD[i][j],x);
+            FloatValue.f_val=BoardInf.QualityPara.dSD[i][j];
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[0]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[1]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[2]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[3]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+
+            //FloatConvertChar(BoardInf.QualityPara.dCV[i][j],x);
+            FloatValue.f_val=BoardInf.QualityPara.dCV[i][j];
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[0]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[1]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[2]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[3]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+
+            //FloatConvertChar(BoardInf.QualityPara.dUpperLimit[i][j],x);
+            FloatValue.f_val=BoardInf.QualityPara.dUpperLimit[i][j];
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[0]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[1]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[2]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[3]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+
+            //FloatConvertChar(BoardInf.QualityPara.dLowerLimit[i][j],x);
+            FloatValue.f_val=BoardInf.QualityPara.dLowerLimit[i][j];
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[0]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[1]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[2]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+            sprintf(ConvertStr,"%2d",FloatValue.c_val[3]);
+            CsvConvertStr[ptr++]=ConvertStr[0]+CHAR_ADD;
+            CsvConvertStr[ptr++]=ConvertStr[1]+CHAR_ADD;
+        }
+    }
+    CsvConvertStr[ptr++]='E'; //674
+    CsvConvertStr[ptr]=0;
+    //WriteFileSize=ptr;
+    //FMC_NAND_EraseBlock(gSystem.CurrBlock);
+    //for( ;ptr<SPI_PAGE;ptr++)
+    // {
+    //CsvConvertStr[ptr]=0xff;
+//	 }
+    /*
+    page_num=0;
+    if(FMC_NAND_WritePage(data_buf, (unsigned int)gSystem.CurrBlock*NAND_BLOCK_SIZE, page_num++, NAND_PAGE_SIZE)!=NAND_OK)
+    {
+       return NAND_FAIL;
+    }
+    */
+
+    /*
+
+    if(BoardInf.bHasData)//带数据
+    {
+      for(i = 0; i < FILTER_PLATE_MAX; i++)
+      {
+    	  if(BoardInf.bHasRawData[i]==0)
+    	  {
+    		  break;
+    	  }
+
+    	  for(k = 0; k < BoardInf.KineticPara.kinetic_readings_practical; k++)
+    	  {
+    		  for(j = 0; j < TUBE_MAX; j++)
+    		  {
+    			   FloatConvertChar(dABSInit[k][i][j],x);
+    	       data_buf[ptr++]=x[0];
+              data_buf[ptr++]=x[1];
+              data_buf[ptr++]=x[2];
+              data_buf[ptr++]=x[3];
+    			   if(ptr==NAND_BLOCK_SIZE)//2048
+    			   {
+    				   ptr=0;
+    				   if(FMC_NAND_WritePage(data_buf, (unsigned int)NAND_BLOCK_SIZE*gSystem.CurrBlock, page_num++, NAND_PAGE_SIZE)!=NAND_OK)
+                {
+                  return NAND_FAIL;
+                }
+    			   }
+    			//stuFile.Write(&(dABSInit[k][i][j]),sizeof(float));
+    		  }
+    	  }
+      }
+    //for(int j = 0; j < TUBE_MAX; j++)
+    //{
+    	//stuFile.Write(&(dABSInitBack[j]),sizeof(float));
+    //}
+    	 data_buf[ptr++]='E';
+        for( ;ptr<NAND_BLOCK_SIZE;ptr++)
+        {
+    		  data_buf[ptr]=0xff;
+        }
+      if(FMC_NAND_WritePage(data_buf, (unsigned int)NAND_BLOCK_SIZE*gSystem.CurrBlock, page_num++, NAND_PAGE_SIZE)!=NAND_OK)
+        {
+          return NAND_FAIL;
+       }
+    }
+    */
+    return NAND_OK;
+}
+
+//导出校准报告
+unsigned char ExportAbsCalibrationFile(char *name_str)
+{
+    UINT  bw;
+    u8 falg_err=0;
+    FRESULT result;
+    DIR DirInf;
+    float temp;
+    u16  i,j,k,m;
+    char charBUF[12];
+    char str[20];
+
+    char chartitle1[LANGUAGE_TYPES][TESTDLG_TITLE_CHAR_MAX]= { "Standard value", "标准值"};
+    char chartitle2[LANGUAGE_TYPES][TESTDLG_TITLE_CHAR_MAX]= { "Calibration value", "校准值"};
+    char chartitle3[LANGUAGE_TYPES][TESTDLG_TITLE_CHAR_MAX]= { "Measured value", "实测值"};
+    char chartitle4[LANGUAGE_TYPES][TESTDLG_TITLE_CHAR_MAX]= { "Error value", "误差值"};
+    char chartitle5[LANGUAGE_TYPES][TESTDLG_TITLE_CHAR_MAX]= { "Percentage(%)", "百分比(%)"};
+    char charChanne[LANGUAGE_TYPES][TESTDLG_TITLE_CHAR_MAX]= { "Channel", "通道"};
+    char charChanneDate[LANGUAGE_TYPES][TESTDLG_TITLE_CHAR_MAX]= { "Channel Date", "通道数据"};
+    char charxhao123[]= { " ,1,2,3,4,5,6,7,8,9,10,11,12,"};
+    char charxhaoABC[8]= { "ABCDEFGH"};
+    if(f_mount(&fs_usb, FS_VOLUME_USB, 0)!= FR_OK)
+    {
+        falg_err=1;
+        goto err;
+    }
+    sprintf(path, "%s/", FS_VOLUME_USB);	//path_usb
+    if ( f_opendir(&DirInf, path)!= FR_OK)
+    {
+        falg_err=2;
+        goto err;
+    }
+
+    sprintf(path, "%s/", FS_VOLUME_USB);	//path_usb
+    // strcat(path,"AbsCali.csv");
+    strcat(path,name_str);
+    strcat(path,".csv");
+    if(f_open(&file_usb, path, FA_OPEN_EXISTING | FA_READ)==FR_OK)//有相同的文件名
+    {
+        f_close(&file_usb);
+        if(f_open(&file_usb, path, FA_OPEN_EXISTING | FA_WRITE)!= FR_OK)
+        {
+            falg_err=3;
+            goto err;
+        }
+    }
+    else if(f_open(&file_usb, path, FA_CREATE_ALWAYS | FA_WRITE)!= FR_OK)
+    {
+        falg_err=4;
+        goto err;
+    }
+
+
+    for(k=0; k<8; k++) //通道
+    {
+        if(SystemPrameter.AbsCali[k].dABS_flag==1)
+        {
+
+            sprintf(str, "%d", k+1);
+            strcat(str,charChanne[SystemPrameter.SystemLanguage]);
+            result = f_write(&file_usb, str, strlen(str), &bw);//第几通道
+            result = f_write(&file_usb,"\r\n", 2, &bw); //换行
+            result = f_write(&file_usb, chartitle1[SystemPrameter.SystemLanguage], strlen(chartitle1[SystemPrameter.SystemLanguage]), &bw);//
+            result = f_write(&file_usb,",", 1, &bw);
+            result = f_write(&file_usb, chartitle2[SystemPrameter.SystemLanguage], strlen(chartitle2[SystemPrameter.SystemLanguage]), &bw);//
+            result = f_write(&file_usb,",", 1, &bw);
+            result = f_write(&file_usb, chartitle3[SystemPrameter.SystemLanguage], strlen(chartitle3[SystemPrameter.SystemLanguage]), &bw);//
+            result = f_write(&file_usb,",", 1, &bw);
+            result = f_write(&file_usb, chartitle4[SystemPrameter.SystemLanguage], strlen(chartitle4[SystemPrameter.SystemLanguage]), &bw);//
+            result = f_write(&file_usb,",", 1, &bw);
+            result = f_write(&file_usb, chartitle5[SystemPrameter.SystemLanguage], strlen(chartitle5[SystemPrameter.SystemLanguage]), &bw);//
+            result = f_write(&file_usb,",", 1, &bw);
+            result = f_write(&file_usb,"\r\n", 2, &bw); //换行
+
+
+            for(j=0; j<8; j++) //校准数量
+            {
+                sprintf(charBUF, "%.3f",SystemPrameter.AbsCali[k].dABS[j]);
+                result = f_write(&file_usb, charBUF, strlen(charBUF), &bw);// 标准值
+                result = f_write(&file_usb,",", 1, &bw);
+
+                sprintf(charBUF, "%.3f",SystemPrameter.AbsCali[k].dABSPractical[j]);
+                result = f_write(&file_usb, charBUF, strlen(charBUF), &bw);//  校准值
+                result = f_write(&file_usb,",", 1, &bw);
+
+                sprintf(charBUF, "%.3f",Used_AbsCali[k][j]);
+                result = f_write(&file_usb, charBUF, strlen(charBUF), &bw);//实测值
+                result = f_write(&file_usb,",", 1, &bw);
+
+                temp=Used_AbsCali[k][j]-SystemPrameter.AbsCali[k].dABS[j];
+                sprintf(charBUF, "%.3f",temp);
+                result = f_write(&file_usb, charBUF, strlen(charBUF), &bw);//实测值-标准值
+                result = f_write(&file_usb,",", 1, &bw);
+
+                sprintf(charBUF, "%.3f",temp*100/SystemPrameter.AbsCali[k].dABS[j]);
+                result = f_write(&file_usb, charBUF, strlen(charBUF), &bw);//(实测值-标准值)/标准值
+                result = f_write(&file_usb,",", 1, &bw);
+                result = f_write(&file_usb,"\r\n", 2, &bw); //换行
+
+            }
+        }
+    }
+
+    result = f_write(&file_usb,"   \r\n", 4, &bw); //换行,空一行
+    for(k=0; k<8; k++) //显示详细信息,通道
+    {
+        if(SystemPrameter.AbsCali[k].dABS_flag==1)
+        {
+            sprintf(str, "%d", k+1);
+            strcat(str,charChanneDate[SystemPrameter.SystemLanguage]);//第几通道
+            result = f_write(&file_usb, str, strlen(str), &bw);//
+            result = f_write(&file_usb,"\r\n", 2, &bw); //换行
+            for(m=0;m<2;m++)
+					{
+            result = f_write(&file_usb, charxhao123, strlen(charxhao123), &bw);//123456
+            result = f_write(&file_usb,"\r\n", 2, &bw); //换行
+
+            for(i=0; i<8; i++)
+            {
+                result = f_write(&file_usb,&charxhaoABC[i], 1, &bw); //
+							  result = f_write(&file_usb,",", 1, &bw); //
+                for(j=0; j<12; j++)
+                {
+                    sprintf(charBUF, "%.3f",dABS[k+1][m][i * 12 + j]);
+									  result = f_write(&file_usb, charBUF, strlen(charBUF), &bw);
+                    result = f_write(&file_usb,",", 1, &bw); //
+                }
+								result = f_write(&file_usb,"\r\n", 2, &bw); //换行
+            }
+					}
+
+					}
+        }
+
+
+
+        falg_err=0;
+err:
+
+        f_close(&file_usb);
+        f_mount(NULL,FS_VOLUME_USB, 0);
+
+        return falg_err;
+    }
+
+//导出.erf或.dat文件
+    unsigned char ExportOneFile(void)
+    {
+
+        UINT  bw;
+        u8 falg_err;
+        FRESULT result;
+        DIR DirInf;
+        //char path_usb[32];
+
+        falg_err=0;
+        if(f_mount(&fs_usb, FS_VOLUME_USB, 0)!= FR_OK)
+        {
+            falg_err=1;
+            goto err;
+        }
+
+        // if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+        // {
+        //	sprintf(StrTemp,"%02d%02d%04d",BoardInf.DateTime.Month,BoardInf.DateTime.Day,BoardInf.DateTime.Year);
+        // }
+        //else
+        //{
+        //  sprintf(StrTemp,"%04d%02d%02d",BoardInf.DateTime.Year,BoardInf.DateTime.Month,BoardInf.DateTime.Day);
+        // }
+        // sprintf(ConvertStr,"%02d%02d%02d",BoardInf.DateTime.Hour,BoardInf.DateTime.Min,BoardInf.DateTime.Sec);
+        // strcat(StrTemp,ConvertStr);
+        sprintf(path, "%s/", FS_VOLUME_USB);	//path_usb
+
+        if ( f_opendir(&DirInf, path)!= FR_OK)
+        {
+            falg_err=2;
+            goto err;
+        }
+
+        //打开子目录
+        strcat(path,DIR_USB_PROGRAM_OUTPUT);  //Items目录下
+        if ( f_opendir(&DirInf, path)!= FR_OK)
+        {
+            falg_err=2;
+            goto err;
+        }
+
+
+        //
+        //sprintf(path_usb, "%s%s%s", FS_VOLUME_USB1,CurrProgramName.Name,".csv");
+        strcat(path,"/");
+        strcat(path,BoardInf.Name);
+        //strcat(path,"_");
+        //strcat(path,StrTemp);
+        //if(BoardInf.bHasData)
+        //{
+        //  strcat(ConvertStr,".dat");
+        //}
+        //else
+        //{
+        strcat(path,".erf"); //注只能导出程序文件
+        //}
+
+        if(f_open(&file_usb, path, FA_OPEN_EXISTING | FA_READ)==FR_OK)//有相同的文件名
+        {
+            f_close(&file_usb);
+            if(f_open(&file_usb, path, FA_OPEN_EXISTING | FA_WRITE)!= FR_OK)
+            {
+                falg_err=3;
+                goto err;
+            }
+        }
+        else if(f_open(&file_usb, path, FA_CREATE_ALWAYS | FA_WRITE)!= FR_OK)
+        {
+            falg_err=4;
+            goto err;
+        }
+        result = f_write(&file_usb, CsvConvertStr, strlen(CsvConvertStr), &bw);//
+        if (result != FR_OK)
+        {
+            // f_close(&file_usb);
+            falg_err=5;
+            goto err;
+        }
+        falg_err=0;
+        // f_close(&file_usb);
+err:
+
+        f_close(&file_usb);
+        f_mount(NULL,FS_VOLUME_USB, 0);
+
+        return falg_err;
+    }
+
+
+
+
+
+
+
+//导出第CENT个文件
+    unsigned char ExportOneProgram(void)
+    {
+
+        UINT  bw;
+        u8 falg_err;
+        FRESULT result;
+        DIR DirInf;
+        //char path_usb[32];
+
+
+        if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+        {
+            sprintf(StrTemp,"%02d%02d%04d",SystemTimePra.Month,SystemTimePra.Day,SystemTimePra.Year);
+        }
+        else
+        {
+            sprintf(StrTemp,"%04d%02d%02d",SystemTimePra.Year,SystemTimePra.Month,SystemTimePra.Day);
+        }
+        sprintf(ConvertStr,"%02d%02d%02d",SystemTimePra.Hour,SystemTimePra.Min,SystemTimePra.Sec);
+        strcat(StrTemp,ConvertStr);
+
+        falg_err=0;
+        if(f_mount(&fs_usb, FS_VOLUME_USB, 0)!= FR_OK)
+        {
+            falg_err=1;
+            goto err;
+        }
+
+        sprintf(ConvertStr, "%s/", FS_VOLUME_USB);	//path_usb
+
+        if ( f_opendir(&DirInf, ConvertStr)!= FR_OK)
+        {
+            falg_err=2;
+            goto err;
+        }
+        //
+        //sprintf(path_usb, "%s%s%s", FS_VOLUME_USB1,CurrProgramName.Name,".csv");
+
+        strcat(ConvertStr,BoardInf.Name);
+        strcat(ConvertStr,"_");
+        strcat(ConvertStr,StrTemp);
+        strcat(ConvertStr,".csv");
+        if(f_open(&file_usb, ConvertStr, FA_OPEN_EXISTING | FA_READ)==FR_OK)//有相同的文件名
+        {
+            falg_err=3;
+            goto err;
+        }
+
+
+        if(f_open(&file_usb, ConvertStr, FA_CREATE_ALWAYS | FA_WRITE)!= FR_OK)
+        {
+            falg_err=4;
+            goto err;
+        }
+        result = f_write(&file_usb, CsvConvertStr, strlen(CsvConvertStr), &bw);
+        if (result != FR_OK)
+        {
+
+            falg_err=5;
+            goto err;
+        }
+        falg_err=0;
+        //f_close(&file_usb);
+err:
+        f_close(&file_usb);
+        f_mount(NULL,FS_VOLUME_USB, 0);
+
+        return falg_err;
+    }
+    /*
+    //读取所有程序头文件
+    unsigned char ReadAllProgramHead(void)
+    {
+      UINT  bw;         // File read/write count
+    	u8 falg_err;
+    	FRESULT result;
+    	int i;
+
+    	DIR DirInf;
+    	FILINFO FileInf;
+    	unsigned short cnt = 0;
+    	unsigned short ptr;
+    	char lfname[256];
+      char path[32];
+
+
+    	  gSystem.ProgramMax=0;
+    	  falg_err=0;
+
+    	  if (f_mount(&fs, FS_VOLUME_SPI, 0) != FR_OK)   // Mount a logical drive
+    		{
+    			 falg_err=1;
+    	     goto err;
+    		}
+    	  sprintf(path, "%s/", FS_VOLUME_SPI);           //打开根目录
+       	if (f_opendir(&DirInf, path) != FR_OK)
+    		{
+    		   falg_err=2;
+    	     goto err;
+    		}
+
+    	  FileInf.lfname = lfname;
+    	  FileInf.lfsize = 256;
+    //    nb=0;
+
+
+    		gSystem.ProgramMax=0;
+    	  for (cnt = 0; ;cnt++)
+    	  {
+    			//清空文件名
+    			for(i=0;i<PROGRAM_NAME_LENGTH;i++)
+    			{
+    				FileInf.fname[i]=0;
+    			}
+          //文件满，正常返回
+    			if(gSystem.ProgramMax>=PROGRAM_MAX)
+    			{
+    			   return 0;
+    			}
+    			//读取根目录下的文件
+    	  	result = f_readdir(&DirInf,&FileInf); 		//读取目录项，索引自动下移
+    		  if (result != FR_OK || FileInf.fname[0] == 0)
+    		  {
+    				//falg_err=3;
+    				break;//没有文件了，退出
+    			}
+    		  if (FileInf.fname[0] == '.')
+    			    continue;
+
+    		  //判断是文件还是目录
+    		  if (FileInf.fattrib & AM_DIR)
+    			{
+    		      continue;  //目录
+    			}
+    			//查找扩展名是否为erf
+    			for(i=0;i<PROGRAM_NAME_LENGTH;i++)
+    			{
+    				if(FileInf.fname[i]=='.')
+    					break;
+    			}
+    			if(FileInf.fname[i+1]!='e'||FileInf.fname[i+2]!='r'||FileInf.fname[i+3]!='f')
+    			{
+    				if(FileInf.fname[i+1]!='E'||FileInf.fname[i+2]!='R'||FileInf.fname[i+3]!='F')
+    				{
+    					continue;  //不是程序文件
+    				}
+    			}
+
+          //打开文件
+    			strcpy(path, FS_VOLUME_SPI);
+    	    strcat(path,FileInf.fname);
+    	    if (f_open(&file,path, FA_OPEN_EXISTING | FA_READ) !=  FR_OK)
+    		  {
+    				  falg_err=4;
+    				  goto err;
+    			}
+
+    	   //读取文件
+    	    result = f_read(&file, &data_buf,file.fsize , &bw);//file.fsize FILE_HEAD_LENCH
+    	    if (bw > 0)//bw为读取的字节数
+    	    {
+    	    	data_buf[bw] = 0;
+    	    }
+
+    			f_close(&file);
+    			ptr=0;
+    			if(data_buf[ptr++]!='S')
+    			{
+    				 falg_err=5;
+    				 goto err;
+    			}
+    			//程序名
+
+    			for(i=0;i<PROGRAM_NAME_LENGTH;i++)
+    		  {
+    					ProgramName[gSystem.ProgramMax].Name[i]=data_buf[ptr++];
+    		  }
+    			//是否带数据标志
+    		  ProgramName[gSystem.ProgramMax].HasData=data_buf[ptr++];
+    			//日期时间值
+    		  ProgramName[gSystem.ProgramMax].DateTime.Year=data_buf[ptr++];
+    			ProgramName[gSystem.ProgramMax].DateTime.Month=data_buf[ptr++];
+    			ProgramName[gSystem.ProgramMax].DateTime.Day=data_buf[ptr++];
+    			ProgramName[gSystem.ProgramMax].DateTime.Hour=data_buf[ptr++];
+    			ProgramName[gSystem.ProgramMax].DateTime.Min=data_buf[ptr++];
+    			ProgramName[gSystem.ProgramMax].DateTime.Sec=data_buf[ptr++];
+    			gSystem.ProgramMax++;
+    		}
+    		falg_err=0;//正常返回
+    		//return 0;
+
+    err:
+    		f_close(&file);
+        f_mount(NULL,FS_VOLUME_SPI, 0);
+        return falg_err;
+
+    }
+
+    */
+
+
+
+
+    unsigned char SpiSaveSystemPra(void)
+    {
+        unsigned char i,j;
+        unsigned char ptr=0;
+
+        data_buf[ptr++]='S';
+        data_buf[ptr++]=SystemPrameter.SystemLanguage;
+        data_buf[ptr++]=SystemPrameter.PrintHeaderEnable;
+        data_buf[ptr++]=SystemPrameter.DoorOpen;
+        for(i=0; i<PRINT_REPORT_CHAR_MAX; i++)
+        {
+            data_buf[ptr++]=SystemPrameter.StrPrintHeader[i];
+        }
+        //滤光片参数
+        for(i=0; i<FILTER_MAX; i++)
+        {
+            j=(i<<1);
+            data_buf[j+ptr]=(FilterLun.Filter[i]>>8)&0xff;
+            ptr++;
+            data_buf[j+ptr]=(FilterLun.Filter[i])&0xff;
+            ptr++;
+        }
+        data_buf[ptr++]='E';
+
+        if(sf_WriteBuffer(data_buf,SPI_SYS_ADDRESS,ptr)==0)//向SPIFLASH写数据 SPI_PAGE
+        {
+            gSystem.SystemErrCode|=ERRCODE_SPI_FLASH;
+            return SPI_ERR;
+        }
+        else
+        {
+            gSystem.SystemErrCode&=~ERRCODE_SPI_FLASH;
+        }
+        return SPI_OK;
+    }
+
+
+
+    unsigned char SpiReadSystemPra(void)
+    {
+        unsigned char i,j;
+        unsigned char ptr=0;
+
+        sf_ReadBuffer( data_buf,SPI_SYS_ADDRESS, 100);//SPI_PAGE
+        //{
+        //gSystem.SystemErrCode&=~ERRCODE_E2P;
+        if(data_buf[ptr++]!='S')
+        {
+            gSystem.SystemErrCode|=ERRCODE_SPI_FLASH; //出错
+            return SPI_ERR;
+        }
+        SystemPrameter.SystemLanguage=data_buf[ptr++];
+        if( (SystemPrameter.SystemLanguage!=LANGUAGE_CH)&&(SystemPrameter.SystemLanguage!=LANGUAGE_EN) )
+        {
+            SystemPrameter.SystemLanguage=LANGUAGE_EN;
+        }
+
+        SystemPrameter.PrintHeaderEnable=data_buf[ptr++];
+        if(SystemPrameter.PrintHeaderEnable>1)
+        {
+            SystemPrameter.PrintHeaderEnable=1;
+        }
+
+        SystemPrameter.DoorOpen=data_buf[ptr++];
+        for(i=0; i<PRINT_REPORT_CHAR_MAX; i++)
+        {
+            SystemPrameter.StrPrintHeader[i]=data_buf[ptr++];
+        }
+        SystemPrameter.StrPrintHeader[PRINT_REPORT_CHAR_MAX-1]=0;
+
+        //滤光片
+        for(i=0; i<FILTER_MAX; i++)
+        {
+            j=(i<<1);
+            FilterLun.Filter[i]=data_buf[j+ptr];
+            FilterLun.Filter[i]<<=8;
+            ptr=ptr+1;
+            FilterLun.Filter[i]+=data_buf[j+ptr];
+            ptr=ptr+1;
+            //检测波长
+            if((FilterLun.Filter[i]>WAVELENGTH_MAX)||(FilterLun.Filter[i]<WAVELENGTH_MIN) )
+            {
+                FilterLun.Filter[i] = 0;
+            }
+        }
+        if(data_buf[ptr]!='E')
+        {
+            gSystem.SystemErrCode|=ERRCODE_SPI_FLASH; //出错
+            return SPI_ERR;
+        }
+        else
+        {
+            gSystem.SystemErrCode&=~ERRCODE_SPI_FLASH;
+        }
+        return SPI_OK;  //0
+
+    }
+
+
+
+    u8 SpiReadAbs(void)
+    {
+        unsigned short ptr=0;
+        unsigned char i,j;
+
+        sf_ReadBuffer( data_buf,SPI_ABS_ADDRESS, SPI_PAGE);
+        if(data_buf[ptr++]!='S')
+        {
+            gSystem.SystemErrCode|=ERRCODE_SPI_FLASH; //出错
+            return SPI_ERR;
+        }
+        SystemPrameter.RawIntensity=data_buf[ptr++]; //原始数据
+
+        SystemPrameter.nOrigin=((int)data_buf[ptr]<<24) + ((int)data_buf[ptr+1]<<16)
+                               +((int)data_buf[ptr+2]<<8) +  (int)data_buf[ptr+3];          //原点
+        //原点范围
+        ptr=ptr+4;
+        if(SystemPrameter.nOrigin>START_STEP_MAX_NUM)
+        {
+            SystemPrameter.nOrigin=START_STEP_MAX_NUM;
+        }
+        else if(SystemPrameter.nOrigin<START_STEP_MIN_NUM)
+        {
+            SystemPrameter.nOrigin=START_STEP_MIN_NUM;
+        }
+
+
+        SystemPrameter.AbsCaliEnable=data_buf[ptr++];
+        for(j=0; j<ABS_CHANNEL_MAX; j++)
+        {
+            SystemPrameter.AbsCali[j].Count=data_buf[ptr++];
+            SystemPrameter.AbsCali[j].dABS_flag=data_buf[ptr++];
+            if(SystemPrameter.AbsCali[j].Count>CALIBRATOR_ABS_MAX)
+            {
+                SystemPrameter.AbsCali[j].Count=CALIBRATOR_ABS_MAX;
+            }
+            for(i=0; i<CALIBRATOR_ABS_MAX; i++)
+            {
+                FloatValue.c_val[0]=data_buf[ptr++];
+                FloatValue.c_val[1]=data_buf[ptr++];
+                FloatValue.c_val[2]=data_buf[ptr++];
+                FloatValue.c_val[3]=data_buf[ptr++];
+                SystemPrameter.AbsCali[j].dABS[i]=FloatValue.f_val;
+                // CharConvertFloat(&FloatValue.c_val[0],SystemPrameter.AbsCali[j].dABS[i]);
+                if(SystemPrameter.AbsCali[j].dABS[i]>ABS_VAL_MAX)
+                {
+                    SystemPrameter.AbsCali[j].dABS[i]=ABS_VAL_MAX;
+                }
+                else if(SystemPrameter.AbsCali[j].dABS[i]<ABS_VAL_MIN)
+                {
+                    SystemPrameter.AbsCali[j].dABS[i]=ABS_VAL_MIN;
+                }
+
+
+                FloatValue.c_val[0]=data_buf[ptr++];
+                FloatValue.c_val[1]=data_buf[ptr++];
+                FloatValue.c_val[2]=data_buf[ptr++];
+                FloatValue.c_val[3]=data_buf[ptr++];
+                SystemPrameter.AbsCali[j].dABSPractical[i]=FloatValue.f_val;
+                //CharConvertFloat(&FloatValue.c_val[0],SystemPrameter.AbsCali[j].dABSPractical[i]);
+                if(SystemPrameter.AbsCali[j].dABSPractical[i]>ABS_VAL_MAX)
+                {
+                    SystemPrameter.AbsCali[j].dABSPractical[i]=ABS_VAL_MAX;
+                }
+                else if(SystemPrameter.AbsCali[j].dABSPractical[i]<ABS_VAL_MIN)
+                {
+                    SystemPrameter.AbsCali[j].dABSPractical[i]=ABS_VAL_MIN;
+                }
+                FloatValue.c_val[0]=data_buf[ptr++];
+                FloatValue.c_val[1]=data_buf[ptr++];
+                FloatValue.c_val[2]=data_buf[ptr++];
+                FloatValue.c_val[3]=data_buf[ptr++];
+                SystemPrameter.AbsCali[j].dABSError[i]=FloatValue.f_val;
+                //CharConvertFloat(&FloatValue.c_val[0],SystemPrameter.AbsCali[j].dABSError[i]);
+                if(SystemPrameter.AbsCali[j].dABSError[i]>ABS_VAL_MAX)
+                {
+                    SystemPrameter.AbsCali[j].dABSError[i]=ABS_VAL_MAX;
+                }
+                else if(SystemPrameter.AbsCali[j].dABSError[i]<ABS_VAL_MIN)
+                {
+                    SystemPrameter.AbsCali[j].dABSError[i]=ABS_VAL_MIN;
+                }
+            }
+        }
+        if(data_buf[ptr++]!='E')
+        {
+            gSystem.SystemErrCode|=ERRCODE_SPI_FLASH; //ERROR
+            return SPI_ERR;
+        }
+        else
+        {
+            gSystem.SystemErrCode&=~ERRCODE_SPI_FLASH; //OK
+        }
+        return SPI_OK;
+    }
+    u8 SpiSaveAbs(void)
+    {
+        unsigned short ptr=0;
+        unsigned char i,j;
+
+        data_buf[ptr++]='S';
+
+        data_buf[ptr++]=SystemPrameter.RawIntensity; //原始数据
+        data_buf[ptr++]=(SystemPrameter.nOrigin>>24)&0xff; //原点
+        data_buf[ptr++]=(SystemPrameter.nOrigin>>16)&0xff;
+        data_buf[ptr++]=(SystemPrameter.nOrigin>>8)&0xff;
+        data_buf[ptr++]=(SystemPrameter.nOrigin)&0xff;
+
+        data_buf[ptr++]=SystemPrameter.AbsCaliEnable;
+        for(j=0; j<ABS_CHANNEL_MAX; j++)
+        {
+            data_buf[ptr++]=SystemPrameter.AbsCali[j].Count;
+            data_buf[ptr++]=SystemPrameter.AbsCali[j].dABS_flag;
+            for(i=0; i<CALIBRATOR_ABS_MAX; i++)
+            {
+                FloatValue.f_val=SystemPrameter.AbsCali[j].dABS[i];
+                //FloatConvertChar(SystemPrameter.AbsCali[j].dABS[i],x);
+                data_buf[ptr++]=FloatValue.c_val[0];
+                data_buf[ptr++]=FloatValue.c_val[1];
+                data_buf[ptr++]=FloatValue.c_val[2];
+                data_buf[ptr++]=FloatValue.c_val[3];
+
+                FloatValue.f_val=SystemPrameter.AbsCali[j].dABSPractical[i];
+                //FloatConvertChar(SystemPrameter.AbsCali[j].dABSPractical[i],x);
+                data_buf[ptr++]=FloatValue.c_val[0];
+                data_buf[ptr++]=FloatValue.c_val[1];
+                data_buf[ptr++]=FloatValue.c_val[2];
+                data_buf[ptr++]=FloatValue.c_val[3];
+
+                FloatValue.f_val=SystemPrameter.AbsCali[j].dABSError[i];
+                //FloatConvertChar(SystemPrameter.AbsCali[j].dABSError[i],x);
+                data_buf[ptr++]=FloatValue.c_val[0];
+                data_buf[ptr++]=FloatValue.c_val[1];
+                data_buf[ptr++]=FloatValue.c_val[2];
+                data_buf[ptr++]=FloatValue.c_val[3];
+            }
+            //memcpy(&(SystemPrameter.AbsCali[SystemPrameter.nChannelCurrent]), &AbsCali, sizeof(ABS_CAL));
+            //SystemPrameter.nChannelCurrent = (SystemPrameter.nChannelCurrent + 1) % ABS_CHANNEL_MAX;
+        }
+        data_buf[ptr++]='E';
+
+        if(sf_WriteBuffer( data_buf,SPI_ABS_ADDRESS, SPI_PAGE)==0)     //写一页数据
+        {
+            gSystem.SystemErrCode|=ERRCODE_SPI_FLASH;                  //出错
+            return SPI_ERR;
+        }
+        else
+        {
+            gSystem.SystemErrCode&=~ERRCODE_SPI_FLASH;                 //
+        }
+        return SPI_OK;
+    }
+
+
+//获得升级程序文件名 0上位机1下位机
+    char find_update_file_name(unsigned char cent)
+    {
+        char *name1="AS112H",*name2="AS112L";
+        // UINT bw;
+        u8 falg_err,nb,i;
+        FRESULT result;
+        DIR DirInf;
+        FILINFO FileInf_Usb;
+        uint32_t cnt = 0;
+        // char lfname[256];
+        // char path_usb[32];
+
+        falg_err=0;
+        //挂载文件
+        if(f_mount(&fs_usb, FS_VOLUME_USB, 0)!= FR_OK)
+        {
+            falg_err=1;  //失败
+            goto err;
+        }
+        //打开主目录
+        sprintf(path, "%s/", FS_VOLUME_USB);
+        if (f_opendir(&DirInf, path)!= FR_OK)
+        {
+            falg_err=2;
+            goto err;
+        }
+        //打开子目录
+        strcat(path,DIR_USB_PROGRAM_UPDATE);
+
+        if(f_opendir(&DirInf, path)!= FR_OK)
+        {
+            falg_err=3;  //失败
+            goto err;
+        }
+        //读取当前文件夹下的文件和目录
+        FileInf_Usb.lfname = lfname;
+        FileInf_Usb.lfsize = 256;
+        nb=0;
+        for (cnt = 0; ; cnt++)
+        {
+            result = f_readdir(&DirInf,&FileInf_Usb); 		// 读取目录项，索引会自动下移
+            if (result != FR_OK || FileInf_Usb.fname[0] == 0)
+            {
+                falg_err=4; //0
+                break;//没有文件 读完
+            }
+            if (FileInf_Usb.fname[0] == '.')
+                continue;
+
+            //判断是文件还是子目录
+            if (FileInf_Usb.fattrib & AM_DIR)
+                continue;  //目录
+            nb=0;
+            if( strncmp(FileInf_Usb.fname,name1,6)==0&&cent==0)
+            {
+                for(i=0; i<20; i++)
+                {
+                    update_file_name[i]=FileInf_Usb.fname[i];
+                    if(update_file_name[i]=='.')
+                        nb=i;
+                }
+                if(update_file_name[nb+1]=='b'||update_file_name[nb+1]=='B')
+                {
+                    falg_err=0;
+                    goto err;
+                    //return 0;
+                }
+            }
+            if( strncmp(FileInf_Usb.fname,name2,6)==0&&cent==1)
+            {
+                for(i=0; i<20; i++)
+                {
+                    update_file_name[i]=FileInf_Usb.fname[i];
+                    if(update_file_name[i]=='.')
+                        nb=i;
+                }
+                if(update_file_name[nb+1]=='b'||update_file_name[nb+1]=='B')
+                {
+                    //return 0;
+                    falg_err=0;
+                    goto err;
+                }
+            }
+        }
+        falg_err=5;
+err:
+        //************************
+
+        // f_close(&file_usb);
+        f_mount(NULL,FS_VOLUME_USB, 0);
+        return falg_err;
+    }
+
+
+//**************************
+//读取升级程序发给下位机件
+//u8 Read_send_bin_File(void)
+//{
+//#define  SPI_PROGRAM_ADDRESS        13*1024*1024//14 15M存程序
+//#define  PROGRAM_PARAMETES_ADDRESS  15*1024*1024//最后16M存数据
+//#define  SEND_PAGE  512
+    /*
+    	uint8_t  data_buf[SEND_PAGE];
+    	FRESULT result;
+    	DIR DirInf;
+    	uint32_t bw,i,page,address;
+    	char falg_err;
+    	char path[32],err=0;
+    	union data{uint8_t size_char[4];uint32_t size_long;};
+    	union data program_size;
+    	uint32_t nb,cent,send_len;
+    	int page_max,excess, page_cent,k,m;
+
+    	if(find_update_file_name(1))
+    	{
+    		falg_err=1;
+    		goto err;
+    	}
+
+    	for(i=0;i<32;i++)
+    		 path[i]=0;
+
+      falg_err=0;
+     	// 挂载文件系统
+    	result = f_mount(&fs, FS_VOLUME_USB, 0);			// Mount a logical drive
+    	if (result != FR_OK)
+    	{
+    		falg_err=1;
+    		goto err;
+    	}
+    	// 打开根文件夹
+    	sprintf(path, "%s/", FS_VOLUME_USB);
+    	result = f_opendir(&DirInf, path); 	// 1: 表示盘符
+    	if (result != FR_OK)
+    	{
+    		falg_err=1;
+    		goto err;
+    	}
+    	//打开子目录
+    	strcat(path,DIR_USB_PROGRAM_UPDATE);
+    	if ( f_opendir(&DirInf, path)!= FR_OK)
+    	{
+    		falg_err=2;
+    		goto err;
+    	}
+
+    	strcpy(path, FS_VOLUME_USB);
+    			//sprintf(path_usb, "%s/", DIR_USB_PROGRAM_INPUT);
+    	strcat(path,DIR_USB_PROGRAM_UPDATE);
+    	strcat(path,"/");
+    	//strcat(path,UPDATE_PROGRAM_NAME);//
+    	strcat(path,update_file_name);
+    //	sprintf(path, "%s/%s ", FS_VOLUME_USB,UPDATE_PROGRAM_NAME);
+    	result = f_open(&file, path, FA_OPEN_EXISTING | FA_READ);
+    	if (result !=  FR_OK)
+    	{
+    		falg_err=3;
+    		goto err;
+    	}
+    	cent=0;
+    	if(file.fsize>100*1024)
+    		file.fsize=100*1024;
+
+    	// 读取文件
+    	page=file.fsize/SEND_PAGE;
+    	excess=file.fsize%SEND_PAGE;
+    	nb=page;
+    //
+    	  flag_start_update=0;
+    		for(i=0;i<3;i++)
+    	  {
+    		    UART6_Send(CMD_UPDATE,0);
+    			  for(m=0;m<10;m++)
+    		    {
+    					GUI_Delay(100);
+    					if(flag_start_update==1)
+    								 break;
+    				}
+    				if(m<10)
+    					   break;
+    	  }
+    		if(i>=3)
+    		{
+    			Prompt_select(PROMPT_UPDATA_DISCONNECT);
+    	  	falg_err=11;
+    		  goto err;
+    		}
+    		refresh_PROGBAR(1);
+    		GUI_Delay(10);
+    		for(i=0;i<3;i++)
+    	  {
+    		    UART6_Send(CMD_UPDATE_START ,0);
+    			  for(m=0;m<20;m++)
+    		    {
+    					GUI_Delay(100);
+    					if(flag_start_update==2)
+    								 break;
+    				}
+    				if(m<20)
+    					   break;
+    	  }
+    		if(i>=3)
+    		{
+    			Prompt_select(PROMPT_UPDATA_DISCONNECT);
+    	  	falg_err=11;
+    		  goto err;
+    		}
+    		GUI_Delay(10);
+
+    	//page_cent=0;
+    	for(i=0;i<page+1;i++)
+    	{ update_data_nember=i;
+    		result = f_read(&file, data_buf,SEND_PAGE , &bw);
+    	  if (result != FR_OK)
+    	  {
+    	  	falg_err=4;
+    		  goto err;
+    	  }
+    		if(i==page)
+    		{
+    			for(k=excess;k<512;k++)
+    			 data_buf[k]=0xff;
+    		}
+    	//	Usb_check();
+    		if(flag_usb_disk_connect==0)//fmc160928
+    		{
+    			falg_err=4;
+    		  goto err;
+    		}
+        //发送和接收 SEND_PAGE
+    		UART_Send_Buf[5]=i>>8;
+    	  UART_Send_Buf[6]=i;
+    		//address=page_cent*512;
+    		for(m=0;m<512;m++)
+    			      UART_Send_Buf[7+m]=data_buf[m];
+        for(k=0;k<3;k++) //发三次
+    		{
+    			flag_update_one_ok=0;
+    			UART6_Send(CMD_UPDATE_SEND,0);
+    		  for(m=0;m<200;m++)
+    	    {
+    		     GUI_Delay(10);
+    				 if(flag_update_one_ok)
+    						 break;
+    	    }
+    			if(flag_update_one_ok)
+    						 break;
+    	 }
+    	 if(flag_update_one_ok==0)
+    	 {
+    		 Prompt_select(PROMPT_UPDATA_DISCONNECT);
+    	  {
+    	  	falg_err=11;
+    		  goto err;
+    	  }
+    	 }
+
+    		cent=i*100/page;
+    	 if(cent!=0&&cent!=100)
+          refresh_PROGBAR(cent);
+        GUI_Delay(10);
+
+      }
+    	  for(k=0;k<2;k++) //发三次
+    		{
+    			flag_update_one_ok=0;
+    			UART6_Send(CMD_UPDATE_END,0);
+    		  for(m=0;m<200;m++)
+    	    {
+    		     GUI_Delay(100);
+    				 if(flag_update_one_ok)
+    						 break;
+    	    }
+    			if(flag_update_one_ok)
+    						 break;
+    	 }
+    	 if(flag_update_one_ok==0)
+    	 {
+    		 Prompt_select(PROMPT_UPDATA_DISCONNECT);
+    	  {
+    	  	falg_err=11;
+    		  goto err;
+    	  }
+    	 }
+    	 GUI_Delay(100);
+    	 if(flag_usb_disk_connect==0)//fmc160928
+    	 {
+    			falg_err=4;
+    		  goto err;
+    	 }
+    	refresh_PROGBAR(100);
+    	  GUI_Delay(10);
+
+    	f_close(&file);
+    	f_mount(NULL,FS_VOLUME_USB, 0);
+    	flag_update_busy=0;
+    	Prompt_select(PROMPT_UPDATA_OK);
+    	  //lgj161013 start
+
+    	 GUI_Delay(200);
+    	 UART6_Send(CMD_READ_VERSION,UartActiveData);      //???????
+    	 GUI_Delay(100);
+    	 UART6_Send(CMD_CHECK,UartActiveData);
+    	 GUI_Delay(200);
+    	 //lgj161013 end
+
+    	return 1;
+
+
+    err:
+    	 Prompt_select(PROMPT_UPDATA_DISCONNECT);//PROMPT_NO_U_DISK);
+
+    	f_close(&file);
+    	f_mount(NULL,FS_VOLUME_USB, 0);
+    	 flag_update_busy=0;
+    	return 0;
+    	*/
+
+//}
+
+//********************************************
+//将USB中上位机升级程序转存到SPI中
+    u8 Read_write_bin_File(void)
+    {
+        //#define  SPI_PROGRAM_ADDRESS        13*1024*1024//14 15M存程序
+        //#define  PROGRAM_PARAMETES_ADDRESS  15*1024*1024//最后16M存数据
+        //#define  SPI_PAGE  4096
+
+        //uint8_t  data_buf[SPI_PAGE];
+        FRESULT result;
+        DIR DirInf;
+        uint32_t bw,i,page,excess,address;
+        char falg_err;
+        char err=0;
+        union data {
+            uint8_t size_char[4];
+            uint32_t size_long;
+        };
+        union data program_size;
+        uint32_t nb,cent;
+
+        bsp_InitSFlash();
+        if(find_update_file_name(0))
+        {
+            falg_err=1;
+            goto err;
+        }
+        for(i=0; i<32; i++)
+            path[i]=0;
+
+        falg_err=0;
+        /* 挂载文件系统 */
+        result = f_mount(&fs, FS_VOLUME_USB, 0);			/* Mount a logical drive */
+        if (result != FR_OK)
+        {
+            falg_err=1;
+            goto err;
+        }
+        /* 打开根文件夹 */
+        sprintf(path, "%s/", FS_VOLUME_USB);
+        result = f_opendir(&DirInf, path); 	/* 1: 表示盘符 */
+        if (result != FR_OK)
+        {
+            falg_err=1;
+            goto err;
+        }
+        //*************************打开子目录
+        strcat(path,DIR_USB_PROGRAM_UPDATE);  //update目录下
+        if ( f_opendir(&DirInf, path)!= FR_OK)
+        {
+            falg_err=2;
+            goto err;
+        }
+
+        //strcpy(path, FS_VOLUME_USB);
+        //strcat(path,DIR_USB_PROGRAM_UPDATE);  //update目录下
+        strcat(path,"/");
+        strcat(path,update_file_name);
+        result = f_open(&file, path, FA_OPEN_EXISTING | FA_READ);
+        if (result !=  FR_OK)
+        {
+            falg_err=3;
+            goto err;
+        }
+
+        cent=0;
+        // 读取文件
+        page=file.fsize/SPI_PAGE;
+        excess=file.fsize%SPI_PAGE;
+
+        nb=page;
+        address=SPI_PROGRAM_ADDRESS;
+        for(i=0; i<page; i++)
+        {
+            result = f_read(&file, data_buf,SPI_PAGE , &bw);//从USB读数据
+            if (result != FR_OK)
+            {
+                falg_err=4;
+                goto err;
+            }
+            if(flag_usb_disk_connect==0)
+            {
+                falg_err=5;
+                goto err;
+            }
+            if(sf_WriteBuffer( data_buf,address, SPI_PAGE)==0)//向SPIFLASH写数据
+            {
+                falg_err=6;
+                goto err;
+            }
+            address=address+SPI_PAGE;
+
+            cent=i*100/page;
+            refresh_PROGBAR(cent);
+        }
+        result = f_read(&file, data_buf,excess, &bw);//剩余小于4K数据
+        if (result != FR_OK)
+        {
+            falg_err=7;
+            goto err;
+        }
+
+
+        data_buf[excess]=0xff;//最后一字节清0xFF
+        Usb_check();
+        GUI_Delay(100);
+        if(flag_usb_disk_connect==0)
+        {
+            falg_err=8;
+            goto err;
+        }
+        if(sf_WriteBuffer( data_buf,address, excess)==0) //向SPIFLASH写尾
+        {
+            falg_err=9;
+            goto err;
+        }
+
+
+        //写6字节参数
+        program_size.size_long=file.fsize;
+        data_buf[0]=0XAA;
+        for(i=0; i<4; i++)
+            data_buf[i+1]=program_size.size_char[i];
+        data_buf[5]=0XAA;
+
+        address=PROGRAM_PARAMETES_ADDRESS;
+        if(sf_WriteBuffer( data_buf,address, 16)==0)
+        {
+            falg_err=10;
+            goto err;
+        }
+        refresh_PROGBAR(100);
+
+
+        falg_err=0;
+err:
+        flag_update_busy=0;
+        f_close(&file);           //FS_LOCK 能够控制同时打开文件的个数 3
+        f_mount(NULL,FS_VOLUME_SPI, 0);
+        return falg_err;
+    }
+
+
+
+    /*
+    *********************************************************************************************************
+    *	函 数 名: DemoFatFS
+    *	功能说明: FatFS文件系统演示主程序
+    *	形    参：无
+    *	返 回 值: 无
+    *********************************************************************************************************
+    */
+
+//***********
+    void DemoFatFS(void)
+    {
+        uint8_t cmd;
+        uint8_t ucVolume = 0;
+
+        /* Init Host Library */
+#ifdef USE_USB_OTG_FS
+        USBH_Init(&USB_OTG_Core,
+                  USB_OTG_FS_CORE_ID,
+                  &USB_Host,
+                  &USBH_MSC_cb,
+                  &USRH_cb);
+#else
+        USBH_Init(&USB_OTG_Core,
+                  USB_OTG_HS_CORE_ID,
+                  &USB_Host,
+                  &USBH_MSC_cb,
+                  &USRH_cb);
+#endif
+        USB_POWER_GPIO_Config();
+        /* 打印命令列表，用户可以通过串口操作指令 */
+        DispMenu();
+        while (1)
+        {
+            //bsp_Idle();		/* 这个函数在bsp.c文件。用户可以修改这个函数实现CPU休眠和喂狗 */
+
+            USBH_Process(&USB_OTG_Core, &USB_Host);
+
+            //if (comGetChar(COM7, &cmd))	/* 从串口读入一个字符(非阻塞方式) */
+            {
+                printf("\r\n");
+                switch (cmd)
+                {
+                case '0':
+                    return;
+                case '1':
+                    //	printf("【1 - 显示SD卡根目录文件】\r\n");
+                    //ViewRootDir(FS_VOLUME_SD);			/* 显示SD卡根目录下的文件名 */
+                    //printf("【1 - 显示NAND Flash根目录文件】\r\n");
+                    //ViewRootDir(FS_VOLUME_NAND);		/* 显示U盘根目录下的文件名 */
+                    //printf("【1 - 显示U盘根目录文件】\r\n");
+                    //ViewRootDir(FS_VOLUME_USB);		/* 显示U盘根目录下的文件名 */
+                    //		printf("【1 - 显示SPI根目录文件】\r\n");
+                    //		ViewRootDir(FS_VOLUME_SPI	);		/* 显示U盘根目录下的文件名 */
+                    break;
+
+                case '2':
+                    //	printf("【2 - CreateNewFile】SD卡\r\n");
+                    CreateNewFile(FS_VOLUME_SD);	/* 创建一个新文件,写入一个字符串 */
+                    //	printf("【2 - CreateNewFile】NAND\r\n");
+                    //		CreateNewFile(FS_VOLUME_NAND);	/* 创建一个新文件,写入一个字符串 */
+                    //printf("【2 - CreateNewFile】U盘写1K字节\r\n");
+                    CreateNewFile_1k(FS_VOLUME_USB);//写1K字节到U盘
+                    //	printf("【2 - CreateNewFile】SPI\r\n");
+                    //	  CreateNewFile(FS_VOLUME_SPI);//
+                    break;
+
+                case '3':
+                    //	printf("【3 - ReadFileData】\r\n");
+                    ReadFileData(FS_VOLUME_SD);		/* 读取根目录下armfly.txt的内容 */
+                    //	ReadFileData(FS_VOLUME_NAND);		/* 读取根目录下armfly.txt的内容 */
+                    ReadFileData(FS_VOLUME_USB);		/* 读取根目录下armfly.txt的内容 */
+                    ReadFileData(FS_VOLUME_SPI);
+                    break;
+
+                case '4':
+                    //	printf("【4 - CreateDir】\r\n");
+                    CreateDir(FS_VOLUME_SD);		/* 创建目录 */
+                    //CreateDir(FS_VOLUME_NAND);		/* 创建目录 */
+                    CreateDir(FS_VOLUME_USB);		/* 创建目录 */
+                    break;
+
+                case '5':
+                    //	printf("【5 - DeleteDirFile】\r\n");
+                    DeleteDirFile(FS_VOLUME_SD);	/* 删除目录和文件 */
+                    //DeleteDirFile(FS_VOLUME_NAND);	/* 删除目录和文件 */
+                    DeleteDirFile(FS_VOLUME_USB);	/* 删除目录和文件 */
+                    break;
+
+                case '6':
+                    //printf("【6 - TestSpeed】\r\n");
+                    WriteFileTest();	/* 速度测试 */
+                    break;
+
+                case '7':
+                    //printf("【1 - SPI格式化】\r\n");
+                    //  FileFormat_spi();//fmc
+
+                    //	printf("Start Format(Low Level) NAND Flash......\r\n");
+                    //	NAND_Format();
+                    //	printf("NAND Flash Format Ok\r\n");
+                    break;
+
+                case 'V':		/* 切换当前盘符 */
+                case 'v':
+                    if (ucVolume == FS_SD)
+                    {
+                        ucVolume = FS_NAND;
+                    }
+                    else if (ucVolume == FS_NAND)
+                    {
+                        ucVolume = FS_USB;
+                    }
+                    else
+                    {
+                        ucVolume = FS_SD;
+                    }
+                    break;
+
+                default:
+                    DispMenu();
+                    break;
+                }
+            }	/* comGetChar(COM1, &cmd) */
+        }
+    }
+
+//****************************************************
+//**********************以下截屏**************************
+    /*extern FRESULT result;
+    extern FIL file;
+    extern FIL FileSave;   //专门用于图片的保存
+    extern DIR DirInf;
+    extern UINT bw;
+    extern FATFS fs;
+    extern FATFS fs_nand;
+
+    unsigned char Pic_Name=1;
+    extern UINT bw;
+    char *_screen_buf;
+    extern uint8_t Pic_Name;
+    void _WriteByte2File1(U8 Data, void * p)
+    {//FRESULT result;
+    	//result = f_write (p, &Data, 1, &bw);
+    	_screen_buf[file.fsize]=Data;
+    	file.fsize++;
+    }
+
+    unsigned char output_screen(void)
+    {
+    GUI_HMEM hMem;
+
+        UINT  bw;
+    	u8 falg_err,i;
+    	FRESULT result;
+    	//FATFS fs;
+    	DIR DirInf[2];
+    	//FILINFO FileInf_Usb,FileInf_Spi;
+    //	uint32_t cnt = 0;
+    //	char lfname[256];
+    	char path_usb[32];
+
+       for(i=0;i<32;i++)
+    	 {
+    		// path_spi[i]=0;
+    	   path_usb[i]=0;
+    	 }
+    	 	hMem=GUI_ALLOC_AllocZero(800*480*3+100);//??????????????????????????????????FMC
+        _screen_buf=GUI_ALLOC_h2p(hMem);
+
+        //挂载文件
+        if(f_mount(&fs_usb, FS_VOLUME_USB1, 0)!= FR_OK)
+    			 return 1;  //失败
+    		//打开主目录
+    	  sprintf(path_usb, "%s/", FS_VOLUME_USB);
+
+    	  if ( f_opendir(&DirInf[0], path_usb)!= FR_OK)
+    		   return  2;
+    		//打开U盘子目录
+    		strcat(path_usb,"PicSave");
+
+    	  if ( f_opendir(&DirInf[0], path_usb)!= FR_OK)
+    		   return  2;
+
+    		//fmc161013重名提示
+    			//strcat(path_usb,"/2");
+    		  //strcat(path_usb,".bmp");//fmc160914
+        //读取当前文件夹下的文件和目录//
+          sprintf(path_usb,"2:/PicSave/%d.bmp",Pic_Name);//USB
+    	    result = f_open(&file, path_usb, FA_CREATE_ALWAYS | FA_WRITE);
+    	    if (result != FR_OK)
+    				return 7; //文件写入失败
+
+          GUI_BMP_Serialize(_WriteByte2File1, &file);
+
+    	    result = f_write(&file, _screen_buf, file.fsize, &bw);//file.fsize  spi文件
+    	    if (result != FR_OK)
+    				return 7; //文件写入失败
+    			//f_close(&file_spi);//FS_LOCK 能够控制同时打开文件的个数 3
+          // 关闭文件系统 FIL file_spi,file_usb;
+          f_close(&file);
+    			f_mount(NULL,FS_VOLUME_USB, 0);
+    GUI_ALLOC_Free(hMem);//
+          return 0;
+    }
+    // ***********************************************
+    // ?**********截屏调用以下函数********************
+    void Print_Screen(void)
+    {	uint8_t buf[50];
+    //	uint8_t Pic_Name=0;
+
+
+    	if ((GPIOB->IDR & GPIO_Pin_1) != 0) //K1
+    		return;
+    	beep();
+    	while(1)
+      {
+    		if ((GPIOB->IDR & GPIO_Pin_1) != 0) //K1
+    		   break;
+      }
+    	if(output_screen())
+    	{
+    		beep();beep();
+    	}
+    	beep();
+    	Pic_Name++;
+
+
+    }*/

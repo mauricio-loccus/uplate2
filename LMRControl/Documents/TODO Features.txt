@@ -1,0 +1,91 @@
+PARAMETROS DE LEITURA
+
+-Ao selecionar o modo de Filtros "duplo", o software permite escolher 2 parâmetros de leitura diferentes, e uma operação básica entre eles (M1-M2, por Ex). Ao realizar a leitura, o software exibe apenas o resultado desta leitura, mas não exibe em lugar nenhum o resultado de leitura individual de cada parâmetro. É necessário, na aba "resultados" exibir um drop down menu que permite selecionar qual resultado exibir nas abas "Absorbância" "Qualitativo" e "Concentração"
+
+-Estes valores também devem aparecer em colunas diferentes da tabela de Resultado de Leitura (RAW) da seguinte forma:
+--Asorbância Bruta > ABS (Fórmula - M1+M2, M1-M2, M2-M1, etc) - puxar a formula selecionada da tela de parâmetros.
+
+-Alterar campo "parâmetros de leitura" por "Protocolo de Leitura"
+
+PLACAS
+-Alterar nome do campo para "Layout"
+
+-O software permite adicionar 'placas' para o equipamento ler em sequência. 
+BUGFIX: Se eu adicionar mais de 2 placas (ex:> #1 #2 #3) e remover uma placa antes da última (ex: #1 ou #2), retorna excessão. Tratar exibindo mensagem "Remova as placas subsequentes antes de remover a placa (esta placa)".
+
+-Adicionar um novo campo ao layout chamado "Calibrador", CAL. Ao adicionar este campo, abre um campo para inserir um número chamado Coeficiente de Calibração (maior que zero, até 3 casas decimais - não permitir o usuário escrever virugla ou ponto;puxar separador das config). 
+
+-Adicionar um checkbox abaixo do layout com texto "Aplicar coeficiente à placa". Este parâmetro irá multiplicar todas as leituras da placa pelo valor do calibrador, inclusive o branco, se houver. Se houver branco, aplicar o branco após o cálculo do calibrador. Aplicar o cálculo inclusive ao resultado de leitura do calibrador. Se este campo for selecionado,
+
+
+
+-Adicionar uma nova ABA dentro da aba da Placa chamada Id das Amostras
+--Esta aba deve apresentar uma tabela de até 96 linhas refletindo o layout da placa. Mapear nas colunas:
+
+Placa: Contém o Nome da placa
+Posição: contém o poço da placa (A01 - H12)
+Tipo: Controle Positivo, Controle Negativo, Standard, Desconhecido, calibrador (mapear automaticamente)
+ID da Amostra: Campo editável apenas nas amostras tipo Desconhecido, até 25 caracteres, String.
+
+-Botão "Importar de TXT" - carrega um arquivo TXT contendo strings, em que cada linha é uma amostra. Preencher no sentido topo - fundo (a01, B01, C01, D01 ... H01, A02, B02, C02 ... H12), apenas os do tipo DESCONHECIDO. Se houver mais linhas na string do que campos DESCONHECIDO, abrir popup perguntando se o usuário deseja preencher campos vazios com amostras. Se sim, transforma os campos VAZIO faltantes em DESCONHECIDO e preenche tudo (sugestão - importar o arquivo de texto em um array). no arquivo de texto não terá nenhum campo além dos identificadores das amostras.
+-Ao importar, se houver algum campo repetido, adicionar _02, _03 aos seguintes, até 96, automaticamente.
+
+
+-Menu "Relatórios" - Adicionar um botão "Exportar Layout". Este botão deve gerar um arquivo PDF exibindo uma tabela de 96 campos (8x12), em que cada campo é quadrado, e cada quadradinho exibe:
+--ID do poço (A01)
+--if desconhecido, exibe o ID da Amostra; else mostra o tipo (C. Pos, C. Neg, Standard, Vazio, Calibrador)
+--espaço
+--espaço
+--espaço
+(5 linhas em cada quadrado, ajustar tamanho de fonte para caber a tabela inteira em uma folha A4 retrado.
+
+PADRÕES
+BUGFIX: Cada vez que eu adiciono uma placa, o software cria um linha na aba "Padrões". Não deveria fazer isso - ele só deve adicionar linhas quando adiciono (ou removo) poços "STD" ao layout da placa.
+
+
+
+QUALITATIVO
+-Interpretação é um campo de 5 caracteres. Aumentar para 10.
+-Em "limite" há uma fórmula que permite inserir parâmetros que serão lidos da placa e calculados de acordo com a fórmula (ex: CN *2 pegará o resultado da leitura da média das leituras da posição CN e multiplicará por 2).
+Essa fórmula é baseda na sintaxe de uma calculadora RPN científica, então eu gostaria de exibir uma calculadora que permitisse clicar em cada um dos botões e ela vai preenchendo os campos sem que o usuário precise digitar. Ideal, porém pode ficar mais pra frente.
+IMPORTANTE: os campos Limite Zona 1 e Limite Zona 2 devem ser, também, variáveis que podem ser utilizadas no cálculo. Exemplo: LZ1 = CN*2.     LZ2 = LZ1 * 1,15.
+-Exibir novo campo: Cutoff: Interpretação Z1 < Valor LZ1 <= Interpretação Z2 < Valor LZ2 (se maior que zero) <= Interpretação Z3 (se diferente de "")
+
+
+
+CONTROLE DE QUALIDADE - Novo campo
+Lógica IF Then Else
+O CQ é um cálculo independente de validação da reação. Este calculo é feito através de uma lógica de critérios, que se aprovados, retornam "sucesso" e do contrario retornam "Falha".
+-Criar janela de Controle de Qualidade
+--Criar campo para adicionar novo critério
+--Criar campo para selecionar variável (CN, CP, CAL, BR, DC_XXX (A01, etc) ou STD (1 a 12)
+--criar campo para inserir cálculo simples (+,-,x,/, número, parênteses lógico, potência, raiz)
+--Criar campo para inserir sinal lógico (>, <, =, =/=)
+--Criar campo lógico "E", "OU", "EOU", "XOU"
+-Permitir que o usuário selecione cada um dos parâmetros acima como 'blocos' e monte a própria lógica, podendo utilizar apenas uma vez o bloco sinal lógico, mas quantas vezes quiser os outros blocos.
+EX: CN x 2 + 0,1 < CP*0,85 - BR     = Sucesso
+
+(CN + CP)/2 * 0,85 < 1.1     Ou     (CN + CP)/2 * 0,85 > 9,0            =Sucesso
+
+CN > 0 e CP > CN * 10    e    CP < 9      =Sucesso
+
+-Permitir adicionar quantas lógicas quiser
+
+
+
+Ao SALVAR, todos estes parâmetros devem ser armazenados no arquivo salvo "protocolo", EXCETO os valores ID da Amosra das posições DESCONHECIDO,
+
+
+
+DESCONHECIDOS
+-Mover para dentro da aba "Resultados"
+-Adicionar botão para selecionar o filtro (M1, M2 ou o resultado da lógica M1-M2 ou outro qualquer) Exibir a absorbância correspondente.
+-renomear campo "ID" nas planilhas como "#" e o criar campo "ID Amostra"
+
+RESULTADOS
+-Adicionar botão para selecionar o filtro (M1, M2 ou Lógica) nas 3 abas.
+-remover os circulos coloridos e exibir apenas a planilha
+-Adicionar ao invés do #número, adicionar o Id da amostra no canto superior esquerdo, e o valor logo abaixo.
+
+RESULTADOS DE LEITURA (RAW)
+-adicionar abas Filtro M1, Filtro M2, Filtro (lógica), os 3 no lugar de "absorbância bruta". O valor de Absorbância processada é o valor final calculado, ou seja, o valor da absorbância M2-M1 menos o branco multiplicado pelo coeficiente de Calibração. Adicionar coluna coeficiente de calibração, que deve ser editavel. Ao editar, refaz todo o calculo de Absorbância processada utilizando o novo Coeficiente de calibração.

@@ -1,0 +1,111 @@
+/*
+ ******************************************************************************
+ *	模块名称 : 
+ *	文件名称 : 
+ *	版 本 号 : V1.00A
+ *	说    明 : 
+ *	修改记录 : 
+ *	日    期 : 2018.1.10     
+ *  作    者 :       
+ *  说    明 :
+ ******************************************************************************
+*/
+
+#ifndef MODULES_COMM_PROCESS_PC_H_
+#define MODULES_COMM_PROCESS_PC_H_
+
+#include "CommStack_PC.h"
+
+
+#define MACHINE_BUSY 1   //仪器忙
+/******************************************************************************/
+//应答PC命令
+enum
+{
+	 COMMAND_CONNECT_ACK_PC=0x0001,    //连接应答
+	 COMMAND_UNCONNECT_ACK_PC=0x0002,  //断开应答
+	 COMMAND_RUN_ACK_PC=0x0003,
+	 COMMAND_STOP_ACK_PC=0x0004,
+	 COMMAND_PLATEIN_ACK_PC=0x0005,
+	 COMMAND_PLATEOUT_ACK_PC=0x0006,
+	 COMMAND_NEXT_PLATE_ACK_PC=0x0007,
+	 COMMAND_MEASURE_PARA_ACK_PC=0x0008,
+	 COMMAND_KINETIC_ACK_PC=0x0009,   
+	 COMMAND_VIEW_ACK_PC=0x000A,      //查询,心跳包
+	 
+};
+//发送PC命令
+enum
+{
+	 COMMAND_MEASURE_END_PC=0x0100,  //检测结束
+	 COMMAND_CURR_BOARD_END_PC=0x0200,//当前板检测结束
+	 COMMAND_ERRCODE_PC=0x0300,       //发送故障代码
+	 COMMAND_UNCONNECT_PC=0x0500,     //断开命令
+};
+
+#define COMMAND_START_PC   COMMAND_MEASURE_END_PC  //命令最小值
+#define COMMAND_END_PC     COMMAND_UNCONNECT_PC    //命令最大值
+
+
+/******************************************************************************/
+
+typedef struct
+{
+  uint16  Cmd;               //命令
+  uint16  DataLen;		       //有效数据个数
+
+  unsigned char  RecBuffer[COMM_UART_LEN_MAX_PC];		 //reveive 
+	unsigned char  SendBuffer[COMM_UART_SEND_LEN_PC];		 //send
+  uint16 Ecc;		             //校验和
+
+	unsigned char Full;
+}UART_INFO_PC;
+extern UART_INFO_PC UartInfo_PC;
+
+/******************************************************************************/
+typedef struct{
+	uint16  CurrentCommand;   //命令
+	uint16  RepeatSendCount;  //重发记数器
+	uint8   Timeout;          //超时
+	
+	uint8   SentFlag;          //主动发送了命令标志
+} COMM_STATUS_PC;
+extern COMM_STATUS_PC CommStatus_PC;
+/******************************************************************************/
+//RunningFlag
+enum
+{
+	  RUNNING_FLAG_INIT=0,  //初使化
+	  RUNNING_FLAG_RUN,     //运行中  
+	  RUNNING_FLAG_FINISH,  //完成
+};
+typedef struct 
+{  
+	unsigned char RemoteFlag;   //远程连接标志
+	unsigned char RunningFlag;  //运行标志
+	
+	unsigned char PlateTotal;   //总的板数
+	unsigned char PlateCurrent; //当前板
+}REMOTE_INFO_PC;
+extern REMOTE_INFO_PC RemoteInfo_PC;
+
+
+/******************************************************************************/
+void UartCommInit(void);
+void UartResendPrepared(unsigned short cmd);                         //重发数据初使化
+uint16 GetRxCheckSum_PC(unsigned char *pCommand, unsigned short ptr);//接收数据时计算校验和,返回校验和
+void GetTxCheckSum_PC(unsigned char *pCommand, unsigned short ptr) ; //发送数据时计算校验和
+void CommInit_PC(void); //通读初使化
+
+void UartCmdSend_PC(unsigned short cmd);//串口主动发送命令,要求对方有应答
+
+unsigned short AddCommandHead_PC( unsigned short nCommandSecond, unsigned char  *pCommand,unsigned short nLength);//向发送字符串中加入命令头
+void PrepareConnectResponseCommand(uint16 cmd,unsigned char *pCommand) ;//准备并发送串口响应的连接命令
+void PrepareResponseCommand(uint16 cmd,unsigned char *pCommand,unsigned char okflag) ;  //准备并发送串口响应的数据
+void WaitPCResponse(void);//等待PC发过来的响应数据并处理
+void UartCmdProcess_PC(unsigned short cmd,uint8 *dat); //根据查询接收队列中的命令调用此函数,进行发送数据
+//void CommRxDataSend_PC(void);
+void CommProcess_PC(void);                            //查询接收队列中是否有需要处理的数据
+void UartReSend(void);//重发功能,1秒调用1次
+
+#endif 

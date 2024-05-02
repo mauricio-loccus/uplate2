@@ -1,0 +1,231 @@
+
+
+#include "MainTask.h"
+
+
+
+
+
+
+void SetButtonSkin(void)
+{
+	BUTTON_SKINFLEX_PROPS   BUTTON_SKI_NORMAL = { { COLOR_BUTTON_DEFAULT, COLOR_BUTTON_FRAME_DEFAULT, COLOR_BUTTON_DEFAULT }, { COLOR_BUTTON_DEFAULT, COLOR_BUTTON_DEFAULT }, { COLOR_BUTTON_DEFAULT, COLOR_BUTTON_DEFAULT }, 3 };
+	BUTTON_SKINFLEX_PROPS   BUTTON_SKI_PRESS = { { COLOR_BUTTON_PRESS, COLOR_BUTTON_FRAME_PRESS, COLOR_BUTTON_PRESS }, { COLOR_BUTTON_PRESS, COLOR_BUTTON_PRESS }, { COLOR_BUTTON_PRESS, COLOR_BUTTON_PRESS }, 3 };
+	BUTTON_SKINFLEX_PROPS   BUTTON_SKI_DISABLE = { { COLOR_BUTTON_DISABLE, COLOR_BUTTON_FRAME_DISABLE, COLOR_BUTTON_DISABLE }, { COLOR_BUTTON_DISABLE, COLOR_BUTTON_DISABLE }, { COLOR_BUTTON_DISABLE, COLOR_BUTTON_DISABLE }, 3 };
+
+	/*BUTTON_SKINFLEX_PROPS   BUTTON_SKI_NORMAL_K = {  {0Xf9f8f7,0Xf9f8f7,0Xf9f8f7}, {0Xf9f8f7,0Xf9f8f7}, {0Xf9f8f7,0Xf9f8f7},2};
+	BUTTON_SKINFLEX_PROPS   BUTTON_SKI_PRESS_K ={  {0Xf9f8f7,0Xf9f8f7,0Xf9f8f7}, {0Xf9f8f7,0Xf9f8f7}, {0Xf9f8f7,0Xf9f8f7},2};
+	BUTTON_SKINFLEX_PROPS   BUTTON_SKI_DISABLE_K= {  {GUI_GRAY,GUI_GRAY,GUI_GRAY}, {GUI_GRAY,GUI_GRAY}, {GUI_GRAY,GUI_GRAY},2};
+	*/BUTTON_SetDefaultSkin(BUTTON_SKIN_FLEX);
+	{
+		BUTTON_SetSkinFlexProps(&BUTTON_SKI_PRESS, BUTTON_SKINFLEX_PI_PRESSED);
+		BUTTON_SetSkinFlexProps(&BUTTON_SKI_NORMAL, BUTTON_SKINFLEX_PI_FOCUSSED);
+		BUTTON_SetSkinFlexProps(&BUTTON_SKI_NORMAL, BUTTON_SKINFLEX_PI_ENABLED);
+		BUTTON_SetSkinFlexProps(&BUTTON_SKI_DISABLE, BUTTON_SKINFLEX_PI_DISABLED);
+	}
+
+}
+
+void SetButtonHelpSkin(void)
+{
+	BUTTON_SKINFLEX_PROPS   BUTTON_SKI_NORMAL = { { COLOR_BUTTON_DEFAULT, COLOR_BUTTON_FRAME_DEFAULT, COLOR_BUTTON_DEFAULT }, { COLOR_BUTTON_DEFAULT, COLOR_BUTTON_DEFAULT }, { COLOR_BUTTON_DEFAULT, COLOR_BUTTON_DEFAULT }, 3 };
+	BUTTON_SKINFLEX_PROPS   BUTTON_SKI_PRESS = { { COLOR_BUTTON_PRESS, COLOR_BUTTON_FRAME_PRESS, COLOR_BUTTON_PRESS }, { COLOR_BUTTON_PRESS, COLOR_BUTTON_PRESS }, { COLOR_BUTTON_PRESS, COLOR_BUTTON_PRESS }, 3 };
+	BUTTON_SKINFLEX_PROPS   BUTTON_SKI_DISABLE = { { COLOR_BUTTON_PRESS, COLOR_BUTTON_FRAME_PRESS, COLOR_BUTTON_PRESS }, { COLOR_BUTTON_PRESS, COLOR_BUTTON_PRESS }, { COLOR_BUTTON_PRESS, COLOR_BUTTON_PRESS }, 3 };
+
+	/*BUTTON_SKINFLEX_PROPS   BUTTON_SKI_NORMAL_K = {  {0Xf9f8f7,0Xf9f8f7,0Xf9f8f7}, {0Xf9f8f7,0Xf9f8f7}, {0Xf9f8f7,0Xf9f8f7},2};
+	BUTTON_SKINFLEX_PROPS   BUTTON_SKI_PRESS_K ={  {0Xf9f8f7,0Xf9f8f7,0Xf9f8f7}, {0Xf9f8f7,0Xf9f8f7}, {0Xf9f8f7,0Xf9f8f7},2};
+	BUTTON_SKINFLEX_PROPS   BUTTON_SKI_DISABLE_K= {  {GUI_GRAY,GUI_GRAY,GUI_GRAY}, {GUI_GRAY,GUI_GRAY}, {GUI_GRAY,GUI_GRAY},2};
+	*/BUTTON_SetDefaultSkin(BUTTON_SKIN_FLEX);
+	{
+		BUTTON_SetSkinFlexProps(&BUTTON_SKI_PRESS, BUTTON_SKINFLEX_PI_PRESSED);
+		BUTTON_SetSkinFlexProps(&BUTTON_SKI_NORMAL, BUTTON_SKINFLEX_PI_FOCUSSED);
+		BUTTON_SetSkinFlexProps(&BUTTON_SKI_NORMAL, BUTTON_SKINFLEX_PI_ENABLED);
+		BUTTON_SetSkinFlexProps(&BUTTON_SKI_DISABLE, BUTTON_SKINFLEX_PI_DISABLED);
+	}
+
+}
+
+
+void ProtocolMenu_Scan(void)
+{
+	if(TouchKey.KeyStatus==0)
+	{
+//	unsigned char i;
+	GUI_PID_STATE TouchState;
+	GUI_PID_GetState(&TouchState);
+  if (TouchState.Pressed)
+	{
+		//检测
+		if ((TouchState.x >= TEST_PARAMETER_START_X +PROGRAM_FUNCTION_AREA_DX) && (TouchState.x <= TEST_PARAMETER_END_X - PROGRAM_FUNCTION_AREA_DX) &&
+			(TouchState.y >= TEST_PARAMETER_START_Y +TITLESBAR_HEIGHT+  PROGRAM_FUNCTION_AREA_DY) && (TouchState.y <= TEST_PARAMETER_END_Y+TITLESBAR_HEIGHT - PROGRAM_FUNCTION_AREA_DY)&&(BoardInf.bHasData==0))
+		{
+			 TouchKey.KeyStatus = 1;
+			 TouchKey.KeyValue=KEY_PROTOCOL_MEASURE;
+			 
+			//WM_HideWindow(ProtocolWin);
+		//	gSystem.TitleButtonEnable = 0;
+		//	gSystem.SystemInterface = MI_PROTOCOL_MEASURE;
+			//ProtocolMeasure_Interface();
+			//  TouchState.x = 120;
+		}
+		//振动
+		else if ((TouchState.x >= SHAKE_PARAMETER_START_X + PROGRAM_FUNCTION_AREA_DX) && (TouchState.x <= SHAKE_PARAMETER_END_X - PROGRAM_FUNCTION_AREA_DX) &&
+		(TouchState.y >= SHAKE_PARAMETER_START_Y +TITLESBAR_HEIGHT+ PROGRAM_FUNCTION_AREA_DY) && (TouchState.y <= SHAKE_PARAMETER_END_Y +TITLESBAR_HEIGHT- PROGRAM_FUNCTION_AREA_DX)&&(BoardInf.bHasData==0))
+		{
+			TouchKey.KeyStatus = 1;
+			TouchKey.KeyValue=KEY_PROTOCOL_SHAKE;
+		//	WM_HideWindow(ProtocolWin);
+			//gSystem.TitleButtonEnable = 0;
+			//gSystem.SystemInterface = MI_PROTOCOL_SHAKE;
+			//ProtocolShake_Interface();
+			//  TouchState.x = 120;
+		}
+		//定性
+		else if ((TouchState.x >= INTER_PARAMETER_START_X + PROGRAM_FUNCTION_AREA_DX) && (TouchState.x <= INTER_PARAMETER_END_X - PROGRAM_FUNCTION_AREA_DX) &&
+			(TouchState.y >= INTER_PARAMETER_START_Y+TITLESBAR_HEIGHT + PROGRAM_FUNCTION_AREA_DY) && (TouchState.y <= INTER_PARAMETER_END_Y +TITLESBAR_HEIGHT- PROGRAM_FUNCTION_AREA_DY))
+		{
+			TouchKey.KeyStatus = 1;
+			TouchKey.KeyValue=KEY_PROTOCOL_INTER;
+			/*WM_HideWindow(ProtocolWin);
+			gSystem.TitleButtonEnable = 0;
+			gSystem.SystemInterface = MI_PROTOCOL_INTER;
+			ProtocolInter_Interface();
+			//  TouchState.x = 120;*/
+		}
+		//布局
+		else if ((TouchState.x >= LAY_PARAMETER_START_X + PROGRAM_FUNCTION_AREA_DX) && (TouchState.x <= LAY_PARAMETER_END_X - PROGRAM_FUNCTION_AREA_DX) &&
+			(TouchState.y >= LAY_PARAMETER_START_Y +TITLESBAR_HEIGHT+ PROGRAM_FUNCTION_AREA_DY) && (TouchState.y <= LAY_PARAMETER_END_Y +TITLESBAR_HEIGHT- PROGRAM_FUNCTION_AREA_DY))
+		{
+			 TouchKey.KeyStatus = 1;
+			 TouchKey.KeyValue=KEY_PROTOCOL_LAYOUT;
+			//WM_HideWindow(ProtocolWin);
+			//gSystem.TitleButtonEnable = 0;
+			//gSystem.SystemInterface = MI_PROTOCOL_LAYOUT;
+			//ProtocolLayout_Interface();
+			//  TouchState.x = 120;
+		}
+
+		//计算
+		else if ((TouchState.x >= CALCUE_PARAMETER_START_X + PROGRAM_FUNCTION_AREA_DX) && (TouchState.x <= CALCUE_PARAMETER_END_X - PROGRAM_FUNCTION_AREA_DX) &&
+			(TouchState.y >= CALCUE_PARAMETER_START_Y +TITLESBAR_HEIGHT+ PROGRAM_FUNCTION_AREA_DY) && (TouchState.y <= CALCUE_PARAMETER_END_Y +TITLESBAR_HEIGHT- PROGRAM_FUNCTION_AREA_DY))
+		{
+			 TouchKey.KeyStatus = 1;
+			 TouchKey.KeyValue=KEY_PROTOCOL_CALCULATE;
+			//WM_HideWindow(ProtocolWin);
+			//gSystem.TitleButtonEnable = 0;
+			//gSystem.SystemInterface = MI_PROTOCOL_CALCULATE;
+			//ProtocolCalc_Interface();
+			//  TouchState.x = 120;
+
+		}
+		//质控
+		else if ((TouchState.x >= QUALITY_PARAMETER_START_X + PROGRAM_FUNCTION_AREA_DX) && (TouchState.x <= QUALITY_PARAMETER_END_X - PROGRAM_FUNCTION_AREA_DX) &&
+			(TouchState.y >= QUALITY_PARAMETER_START_Y+TITLESBAR_HEIGHT + PROGRAM_FUNCTION_AREA_DY) && (TouchState.y <= QUALITY_PARAMETER_END_Y +TITLESBAR_HEIGHT- PROGRAM_FUNCTION_AREA_DY))
+		{
+			TouchKey.KeyStatus = 1;
+			TouchKey.KeyValue=KEY_PROTOCOL_QUALITY;
+		//	WM_HideWindow(ProtocolWin);
+			//gSystem.TitleButtonEnable = 0;
+			//gSystem.SystemInterface = MI_PROTOCOL_QUALITY;
+		//	ProtocolQuality_Interface();
+			//  TouchState.x = 120;
+		}
+
+	
+		
+	//	TouchKey.KeyStatus = 1;
+	}
+	}
+
+
+
+}
+
+
+
+
+void ProtocolMenu_Go(void)
+{
+	if (TouchKey.KeyStatus)
+	{
+	  GUI_PID_STATE TouchState;
+	  GUI_PID_GetState(&TouchState);
+		
+		if (TouchState.Pressed == 0)
+		{
+			TouchKey.KeyPressDelay++;
+			if (TouchKey.KeyPressDelay > TOUCH_RELEASE_DELAY)
+			{
+				TouchKey.KeyPressDelay = 0;
+				TouchKey.KeyStatus = 0;
+			}
+		}
+  if(TouchKey.KeyValue>0)
+	{
+		//检测
+		if (TouchKey.KeyValue==KEY_PROTOCOL_MEASURE)
+		{
+			 TouchKey.KeyStatus = 1;
+			
+			 WM_HideWindow(ProtocolWin);
+			 gSystem.TitleButtonEnable = 0;
+			 gSystem.SystemInterface = MI_PROTOCOL_MEASURE;
+			 ProtocolMeasure_Interface();
+		}
+		//振动
+		else if (TouchKey.KeyValue==KEY_PROTOCOL_SHAKE)
+		{
+			TouchKey.KeyStatus = 1;
+			
+			WM_HideWindow(ProtocolWin);
+			gSystem.TitleButtonEnable = 0;
+			gSystem.SystemInterface = MI_PROTOCOL_SHAKE;
+			ProtocolShake_Interface();
+		}
+		//定性
+		else if (TouchKey.KeyValue==KEY_PROTOCOL_INTER)
+		{
+			TouchKey.KeyStatus = 1;
+			
+			WM_HideWindow(ProtocolWin);
+			gSystem.TitleButtonEnable = 0;
+			gSystem.SystemInterface = MI_PROTOCOL_INTER;
+			ProtocolInter_Interface();
+			//  TouchState.x = 120;
+		}
+		//布局
+		else if (TouchKey.KeyValue==KEY_PROTOCOL_LAYOUT)
+		{
+			TouchKey.KeyStatus = 1; 
+			
+			WM_HideWindow(ProtocolWin);
+			gSystem.TitleButtonEnable = 0;
+			gSystem.SystemInterface = MI_PROTOCOL_LAYOUT;
+			ProtocolLayout_Interface();
+		}
+
+		//计算
+		else if (TouchKey.KeyValue==KEY_PROTOCOL_CALCULATE)
+		{
+			TouchKey.KeyStatus = 1;
+			
+			WM_HideWindow(ProtocolWin);
+			gSystem.TitleButtonEnable = 0;
+			gSystem.SystemInterface = MI_PROTOCOL_CALCULATE;
+			ProtocolCalc_Interface();
+		}
+		//质控
+		else if (TouchKey.KeyValue==KEY_PROTOCOL_QUALITY)
+		{
+			TouchKey.KeyStatus = 1;
+			
+			WM_HideWindow(ProtocolWin);
+			gSystem.TitleButtonEnable = 0;
+			gSystem.SystemInterface = MI_PROTOCOL_QUALITY;
+			ProtocolQuality_Interface();
+		}
+		TouchKey.KeyValue=0;
+	}
+}
+}
+

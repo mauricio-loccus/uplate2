@@ -1,0 +1,291 @@
+#include "StrConvert.h"
+
+
+
+#define STR_LENGTH  30
+char Str[STR_LENGTH];
+char Convert_Str[STR_LENGTH];
+char *ConvertDateTime(char *val,short year,unsigned char mon,unsigned char day,unsigned char hour,unsigned char min,unsigned char str_format)
+{
+   char *p;
+   p=val;
+
+	 if(str_format==CH_TIME_24HOUR)  //????
+	 {
+		       *val++='2';
+		       *val++='0';
+           *val++=year/10+'0';
+           *val++=year%10+'0';
+		       *val++='-';
+		       *val++=mon/10+'0';
+           *val++=mon%10+'0';
+		       *val++='-';
+		       *val++=day/10+'0';
+           *val++=day%10+'0';
+		      
+	 }
+	 else
+	 {
+	
+		       *val++=mon/10+'0';
+           *val++=mon%10+'0';
+		       *val++='-';
+		       *val++=day/10+'0';
+           *val++=day%10+'0';
+		       *val++='-';
+		 	     *val++='2';
+		       *val++='0';
+           *val++=year/10+'0';
+           *val++=year%10+'0';  
+	 }
+		       *val++=' ';
+	 
+		       *val++=hour/10+'0';
+           *val++=hour%10+'0';
+		       *val++='-';
+		       *val++=min/10+'0';
+           *val++=min%10+'0';
+		 
+		 
+   *val++=0;
+   return p;
+ }
+
+ 
+ 
+
+char *ConvertUVLightTime(char *val,long time)
+{
+   char *p;
+	 unsigned char h,m,s;
+	 p=val;
+	
+	h=time/3600;
+	m=time%3600/60;
+	s=time%60;
+  
+
+		       *val++=h/10+'0';
+           *val++=h%10+'0';
+	         *val++=':';
+		       *val++=m/10+'0';
+           *val++=m%10+'0';
+		       *val++=':';
+		       *val++=s/10+'0';
+           *val++=s%10+'0'; 
+
+   *val++=0;
+   return p;
+}
+
+char *ConvertZeroAdjust(char *val,unsigned int temp)
+{
+   char *p;
+	 unsigned short h;
+	 unsigned char l;
+	 p=val;
+	
+	h=temp/100;
+	l=temp%100;
+  
+  if(h>=100) 
+  {
+	  *val++=h/100+'0';
+  }
+  if(h>=10) 
+  {
+	  *val++=h%100/10+'0';
+  }
+           *val++=h%10+'0';
+	         *val++='.';
+		       *val++=l/10+'0';
+           *val++=l%10+'0';
+		     
+   *val++=0;
+   return p;
+}
+
+
+char *ConvertRemainRunTime(char *val,long time)
+{
+   char *p;
+	 unsigned char h,m,s;
+	 p=val;
+	
+	h=time/3600;
+	m=time%3600/60;
+	s=time%60;
+  
+
+		       *val++=h/10+'0';
+           *val++=h%10+'0';
+	         *val++=':';
+		       *val++=m/10+'0';
+           *val++=m%10+'0';
+		       *val++=':';
+		       *val++=s/10+'0';
+           *val++=s%10+'0'; 
+
+   *val++=0;
+   return p;
+}
+
+char *OneByteConvertStr(char *val,unsigned char t)
+{
+   char *p;
+	 p=val;
+	
+		       if(t>=100)*val++=t/100+'0';
+           if(t>=10)*val++=t%100/10+'0';
+					 *val++=t%10+'0';
+	        
+
+  *val++=0;
+   return p;
+}
+//函数名char *SetTempConvertStr(char *val,unsigned short t,unsigned char unit_flag)
+//功能设置温度转化为字符串(温度范围:0-120)
+//输入值: 1)t:温度值,  unit_flag:1表示显示温度符号,0表示不显示温度符号
+//返回值:字符串指针  char *val为返回的字符串指针
+char *SetTempConvertStr(char *val,unsigned char t,unsigned char unit_flag)
+{
+	 char *p;
+	 p=val;
+	
+		       if(t>=100)*val++=t/100+'0';
+           if(t>=10)*val++=t%100/10+'0';
+					 *val++=t%10+'0';
+	         if(unit_flag)
+					 {
+						 *val++='';
+						 *val++='C';
+					 }
+
+
+  *val++=0;
+   return p;
+}
+//函数名char *PraTempConvertStr(char *val,unsigned short t,unsigned char unit_flag)
+//功能实际温度转化为字符串(温度范围:0-150.0)
+//输入值: 1)t:温度值,  unit_flag:1表示显示温度符号,0表示不显示温度符号
+//返回值:字符串指针  char *val为返回的字符串指针
+char *PraTempConvertStr(char *val,unsigned short t,unsigned char unit_flag)
+{
+	 char *p;
+	 p=val;
+	
+	         if(t>=1000)*val++=t/1000+'0';
+		       if(t>=100)*val++=t%1000/100+'0';
+           *val++=t%100/10+'0';
+	         *val++='.';
+					 *val++=t%10+'0';
+	         if(unit_flag)
+					 {
+						 *val++='C';
+						 *val++='C';
+					 }
+
+          *val++=0;
+          return p;
+}
+//电机零点偏移转化为字符串
+char *ZeroOffsetConvertStr(char *val,unsigned short t)
+{
+	 char *p;
+	 p=val;
+	
+	         if(t>=1000)*val++=t/1000+'0';
+		       if(t>=100)*val++=t%1000/100+'0';
+	         *val++='.';
+           *val++=t%100/10+'0';
+					 *val++=t%10+'0';
+	       
+
+          *val++=0;
+          return p;
+}
+
+//电机零点偏移转化为字符串
+char *ZeroAdjustConvertStr(char *val,unsigned char t)
+{
+	 char *p;
+	 p=val;
+	
+
+		       *val++=t/100+'0';
+	         *val++='.';
+           *val++=t%100/10+'0';
+					 *val++=t%10+'0';
+	       
+
+          *val++=0;
+          return p;
+}
+//函数名:char *PraDisConvertStr(char *val,unsigned short t)
+//功能:实际行程转化为字符串
+//输入值: 1)t:实际行程值
+//返回值:字符串指针  char *val为返回的字符串指针
+char *PraDisConvertStr(char *val,unsigned short t)
+{
+	 char *p;
+	 unsigned char h,l;
+	 p=val;
+	
+	h=t/100;
+	l=t%100;
+
+  
+
+		       if(h>=100)*val++=h/100+'0';
+           if(h>=10)*val++=h%100/10+'0';
+            *val++=h%10+'0';
+	         *val++='.';
+		       *val++=l/10+'0';
+           *val++=l%10+'0';
+		     
+
+   *val++=0;
+   return p;
+}
+
+char *AdvanceMixConvertStr(char *val,unsigned short t)
+{
+	 char *p;
+	 unsigned char h,l;
+	 p=val;
+	
+	 h=t/100;
+	 l=t%100;
+
+  
+
+		      
+           if(h>=10)*val++=h/10+'0';
+           *val++=h%10+'0';
+	         *val++='.';
+		       *val++=l/10+'0';
+           *val++=l%10+'0';
+		     
+
+   *val++=0;
+   return p;
+}
+char *MotionConvertStr(char *val,unsigned char t)
+{
+	char *p;
+
+	 p=val;
+	
+
+
+  
+
+		      
+           if(t>=100)*val++=t/100+'0';
+	         if(t>=10)*val++=t%100/10+'0';
+           *val++=t%10+'0';
+		     
+
+   *val++=0;
+   return p;
+}

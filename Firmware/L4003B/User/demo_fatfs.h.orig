@@ -1,0 +1,76 @@
+
+
+#ifndef _FAT_H
+#define _FAT_H
+enum 
+{
+	NOT_READ_FILE=0,         
+  READ_FILE
+};
+#define SPI_OK   0
+#define SPI_ERR  1
+
+#define  DIR_USB_PROGRAM_INPUT  "Items"   //"imput"//fmc161013
+#define  DIR_USB_PROGRAM_OUTPUT  "Items"   //"imput"//fmc161013
+#define  DIR_USB_PROGRAM_UPDATE  "update"   //"imput"
+#define  DIR_USB_REPORT          "report"   //"imput"
+//#define  UPDATE_PROGRAM_NAME     "output.bin"
+
+
+
+
+
+
+//char output_one_program(char cent);
+void check_usb_connect(void);
+
+
+extern int usb_program_number,spi_program_number;
+
+
+ void Create_USB_Dir(char *_ucVolume);
+
+//开机背景图片
+unsigned char ReadFile_background(char *ad,unsigned char picture_flag);//从Nand读取背景图片
+unsigned char ReadFileFromUSB_BG(char *ad,unsigned char picture_flag); //从USB读取背景图片
+unsigned char WriteFile_background(char *_ucVolume,unsigned long len,unsigned char picture_flag);//写背景图片
+unsigned char CopyStartupPicture(void);     //复制背景图片
+
+
+void Usb_Init(void);   //初使化USB
+void Usb_check(void);  //检测USB
+void check_usb_connect(void);//检测USB连接状态
+
+int GenerateNewFile(void);//产生新文件
+unsigned char  SaveProgram(void);     //保存程序(不用)
+unsigned char DeleteOneFile(char name[]);//(不用)
+
+unsigned char UsbInputFileData(void);      //被SpiInputFileData调用
+unsigned char UsbOpenOneFile(void);       //导入文件.erf
+unsigned char UsbReadAllProgramHead(void); //从U盘读取所有程序头
+unsigned char SpiGenerateBoardFile(void);  //将本板的信息存入SPIFLASH
+unsigned char ExportOneFile(void);         //导出erf文件
+unsigned char ExportOneProgram(void);      //检测报告导出到.csv
+//unsigned char ReadAllProgramHead(void);  //读取所有程序头
+
+//保存系统调置参数
+unsigned char SpiSaveAbs(void);            //保存校准吸光度
+unsigned char SpiReadAbs(void);
+unsigned char SpiSaveSystemPra(void);      //保存系统参数
+unsigned char SpiReadSystemPra(void);
+void FileFormat_spi(void);
+//lgj161013 start
+unsigned char Read_send_bin_File(void);
+unsigned char Read_write_bin_File(void);
+//lgj161013 end
+//static void CreateNewFile(char *_ucVolume)
+	
+
+
+
+
+
+void WriteFileTest(void);
+extern char *update103_buf;
+#endif
+

@@ -1,0 +1,12 @@
+
+#ifndef __HELP_MENU_H
+#define __HELP_MENU_H
+
+extern unsigned char HelpMenuFlag;                //帮助菜单标志 
+extern unsigned char HelpMenuPage;                //帮助菜单当前页
+
+void HelpMenuInit(void);
+//void UpdateHelpButton(void);
+void DisplayHelp(void);
+
+#endif

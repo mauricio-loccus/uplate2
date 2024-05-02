@@ -1,0 +1,229 @@
+//BoardInf.DetectMode
+enum
+{
+    MODE_NORMAL = 0,
+    MODE_FAST,
+};
+
+
+
+//1.颜色定义
+#define COLOR_MODE_SEL_BK      0x51320c//0xe7a362  //模式项-选中时的背景色
+#define COLOR_MODE_SEL_TXT     0xffffff  //模式项-选中时的文字
+//滤光片
+
+#define COLOR_FILTER_NUM_BK     0x51320c//0xe7a362 //滤光片-数字的底色
+#define COLOR_FILTER_NUM_TXT    0xffffff//0xf8e1c6 //滤光片-数字的颜色
+
+
+#define COLOR_FILTER_SEL_BK      0x51320c//0xe7a362  //模式项-选中时的背景色
+#define COLOR_FILTER_SEL_TXT     0xffffff  //模式项-选中时的文字
+
+#define COLOR_PAINT_TXT          0x51320c//0xf7f1ef
+
+#define COLOR_PAINT_TXT_DIS      0x686664//0xc0c0c0
+
+
+
+
+
+//第1个滤光片位置定义
+#define FILTER_WIDTH      101            //滤光片按键左侧部分的宽度
+#define FILTER_R_WIDTH    90             //滤光片按键右侧部分的宽度
+
+#define FILTER_1_START_X    19
+#define FILTER_1_START_Y    164
+#define FILTER_1_END_X      120
+#define FILTER_1_END_Y      210
+
+#define FILTER_1_R_START_X  (120)  //120
+#define FILTER_1_R_START_Y  (FILTER_1_START_Y)
+#define FILTER_1_R_END_X    210
+#define FILTER_1_R_END_Y    (FILTER_1_END_Y)
+
+
+//第2个滤光片位置定义
+#define FILTER_2_START_X    (FILTER_1_START_X)
+#define FILTER_2_START_Y    249
+#define FILTER_2_END_X      (FILTER_1_END_X)
+#define FILTER_2_END_Y      295
+
+#define FILTER_2_R_START_X  (FILTER_1_R_START_X)
+#define FILTER_2_R_START_Y  (FILTER_2_START_Y)
+#define FILTER_2_R_END_X    (FILTER_1_R_END_X)
+#define FILTER_2_R_END_Y    (FILTER_2_END_Y)
+//模式位置定义
+#define MODE_WIDTH       （FILTER_WIDTH）             //模式按键左侧部分的宽度
+#define MODE_R_WIDTH     （FILTER_HEIGHT）               //模式按键右侧部分的宽度
+
+#define MODE_START_X       (FILTER_1_START_X)
+#define MODE_START_Y       334
+#define MODE_END_X         (FILTER_1_END_X)
+#define MODE_END_Y         380
+
+#define MODE_R_START_X   (FILTER_1_R_START_X)
+#define MODE_R_START_Y   (MODE_START_Y)
+#define MODE_R_END_X     (FILTER_1_R_END_X)
+#define MODE_R_END_Y     (MODE_END_Y)
+
+//滤光片扩展宽和高定义
+#define FILTER_EXPAND_WIDTH      400   //滤光片1和2扩展项的宽度
+#define FILTER_EXPAND_HEIGHT     46    //滤光片1和2扩展项的高度
+//滤光片扩展选中的宽度
+#define FILTER_SELECT_WIDTH      43
+
+//滤光片1扩展位置定义
+#define FILTER_1_EXPAND_START_X    FILTER_1_R_START_X //2014-8-10项
+#define FILTER_1_EXPAND_START_Y    FILTER_1_R_START_Y
+#define FILTER_1_EXPAND_END_X      (FILTER_1_EXPAND_START_X + FILTER_EXPAND_WIDTH)
+#define FILTER_1_EXPAND_END_Y      (FILTER_1_R_START_Y+FILTER_EXPAND_HEIGHT)
+//滤光片2扩展位置定义
+#define FILTER_2_EXPAND_START_X    FILTER_2_R_START_X //2014-8-10项
+#define FILTER_2_EXPAND_START_Y    FILTER_2_R_START_Y
+#define FILTER_2_EXPAND_END_X      (FILTER_2_EXPAND_START_X + FILTER_EXPAND_WIDTH)
+#define FILTER_2_EXPAND_END_Y      (FILTER_2_R_START_Y+FILTER_EXPAND_HEIGHT)
+
+
+//模式扩展位置定义
+#define MODE_EXPAND_WIDTH         135  //模式扩展项的宽度
+#define MODE_EXPAND_HEIGHT        46    //模式扩展项的高度
+//模式扩展选中的宽度
+#define MODE_EXPAND_WIDTH1        45
+#define MODE_EXPAND_WIDTH2        65
+
+#define MODE_EXPAND_START_X       MODE_R_START_X //2014-8-10项
+#define MODE_EXPAND_START_Y       MODE_R_START_Y
+#define MODE_EXPAND_END_X        (MODE_EXPAND_START_X+MODE_EXPAND_WIDTH)
+#define MODE_EXPAND_END_Y        (MODE_R_START_Y+MODE_EXPAND_HEIGHT)
+
+
+
+
+
+
+
+
+
+
+
+
+
+//2.振动参数界面
+
+//振动使能宽度
+#define SHAKE_ENABLE_WIDTH   66  //45 //66
+//振动时间位置
+#define TIMESHAKE_R_START_X  120
+#define TIMESHAKE_R_START_Y  334
+#define TIMESHAKE_R_END_X    260
+#define TIMESHAKE_R_END_Y    380
+
+#define SHAKE_TIME_WIDTH     40  //振动时间（时、分或秒的宽度)
+
+//振动速度扩展位置
+#define SPEED_EXPAND_START_X    FILTER_2_EXPAND_START_X
+#define SPEED_EXPAND_START_Y    FILTER_2_EXPAND_START_Y
+#define SPEED_EXPAND_END_X      336
+#define SPEED_EXPAND_END_Y      SPEED_EXPAND_START_Y+46
+
+//振动速度宽度
+#define SHAKE_SPEED_WIDTH   45  //正常的宽度（第1和第3个）//40
+#define SHAKE_SPEED_WIDTH1   66 //Normal的宽度//56
+
+
+
+
+//暂停时间位置
+#define TIMEPAUSE_R_START_X  (SPEED_EXPAND_START_X  +KINETIC_PARA_POS_START)
+#define TIMEPAUSE_R_START_Y  SPEED_EXPAND_START_Y
+#define TIMEPAUSE_R_END_X    (TIMEPAUSE_R_START_X+140)
+#define TIMEPAUSE_R_END_Y    (TIMEPAUSE_R_START_Y+46)
+
+#define PAUSE_TIME_WIDTH     40  //振动时间（时、分或秒的宽度)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#define KINETIC_ENABLE_WIDTH   66
+#define KINETIC_ANALYSIS_BASELINE_WIDTH   85
+
+#define INTERPRET_ENABLE_WIDTH   66
+#define QUALITY_CONC_WIDTH   66
+
+
+//动力学界面位置定义
+#define  CALCULATION_PARA_START_X  320//103
+#define  READINGS_START_X  (CALCULATION_PARA_START_X+FILTER_1_START_X)
+#define  READINGS_START_Y  (FILTER_1_START_Y)
+#define  READINGS_END_X    (CALCULATION_PARA_START_X+FILTER_1_END_X)
+#define  READINGS_END_Y    (FILTER_1_END_Y)
+
+#define  READINGS_R_START_X  (READINGS_END_X)
+#define  READINGS_R_START_Y  (READINGS_START_Y)
+#define  READINGS_R_END_X    (READINGS_R_START_X+100)
+#define  READINGS_R_END_Y    (READINGS_END_Y)
+
+
+
+#define  TIME_INTERVAL_START_X  (CALCULATION_PARA_START_X+FILTER_2_START_X)
+#define  TIME_INTERVAL_START_Y  (FILTER_2_START_Y)
+#define  TIME_INTERVAL_END_X    (CALCULATION_PARA_START_X+FILTER_2_END_X)
+#define  TIME_INTERVAL_END_Y    (FILTER_2_END_Y)
+
+
+#define  TIME_INTERVAL_R_START_X  (READINGS_R_START_X)
+#define  TIME_INTERVAL_R_START_Y  (FILTER_2_R_START_Y)
+#define  TIME_INTERVAL_R_END_X    (READINGS_R_END_X+35)
+#define  TIME_INTERVAL_R_END_Y    (FILTER_2_R_END_Y)
+
+
+#define KINETIC_PARA_POS_START (300) //2014-8-10项
+
+//动力学参数界面位置定义
+#define KINETIC_TYPE_EXPAND_START_X    FILTER_1_EXPAND_START_X
+#define KINETIC_TYPE_EXPAND_START_Y    FILTER_1_EXPAND_START_Y
+#define KINETIC_TYPE_EXPAND_END_X      KINETIC_TYPE_EXPAND_START_X+540
+#define KINETIC_TYPE_EXPAND_END_Y      KINETIC_TYPE_EXPAND_START_Y+46
+
+#define PRECALCUE_EXPAND_START_X    FILTER_2_R_START_X //2014-8-10项
+#define PRECALCUE_EXPAND_START_Y    FILTER_2_R_START_Y
+#define PRECALCUE_EXPAND_END_X      FILTER_2_R_START_X+410
+#define PRECALCUE_EXPAND_END_Y      FILTER_2_R_END_Y
+
+#define KINETC_EXPAND_START_X    FILTER_1_R_START_X //2014-8-10项
+#define KINETC_EXPAND_START_Y    FILTER_1_R_START_Y
+#define KINETC_EXPAND_END_X      FILTER_1_R_START_X+170
+#define KINETC_EXPAND_END_Y      FILTER_1_R_END_Y
+
+#define CURVE_EXPAND_START_X    MODE_R_START_X //2014-8-10项
+#define CURVE_EXPAND_START_Y    MODE_R_START_Y
+
+#ifdef SOFTWARE_DN
+#define CURVE_EXPAND_END_X      (MODE_R_START_X+470)
+#else
+#define CURVE_EXPAND_END_X      (MODE_R_START_X+380)
+#endif
+#define CURVE_EXPAND_END_Y      MODE_R_END_Y
+
+
+
+#ifndef __PROTOCOL_MEASURE_H
+#define __PROTOCOL_MEASURE_H
+
+
+void ProtocolMeasure_Interface(void);
+void ProtocolMeasure_Scan(void);
+void ProtocolMeasure_Go(void);
+
+#endif

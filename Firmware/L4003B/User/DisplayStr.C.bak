@@ -1,0 +1,550 @@
+#include "MainTask.h"
+/*
+const char BUTTON_SYSTEM_OK[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {"OK", "确认"};
+const char BUTTON_SYSTEM_BACK[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {"Back", "返回"};
+const char BUTTON_SYSTEM_CANCEL[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {"Cancel", "取消"};
+
+
+
+const char SETTING_MODULE_TITLE_LANGUAGE[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {"Language","语言"};
+const char SETTING_MODULE_TITLE_FILTER[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {"Filter","滤光片"};
+const char SETTING_MODULE_TITLE_MAINTENANCE[LANGUAGE_TYPES][KINETIC_SELECT_CHAR_MAX] = {"Maintenance", "维护"};
+const char SETTING_MODULE_TITLE_PRINT[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {"Print", "打印"};
+const char SETTING_MODULE_TITLE_QUALITY[LANGUAGE_TYPES][KINETIC_SELECT_CHAR_MAX] = {"Quality control", "质控"};
+const char SETTING_MODULE_TITLE_DATE[LANGUAGE_TYPES][KINETIC_SELECT_CHAR_MAX] = {"Date & time", "时间&日期"};
+
+
+
+
+
+
+
+
+const char CURVE_REPORT_ABSORBANCE[LANGUAGE_TYPES][PLATE_IN_OUT_CHAR_MAX] = {"Absorbance", "吸光度"};
+const char CURVE_REPORT_CYCLE[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {"Cycle","循环数"};
+const char CURVE_REPORT_LOG_ABSORBANCE[LANGUAGE_TYPES][KINETIC_SELECT_CHAR_MAX] = {"Log absorbance", "对数吸光度"};
+const char CURVE_REPORT_CONCENTRATION[LANGUAGE_TYPES][KINETIC_SELECT_CHAR_MAX] = {"Concentration","浓度"};
+const char CURVE_REPORT_LOG_CONCENTRATION[LANGUAGE_TYPES][KINETIC_SELECT_CHAR_MAX] = {"Log concentration", "对数浓度"};
+
+//const char SELECT_REPORT_SAMPLE_NO[LANGUAGE_TYPES][KINETIC_SELECT_CHAR_MAX] = {_T("Sample: %c%d"), _T("样本：%c%d"), _T("Sample: %c%d"), _T("Sample: %c%d")};
+//const char SELECT_REPORT_SAMPLE_ALL[LANGUAGE_TYPES][KINETIC_SELECT_CHAR_MAX] = {"Samples: All"), _T("样本：全部"), _T("Samples: All"), _T("Samples: All")};
+//const char SELECT_REPORT_CYCLE[LANGUAGE_TYPES][KINETIC_SELECT_CHAR_MAX] = {_T("Cycle: %d"), _T("循环：%d"), _T("Cycle: %d"), _T("Cycle: %d")};
+
+const char SYSTEM_NO_EXPRESSION[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {"Off","无"};
+const char SYSTEM_CLOSE_EXPRESSION[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {"Off"), "关闭"};
+const char SYSTEM_OPEN_EXPRESSION[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {"On", "打开"};
+
+
+
+
+
+
+
+*/
+
+
+//1.Main Menu
+const char STR_FILTER[LANGUAGE_TYPES][20] = {"Filter :", "滤光片："};//{"Filter :", "滤  光  片："};
+const char STR_MODE[LANGUAGE_TYPES][20] = {"Mode :", "模式："};
+const char STR_OFF[LANGUAGE_TYPES][8] = {"Off","无"};
+const char STR_MODE_NORMAL[LANGUAGE_TYPES][10] = {"Normal", "正常"};
+const char STR_MODE_FAST[LANGUAGE_TYPES][10] = {"Fast", "快速"};
+
+const char SETUP_SHAKE_SHAKE[LANGUAGE_TYPES][20] = {"Shake :", "振动："};
+const char SETUP_SHAKE_SPEED[LANGUAGE_TYPES][20] = {"Speed :", "速度："};
+const char SETUP_SHAKE_TIME[LANGUAGE_TYPES][20] = {"Time :", "时间："};
+
+const char STR_SHAKE_SPEED_SLOW[LANGUAGE_TYPES][15] = {"Slow", "慢速"};
+const char STR_SHAKE_SPEED_NORMAL[LANGUAGE_TYPES][15] = {"Normal", "中速"};
+const char STR_SHAKE_SPEED_FAST[LANGUAGE_TYPES][15] = {"Fast","快速"};
+
+
+
+
+const char STR_OPEN[LANGUAGE_TYPES][10] = {"On", "打开"};
+const char STR_CLOSE[LANGUAGE_TYPES][10] = {"Off", "关闭"};
+const char STR_NO[LANGUAGE_TYPES][10] = {"No", "无"};
+
+const char STR_LAYOUT_NAME[LANGUAGE_TYPES][40] = {"Plate :   96 wells", "名        称：96孔板"};
+const char STR_LAYOUT[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {"Layout","布局"};
+
+const char STR_PREPROCESS[LANGUAGE_TYPES][20] = {"Preprocess : ", "预  处  理："};
+const char STR_KINETIC[LANGUAGE_TYPES][20] = {"Kinetic : ", "动  力  学："};
+const char STR_CURVE[LANGUAGE_TYPES][20] = {"Curves : ","标准曲线："};
+
+
+
+//Interpret
+const char STR_INTERPRET[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {"Intepret", "定性"};
+const char STR_ABS[LANGUAGE_TYPES][10] = {"ABS","吸光度"};
+const char STR_CONC[LANGUAGE_TYPES][10] = {"Conc.","浓度"};
+const char STR_CUTOFF[LANGUAGE_TYPES][10] = {"Cutoff", "临界值"};
+
+
+//设置浓度界面
+
+const char STR_CONCENTRATION_SELECT_UNIT[CALIBRATOR_CONCENTRATION_UNIT_MAX][10]
+= {"fg/μl", "pg/μl", "ng/μl", "ug/μl", "UI/μl", "UI/ml", ""}; //"fg/μl"
+
+
+const char STR_TABLE_RECORD_NO[LANGUAGE_TYPES][10] = {"NO.", "序号"};
+
+
+
+//Quality
+const char STR__PASS[LANGUAGE_TYPES][10] = {"Passed","通过"};
+const char STR__FAILED[LANGUAGE_TYPES][10] = {"Failed","失败"};
+
+
+//Run
+const char STR_CURRENT_CYCLE[LANGUAGE_TYPES][20] = {"Cycle:", "当前循环:"};
+const char RUN_COMMAND_RESPONSE_ERROR[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {"The machine is malfunctioning.", "机器运行错误。"};
+
+//Report
+const char FILE_IMPORT_SUCCESS[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {"The files are imported successfully."
+	, "文件导入成功。"};
+const char FILE_EXPORT_SUCCESS[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {"The files are exported successfully."
+	, "文件导出成功。"};
+const char FILE_EXPORT_ERROR[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {"The files are exported fail."
+	, "文件导出失败。"};
+
+
+const char STR_RESTART_SYSTEM[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {"Please restart system!", "请重启系统！"};
+const char STR_NO_FILE[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {"No file exist.", "没有文件。"};
+const char STR_MODIFIED_FILE[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {"Want to save the modified file first?","文件已修改，是否先保存？"};
+const char STR_ALL[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {"All", "全部"};
+const char STR_WAIT[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {"Please wait...", "请稍等..."};
+const char STR_PRINT_WAIT_MESSAGE[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {"Sending data, Please wait 6 seconds!"
+, "正在发送数据, 请等待6秒钟!"};
+
+
+
+//质控
+const char STR_QUALITY_TITLE[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {"Quality","质控"};
+const char STR_QUALITY_RESULT[LANGUAGE_TYPES][2][10] = {{"Passed","Failed"}, {"通过", "失败"}}; //½á¹ûÏÔÊ¾
+const char REFERENCE_SELECT[LANGUAGE_TYPES][2][10] = {{"Conc.", "ABS"}, {"浓度", "吸光度"}};  
+
+const char QUALITY_TABLE_RESULT[LANGUAGE_TYPES][10]={"Result","结果"};
+
+const char QUALITY_MAIN_TITLE[LANGUAGE_TYPES][30] = {"Quality controls", "质控参数"};
+const char QUALITY_TABLE_TARGET[LANGUAGE_TYPES][10] = {"Target", "目标值"};
+const char QUALITY_TABLE_SD[LANGUAGE_TYPES][15] = {"SD", "标准偏差"};
+const char QUALITY_TABLE_CV[LANGUAGE_TYPES][15] = {"CV", "变异系数"};
+const char QUALITY_TABLE_UPPER_LIMIT[LANGUAGE_TYPES][15] = {"Upper limit", "上限"};
+const char QUALITY_TABLE_LOWER_LIMIT[LANGUAGE_TYPES][15] = {"Lower limit", "下限"};
+/*
+
+const char SETUP_PHOTO_METRIC_TITLE[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Measure"), _T("测量"), _T("Measure"), _T("Measure")};
+const char SETUP_LAYOUT_TITLE[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Layout"), _T("布局"), _T("Layout"), _T("Layout")};
+const char SETUP_SHAKE_TITLE[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Shake"), _T("振动"), _T("Shake"), _T("Shake")};
+const char SETUP_CALCULATE_TITLE[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Calculate"), _T("计算"), _T("Calculate"), _T("Calculate")};
+const char SETUP_INTERPRET_TITLE[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Intepret"), _T("定性"), _T("Interpret"), _T("Interpret")};
+const char SETUP_QUALITY_TITLE[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Quality"), _T("质控"), _T("Quality"), _T("Quality")};
+
+const char PARAMETER_FILE_NOT_REPORT[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("No report data in this file!")
+, _T("该文件没有报告数据！"), _T("No report data in this file!"), _T("No report data in this file!")};
+
+
+
+
+const wchar_t SELECT_CONTROL_REPORT_FILTER1[LANGUAGE_TYPES][PLATE_IN_OUT_CHAR_MAX] = {_T("Filter 1"), _T("滤光片1"), _T("Filter 1"), _T("Filter 1")};
+const wchar_t SELECT_CONTROL_REPORT_FILTER2[LANGUAGE_TYPES][PLATE_IN_OUT_CHAR_MAX] = {_T("Filter 2"), _T("滤光片2"), _T("Filter 2"), _T("Filter 2")};
+const wchar_t SELECT_CONTROL_REPORT_FILTER12[LANGUAGE_TYPES][PLATE_IN_OUT_CHAR_MAX] = {_T("Filter 1&2"), _T("滤光片1&2"), _T("Filter 1&2"), _T("Filter 1&2")};
+
+const wchar_t BUTTON_REPORT_RAW_DATA[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Raw data"), _T("原始数据"), _T("Raw data"), _T("Raw data")};
+const wchar_t BUTTON_REPORT_INTERPRET[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Interpret"), _T("定性分析"), _T("Interpret"), _T("Interpret")};
+const wchar_t BUTTON_REPORT_ANALYSIS[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Analysis"), _T("定量分析"), _T("Analysis"), _T("Analysis")};
+const wchar_t BUTTON_REPORT_KINETIC_ANALYSIS[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Analysis"), _T("分析结果"), _T("Analysis"), _T("Analysis")};
+const wchar_t BUTTON_REPORT_CURVE[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Curve"), _T("标准曲线"), _T("Curve"), _T("Curve")};
+const wchar_t BUTTON_REPORT_KINETIC_CURVE[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Curve"), _T("原始曲线"), _T("Curve"), _T("Curve")};
+const wchar_t BUTTON_REPORT_QC[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("QC"), _T("质控分析"), _T("QC"), _T("QC")};
+const wchar_t BUTTON_REPORT_PRINT[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Print"), _T("打印"), _T("Print"), _T("Print")};
+//const wchar_t BUTTON_REPORT_EXPORT[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Export"), _T("数据导出"), _T("Export"), _T("Export")};
+const wchar_t BUTTON_EXPORT_REPORT[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Ex Report"), _T("导出报告"), _T("Ex Report"), _T("Ex Report")};
+
+const wchar_t BUTTON_HELP_NEXT[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Next"), _T("下一页"), _T("Next"), _T("Next")};
+const wchar_t BUTTON_HELP_PREVIOUS[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Previous"), _T("上一页"), _T("Previous"), _T("Previous")};
+
+const wchar_t BUTTON_FILE_LIST[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("File List"), _T("文件列表"), _T("File List"), _T("File List")};
+//const wchar_t BUTTON_FILE_OPEN[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Open"), _T("打开"), _T("Open"), _T("Open")};
+const wchar_t BUTTON_FILE_SAVE[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Save"), _T("保存"), _T("Save"), _T("Save")};
+const wchar_t BUTTON_FILE_SAVE_AS[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Save As"), _T("另存"), _T("Save As"), _T("Save As")};
+const wchar_t BUTTON_FILE_NEW[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("New"), _T("新建"), _T("New"), _T("New")};
+
+const wchar_t BUTTON_PLATE_IN_OUT[LANGUAGE_TYPES][PLATE_IN_OUT_CHAR_MAX] = {_T("Plate in/out"), _T("板进/板出"), _T("Plate in/out"), _T("Plate in/out")};
+//wenqg, 20160511 9:58, add
+const wchar_t BUTTON_RUN[LANGUAGE_TYPES][PLATE_IN_OUT_CHAR_MAX] = {_T("Run"), _T("运行"), _T("Run"), _T("Run")};
+const wchar_t BUTTON_STOP[LANGUAGE_TYPES][PLATE_IN_OUT_CHAR_MAX] = {_T("Stop"), _T("停止"), _T("Stop"), _T("Stop")};
+const wchar_t BUTTON_EXIT[LANGUAGE_TYPES][PLATE_IN_OUT_CHAR_MAX] = {_T("Reboot"), _T("重启"), _T("Reboot"), _T("Reboot")};
+const wchar_t TEXT_PARAMETER_NAME[LANGUAGE_TYPES][PLATE_IN_OUT_CHAR_MAX] = {_T("have data"), _T("有数据"), _T("have data"), _T("have data")};
+
+
+
+const wchar_t MENU_PROGRAM[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Protocol"), _T("程序"), _T("Protocol"), _T("Protocol")};
+const wchar_t MENU_REPORT[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Results"), _T("报告"), _T("Results"), _T("Results")};
+const wchar_t MENU_SETTING[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Settings"), _T("设置"), _T("Settings"), _T("Settings")};
+const wchar_t MENU_HELP[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("Help"), _T("帮助"), _T("Help"), _T("Help")};
+const wchar_t LANGUAGE_SELECTION[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX] = {_T("English"), _T("中文"), _T("Spain"), _T("Japanese")};
+const wchar_t NORMAL_ANALYSIS_TITLE[LANGUAGE_TYPES][ANALYSIS_MODE_MAX][ANALYSIS_MODE_CHAR_MAX]  
+= {{_T("raw data"), _T("Inter. result"), _T("analysis result"), _T("analysis curve"), _T("QC result")}
+, {_T("原始数据"), _T("定性分析结果"), _T("定量分析结果"), _T("标准曲线"), _T("质控分析结果")}
+, {_T("raw data"), _T("Inter. result"), _T("analysis result"), _T("analysis curve"), _T("QC result")}
+, {_T("raw data"), _T("Inter. result"), _T("analysis result"), _T("analysis curve"), _T("QC result")}};
+const wchar_t KINETIC_ANALYSIS_TITLE[LANGUAGE_TYPES][ANALYSIS_MODE_MAX][ANALYSIS_MODE_CHAR_MAX]
+= {{_T("raw data"), _T("Inter. result"), _T("kinetic analysis"), _T("kinetic curve"), _T("QC result")}
+, {_T("原始数据"), _T("定性分析结果"), _T("动力学分析结果"), _T("动力学曲线"), _T("质控分析结果")}
+, {_T("raw data"), _T("Inter. result"), _T("kinetic analysis"), _T("kinetic curve"), _T("QC result")}
+, {_T("raw data"), _T("Inter. result"), _T("kinetic analysis"), _T("kinetic curve"), _T("QC result")}};
+
+const wchar_t CONCENTRATION_UNIT[CALIBRATOR_CONCENTRATION_UNIT_MAX][CALIBRATOR_CONCENTRATION_UNIT_CHAR_MAX]
+= {_T("fg/μl"), _T("pg/μl"), _T("ng/μl"), _T("ug/μl"), _T("UI/μl"), _T("UI/ml"), _T("")}; //2015-2-10
+
+const wchar_t SYSTEM_ERROR_MESSAGE[LANGUAGE_TYPES][SYSTEM_ERROR_MAX][SYSTEM_ERROR_CHAR_MAX]
+= {{_T("Filter wheel control fails."), _T("Front position error.")
+, _T("Rear position error."), _T("EEPROM fails.")
+, _T("Origin data is lost."), _T("Weak"), _T("Too weak") //2015-4-3
+, _T("Too strong"), _T("Too strong bg.") //2015-4-3
+, _T("Mismatched filter wavelength."), _T("Wrong intensity data.")}
+, {_T("滤光轮不能回到初始位置。"), _T("前方位置传感器错误。")
+, _T("后方传感器错误。"), _T("EEPROM 存储错误。")
+, _T("原点数据丢失。"), _T("光强不够大。"), _T("光强太弱。")
+, _T("光强太强。"), _T("本底光强太强。")
+, _T("滤光片波长不匹配。"), _T("光强数据错误。")}
+, {_T("Filter wheel control fails."), _T("Front position error.")
+, _T("Rear position error."), _T("EEPROM fails.")
+, _T("Origin data is lost."), _T("Intensity is weak"), _T("Intensity is too weak") //2015-2-20
+, _T("Intensity is too strong"), _T("Bg. intensity is too strong") //2015-2-20
+, _T("Mismatched filter wavelength."), _T("Wrong intensity data.")}
+, {_T("Filter wheel control fails."), _T("Front position error.")
+, _T("Rear position error."), _T("EEPROM fails.")
+, _T("Origin data is lost."), _T("Intensity is weak"), _T("Intensity is too weak") //2015-2-20
+, _T("Intensity is too strong"), _T("Bg. intensity is too strong") //2015-2-20
+, _T("Mismatched filter wavelength."), _T("Wrong intensity data.")}};
+
+const wchar_t HELP_TITLES_CHAPTER[HELP_TITLE_CHAPTER_MAX] = {0, 1, 8, 13, 17, 21, 32, 36};
+const wchar_t HELP_TITLES[LANGUAGE_TYPES][HELP_TITLE_MAX][HELP_TITLE_CHAR_MAX] //0, 7, 12, 16, 20, 31, 35-40
+= {{_T("About..."), _T("Settings of protocols"), _T("Photometric test")
+, _T("Shaking"), _T("Calculation"), _T("Kinetic test"), _T("Interpret")
+, _T("Quality controls")
+, _T("File operations"), _T("Create a new file")
+, _T("Save a file"), _T("Open a file"), _T("Open a demo file")
+, _T("Plate operations"), _T("Plate in / out"), _T("Start a plate test")
+, _T("Stop a plate test")
+, _T("Sample layout"), _T("Select a sample type")
+, _T("Clear the entire plate"), _T("Setting of std. concentrations")
+, _T("Report of analysis results")
+, _T("Photometric test"), _T("Absorbance data"), _T("Quantitative analysis result")
+, _T("Interpret result"), _T("Quality control result"), _T("Standard curve")
+, _T("Kinetic test"), _T("Absorbance data"), _T("Kinetic analysis result")
+, _T("Kinetic curve")
+, _T("Operations of history records"), _T("Browse records")
+, _T("Import / export records"), _T("Delete a record")
+, _T("Options")
+, _T("Language selection"), _T("Filter settings"), _T("Leave the plate in / out")
+, _T("Date / time settings"), _T("Touch screen calibration")}
+, {_T("关于..."), _T("程序设置"), _T("吸光度测量参数设置")
+, _T("振动参数设置"), _T("计算参数设置"), _T("动力学参数设置"), _T("定性参数设置")
+, _T("质控参数设置")
+, _T("文件操作"), _T("新建")
+, _T("保存"), _T("打开"), _T("打开演示文件")
+, _T("酶标板操作"), _T("板进/板出"), _T("启动测量")
+, _T("停止测量")
+, _T("样品布局设置"), _T("选择样品类型")
+, _T("清除整板设置"), _T("标准浓度设置")
+, _T("报告分析结果")
+, _T("吸光度测量"), _T("原始吸光度数据"), _T("定量分析结果")
+, _T("定性分析结果"), _T("质控分析结果"), _T("标准曲线")
+, _T("动力学测试"), _T("原始吸光度数据"), _T("动力学分析结果")
+, _T("动力学曲线")
+, _T("历史记录"), _T("浏览历史记录")
+, _T("导入/导出历史记录"), _T("删除历史记录")
+, _T("选项")
+, _T("语言选择"), _T("滤光片设置"), _T("运行后酶标板退出/不退出")
+, _T("日期/时间设置"), _T("触摸屏校准")}
+, {_T("About..."), _T("Settings of protocols"), _T("Photometric test")
+, _T("Shaking"), _T("Calculation"), _T("Kinetic test"), _T("Interpret")
+, _T("Quality controls")
+, _T("File operations"), _T("Create a new file")
+, _T("Save a file"), _T("Open a file"), _T("Open a demo file")
+, _T("Plate operations"), _T("Plate in / out"), _T("Start a plate test")
+, _T("Stop a plate test")
+, _T("Sample layout"), _T("Select a sample type")
+, _T("Clear the entire plate"), _T("Setting of std. concentrations")
+, _T("Report of analysis results")
+, _T("Photometric test"), _T("Absorbance data"), _T("Quantitative analysis result")
+, _T("Interpret result"), _T("Quality control result"), _T("Standard curve")
+, _T("Kinetic test"), _T("Absorbance data"), _T("Kinetic analysis result")
+, _T("Kinetic curve")
+, _T("Operations of history records"), _T("Browse records")
+, _T("Import / export records"), _T("Delete a record")
+, _T("Options")
+, _T("Language selection"), _T("Filter settings"), _T("Leave the plate in / out")
+, _T("Date / time settings"), _T("Touch screen calibration")}
+, {_T("About..."), _T("Settings of protocols"), _T("Photometric test")
+, _T("Shaking"), _T("Calculation"), _T("Kinetic test"), _T("Interpret")
+, _T("Quality controls")
+, _T("File operations"), _T("Create a new file")
+, _T("Save a file"), _T("Open a file"), _T("Open a demo file")
+, _T("Plate operations"), _T("Plate in / out"), _T("Start a plate test")
+, _T("Stop a plate test")
+, _T("Sample layout"), _T("Select a sample type")
+, _T("Clear the entire plate"), _T("Setting of std. concentrations")
+, _T("Report of analysis results")
+, _T("Photometric test"), _T("Absorbance data"), _T("Quantitative analysis result")
+, _T("Interpret result"), _T("Quality control result"), _T("Standard curve")
+, _T("Kinetic test"), _T("Absorbance data"), _T("Kinetic analysis result")
+, _T("Kinetic curve")
+, _T("Operations of history records"), _T("Browse records")
+, _T("Import / export records"), _T("Delete a record")
+, _T("Options")
+, _T("Language selection"), _T("Filter settings"), _T("Leave the plate in / out")
+, _T("Date / time settings"), _T("Touch screen calibration")}};
+
+const wchar_t FILE_ERROR_MESSAGE[LANGUAGE_TYPES][FILE_ERROR_MAX][64]
+= {{_T("Select files first."), _T("Do you want to delete the sel. files?") 
+, _T("Please insert USB disk first."), _T("There is no file to import.")
+, _T("There is no file to export."), _T("There is no file to delete."), _T("There is no file to open.")
+, _T("Please change to USB disk mode first."), _T("Please change to harddisk mode first.")
+, _T("Overwrite existing files?"), _T("Save the modified file first?"), _T("The file is already opened.")} //2015-2-10
+, {_T("请先选择文件。"), _T("确实需删除所选文件吗？Demo文件不能删除！")
+, _T("请先插入U盘。"), _T("U盘中没有文件可导入。")
+, _T("没有文件可导出。"), _T("没有文件可删除。"), _T("没有文件可打开。")
+, _T("请先切换到U盘模式。"), _T("请先切换到硬盘模式。")
+, _T("是否覆盖现有文件？Demo文件不能覆盖"),_T("是否先保存当前文件？"),_T("文件已经处于打开状态。")}
+,{_T("Select files first."), _T("Do you want to delete the sel. files?")
+, _T("Please insert USB disk first."), _T("There is no file to import.")
+, _T("There is no file to export."), _T("There is no file to delete."), _T("There is no file to open.")
+, _T("Please change to USB disk mode first."), _T("Please change to flash mode first.")
+, _T("Overwrite existing files?"), _T("Save the modified file first?"), _T("The file is already opened.")} //2015-2-10
+,{_T("Select files first."), _T("Do you want to delete the sel. files?")
+, _T("Please insert USB disk first."), _T("There is no file to import.")
+, _T("There is no file to export."), _T("There is no file to delete."), _T("There is no file to open.")
+, _T("Please change to USB disk mode first."), _T("Please change to flash mode first.")
+, _T("Overwrite existing files?"), _T("Save the modified file first?"), _T("The file is already opened.")}}; //2015-2-10
+
+const wchar_t ANALYSIS_ERROR_MESSAGE[LANGUAGE_TYPES][ANALYSIS_ERROR_MAX][ANALYSIS_ERROR_CHAR_MAX] //2015-3-16 LANGUAGE_TYPES
+= {
+	{_T("OK."), _T("More standard samples are needed."), _T("Curve fitting fails.")
+, _T("Only pos. concentration is allowed."), _T("Only pos. ABS is allowed.")
+, _T("Only log concentration is allowed."), _T("Log concentration is not allowed.")
+, _T("Only pos. log concentration is allowed."), _T("Neg. ABS is not allowed.")
+, _T("No valid NC is found."), _T("No valid PC is found.")
+, _T("No concentration result is calculated."), _T("No QC is found."), _T("QC result is invalid.")
+, _T("Kinetic data is insufficient.")
+	},  
+	{_T("分析完毕。"), _T("标准品个数不够。"), _T("曲线拟合不成功。")
+, _T("只允许正的浓度。"), _T("只允许正的吸光度。")
+, _T("只允许对数浓度。"), _T("不允许对数浓度。")
+, _T("只允许正的对数浓度。"), _T("不允许负的吸光度。")
+, _T("无有效的阴性对照品。"), _T("无有效地阳性对照品。")
+, _T("无浓度计算结果。"), _T("没有质控品。"), _T("质控结果无效。")
+, _T("动力学数据不够。")
+	}, 
+	{_T("OK."), _T("More standard samples are needed."), _T("Curve fitting fails.")
+, _T("Only pos. concentration is allowed."), _T("Only pos. ABS is allowed.")
+, _T("Only log concentration is allowed."), _T("Log concentration is not allowed.")
+, _T("Only pos. log concentration is allowed."), _T("Neg. ABS is not allowed.")
+, _T("No valid NC is found."), _T("No valid PC is found.")
+, _T("No concentration result is calculated."), _T("No QC is found."), _T("QC result is invalid.")
+, _T("Kinetic data is insufficient.")
+	}, 
+	{_T("OK."), _T("More standard samples are needed."), _T("Curve fitting fails.")
+, _T("Only pos. concentration is allowed."), _T("Only pos. ABS is allowed.")
+, _T("Only log concentration is allowed."), _T("Log concentration is not allowed.")
+, _T("Only pos. log concentration is allowed."), _T("Neg. ABS is not allowed.")
+, _T("No valid NC is found."), _T("No valid PC is found.")
+, _T("No concentration result is calculated."), _T("No QC is found."), _T("QC result is invalid.")
+, _T("Kinetic data is insufficient.")
+	}
+};
+
+const wchar_t RUNNING_STATUS_MESSAGE[LANGUAGE_TYPES][RUN_MODE_MAX][ANALYSIS_ERROR_CHAR_MAX] //2015-3-16
+= {{_T(""), _T(""), _T("")
+, _T(""), _T("Measuring now...")
+, _T("Shaking now..."), _T(""), _T("")
+, _T("Calibrating now..."), _T("")}
+, {_T(""), _T(""), _T("")
+, _T(""), _T("机器在测量中...")
+, _T("机器在振动中..."), _T(""), _T("")
+, _T("机器在校准中..."), _T("")}
+, {_T(""), _T(""), _T("")
+, _T(""), _T("Measuring now...")
+, _T("Shaking now..."), _T(""), _T("")
+, _T("Calibrating now..."), _T("")}
+, {_T(""), _T(""), _T("")
+, _T(""), _T("Measuring now...")
+, _T("Shaking now..."), _T(""), _T("")
+, _T("Calibrating now..."), _T("")}};
+
+//2015-3-16
+//const wchar_t FILE_IMPORT_SUCCESS[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("The files are imported successfully.")
+//	, _T("文件导入成功。"), _T("The files are imported successfully."), _T("The files are imported successfully.")};
+//const wchar_t FILE_EXPORT_SUCCESS[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("The files are exported successfully.")
+//	, _T("文件导出成功。"), _T("The files are exported successfully."), _T("The files are exported successfully.")};
+const wchar_t IMAGE_FACTORY_ERROR[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("CoCreateInstance Error.")
+, _T("图像处理错误。"), _T("CoCreateInstance Error."), _T("CoCreateInstance Error.")};
+const wchar_t CONFIRM_CALIBRATE[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("    Are you sure to calibrate the screen?")
+, _T("    确认开始校准屏幕？"), _T("    Are you sure to calibrate the screen?"), _T("    Are you sure to calibrate the screen?")};
+const wchar_t RESTART_SYSTEM[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("Please restart system!")
+, _T("请重启系统！"), _T("Please restart system!"), _T("Please restart system!")};
+const wchar_t NO_FILE_MESSAGE[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("No file exist.")
+, _T("没有文件。"), _T("No file exist."), _T("No file exist.")};
+const wchar_t MODIFIED_FILE_MESSAGE[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("Want to save the modified file first?")
+, _T("文件已修改，是否先保存？"), _T("Want to save the modified file first?"), _T("Want to save the modified file first?")};
+const wchar_t ALL_WELL_DISPLAY[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("All")
+, _T("全部"), _T("All"), _T("All")};
+const wchar_t WAIT_MESSAGE[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("Please wait...")
+, _T("请稍等..."), _T("Please wait..."), _T("Please wait...")};
+const wchar_t PRINT_WAIT_MESSAGE[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("Sending data, Please wait 6 seconds!")
+, _T("正在发送数据, 请等待6秒钟!"), _T("Sending data, Please wait 6 seconds!"), _T("Sending data, Please wait 6 seconds!")};
+
+const wchar_t IMAGE_LOAD_ERROR[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("CreateImageFromFile Error.")
+, _T("图像装载错误。"), _T("CreateImageFromFile Error."), _T("CreateImageFromFile Error."),};
+const wchar_t MENU_LEFT_EXPAND_W220H46_PGN[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\footer\\menu_left_expand_w220h46.png");	
+const wchar_t MENU_LEFT_W330H46_PGN[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\footer\\menu_left_expand_w330h46.png"); //2015-5-22	
+const wchar_t MENU_RIGHT_W101H46_PGN[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\footer\\menu_right_w101h46.png");	
+const wchar_t BUTTON_ADD_ACTIVE_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\button\\button_add_active.png");
+const wchar_t ICON_CALIB_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\footer\\icon_calib.png");
+const wchar_t ICON_WARNING_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\footer\\icon_warning.png");
+const wchar_t ICON_DEL_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\footer\\icon_del.bmp"); //2015-4-10
+const wchar_t ICON_NO_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\footer\\icon_no.bmp"); //2015-4-10
+const wchar_t BUTTON_OK_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\footer\\button_ok.png");
+const wchar_t BUTTON_CANCEL_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\footer\\button_cancel.png");
+const wchar_t BUTTON_RM_ACTIVE_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\button\\button_rm_active.png");
+const wchar_t BUTTON_ADD_PNG[RUN_ERROR_CHAR_MAX] = _T ("\\NandFlash\\UI\\button\\button_add.png");
+const wchar_t BUTTON_RM_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\button\\button_rm.png");
+const wchar_t NETWORK_SERVICE_HOVER_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\SET\\network-service_hover.bmp");
+const wchar_t SKYPE_CAMERA_HOVER_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\SET\\skype-camera_hover.bmp");
+const wchar_t PREFERENCES_SYSTEM_HOVER_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\SET\\preferences-system_hover.bmp");
+const wchar_t PRINTERS_FAXES_HOVER_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\SET\\printers-faxes_hover.bmp");
+const wchar_t CONTROL_PANEL_HOVER_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\SET\\control-panel_hover.bmp");
+const wchar_t PLAYER_TIME_HOVER_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\SET\\player-time_hover.bmp");
+const wchar_t PAGE_NEXT_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\page\\next.bmp");
+const wchar_t PAGE_PREV_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\page\\prev.bmp");
+const wchar_t PAGE_END_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\page\\end.bmp");
+const wchar_t PAGE_FIRST_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\page\\first.bmp");
+
+const wchar_t MENU_01_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\menu_01.bmp");
+const wchar_t MENU_11_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\meun_01.bmp");
+
+const wchar_t MENU_02_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\menu_02.bmp");
+const wchar_t MENU_22_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\meun_02.bmp");
+
+//	const wchar_t MENU_03_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\meun_04.bmp");
+const wchar_t MENU_04_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\menu_04.bmp");
+const wchar_t MENU_44_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\meun_04.bmp");
+
+const wchar_t MENU_05_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\menu_05.bmp");
+const wchar_t MENU_55_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\meun_05.bmp");
+
+const wchar_t MENU_HOEVER_01_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\menu_hover_01.bmp");
+const wchar_t MENU_HOEVER_11_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\meun_hover_01.bmp");
+
+const wchar_t MENU_HOEVER_02_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\menu_hover_02.bmp");
+const wchar_t MENU_HOEVER_22_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\meun_hover_02.bmp");
+//	const wchar_t MENU_HOEVER_03_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\meun_hover_04.bmp");
+
+const wchar_t MENU_HOEVER_04_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\menu_hover_04.bmp");
+const wchar_t MENU_HOEVER_44_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\meun_hover_04.bmp");
+
+const wchar_t MENU_HOEVER_05_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\menu_hover_05.bmp");
+const wchar_t MENU_HOEVER_55_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\header\\meun_hover_05.bmp");
+
+const wchar_t MAIN_BK_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\button\\main_bk.bmp");
+const wchar_t TABLE_BK_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\page\\table_bk.bmp");
+const wchar_t WHITE_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\main\\white.bmp");
+const wchar_t BLUE_EDGE_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\main\\blue_edge.bmp");
+const wchar_t HELP_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\main\\help.bmp");
+const wchar_t PAGE_SELECT_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\page\\page_select.bmp");
+const wchar_t BLUE_BAR_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\main\\blue_bar.bmp");
+const wchar_t NETWORK_SERVICE_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\Set\\network-service.bmp");
+const wchar_t SKYPE_CAMERA_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\Set\\skype-camera.bmp");
+const wchar_t PREFERENCE_SYSTEM_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\Set\\preferences-system.bmp");
+const wchar_t PRINTERS_FAXES_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\Set\\printers-faxes.bmp");
+const wchar_t CONTROL_PANEL_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\Set\\control-panel.bmp");
+const wchar_t PLAYER_TIME_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\Set\\player-time.bmp");
+const wchar_t BG_BACKGROUND_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\main\\bg.png");
+const wchar_t BUTTON_01_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\main\\btn_01.png");
+const wchar_t BUTTON_02_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\main\\btn_02.png");
+const wchar_t BUTTON_03_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\main\\btn_03.png");
+const wchar_t BUTTON_04_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\main\\btn_04.png");
+const wchar_t BUTTON_05_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\main\\btn_05.png");
+const wchar_t INPUT_W320H38_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\main\\input_w320h38.bmp");
+const wchar_t DATA_WHITE_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\button\\data_white.bmp");
+const wchar_t DATA_BLUE_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\button\\data_blue.bmp");
+const wchar_t SORT_WHITE_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\button\\sort.bmp");
+
+const wchar_t CHECK_ON_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\button\\checkbox_on.bmp");
+const wchar_t CHECK_OFF_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\button\\checkbox_off.bmp");
+
+const wchar_t TABLE_LINK_HOVER_W11H16_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\lock\\table_link_hover_w11h16.bmp");
+const wchar_t MENU_LEFT_W101H46_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\footer\\menu_left_w101h46.bmp");
+const wchar_t MENU_RIGHT_W90H46_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\footer\\menu_right_w90h46.bmp");
+const wchar_t MENU_RIGHT_W135H46_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\footer\\menu_right_w135h46.bmp");
+const wchar_t EDIT_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\footer\\Edit.bmp");
+const wchar_t LAY_SMALL_BACK_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\lay\\laySmallbak.bmp");
+const wchar_t FOOT_LOGO_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\footer\\foot_logo.bmp");
+const wchar_t FOOT_BACKGROUND_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\footer\\foot_bg.bmp");
+const wchar_t FOOT_CLOCK_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\footer\\foot_clock.png");
+const wchar_t MENU_BUTTON_01_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\lay\\meau_btn_01.png");
+const wchar_t MENU_BUTTON_02_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\lay\\meau_btn_02.png");
+const wchar_t MENU_BUTTON_03_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\lay\\meau_btn_03.png");
+const wchar_t MENU_BUTTON_04_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\lay\\meau_btn_04.png");
+const wchar_t MENU_BUTTON_05_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\lay\\meau_btn_05.png");
+const wchar_t MENU_BUTTON_06_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\lay\\meau_btn_06.png");
+const wchar_t MENU_BUTTON_07_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\lay\\meau_btn_07.png");
+const wchar_t LIST_BUTTON_01_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\lay\\list_btn_01.png");
+const wchar_t LIST_BUTTON_02_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\lay\\list_btn_02.png");
+const wchar_t LIST_BUTTON_03_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\lay\\list_btn_03.png");
+const wchar_t LIST_BUTTON_04_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\lay\\list_btn_04.png");
+const wchar_t LIST_BUTTON_05_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\lay\\list_btn_05.png");
+const wchar_t LIST_BUTTON_06_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\lay\\list_btn_06.png");
+const wchar_t LIST_BUTTON_07_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\lay\\list_btn_07.png");
+const wchar_t INIT_LOADING_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\load\\init_loading.bmp");
+const wchar_t LOADING_DEFAULT_PNG[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\load\\loading_default.png");
+const wchar_t BACKGROUND_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\footer\\background.bmp");
+const wchar_t COMM_INIT_ERROR[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("Serial port init fails."), _T ("初始化串口失败。")
+, _T("Serial port init fails."), _T("Serial port init fails.")};
+const wchar_t RUN_COMMAND_RESPONSE_ERROR[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("The machine is malfunctioning."), _T("机器运行错误。")
+, _T("The machine is malfunctioning."), _T("The machine is malfunctioning.")};
+const wchar_t RUN_CURRENT_CYCLE[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("      Cycle:  "), _T("    当前循环：  ")
+, _T("      Cycle:  "), _T("      Cycle:  ")};
+const wchar_t XY_COORDINATES[LANGUAGE_TYPES][2][10] = {{_T("Linear"), _T("Log")}, {_T("线性"), _T("对数")}, {_T("Linear"), _T("Log")}, {_T("Linear"), _T("Log")}};
+const wchar_t CUTOFF_CONDITION[LANGUAGE_TYPES][10] = {_T("Cutoff"), _T("临界值"), _T("Cutoff"), _T("Cutoff")};
+const wchar_t CONCENTRATION_BK_BMP[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\UI\\page\\concentration_BK.bmp");    
+const wchar_t COMMUNICATION_FAIL[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("Communication fails.")
+, _T("通信错误。")
+, _T("Communication fails.")
+, _T("Communication fails.")};
+const wchar_t PAD_CONNECT[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("Remote PAD is connected.")
+, _T("已被 PAD 连接控制。")
+, _T("Remote PAD is connected.")
+, _T("Remote PAD is connected.")};
+const wchar_t PC_CONNECT[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("Remote PC is connected.")
+, _T("已被 PC 连接控制。")
+, _T("Remote PC is connected.")
+, _T("Remote PC is connected.")};
+//2015-3-16
+
+const wchar_t NANDFLASH_DIR[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\");
+const wchar_t NANDFLASH_OLD_FILE[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\*.erf");
+
+const wchar_t NANDFLASH_FILE_DIR[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\File\\");
+const wchar_t NANDFLASH_PARA_AND_DATA[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\File\\*.*");
+const wchar_t NANDFLASH_PARA_FILE_DIR[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\File\\*.erf");
+const wchar_t NANDFLASH_DATA_FILE_DIR[RUN_ERROR_CHAR_MAX] = _T("\\NandFlash\\File\\*.dat");
+
+const wchar_t NOT_FIND_PRINTER[LANGUAGE_TYPES][64] = {_T("Open printer error!Reconnect printer!")
+, _T("打开打印机错误，请重新连接!"), _T("Open printer error!Reconnect printer!"), _T("Open printer error!Reconnect printer!")};
+const wchar_t PRINT_ERROR[LANGUAGE_TYPES][64] = {_T("Print Error!Reconnect printer!")
+, _T("打印错误，请重新连接打印机!"), _T("Print Error!Reconnect printer!"), _T("Print Error!Reconnect printer!")};
+const wchar_t NOT_OP_PRINTER[LANGUAGE_TYPES][RUN_ERROR_CHAR_MAX] = {_T("Operate interval too short!")
+, _T("操作过于频繁!"), _T("Operate interval too short!"), _T("Operate interval too short!")};
+
+const wchar_t FUNCTION_STATUS[LANGUAGE_TYPES][2][10] = {{_T("Off"), _T("On")}, {_T("关闭"), _T("打开")}, {_T("Off"), _T("On")}, {_T("Off"), _T("On")}};
+const wchar_t REFERENCE_SELECT[LANGUAGE_TYPES][2][10] = {{_T("Conc."), _T("ABS")}, {_T("浓度"), _T("吸光度")}, {_T("Conc."), _T("ABS")}, {_T("Conc."), _T("ABS")}};
+const wchar_t QUALITY_RESULT[LANGUAGE_TYPES][2][10] = {{_T("Passed"), _T("Failed")}, {_T("通过"), _T("失败")}, {_T("Passed"), _T("Failed")}, {_T("Passed"), _T("Failed")}}; //2015-3-16
+//const int RESPONSE_COMMAND_LENGTH[CPU_RESPONSE_MAX] = {0, 4, 5, 387, 771, 3, 6, 6, 963, 27}; //2015-1-20
+const int RESPONSE_COMMAND_LENGTH[CPU_RESPONSE_MAX] = {0, 4, 5, 381,759, 3, 6, 6, 963, 27,3}; //2015-09-07
+const int FILTER_POS[FILTER_COEF_MAX] = {405, 450, 492, 630};
+*/

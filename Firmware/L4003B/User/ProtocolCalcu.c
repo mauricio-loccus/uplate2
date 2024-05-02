@@ -1,0 +1,1048 @@
+//程序已自检
+
+#include "MainTask.h"
+
+/*
+  //读取参数
+	BoardInfTemp.KineticPara.Enable=BoardInf.KineticPara.Enable;
+    BoardInfTemp.KineticPara.PreProcess= BoardInf.KineticPara.PreProcess;
+	BoardInfTemp.KineticPara.Curve=BoardInf.KineticPara.Curve;
+	BoardInfTemp.KineticPara.Readings=BoardInf.KineticPara.Readings;
+	BoardInfTemp.KineticPara.TimeInterval= BoardInf.KineticPara.TimeInterval;
+ //Para.
+	BoardInfTemp.KineticPara.kinetic_analysis_mode=BoardInf.KineticPara.kinetic_analysis_mode;
+	BoardInfTemp.KineticPara.BaseLinePoint=BoardInf.KineticPara.BaseLinePoint;
+	BoardInfTemp.KineticPara.BaseLineSel=BoardInf.KineticPara.BaseLineSel;
+	BoardInfTemp.KineticPara.EndReadings=BoardInf.KineticPara.EndReadings;
+	BoardInfTemp.KineticPara.FirstReadings=BoardInf.KineticPara.FirstReadings;
+	BoardInfTemp.KineticPara.Change=BoardInf.KineticPara.Change;
+*/
+
+
+//const int PREPROCESS_SECTION_WIDTH[7] = {30, 60, 60, 63, 60, 60, 60}; //2014-8-12项
+const int PREPROCESS_SECTION_WIDTH[7] = {35, 65, 65, 68, 65, 65, 65}; //2014-8-12项
+
+#ifdef SOFTWARE_DN
+const int CURVES_SELECTION_WIDTH[7] = {30, 60, 70, 100, 45, 56,90};
+#define CURVES_AREA_WIDTH 470
+#else
+const int CURVES_SELECTION_WIDTH[6] = {30, 60, 70, 100, 45, 56};
+#define CURVES_AREA_WIDTH 380
+#endif
+
+
+//#define PRE_CALCULATE_MAX  6
+const char *PRE_CALCULATE_STR[] =
+{
+    { "M1-M2" },
+    { "M1/M2" },
+    { "M1+M2" },
+    { "M1*M2" },
+    { "M2-M1" },
+    { "M2/M1" },
+};
+//#define CURVE_MAX  5
+const char *CURVE_STR[] =
+{
+    { "Linear" },
+    { "Logistic" },
+    { "CubicSpline" },
+    { "PtoP" },
+    { "Factor" },
+    { "Logit/log" },
+};
+
+
+const char CALCULATE_MAIN_TITLE[LANGUAGE_TYPES][30] = {"Calculation parameters", "Cálculos"};
+const char CALCULATE_READINGS[LANGUAGE_TYPES][20] = {"Readings", "Leituras"};
+const char CALCULATE_CURVES[LANGUAGE_TYPES][10] = {"Curves", "Curva"};
+const char CALCULATE_INTERVAL[LANGUAGE_TYPES][15] = {"Interval" , "Intervalo"};
+const char CALCULATE_KINETIC[LANGUAGE_TYPES][10] = {"Kinetic", "Cinética"};
+const char CALCULATE_PREPROCESS[LANGUAGE_TYPES][12] = {"Preprocess", "Modo"};
+
+
+const BUTTON_DATA _aButtonProtocolCalc[] =
+{
+    { TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(0), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Parameters", "Parâmetros" },
+    { TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(3), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Ok", "Ok" },
+    { TOOLS1_BUTTON_POSX, TOOLS1_BUTTON_POSY(4), TOOLS1_BUTTON_WIDTH, TOOLS1_BUTTON_HEIGHT, "Back", "Voltar" },
+
+};
+
+enum
+{
+    EXP_EN=1,
+    EXP_PREPROCESS,
+    EXP_CURVE,
+    EXP_READINGS,
+    EXP_TIME_HOUR,
+    EXP_TIME_MIN,
+    EXP_TIME_SEC,
+};
+static unsigned char ExpEnable;
+
+
+
+//KINETIC_CALCU KineticCalcuBack;
+
+//KINETIC_PARA KineticPraBack;
+WM_HWIN ProtocolCalcWin = NULL;       //检测窗体
+
+
+//修正读数
+void ChangeReadingsRun(void)
+{
+    if(BoardInf.KineticPara.FirstReadings>=BoardInf.KineticPara.Readings)//if(kinetic_para.kinetic_first_readings >= kinetic_para.kinetic_readings)
+    {
+        if(BoardInf.KineticPara.Readings==0)
+        {
+            BoardInf.KineticPara.FirstReadings=BoardInf.KineticPara.Readings;
+        }
+        else
+        {
+            BoardInf.KineticPara.FirstReadings = BoardInf.KineticPara.Readings-1;
+        }
+    }
+    if(BoardInf.KineticPara.EndReadings>=BoardInf.KineticPara.Readings)//if(kinetic_para.kinetic_first_readings >= kinetic_para.kinetic_readings)
+    {
+        if(BoardInf.KineticPara.Readings==0)
+        {
+            BoardInf.KineticPara.EndReadings=BoardInf.KineticPara.Readings;
+        }
+        else
+        {
+            BoardInf.KineticPara.EndReadings = BoardInf.KineticPara.Readings-1;
+        }
+    }
+    if(BoardInf.KineticPara.EndReadings <=BoardInf.KineticPara.FirstReadings)
+    {
+        BoardInf.KineticPara.EndReadings = BoardInf.KineticPara.FirstReadings;
+    }
+    //基线点数
+    if(BoardInf.KineticPara.BaseLinePoint >BoardInf.KineticPara.EndReadings-BoardInf.KineticPara.FirstReadings+1)
+    {
+        BoardInf.KineticPara.BaseLinePoint = BoardInf.KineticPara.EndReadings-BoardInf.KineticPara.FirstReadings+1;//BoardInf.KineticPara.nPoints
+    }
+
+    //if(BoardInf.KineticPara.EndReadings >=BoardInfTemp.KineticPara.Readings)
+    //{
+    //        BoardInf.KineticPara.EndReadings = BoardInfTemp.KineticPara.Readings - BoardInf.KineticPara.FirstReadings - 1;
+    //}
+
+//	BoardInf.KineticPara.FirstReadings +
+
+    //if(BoardInf.KineticPara.BaseLinePoint >BoardInfTemp.KineticPara.Readings- BoardInf.KineticPara.FirstReadings - BoardInf.KineticPara.EndReadings)
+    //{
+    //      BoardInf.KineticPara.BaseLinePoint = BoardInfTemp.KineticPara.Readings- BoardInf.KineticPara.FirstReadings -BoardInf.KineticPara.EndReadings;//BoardInf.KineticPara.nPoints
+//	}
+}
+
+
+
+
+//修正读数
+void ChangeReadings(void)
+{
+    if(BoardInfTemp.KineticPara.FirstReadings>=BoardInfTemp.KineticPara.Readings)//if(kinetic_para.kinetic_first_readings >= kinetic_para.kinetic_readings)
+    {
+        if(BoardInfTemp.KineticPara.Readings==0)
+        {
+            BoardInfTemp.KineticPara.FirstReadings=BoardInfTemp.KineticPara.Readings;
+        }
+        else
+        {
+            BoardInfTemp.KineticPara.FirstReadings = BoardInfTemp.KineticPara.Readings-1;
+        }
+    }
+    if(BoardInfTemp.KineticPara.EndReadings>=BoardInfTemp.KineticPara.Readings)//if(kinetic_para.kinetic_first_readings >= kinetic_para.kinetic_readings)
+    {
+        if(BoardInfTemp.KineticPara.Readings==0)
+        {
+            BoardInfTemp.KineticPara.EndReadings=BoardInfTemp.KineticPara.Readings;
+        }
+        else
+        {
+            BoardInfTemp.KineticPara.EndReadings = BoardInfTemp.KineticPara.Readings-1;
+        }
+    }
+    if(BoardInfTemp.KineticPara.EndReadings <=BoardInfTemp.KineticPara.FirstReadings)
+    {
+        BoardInfTemp.KineticPara.EndReadings = BoardInfTemp.KineticPara.FirstReadings;
+    }
+    //基线点数
+    if(BoardInfTemp.KineticPara.BaseLinePoint >BoardInfTemp.KineticPara.EndReadings-BoardInfTemp.KineticPara.FirstReadings+1)
+    {
+        BoardInfTemp.KineticPara.BaseLinePoint = BoardInfTemp.KineticPara.EndReadings-BoardInfTemp.KineticPara.FirstReadings+1;//BoardInf.KineticPara.nPoints
+    }
+
+    //if(BoardInf.KineticPara.EndReadings >=BoardInfTemp.KineticPara.Readings)
+    //{
+    //        BoardInf.KineticPara.EndReadings = BoardInfTemp.KineticPara.Readings - BoardInf.KineticPara.FirstReadings - 1;
+    //}
+
+//	BoardInf.KineticPara.FirstReadings +
+
+    //if(BoardInf.KineticPara.BaseLinePoint >BoardInfTemp.KineticPara.Readings- BoardInf.KineticPara.FirstReadings - BoardInf.KineticPara.EndReadings)
+    //{
+    //      BoardInf.KineticPara.BaseLinePoint = BoardInfTemp.KineticPara.Readings- BoardInf.KineticPara.FirstReadings -BoardInf.KineticPara.EndReadings;//BoardInf.KineticPara.nPoints
+//	}
+}
+
+
+void DisplayKineticExpand(void)
+{
+    unsigned char i;
+    //char str[10];
+    GUI_RECT rect;
+
+    int start_x, start_y, wide, high;
+
+    start_x = KINETC_EXPAND_START_X;
+    start_y = KINETC_EXPAND_START_Y - TITLESBAR_HEIGHT;
+    //GUI_DrawBitmap(&bmExpMenuRight_135_46, KINETC_EXPAND_START_X, KINETC_EXPAND_START_Y - TITLESBAR_HEIGHT);
+    GUI_SetColor(COLOR_EXP_PICTURE_FRAME);
+    GUI_DrawLine(start_x, start_y,start_x+125,start_y);
+    GUI_DrawLine(start_x, start_y+45,start_x+125,start_y+45);
+    GUI_SetColor(COLOR_EXP_PICTURE);
+    GUI_FillRect(start_x, start_y,start_x+125,start_y+45);
+    GUI_DrawBitmap(&bmExpMenuRight_20_46, start_x+125, start_y);
+
+    start_x += 3;
+    start_y += 3;
+
+
+    wide = INTER_SEL_WIDTH;
+    high = 40;
+    for (i = 0; i<2; i++)
+    {
+        //填充选中的底色
+        GUI_SetColor(COLOR_SHAKE_BK);
+        if (i == 0)
+        {
+            strcpy(ConvertStr,STR_CLOSE[SystemPrameter.SystemLanguage] );//"Off"
+        }
+        else
+        {
+            strcpy(ConvertStr, STR_OPEN[SystemPrameter.SystemLanguage] );//"On"
+        }
+
+        //填充选中的文字-白色
+        if (((BoardInfTemp.KineticPara.Enable == 0) && (i == 0)) || ((BoardInfTemp.KineticPara.Enable) && (i == 1)))
+        {
+            GUI_FillRect(start_x, start_y, start_x + wide, start_y + high);
+            GUI_SetColor(COLOR_SHAKE_TXT);
+            //GUI_DrawCircle(RUNMENU_CIRCLE_POSX(i), RUNMENU_CIRCLE_POSY, RUNMENU_CIRCLE_RADIUS);
+        }
+
+        rect.x0 = start_x;
+        rect.y0 = start_y - 1;
+        rect.x1 = start_x + wide;
+        rect.y1 = start_y + high;
+
+        start_x += wide;
+        wide =60;// INTER_SEL_WIDTH;
+
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+    }
+}
+
+
+void DisplayPreCalcuExpand(void)
+{
+    GUI_RECT rect;
+
+    signed char i;
+    short start_x, start_y, wide, high;
+    //char str[10];
+
+    start_x = PRECALCUE_EXPAND_START_X ;
+    start_y = PRECALCUE_EXPAND_START_Y  - TITLESBAR_HEIGHT;
+
+    high = 40; //46
+    //GUI_DrawBitmap(&bmExpMenuRight_400_46, PRECALCUE_EXPAND_START_X, PRECALCUE_EXPAND_START_Y - TITLESBAR_HEIGHT);
+    GUI_SetColor(COLOR_EXP_PICTURE_FRAME);
+    GUI_DrawLine(start_x, start_y,start_x+435,start_y);
+    GUI_DrawLine(start_x, start_y+45,start_x+435,start_y+45);
+    GUI_SetColor(COLOR_EXP_PICTURE);
+    GUI_FillRect(start_x, start_y,start_x+435,start_y+45);
+    GUI_DrawBitmap(&bmExpMenuRight_20_46, start_x+435, start_y);
+
+    start_x += 3;
+    start_y += 3;
+
+    for (i = 0; i<PRE_CALCULATE_MAX+1; i++)
+    {
+        wide = PREPROCESS_SECTION_WIDTH[i]; //43  39+3=42
+        if (i == BoardInfTemp.KineticPara.PreProcess+1)  //选中的扩展项
+        {
+            //填充选中的底色
+            GUI_SetColor(COLOR_FILTER_SEL_BK);
+            GUI_FillRect(start_x, start_y, start_x + wide, start_y+high);
+
+            //填充选中的文字-白色
+            GUI_SetColor(COLOR_FILTER_SEL_TXT);
+            //最下方的数字
+        }//if (i == BoardInf.Filter1Locate && SystemPrameter.FilterWavelength[i]!=0)  //选中的扩展项
+
+        else
+        {
+            GUI_SetColor(COLOR_FILTER_NUM_BK);
+
+        }
+
+        rect.x0 = start_x;
+        rect.x1 = start_x + wide;
+        rect.y0 = start_y;
+        rect.y1 = start_y + high;
+        if(i==0)//PRE_CALCULATE_NO+1)
+        {
+            strcpy(ConvertStr,STR_CLOSE[SystemPrameter.SystemLanguage]);
+        }
+        else
+        {
+            strcpy(ConvertStr,PRE_CALCULATE_STR[i-1]);
+        }
+
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+        start_x+=PREPROCESS_SECTION_WIDTH[i]; //2014-8-12项
+    }
+
+}
+
+
+void DisplayCurveExpand(void)
+{
+    GUI_RECT rect;
+
+    unsigned char i;
+    short start_x, start_y, wide, high;
+    //char str[10];
+
+    start_x = CURVE_EXPAND_START_X ;
+    start_y = CURVE_EXPAND_START_Y - TITLESBAR_HEIGHT;
+
+    high = 40; //46
+    //GUI_DrawBitmap(&bmExpMenuRight_400_46, CURVE_EXPAND_START_X, CURVE_EXPAND_START_Y - TITLESBAR_HEIGHT);
+
+    GUI_SetColor(COLOR_EXP_PICTURE_FRAME);
+    GUI_DrawLine(start_x, start_y,start_x+CURVES_AREA_WIDTH,start_y);
+    GUI_DrawLine(start_x, start_y+45,start_x+CURVES_AREA_WIDTH,start_y+45);
+    GUI_SetColor(COLOR_EXP_PICTURE);
+    GUI_FillRect(start_x, start_y,start_x+CURVES_AREA_WIDTH,start_y+45);
+    GUI_DrawBitmap(&bmExpMenuRight_20_46, start_x+CURVES_AREA_WIDTH, start_y);
+
+    start_x += 3;
+    start_y += 3;
+
+    for (i = 0; i<CURVE_MAX+1; i++)
+    {
+        wide = CURVES_SELECTION_WIDTH[i]; //43  39+3=42
+        if (i == BoardInfTemp.KineticPara.Curve+1)  //选中的扩展项
+        {
+            //填充选中的底色
+            GUI_SetColor(COLOR_FILTER_SEL_BK);
+            GUI_FillRect(start_x, start_y, start_x + wide, start_y+high);
+
+
+            //填充选中的文字-白色
+            GUI_SetColor(COLOR_FILTER_SEL_TXT);
+            //最下方的数字
+        }//if (i == BoardInf.Filter1Locate && SystemPrameter.FilterWavelength[i]!=0)  //选中的扩展项
+        else
+        {
+            GUI_SetColor(COLOR_FILTER_NUM_BK);
+        }
+
+        rect.x0 = start_x;
+        rect.x1 = start_x + wide;
+        rect.y0 = start_y;
+        rect.y1 = start_y + high;
+        if(i==0)
+        {
+            strcpy(ConvertStr,STR_CLOSE[SystemPrameter.SystemLanguage]);
+        }
+        else
+        {
+            strcpy(ConvertStr,CURVE_STR[i-1]);
+        }
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+        start_x+=CURVES_SELECTION_WIDTH[i];
+    }
+}
+
+
+
+//显示间隔时间
+void DisplayIntervalTime(void)
+{
+    short start_x, stary_y, wide, high;
+    unsigned char i;
+
+    GUI_RECT rect;
+
+
+    start_x = READINGS_R_START_X;
+    stary_y = TIME_INTERVAL_START_Y +3 - TITLESBAR_HEIGHT;
+    wide = 35;
+    high = 40;
+    for (i = 0; i < 3; i++)
+    {
+        //	if (BoardInfTemp.KineticPara.Enable)
+        //{
+        // GUI_SetColor(COLOR_PAINT_TXT);
+        //}
+        //else
+        //{
+        // GUI_SetColor(COLOR_TXT_DISABLE);
+        //}
+
+        if (((ExpEnable == EXP_TIME_HOUR) && (i == 0)) ||
+                ((ExpEnable == EXP_TIME_MIN) && (i == 1)) ||
+                ((ExpEnable == EXP_TIME_SEC) && (i == 2)))
+        {
+            GUI_SetColor(COLOR_SHAKE_TIME_BK);
+            GUI_FillRect(start_x + 3, stary_y, start_x + wide - 3, stary_y + high);
+            GUI_SetColor(GUI_WHITE);
+        }
+        if (i == 0)
+        {
+            TwoNum2ConvertStr(ConvertStr, BoardInfTemp.KineticPara.TimeInterval / 3600);
+
+        }
+        else if (i == 1)
+        {
+            TwoNum2ConvertStr(ConvertStr,BoardInfTemp.KineticPara.TimeInterval % 3600 / 60);
+        }
+        else
+        {
+            TwoNum2ConvertStr(ConvertStr, BoardInfTemp.KineticPara.TimeInterval % 60);
+        }
+        rect.x0 = start_x;
+        rect.x1 = start_x + wide;
+        rect.y0 = stary_y;
+        rect.y1 = stary_y + high;
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+
+        //ÏÔÊ¾":"
+        if (i < 2)
+        {
+            rect.x0 = rect.x1;
+            rect.x1 = rect.x0 + 5;
+            GUI_DispStringInRect(":", &rect, GUI_TA_HCENTER | GUI_TA_VCENTER);
+        }
+        start_x += SHAKE_TIME_WIDTH;
+    }
+}
+
+
+void _cbProtocolCalc(WM_MESSAGE * pMsg)
+{
+    WM_HWIN hWin = pMsg->hWin;
+    WM_HWIN hWinFocus;
+    BUTTON_Handle hbutton;
+    unsigned char i;
+    short        xSize;
+    short        ySize;
+    short NCode, Id;
+    GUI_RECT rect;
+
+
+    hWinFocus = WM_GetFocussedWindow();
+
+
+    switch (pMsg->MsgId)
+    {
+    case WM_CREATE:
+    {
+        for (i = 0; i < GUI_COUNTOF(_aButtonProtocolCalc); i++)
+        {
+            hbutton = BUTTON_CreateEx(_aButtonProtocolCalc[i].xPos, _aButtonProtocolCalc[i].yPos, _aButtonProtocolCalc[i].xSize, _aButtonProtocolCalc[i].ySize,
+                                      hWin, WM_CF_SHOW, 0, ID_CALC_BUTTON + i);
+
+            if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+            {
+                BUTTON_SetFont(hbutton, GUI_FONT_BIG);
+                BUTTON_SetText(hbutton, _aButtonProtocolCalc[i].acLabelEn);
+            }
+            else
+            {
+                BUTTON_SetFont(hbutton, GUI_FONT_BIG_CH);
+                BUTTON_SetText(hbutton, _aButtonProtocolCalc[i].acLabelCh);
+            }
+
+
+            //带数据时禁止
+            if( (BoardInfTemp.KineticPara.Enable==0)&&(i==0) )//||(BoardInf.bHasData)
+            {
+                //BUTTON_SetState(hbutton,BUTTON_CI_DISABLED);
+                WM_DisableWindow(hbutton);
+            }
+            BUTTON_SetTextColor(hbutton, BUTTON_CI_DISABLED, GUI_GRAY);
+            //SetAsciiBUTTONColor(hbutton);
+            BUTTON_SetTextAlign(hbutton, GUI_TA_HCENTER | GUI_TA_VCENTER);
+            BUTTON_SetFocussable(hbutton, 0);
+        }
+
+        break;
+    }
+    //删除按钮
+    case WM_DELETE:
+
+        //WM_ShowWindow(ButtonZero[i]);
+        break;
+        //绘制背景
+    case WM_PAINT:
+        xSize = WM_GetWindowSizeX(hWin);
+        ySize = WM_GetWindowSizeY(hWin);
+        //上方第一行
+        GUI_SetColor(COLOR_TITLEBAR);
+        GUI_FillRect(0, 0, xSize - 1, CONTENTBAR_TITLE_HEIGHT - 1);
+        //左方内容栏
+        GUI_SetColor(COLOR_CONTENTBAR);
+        GUI_FillRect(0, CONTENTBAR_CONTENT_POSY, CONTENTBAR_CONTENT_WIDTH - 1, ySize - 1);
+        //右侧工具栏
+        GUI_SetColor(COLOR_TOOLSBAR);
+        GUI_FillRect(CONTENTBAR_CONTENT_WIDTH, CONTENTBAR_CONTENT_POSY, xSize - 1, ySize - 1);
+GUI_SetColor(GUI_GRAY);
+				GUI_DrawLine(0,0, xSize - 1,0);
+				GUI_DrawLine(0,CONTENTBAR_TITLE_HEIGHT - 1, xSize - 1,CONTENTBAR_TITLE_HEIGHT - 1);
+
+
+        GUI_DrawBitmap(&bmMenuLeft_101_46, FILTER_1_START_X, FILTER_1_START_Y - TITLESBAR_HEIGHT);
+        GUI_DrawBitmap(&bmMenuLeft_101_46, FILTER_2_START_X, FILTER_2_START_Y - TITLESBAR_HEIGHT);
+        GUI_DrawBitmap(&bmMenuLeft_101_46, MODE_START_X, MODE_START_Y - TITLESBAR_HEIGHT);
+
+        GUI_DrawBitmap(&bmMenuLeft_101_46, READINGS_START_X, READINGS_START_Y - TITLESBAR_HEIGHT);
+        GUI_DrawBitmap(&bmMenuLeft_101_46, TIME_INTERVAL_START_X, TIME_INTERVAL_START_Y - TITLESBAR_HEIGHT);
+
+
+        //GUI_DrawBitmap(&bmMenuRight_90_46, FILTER_1_R_START_X, FILTER_1_R_START_Y - TITLESBAR_HEIGHT);
+        GUI_SetColor(COLOR_PICTURE);
+        GUI_FillRect(FILTER_1_R_START_X, FILTER_1_R_START_Y- TITLESBAR_HEIGHT,FILTER_1_R_START_X+100, FILTER_1_R_START_Y- TITLESBAR_HEIGHT+45);
+        GUI_DrawBitmap(&bmMenuRight_20_46, FILTER_1_R_START_X+100, FILTER_1_R_START_Y- TITLESBAR_HEIGHT);
+
+        //GUI_DrawBitmap(&bmMenuRight_90_46, FILTER_2_R_START_X, FILTER_2_R_START_Y - TITLESBAR_HEIGHT);
+        GUI_FillRect(FILTER_2_R_START_X, FILTER_2_R_START_Y- TITLESBAR_HEIGHT,FILTER_2_R_START_X+100, FILTER_2_R_START_Y- TITLESBAR_HEIGHT+45);
+        GUI_DrawBitmap(&bmMenuRight_20_46, FILTER_2_R_START_X+100, FILTER_2_R_START_Y- TITLESBAR_HEIGHT);
+
+        //GUI_DrawBitmap(&bmMenuRight_120_46, MODE_R_START_X, MODE_START_Y - TITLESBAR_HEIGHT);
+        GUI_FillRect(MODE_R_START_X, MODE_R_START_Y- TITLESBAR_HEIGHT,MODE_R_START_X+100, MODE_R_START_Y- TITLESBAR_HEIGHT+45);
+        GUI_DrawBitmap(&bmMenuRight_20_46, MODE_R_START_X+100, MODE_R_START_Y- TITLESBAR_HEIGHT);
+
+        //GUI_DrawBitmap(&bmMenuRight_90_46, READINGS_R_START_X, READINGS_R_START_Y - TITLESBAR_HEIGHT);
+        GUI_FillRect(READINGS_R_START_X, READINGS_R_START_Y- TITLESBAR_HEIGHT,READINGS_R_START_X+100, READINGS_R_START_Y- TITLESBAR_HEIGHT+45);
+        GUI_DrawBitmap(&bmMenuRight_20_46, READINGS_R_START_X+100, READINGS_R_START_Y- TITLESBAR_HEIGHT);
+
+        //GUI_DrawBitmap(&bmMenuRight_120_46, TIME_INTERVAL_R_START_X, TIME_INTERVAL_R_START_Y - TITLESBAR_HEIGHT);
+        GUI_FillRect(TIME_INTERVAL_R_START_X, TIME_INTERVAL_R_START_Y- TITLESBAR_HEIGHT,TIME_INTERVAL_R_START_X+115, TIME_INTERVAL_R_START_Y- TITLESBAR_HEIGHT+45);
+        GUI_DrawBitmap(&bmMenuRight_20_46, TIME_INTERVAL_R_START_X+115, TIME_INTERVAL_R_START_Y- TITLESBAR_HEIGHT);
+
+        GUI_SetTextMode(GUI_TM_TRANS);
+
+        GUI_SetColor(COLOR_PAINT_TXT);
+
+        if(SystemPrameter.SystemLanguage==LANGUAGE_EN)
+        {
+            GUI_SetFont(GUI_FONT_BIG);
+        }
+        else
+        {
+            GUI_SetFont(GUI_FONT_BIG_CH);
+        }
+        GUI_DispStringAt(CALCULATE_MAIN_TITLE[SystemPrameter.SystemLanguage], CONTENTBAR_CAPTION_POSX, CONTENTBAR_CAPTION_POSY);
+
+        //带数据时“动力学开启”状态不能改变
+        if(BoardInf.bHasData)
+        {
+            GUI_SetColor(COLOR_PAINT_TXT_DIS);
+        }
+        else
+        {
+            GUI_SetColor(COLOR_PAINT_TXT);
+        }
+
+        rect.x0 = FILTER_1_START_X+5;
+        rect.y0 = FILTER_1_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = FILTER_1_END_X+10;
+        rect.y1 = FILTER_1_END_Y - TITLESBAR_HEIGHT;
+        //strcpy(ConvertStr, "Filter 1");
+        GUI_DispStringInRect(CALCULATE_KINETIC[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Kinetic"
+
+
+
+        GUI_SetColor(COLOR_PAINT_TXT);
+
+        rect.y0 = FILTER_2_START_Y - TITLESBAR_HEIGHT;
+        rect.y1 = FILTER_2_END_Y - TITLESBAR_HEIGHT;
+        GUI_DispStringInRect(CALCULATE_PREPROCESS[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Preprocess"
+
+        rect.y0 = MODE_START_Y - TITLESBAR_HEIGHT;
+        rect.y1 = MODE_END_Y - TITLESBAR_HEIGHT;
+        GUI_DispStringInRect(CALCULATE_CURVES[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Curve"
+
+
+        //带数据时“动力学开启”状态不能改变
+        if(BoardInf.bHasData)
+        {
+            GUI_SetColor(COLOR_PAINT_TXT_DIS);
+        }
+        else
+        {
+            GUI_SetColor(COLOR_PAINT_TXT);
+        }
+
+        rect.x0 = FILTER_1_R_START_X + 5;
+        rect.y0 = FILTER_1_R_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = FILTER_1_R_END_X+20;
+        rect.y1 = FILTER_1_R_END_Y - TITLESBAR_HEIGHT;
+        //填充选中的文字
+        if(BoardInfTemp.KineticPara.Enable)
+        {
+            GUI_DispStringInRect(STR_OPEN[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"On"
+        }
+        else //if(BoardInfTemp.KineticPara.Enable)
+        {
+            GUI_DispStringInRect(STR_CLOSE[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Off"
+        }
+
+
+        GUI_SetColor(COLOR_PAINT_TXT);
+        rect.y0 = FILTER_2_START_Y - TITLESBAR_HEIGHT;
+        rect.y1 = FILTER_2_END_Y - TITLESBAR_HEIGHT;
+        if ((BoardInfTemp.KineticPara.PreProcess<PRE_CALCULATE_MAX) && (BoardInfTemp.KineticPara.PreProcess >PRE_CALCULATE_NO ))
+        {
+            strcpy(ConvertStr,PRE_CALCULATE_STR[ BoardInfTemp.KineticPara.PreProcess]);
+        }
+        else //if (BoardInf.KineticPara.PreProcess == 0)
+        {
+            strcpy(ConvertStr, STR_CLOSE[SystemPrameter.SystemLanguage]);//"Off"
+        }
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+
+
+        rect.y0 = MODE_START_Y - TITLESBAR_HEIGHT;
+        rect.y1 = MODE_END_Y - TITLESBAR_HEIGHT;
+        if ((BoardInfTemp.KineticPara.Curve<CURVE_MAX) && (BoardInfTemp.KineticPara.Curve >CURVE_NO))
+        {
+            strcpy(ConvertStr, CURVE_STR[BoardInfTemp.KineticPara.Curve]);
+        }
+        else //if (BoardInf.KineticPara.PreProcess == 0)
+        {
+            strcpy(ConvertStr,STR_CLOSE[SystemPrameter.SystemLanguage]);
+        }
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+
+
+        if( (BoardInfTemp.KineticPara.Enable)&& (BoardInf.bHasData==0) )
+        {
+            GUI_SetColor(COLOR_PAINT_TXT);
+        }
+        else
+        {
+            GUI_SetColor(COLOR_TXT_DISABLE);
+        }
+        rect.x0 = READINGS_START_X+7;
+        rect.y0 = READINGS_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = READINGS_END_X;
+        rect.y1 = READINGS_END_Y - TITLESBAR_HEIGHT;
+        GUI_DispStringInRect(CALCULATE_READINGS[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Readings"
+
+
+        rect.y0 = TIME_INTERVAL_START_Y - TITLESBAR_HEIGHT;
+        rect.y1 = TIME_INTERVAL_END_Y - TITLESBAR_HEIGHT;
+        GUI_DispStringInRect(CALCULATE_INTERVAL[SystemPrameter.SystemLanguage], &rect, GUI_TA_LEFT | GUI_TA_VCENTER);//"Interval"
+
+
+        rect.x0 = READINGS_R_START_X + 5;
+        rect.y0 = READINGS_R_START_Y - TITLESBAR_HEIGHT;
+        rect.x1 = READINGS_R_END_X;
+        rect.y1 = READINGS_R_END_Y - TITLESBAR_HEIGHT;
+        TwoNumConvertStr(ConvertStr,BoardInfTemp.KineticPara.Readings);
+        //填充选中的文字
+
+        GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+
+
+
+        //rect.y0 = TIME_INTERVAL_START_Y - TITLESBAR_HEIGHT;
+        //rect.y1 = TIME_INTERVAL_END_Y - TITLESBAR_HEIGHT;
+        //ShakeTimeConvertStr(ConvertStr, BoardInfTemp.KineticPara.TimeInterval);
+        // GUI_DispStringInRect(ConvertStr, &rect, GUI_TA_LEFT | GUI_TA_VCENTER);
+        DisplayIntervalTime();
+
+
+
+        GUI_SetColor(COLOR_PAINT_TXT);
+        if (ExpEnable==EXP_PREPROCESS)
+        {
+            DisplayPreCalcuExpand();
+        }
+        else if (ExpEnable == EXP_EN)
+        {
+            DisplayKineticExpand();
+        }
+        else if (ExpEnable == EXP_CURVE)
+        {
+            DisplayCurveExpand();
+        }
+
+
+
+
+        break;
+
+    case WM_NOTIFY_PARENT:
+    {
+        Id = WM_GetId(pMsg->hWinSrc);    // Id of widget
+        NCode = pMsg->Data.v;               // Notification code
+        if(RemoteInfo_PC.RemoteFlag)
+        {
+            break;
+        }
+        if( (KeyPadAsc.UseFlag == KEYPAD_BUSY)||(KeyPadNum.UseFlag == KEYPAD_BUSY)||(PromptMenu.InterfaceStatus==PROMPT_MENU_BUSY) )
+        {
+            break;
+        }
+        if (NCode == WM_NOTIFICATION_RELEASED)
+        {
+            //if ((Id == ID_CALC_BUTTON)&&(BoardInfTemp.KineticPara.Enable)&&(BoardInf.bHasData==0))   //工具栏第4个按钮  Para
+            if ((Id == ID_CALC_BUTTON)&&(BoardInfTemp.KineticPara.Enable))   //工具栏第4个按钮  Para
+            {
+                ProtocolKenetic_Interface();
+            }
+            else if (Id == ID_CALC_BUTTON+1)   //工具栏第4个按钮  Enter
+            {
+                //保存参数
+                //BoardInf.KineticPara.Enable=BoardInfTemp.KineticPara.Enable;
+                //BoardInf.KineticPara.PreProcess=BoardInfTemp.KineticPara.PreProcess;
+                // BoardInf.KineticPara.Curve=BoardInfTemp.KineticPara.Curve;
+                // BoardInf.KineticPara.Readings=BoardInfTemp.KineticPara.Readings;
+                // BoardInf.KineticPara.TimeInterval=BoardInfTemp.KineticPara.TimeInterval;
+
+
+                //不用写入存贮器
+                // E2pSaveKineticPra();
+                ChangeReadings();
+                if(memcmp(&BoardInf,&BoardInfTemp, sizeof(BOARD_INF)))  //板信息已修改
+                {
+                    memcpy(&BoardInf, &BoardInfTemp,sizeof(BOARD_INF));  //程序拷贝
+
+                    if(BoardInf.bHasData)
+                    {
+                        ReportMenu.ReportReady=1;
+                        LanguageChange.Report=1;
+                    }
+                }
+
+
+                WM_DeleteWindow(ProtocolCalcWin);
+                WM_ShowWindow(ProtocolWin);
+
+                gSystem.SystemInterface = MI_PROTOCOL;
+                gSystem.TitleButtonEnable = 1;
+                TouchKey.KeyStatus=1;
+                gSystem.MenuRefreshFlag = 1;
+            }
+            else if (Id == ID_CALC_BUTTON+2)   //工具栏第5个按钮  Cancel
+            {
+                //还原动力学数据
+                /*
+                	BoardInfTemp.KineticPara.Enable=BoardInf.KineticPara.Enable;
+                	BoardInfTemp.KineticPara.PreProcess= BoardInf.KineticPara.PreProcess;
+                	BoardInfTemp.KineticPara.Curve=BoardInf.KineticPara.Curve;
+                	BoardInfTemp.KineticPara.Readings=BoardInf.KineticPara.Readings;
+                	BoardInfTemp.KineticPara.TimeInterval= BoardInf.KineticPara.TimeInterval;
+                	//Para.
+                	BoardInfTemp.KineticPara.kinetic_analysis_mode=BoardInf.KineticPara.kinetic_analysis_mode;
+                	BoardInfTemp.KineticPara.BaseLinePoint=BoardInf.KineticPara.BaseLinePoint;
+                	BoardInfTemp.KineticPara.BaseLineSel=BoardInf.KineticPara.BaseLineSel;
+                	BoardInfTemp.KineticPara.EndReadings=BoardInf.KineticPara.EndReadings;
+                	BoardInfTemp.KineticPara.FirstReadings=BoardInf.KineticPara.FirstReadings;
+                	BoardInfTemp.KineticPara.Change=BoardInf.KineticPara.Change;
+
+                  */
+                WM_DeleteWindow(ProtocolCalcWin);
+                WM_ShowWindow(ProtocolWin);
+
+                gSystem.SystemInterface = MI_PROTOCOL;
+                gSystem.TitleButtonEnable = 1;
+                TouchKey.KeyStatus=1;
+                gSystem.MenuRefreshFlag = 1;
+            }
+        }
+        break;
+    }
+
+    default:
+        //		WM_DefaultProc(pMsg);
+        break;
+    }
+}
+
+void ProtocolCalc_Interface(void)
+{
+    //读取参数
+    /*
+    	BoardInfTemp.KineticPara.Enable=BoardInf.KineticPara.Enable;
+      BoardInfTemp.KineticPara.PreProcess= BoardInf.KineticPara.PreProcess;
+    	BoardInfTemp.KineticPara.Curve=BoardInf.KineticPara.Curve;
+    	BoardInfTemp.KineticPara.Readings=BoardInf.KineticPara.Readings;
+    	BoardInfTemp.KineticPara.TimeInterval= BoardInf.KineticPara.TimeInterval;
+     //Para.
+    	BoardInfTemp.KineticPara.kinetic_analysis_mode=BoardInf.KineticPara.kinetic_analysis_mode;
+    	BoardInfTemp.KineticPara.BaseLinePoint=BoardInf.KineticPara.BaseLinePoint;
+    	BoardInfTemp.KineticPara.BaseLineSel=BoardInf.KineticPara.BaseLineSel;
+    	BoardInfTemp.KineticPara.EndReadings=BoardInf.KineticPara.EndReadings;
+    	BoardInfTemp.KineticPara.FirstReadings=BoardInf.KineticPara.FirstReadings;
+    	BoardInfTemp.KineticPara.Change=BoardInf.KineticPara.Change;
+      */
+    ExpEnable = 0;
+    memcpy(&BoardInfTemp,&BoardInf, sizeof(BOARD_INF));
+    ProtocolCalcWin = WM_CreateWindowAsChild(CONTENTBAR_POSX, CONTENTBAR_POSY, CONTENTBAR_WIDTH, CONTENTBAR_HEIGHT, WM_HBKWIN, WM_CF_SHOW | WM_CF_STAYONTOP | WM_CF_MEMDEV, _cbProtocolCalc, 0);
+    WM_BringToTop(ProtocolCalcWin);
+}
+
+void ProtocolCalc_Scan(void)
+{
+    if(TouchKey.KeyStatus==0)
+    {
+        signed char i;
+        int start_x;
+        int wide;
+
+        GUI_PID_STATE TouchState;
+
+        GUI_PID_GetState(&TouchState);
+
+        if (TouchState.Pressed)
+        {
+            if (ExpEnable==0)  //初使状态，没有弹出扩展项
+            {
+                if ((TouchState.x >= FILTER_1_R_START_X) && (TouchState.x <= FILTER_1_R_END_X+10) &&
+                        (TouchState.y >= FILTER_1_R_START_Y) && (TouchState.y <= FILTER_1_R_END_Y)&&(BoardInf.bHasData==0))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_EN;
+                    WM_Invalidate(ProtocolCalcWin);
+                }
+                else if ((TouchState.x >= FILTER_2_R_START_X) && (TouchState.x <= FILTER_2_R_END_X+10) &&
+                         (TouchState.y >= FILTER_2_R_START_Y) && (TouchState.y <= FILTER_2_R_END_Y))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_PREPROCESS;
+                    WM_Invalidate(ProtocolCalcWin);
+                }
+                else if ((TouchState.x >= MODE_R_START_X) && (TouchState.x <= MODE_R_END_X+10) &&
+                         (TouchState.y >= MODE_R_START_Y) && (TouchState.y <= MODE_R_END_Y))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_CURVE;
+                    WM_Invalidate(ProtocolCalcWin);
+                }
+                else if((TouchState.x >=READINGS_R_START_X ) && (TouchState.x <= READINGS_R_END_X+10) &&
+                        (TouchState.y >= READINGS_R_START_Y) && (TouchState.y <= READINGS_R_END_Y)&&(BoardInfTemp.KineticPara.Enable)&&(BoardInf.bHasData==0))
+                {
+                    TouchKey.KeyStatus = 1;
+                    ExpEnable = EXP_READINGS;
+                    WM_Invalidate(ProtocolCalcWin);
+                }
+                else if((TouchState.x >=TIME_INTERVAL_R_START_X ) && (TouchState.x <= TIME_INTERVAL_R_END_X) &&
+                        (TouchState.y >= TIME_INTERVAL_R_START_Y) && (TouchState.y <= TIME_INTERVAL_R_END_Y)&&(BoardInfTemp.KineticPara.Enable)&&(BoardInf.bHasData==0))
+                {
+                    if ((TouchState.x >= TIME_INTERVAL_R_START_X) && (TouchState.x < TIME_INTERVAL_R_START_X + SHAKE_TIME_WIDTH))
+                    {
+                        ExpEnable = EXP_TIME_HOUR;
+                        TouchKey.KeyStatus = 1;
+                        WM_Invalidate(ProtocolCalcWin);
+                    }//if ((TouchState.x >= TIME_INTERVAL_R_START_X) && (TouchState.x < TIME_INTERVAL_R_START_X + SHAKE_TIME_WIDTH))
+                    else if ((TouchState.x >= TIME_INTERVAL_R_START_X + SHAKE_TIME_WIDTH) && (TouchState.x < TIME_INTERVAL_R_START_X + SHAKE_TIME_WIDTH * 2))
+                    {
+                        ExpEnable = EXP_TIME_MIN;
+                        TouchKey.KeyStatus = 1;
+                        WM_Invalidate(ProtocolCalcWin);
+                    }//else if ((TouchState.x >= TIME_INTERVAL_R_START_X + SHAKE_TIME_WIDTH) && (TouchState.x < TIME_INTERVAL_R_START_X + SHAKE_TIME_WIDTH * 2))
+                    else if ((TouchState.x >= TIME_INTERVAL_R_START_X + SHAKE_TIME_WIDTH * 2) && (TouchState.x < TIME_INTERVAL_R_START_X + SHAKE_TIME_WIDTH * 3))
+                    {
+                        ExpEnable = EXP_TIME_SEC;
+                        TouchKey.KeyStatus = 1;
+                        WM_Invalidate(ProtocolCalcWin);
+                    }//else if ((TouchState.x >= TIME_INTERVAL_R_START_X + SHAKE_TIME_WIDTH * 2) && (TouchState.x < TIME_INTERVAL_R_START_X + SHAKE_TIME_WIDTH * 3))
+                }//else if((TouchState.x >=TIME_INTERVAL_R_START_X ) && (TouchState.x <= TIME_INTERVAL_R_END_X) &&(TouchState.y >= TIME_INTERVAL_R_START_Y) && (TouchState.y <= TIME_INTERVAL_R_END_Y)&&(BoardInfTemp.KineticPara.Enable))
+            }//	if (ExpEnable==0)  //初使状态，没有弹出扩展项
+            else if (ExpEnable == EXP_EN) //0k
+            {
+                ExpEnable = 0;
+                if ((TouchState.x >= KINETC_EXPAND_START_X) && (TouchState.x <= KINETC_EXPAND_START_X + KINETIC_ENABLE_SEL_WIDTH) &&
+                        (TouchState.y >= KINETC_EXPAND_START_Y) && (TouchState.y <= KINETC_EXPAND_END_Y))
+                {
+                    //关闭
+                    BoardInfTemp.KineticPara.Enable = 0;
+                    WM_DisableWindow(WM_GetDialogItem(ProtocolCalcWin, ID_CALC_BUTTON));
+                    // BUTTON_SetState(WM_GetDialogItem(ProtocolCalcWin, ID_CALC_BUTTON),BUTTON_CI_DISABLED);
+
+                }
+                else if ((TouchState.x >= KINETC_EXPAND_START_X + KINETIC_ENABLE_SEL_WIDTH) && (TouchState.x <= KINETC_EXPAND_START_X + KINETIC_ENABLE_SEL_WIDTH*2) &&
+                         (TouchState.y >= KINETC_EXPAND_START_Y) && (TouchState.y <= KINETC_EXPAND_END_Y))
+                {
+                    //开启振动
+                    BoardInfTemp.KineticPara.Enable = 1;
+                    WM_EnableWindow(WM_GetDialogItem(ProtocolCalcWin, ID_CALC_BUTTON));
+                    //BUTTON_SetState(WM_GetDialogItem(ProtocolCalcWin, ID_CALC_BUTTON),BUTTON_CI_UNPRESSED);
+                }
+
+                TouchKey.KeyStatus = 1;
+                WM_Invalidate(ProtocolCalcWin);
+
+            }//else if (ExpEnable == EXP_EN) //0k
+            else if (ExpEnable == EXP_PREPROCESS)  //滤光片2扩展
+            {
+                ExpEnable = 0;
+                if ((TouchState.x >= PRECALCUE_EXPAND_START_X) && (TouchState.x <= PRECALCUE_EXPAND_END_X) &&
+                        (TouchState.y >= PRECALCUE_EXPAND_START_Y) && (TouchState.y <= PRECALCUE_EXPAND_END_Y))
+                {
+                    start_x=PRECALCUE_EXPAND_START_X;
+                    //wide=PREPROCESS_SECTION_WIDTH[0];
+
+                    for (i = 0; i<7; i++)
+                    {
+                        wide=PREPROCESS_SECTION_WIDTH[i];
+                        if ((TouchState.x >= start_x) && (TouchState.x < start_x+wide))
+                        {
+                            BoardInfTemp.KineticPara.PreProcess=i-1;
+
+                            //WM_Invalidate(ProtocolCalcWin);
+                            break;
+                        }
+                        start_x+=PREPROCESS_SECTION_WIDTH[i];
+                    }//for (i = 0; i<7; i++)
+                }//	if ((TouchState.x >= PRECALCUE_EXPAND_START_X) && (TouchState.x <= PRECALCUE_EXPAND_END_X) &&(TouchState.y >= PRECALCUE_EXPAND_START_Y) && (TouchState.y <= PRECALCUE_EXPAND_END_Y))
+                WM_Invalidate(ProtocolCalcWin);
+                TouchKey.KeyStatus = 1;
+            }//else if (ExpEnable == EXP_PREPROCESS)  //滤光片2扩展
+            else if (ExpEnable == EXP_CURVE) //模式扩展
+            {
+                ExpEnable = 0;
+                if ((TouchState.x >= CURVE_EXPAND_START_X) && (TouchState.x <= CURVE_EXPAND_END_X) &&
+                        (TouchState.y >= CURVE_EXPAND_START_Y) && (TouchState.y <= CURVE_EXPAND_END_Y))
+                {
+                    start_x=CURVE_EXPAND_START_X;
+
+                    for (i = 0; i<CURVE_MAX+1; i++)
+                    {
+                        wide=CURVES_SELECTION_WIDTH[i];
+                        if ((TouchState.x >= start_x) && (TouchState.x < start_x+wide))
+                        {
+                            BoardInfTemp.KineticPara.Curve=i-1;
+
+                            //WM_Invalidate(ProtocolMeasureWin);
+                            break;
+                        }
+                        start_x+=CURVES_SELECTION_WIDTH[i];
+                    }//for (i = 0; i<7; i++)
+                }//if ((TouchState.x >= CURVE_EXPAND_START_X) && (TouchState.x <= CURVE_EXPAND_END_X) &&(TouchState.y >= CURVE_EXPAND_START_Y) && (TouchState.y <= CURVE_EXPAND_END_Y))
+
+                WM_Invalidate(ProtocolCalcWin);
+                TouchKey.KeyStatus = 1;
+            }//else if (ExpEnable == EXP_CURVE) //模式扩展
+        }//if (TouchState.Pressed)
+    }//if(TouchKey.KeyStatus==0)
+}
+
+void ProtocolCalc_Go(void)
+{
+    unsigned long time_val;
+    if(TouchKey.KeyStatus)
+    {
+        GUI_PID_STATE TouchState;
+        GUI_PID_GetState(&TouchState);
+        if (TouchKey.KeyStatus)
+        {
+            if (TouchState.Pressed == 0)
+            {
+                TouchKey.KeyPressDelay++;
+                if (TouchKey.KeyPressDelay > TOUCH_RELEASE_DELAY)
+                {
+                    TouchKey.KeyPressDelay = 0;
+                    TouchKey.KeyStatus = 0;
+                }
+            }
+        }
+    }
+    if(ExpEnable == EXP_READINGS)
+    {
+        TwoNum2ConvertStr(KeyPadNum.InputValueStr, BoardInfTemp.KineticPara.Readings);
+        KeyPadNum_Interface(NUM_MENUFLAG_2NUM);
+        if ( (KeyPadNum.ReturnKey == KEYPAD_NUM_RETURN_ENTER)&&(KeyPadNum.InputValueStr[0]!=0) )
+        {
+            BoardInfTemp.KineticPara.Readings=atoi(KeyPadNum.InputValueStr);
+
+            if(BoardInfTemp.KineticPara.Readings > KINETIC_READINGS_MAX)
+            {
+                BoardInfTemp.KineticPara.Readings = KINETIC_READINGS_MAX;
+            }
+            else if(BoardInfTemp.KineticPara.Readings < KINETIC_READINGS_MIN)
+            {
+                BoardInfTemp.KineticPara.Readings = KINETIC_READINGS_MIN;
+            }
+            ChangeReadings();
+        }
+        ExpEnable = 0;
+        TouchKey.KeyStatus = 1;
+        WM_Invalidate(ProtocolCalcWin);
+    }
+
+    else if (ExpEnable == EXP_TIME_HOUR)
+    {
+        TwoNum2ConvertStr(KeyPadNum.InputValueStr, BoardInfTemp.KineticPara.TimeInterval / 3600);
+        KeyPadNum_Interface(NUM_MENUFLAG_2NUM);
+        if ( (KeyPadNum.ReturnKey == KEYPAD_NUM_RETURN_ENTER)&&(KeyPadNum.InputValueStr[0]!=0) )
+        {
+            time_val=atoi(KeyPadNum.InputValueStr);
+            if(time_val > KINETIC_HOUR_MAX)
+            {
+                time_val = KINETIC_HOUR_MAX;
+            }
+            else if(time_val < KINETIC_HOUR_MIN)
+            {
+                time_val = KINETIC_HOUR_MIN;
+            }
+            BoardInfTemp.KineticPara.TimeInterval=BoardInfTemp.KineticPara.TimeInterval%3600+(long)time_val*3600;
+        }
+        ExpEnable = 0;
+        TouchKey.KeyStatus = 1;
+        WM_Invalidate(ProtocolCalcWin);
+    }//if ((TouchState.x >= TIME_INTERVAL_R_START_X) && (TouchState.x < TIME_INTERVAL_R_START_X + SHAKE_TIME_WIDTH))
+    else if (ExpEnable == EXP_TIME_MIN)
+    {
+        TwoNum2ConvertStr(KeyPadNum.InputValueStr, BoardInfTemp.KineticPara.TimeInterval  % 3600/60);
+        KeyPadNum_Interface(NUM_MENUFLAG_2NUM);
+
+        if ( (KeyPadNum.ReturnKey == KEYPAD_NUM_RETURN_ENTER)&&(KeyPadNum.InputValueStr[0]!=0) )
+        {
+            time_val=atoi(KeyPadNum.InputValueStr);
+            if(time_val>59)time_val=59;
+            BoardInfTemp.KineticPara.TimeInterval =BoardInfTemp.KineticPara.TimeInterval/3600*3600+(long)time_val*60+BoardInfTemp.KineticPara.TimeInterval%60;
+        }
+        ExpEnable = 0;
+        TouchKey.KeyStatus = 1;
+        WM_Invalidate(ProtocolCalcWin);
+    }//else if ((TouchState.x >= TIME_INTERVAL_R_START_X + SHAKE_TIME_WIDTH) && (TouchState.x < TIME_INTERVAL_R_START_X + SHAKE_TIME_WIDTH * 2))
+    else if (ExpEnable == EXP_TIME_SEC)
+    {
+        TwoNum2ConvertStr(KeyPadNum.InputValueStr, BoardInfTemp.KineticPara.TimeInterval % 60);
+        KeyPadNum_Interface(NUM_MENUFLAG_2NUM);
+
+        if ( (KeyPadNum.ReturnKey == KEYPAD_NUM_RETURN_ENTER)&&(KeyPadNum.InputValueStr[0]!=0) )
+        {
+            time_val=atoi(KeyPadNum.InputValueStr);
+            if(time_val>59)time_val=59;
+            BoardInfTemp.KineticPara.TimeInterval=BoardInfTemp.KineticPara.TimeInterval/60*60+time_val;
+        }
+
+        ExpEnable = 0;
+        TouchKey.KeyStatus = 1;
+        WM_Invalidate(ProtocolCalcWin);
+    }//else if (ExpEnable == EXP_TIME_SEC)
+}

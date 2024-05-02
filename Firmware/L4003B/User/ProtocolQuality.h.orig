@@ -1,0 +1,128 @@
+#ifndef __QUALITY_H
+#define __QUALITY_H
+
+
+
+
+
+
+
+
+//#define MAIN_RET_START_X  662
+//#define MAIN_RET_START_Y  382
+//#define MAIN_RET_END_X    783
+//#define MAIN_RET_END_Y    422
+
+
+
+
+
+
+#define QUALITY_CONC_SELECT_START_X (MAIN_RET_START_X) //2014-8-19项
+#define QUALITY_CONC_SELECT_END_X (MAIN_RET_START_X + 121) //2014-8-19项
+#define QUALITY_CONC_SELECT_START_Y (MAIN_RET_START_Y - 230) //2014-8-19项
+#define QUALITY_CONC_SELECT_END_Y (MAIN_RET_START_Y - 230 + 46) //2014-8-19项
+
+
+
+#define QUALITY_OPEN_SELECT_START_X (MAIN_RET_START_X) //2014-8-19项
+#define QUALITY_OPEN_SELECT_END_X (MAIN_RET_START_X + 121) //2014-8-19项
+#define QUALITY_OPEN_SELECT_START_Y (MAIN_RET_START_Y - 160) //2014-8-19项
+#define QUALITY_OPEN_SELECT_END_Y (MAIN_RET_START_Y - 160 + 46) //2014-8-19项
+
+#define QUALITY_CONC_EXPAND_START_X ( QUALITY_CONC_SELECT_START_X - 170) //2014-8-19项
+#define QUALITY_OPEN_EXPAND_START_X ( QUALITY_OPEN_SELECT_START_X - 170) //2014-8-19项
+
+
+
+//2.表位置定义
+//2.1表位置定义（用于画线)
+#define SELECT_LEN     594  
+#define SELECT_HIGH    32    
+
+
+#define  TABLE_QUALITY_START_X  10
+#define  TABLE_QUALITY_START_Y  130
+#define  TABLE_QUALITY_END_X      610
+#define  TABLE_QUALITY_END_Y      426
+
+//2.2内容位置定义
+#define PAGE_SELECT_START_X  10       //表选中的X起始位置(TABLE_QUALITY_START_X+3)
+#define PAGE_SELECT_START_Y  167     //内容首行的位置(TABLE_QUALITY_START_Y+37)
+#define PAGE_SELECT_END_X     610   
+#define PAGE_SELECT_END_Y     352
+
+#define PAGE_SELECT_DIS_Y        37          //行距
+
+
+
+
+//#define  TABLE_QUALITY_NO_START_Y     167/
+//#define  TABLE_QUALITY_NO_END_Y       352
+//#define  TABLE_QUALITY_ROW_DIS        37
+
+
+//3.表中文字距离定义
+#define QUALITY_ROW_TXT_DIS_Y                10; //本行文字与头的距离
+//5项内容的位置分别如下
+#define QUALITY_CONTROL_COLUMN_NO  13 //2014-8-10项
+#define QUALITY_CONTROL_COLUMN_TARGET  70
+#define QUALITY_CONTROL_COLUMN_SD  180
+#define QUALITY_CONTROL_COLUMN_CV  280
+#define QUALITY_CONTROL_COLUMN_UPPER  380
+#define QUALITY_CONTROL_COLUMN_LOWER  500
+
+//4.表格尾行中的4个翻页键
+//4.3下一行
+#define TAB_RIGHT_START_X  370
+#define TAB_RIGHT_START_Y  402 //405
+#define TAB_RIGHT_END_X    (TAB_RIGHT_START_X+9)
+#define TAB_RIGHT_END_Y    (TAB_RIGHT_START_Y+12)
+
+//4.1向上翻页
+#define TABPAGE_LEFT_START_X    205 
+#define TABPAGE_LEFT_START_Y   (TAB_RIGHT_START_Y)
+#define TABPAGE_LEFT_END_X       (TABPAGE_LEFT_START_X+16)
+#define TABPAGE_LEFT_END_Y       (TABPAGE_LEFT_START_Y+12)
+//4.2上一行
+#define TAB_LEFT_START_X  250
+#define TAB_LEFT_START_Y  (TAB_RIGHT_START_Y)
+#define TAB_LEFT_END_X     (TAB_LEFT_START_X+9)
+#define TAB_LEFT_END_Y     (TAB_LEFT_START_Y+12)
+
+
+
+//4.4向下翻页
+#define TABPAGE_RIGHT_START_X  415
+#define TABPAGE_RIGHT_START_Y  (TAB_RIGHT_START_Y)
+#define TABPAGE_RIGHT_END_X      (TABPAGE_RIGHT_START_X+16)
+#define TABPAGE_RIGHT_END_Y      (TABPAGE_RIGHT_START_Y+12)
+
+
+
+
+
+
+
+
+
+//扩展选项位置定义
+#define QUALITY_CONC_EXPAND_START_X ( QUALITY_CONC_SELECT_START_X - 170) //2014-8-19项
+#define QUALITY_OPEN_EXPAND_START_X ( QUALITY_OPEN_SELECT_START_X - 170) //2014-8-19项
+
+
+extern const char QUALITY_TABLE_TARGET[LANGUAGE_TYPES][10];// = {"Target", "目标值"};
+extern const char QUALITY_TABLE_SD[LANGUAGE_TYPES][15] ;
+extern const char QUALITY_TABLE_CV[LANGUAGE_TYPES][15];
+extern const char QUALITY_TABLE_UPPER_LIMIT[LANGUAGE_TYPES][15] ;
+extern const char QUALITY_TABLE_LOWER_LIMIT[LANGUAGE_TYPES][15] ;
+
+void ProtocolQuality_Interface(void);
+void ProtocolQuality_Go(void);
+void ProtocolQuality_Scan(void);
+#endif
+
+
+
+
+

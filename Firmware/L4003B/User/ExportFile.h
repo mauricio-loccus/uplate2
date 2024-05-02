@@ -1,0 +1,73 @@
+
+#ifndef __EXPORT_FILE_H
+#define __EXPORT_FILE_H
+
+
+
+
+extern const char CH_STR_FILTER[LANGUAGE_TYPES][20];//{"Filter :", "ÂË  ¹â  Æ¬£º"};
+extern const char CH_STR_NO[LANGUAGE_TYPES][10];
+extern const char CH_STR_OFF[LANGUAGE_TYPES][8];
+extern const char CH_STR_MODE[LANGUAGE_TYPES][20];
+extern const char CH_STR_MODE_NORMAL[LANGUAGE_TYPES][10];
+extern const char CH_STR_MODE_FAST[LANGUAGE_TYPES][10];
+extern const char CH_SETUP_SHAKE_SHAKE[LANGUAGE_TYPES][20];
+extern const char CH_SETUP_SHAKE_SPEED[LANGUAGE_TYPES][20];
+extern const char CH_SETUP_SHAKE_TIME[LANGUAGE_TYPES][20];
+
+extern const char CH_STR_SHAKE_SPEED_SLOW[LANGUAGE_TYPES][15];
+extern const char CH_STR_SHAKE_SPEED_NORMAL[LANGUAGE_TYPES][15];
+extern const char CH_STR_SHAKE_SPEED_FAST[LANGUAGE_TYPES][15];
+extern const char CH_STR_OPEN[LANGUAGE_TYPES][10];
+extern const char CH_STR_CLOSE[LANGUAGE_TYPES][10];
+extern const char CH_STR_PREPROCESS[LANGUAGE_TYPES][20];
+extern const char CH_STR_KINETIC[LANGUAGE_TYPES][20];
+extern const char CH_STR_CURVE[LANGUAGE_TYPES][20];
+extern const char CH_CALCULATE_READINGS[LANGUAGE_TYPES][20];
+extern const char CH_CALCULATE_CURVES[LANGUAGE_TYPES][10];
+extern const char CH_CALCULATE_INTERVAL[LANGUAGE_TYPES][15];
+extern const char CH_CALCULATE_KINETIC[LANGUAGE_TYPES][10];
+extern const char CH_CALCULATE_PREPROCESS[LANGUAGE_TYPES][12];
+//Interpret
+extern const char CH_STR_INTERPRET[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX];
+extern const char CH_STR_ABS[LANGUAGE_TYPES][20];
+extern const char CH_STR_CONC[LANGUAGE_TYPES][20];
+extern const char CH_STR_CUTOFF[LANGUAGE_TYPES][10];
+extern const char CH_STR_LAYOUT[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX];
+extern const char CH_STR_INTERPRET_SOURCE[LANGUAGE_TYPES][15];
+extern const char CH_STR_QUALITY_TITLE[LANGUAGE_TYPES][LANGUAGE_CHAR_MAX];
+extern const char CH_STR_INTERPRET_CUTOFF[LANGUAGE_TYPES][15];
+extern const char CH_STR_INTERPRET_POS[LANGUAGE_TYPES][20];
+extern const char CH_STR_INTERPRET_WEAK_POS[LANGUAGE_TYPES][40];
+
+extern const char CH_STR_TABLE_RECORD_NO[LANGUAGE_TYPES][10];
+extern const char CH_QUALITY_TABLE_TARGET[LANGUAGE_TYPES][10];
+extern const char CH_QUALITY_TABLE_SD[LANGUAGE_TYPES][15];
+extern const char CH_QUALITY_TABLE_CV[LANGUAGE_TYPES][15];
+extern const char CH_QUALITY_TABLE_UPPER_LIMIT[LANGUAGE_TYPES][17];
+extern const char CH_QUALITY_TABLE_LOWER_LIMIT[LANGUAGE_TYPES][17];
+extern const char CH_SELECT_CONTROL_REPORT_FILTER1[LANGUAGE_TYPES][15];
+extern const char CH_SELECT_CONTROL_REPORT_FILTER2[LANGUAGE_TYPES][15];
+extern const char CH_SELECT_CONTROL_REPORT_FILTER12[LANGUAGE_TYPES][20];
+extern const char CH_REFERENCE_SELECT[LANGUAGE_TYPES][2][10];
+extern const char CH_KINETIC_READINGS[LANGUAGE_TYPES][10];
+
+
+extern const char CH_KINETIC_ANALYSIS_SELECTION[2][LANGUAGE_TYPES][KINETIC_ANALYSIS_MAX][20];
+extern const char CH_STR_QUALITY_RESULT[LANGUAGE_TYPES][2][10];
+
+
+void SetUDContent(void);
+void SetParameterContent(void);
+void SetRawDataContent(void);
+void SetQualityContent(void);
+
+#ifndef SOFTWARE_DN
+   void SetCurveContent(void);
+#endif
+
+void SetInterContent(void);
+void SetQCContent(void);
+void SetResultContent(void);
+
+#endif

@@ -1,0 +1,44 @@
+
+//#define PROGRAM_NAME_LENGTH 15
+
+#define KEYPAD_ASC_CHAR_MAX 16//16
+
+//??????  ????:KeyPadNumUseFlag
+#define KEYPAD_FREE        0							//??
+#define KEYPAD_BUSY        1							//?
+
+//KeyPadNumReturnValue
+#define KEYPAD_RETURN_ENTER     1                       //??????Enter?
+#define KEYPAD_RETURN_CANCEL    0                       //??????Cancel?
+
+enum{ FLAG_ABC = 0, FLAG_123 };
+enum{FLAG_SMALL=0,FLAG_BIG};
+
+#ifndef _KEYPAD_ASCII_H
+   #define _KEYPAD_ASCII_H
+	 
+typedef struct
+{
+	unsigned char MenuFlag;  //键盘菜单标志
+	char InputValueStr[KEYPAD_ASC_CHAR_MAX+8];   //传入的字符串
+	unsigned short ReturnKey; //键盘返回值
+	unsigned char UseFlag;  //键盘是否在使用1:使用中,0:无效中
+	unsigned char ABC123Flag;
+	unsigned char CapsLockFlag;
+	unsigned char KeyPadFlag;
+	unsigned char SelFlag;
+
+  unsigned short ID;	
+}KEYPAD_ASC;
+extern KEYPAD_ASC KeyPadAsc;
+
+
+extern char CmpFileName[PROGRAM_NAME_LENGTH];
+
+unsigned char check_same_name(unsigned char flag);
+void KeyPadAscii_Interface(unsigned char flag);
+void SetAsciiBUTTONColor(BUTTON_Handle BUTTON_CENT);
+void SetAsciiButtonSkin(void);
+//#else 
+
+#endif

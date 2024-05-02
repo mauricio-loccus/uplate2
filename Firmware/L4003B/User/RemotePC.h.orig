@@ -1,0 +1,7 @@
+
+#ifndef _REMOTE_PC_H
+     #define _REMOTE_PC_H
+		 
+void Remote_Interface(void);
+void DeletePCMenu(void);
+#endif

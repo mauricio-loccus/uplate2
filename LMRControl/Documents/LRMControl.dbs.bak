@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="LRMControl" id="Project_2a7ac5e2" template="Default" database="Sqlite" >
+	<comment><![CDATA[Database com as propriedades de controle do sistema LRMControl.]]></comment>
+	<schema name="Default" schemaname="Default" >
+		<table name="Plates" >
+			<column name="platenum" type="integer" length="2000000000" decimal="10" jt="4" mandatory="y" />
+			<column name="Height" type="integer" length="2000000000" decimal="10" jt="4" />
+			<column name="Width" type="integer" length="2000000000" decimal="10" jt="4" />
+			<column name="PlateName" type="varchar " length="100" jt="12" />
+			<column name="PlateDescr" type="varchar " length="200" jt="12" />
+			<column name="Type" type="varchar " length="1" jt="12" >
+				<defo>&#039;P&#039;</defo>
+			</column>
+			<index name="pk_plates" unique="PRIMARY_KEY" >
+				<column name="platenum" />
+			</index>
+		</table>
+		<table name="SystemUsers" >
+			<column name="Id" type="integer" length="2000000000" decimal="10" jt="4" mandatory="y" />
+			<column name="Login" type="varbinary " length="20" jt="12" mandatory="y" />
+			<column name="Password" type="varbinary " length="20" jt="12" mandatory="y" />
+			<column name="UserID" type="integer" length="2000000000" decimal="10" jt="4" />
+			<column name="CreateDate" type="date" length="2000000000" decimal="10" jt="91" />
+			<column name="AlterDate" type="date" length="2000000000" decimal="10" jt="91" />
+			<index name="pk_SystemUsers" unique="PRIMARY_KEY" >
+				<column name="Id" />
+			</index>
+			<fk name="Fk_SystemUsers" to_schema="Default" to_table="Users" delete_action="cascade" update_action="restrict" >
+				<fk_column name="UserID" pk="ID" />
+			</fk>
+		</table>
+		<table name="Users" >
+			<column name="ID" type="integer" length="2000000000" decimal="10" jt="4" mandatory="y" />
+			<column name="REGID" type="varchar " length="30" jt="12" />
+			<column name="NAME" type="varchar " length="60" jt="12" />
+			<column name="DEPTNO" type="varchar " length="60" jt="12" />
+			<column name="CREATEDATE" type="date" length="2000000000" decimal="10" jt="91" />
+			<column name="ALTERDATE" type="date" length="2000000000" decimal="10" jt="91" />
+			<index name="pk_Users" unique="PRIMARY_KEY" >
+				<column name="ID" />
+			</index>
+		</table>
+		<table name="Well" >
+			<column name="Platenum" type="integer" length="2000000000" decimal="10" jt="4" mandatory="y" />
+			<column name="cellid" type="integer" length="2000000000" decimal="10" jt="4" />
+			<column name="Row" type="varchar " length="1" jt="12" mandatory="y" />
+			<column name="Col" type="integer" length="2000000000" decimal="10" jt="4" />
+			<column name="Type" type="integer" length="2000000000" decimal="10" jt="4" mandatory="y" />
+			<column name="StdValue" type="numeric" length="2000000000" decimal="10" jt="2" />
+			<column name="RawValue" type="numeric" length="2000000000" decimal="10" jt="2" />
+			<column name="PostValue" type="numeric" length="2000000000" decimal="10" jt="2" />
+			<column name="Interpret" type="varchar " length="1" jt="12" >
+				<defo>&#039;G&#039;</defo>
+			</column>
+			<index name="idx_Well" unique="NORMAL" >
+				<column name="Type" />
+			</index>
+			<index name="sqlite_autoindex_Well_1" unique="UNIQUE" >
+				<column name="Platenum" />
+				<column name="Row" />
+				<column name="Col" />
+			</index>
+		</table>
+		<table name="WellType" >
+			<column name="ID" type="integer" length="2000000000" decimal="10" jt="4" mandatory="y" />
+			<column name="DESCR" type="varchar " length="60" jt="12" mandatory="y" />
+			<index name="pk_WellType" unique="PRIMARY_KEY" >
+				<column name="ID" />
+			</index>
+		</table>
+		<table name="sqlite_sequence" >
+			<comment><![CDATA[Tabela exclusiave do sqlite para a geração de sequencias em campos com autoincremento.]]></comment>
+			<column name="name" type="varchar " length="2000000000" decimal="10" jt="12" />
+			<column name="seq" type="varchar " length="2000000000" decimal="10" jt="12" />
+		</table>
+		<trigger name="update_alterdate" id="Trigger_e7ed5ff" isSystem="false" >
+			<string><![CDATA[CREATE TRIGGER update_alterdate AFTER UPDATE OF Password ON SystemUsers BEGIN UPDATE SystemUsers SET alterdate = date('Now'); END]]></string>
+		</trigger>
+		<trigger name="update_createdate" id="Trigger_2dec9fde" isSystem="false" >
+			<string><![CDATA[CREATE TRIGGER update_createdate AFTER INSERT ON SystemUsers BEGIN UPDATE SystemUsers SET createdate = date('now'); END]]></string>
+		</trigger>
+	</schema>
+	<connector name="Sqlite" database="Sqlite" driver_class="org.sqlite.JDBC" driver_jar="sqlite-jdbc-3.16.1.jar" driver_desc="Standard" host="localhost" port="7210" instance="D:/Projetos/ELISA/LRMControl/Data/lrm.db3" />
+	<layout name="Default Layout" id="Layout_12ba9e27" joined_routing="y" show_relation="columns" >
+		<comment><![CDATA[Default Layout]]></comment>
+		<entity schema="Default" name="Plates" color="bcd5f1" x="45" y="150" />
+		<entity schema="Default" name="SystemUsers" color="bcd5f1" x="435" y="480" />
+		<entity schema="Default" name="Users" color="bcd5f1" x="645" y="480" />
+		<entity schema="Default" name="WellType" color="bcd5f1" x="510" y="75" />
+		<entity schema="Default" name="Well" color="bcd5f1" x="195" y="45" />
+		<script name="Sql" id="Query_1c93afcf" language="SQL" >
+			<string><![CDATA[DROP TABLE IF EXISTS LRM.Plates;
+ 
+CREATE TABLE Plates ( 
+	platenum             integer NOT NULL  ,
+	Height               integer   ,
+	Width                integer   ,
+	PlateName            varchar(100)   ,
+	PlateDescr           varchar(200)   ,
+	Layout               varchar(1)   ,
+	CONSTRAINT Pk_Plates PRIMARY KEY ( platenum )
+ ) ;
+
+DROP TABLE IF EXISTS LRM.WellType;
+
+CREATE TABLE LRM.WellType ( 
+	ID                   integer NOT NULL  ,
+	descr                varchar(45) NOT NULL  ,
+	CONSTRAINT Pk_WellType PRIMARY KEY ( ID )
+ ) ;
+
+DROP TABLE IF EXISTS LRM.Well;
+
+CREATE TABLE LRM.Well ( 
+	Platenum             integer NOT NULL  ,
+	cellid               integer   ,
+	Row                  varchar(1) NOT NULL  ,
+	Col                  integer   ,
+	"Type"               integer NOT NULL  ,
+	StdValue             numeric   ,
+	RawValue             numeric   ,
+	PostValue            numeric   ,
+	Interpret            varchar(1)  DEFAULT 'G' ,
+	CONSTRAINT Idx_Well_PlateNumRowCol UNIQUE ( Platenum, Row, Col ) ,
+	FOREIGN KEY ( Platenum ) REFERENCES Plates( platenum ) ON DELETE CASCADE ,
+	FOREIGN KEY ( "Type" ) REFERENCES WellType( ID ) ON DELETE CASCADE 
+ ) ;
+
+CREATE INDEX idx_Well ON LRM.Well ( "Type" ) ;
+
+]]></string>
+		</script>
+	</layout>
+</project>

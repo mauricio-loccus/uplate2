@@ -1,0 +1,2604 @@
+#include "MainTask.h"
+
+
+/*
+
+void GetAxisMin(float *dX);
+void GetAxisMax(float *dX);
+void GetAxisLimits(float *dXMin, float *dXMax, float *dYMin, float *dYMax, float *p_dX, float *p_dY);
+void GetAxisLimitsKinetic(float *dXMin, float *dXMax, float *dYMin, float *dYMax, float *p_dX, float *p_dY);
+unsigned char PreCalOK(void);
+void SearchForBlanks(void);
+void SearchForStandards(unsigned char nStandard);
+int SearchForNCPC(signed char wcCurrentFilter);
+int SearchForQC(unsigned char wcCurrentFilter);
+void GetResultABS(unsigned char nChannel, unsigned char nCycle);///////////////////////
+void GetCalibrationPara(void);
+void MakeABSCalibration(void);
+void MeasureFinishProcess();//////////////
+
+
+void Preproccessing(unsigned char wcCycle);
+void GetKineticABS(unsigned char wcCycle);/////////////////////////////////
+
+int DoFactorAnalysis(unsigned char  wcCurrentFilter);
+int DoLinearAnalysis(unsigned char  wcCurrentFilter);
+int DoPtoPAnalysis(unsigned char wcCurrentFilter);
+int DoSplineAnalysis(unsigned char  wcCurrentFilter);
+void SearchForPlateLimits(unsigned char wcCurrentFilter, float *dYMin, float *dYMax);
+int DoLogisticAnalysis(unsigned char wcCurrentFilter);//////////////////////
+
+*/
+
+
+
+ABS_CAL_PARA AbsCalPara;
+
+
+
+void GetAxisMin(float *dX)
+{
+    int nX;
+    if(*dX >= 0.0f)
+    {
+        nX = (int)(*dX);
+    }
+    else
+    {
+        nX = (int)(*dX - 1);
+    }
+
+    if(nX < -10 && nX >= -20) //负坐标
+    {
+        nX = ((nX - 1) / 2) * 2;
+    }
+    else if(nX < -20 && nX >= -100)
+    {
+        if(nX % 5 != 0)
+        {
+            nX = ((nX - 5) / 5) * 5;
+        }
+    }
+    else if(nX < -100 && nX >= -1000)
+    {
+        if(nX % 10 != 0)
+        {
+            nX = ((nX - 10) / 10) * 10;
+        }
+    }
+    else if(nX < -1000)
+    {
+        if(nX % 100 != 0)
+        {
+            nX = ((nX - 100) / 100) * 100;
+        }
+    }
+
+    if(nX <= 20 && nX > 10) //正坐标
+    {
+        nX = (nX / 2) * 2;
+    }
+    else if(nX <= 100 && nX > 20)
+    {
+        if(nX % 5 != 0)
+        {
+            nX = (nX / 5) * 5;
+        }
+    }
+    else if(nX <= 1000 && nX > 100)
+    {
+        if(nX % 10 != 0)
+        {
+            nX = (nX / 10) * 10;
+        }
+    }
+    else if(nX > 1000)
+    {
+        if(nX % 100 != 0)
+        {
+            nX = (nX / 100) * 100;
+        }
+    }
+
+    if(*dX >= 0.0f && *dX <= 10.0f)
+    {
+        nX = (int)(*dX * 10.0f) - 1;
+        *dX = (float)nX / 10.0f;
+    }
+    else if(*dX >= -10.0f && *dX < 0.0f)
+    {
+        nX = (int)(*dX * 10.0f) - 2;
+        *dX = (float)nX / 10.0f;
+    }
+    else
+    {
+        *dX = (float)nX;
+    }
+}
+
+void GetAxisMax(float *dX)
+{
+    int nX;
+    if(*dX >= 0.0f)
+    {
+        nX = (int)(*dX + 1);
+    }
+    else
+    {
+        nX = (int)(*dX);
+    }
+
+    if(nX > 10 && nX <= 20) //正坐标
+    {
+        nX = ((nX + 1) / 2) * 2;
+    }
+    else if(nX > 20 && nX <= 100)
+    {
+        if(nX % 5 != 0)
+        {
+            nX = ((nX + 5) / 5) * 5;
+        }
+    }
+    else if(nX > 100 && nX <= 1000)
+    {
+        if(nX % 10 != 0)
+        {
+            nX = ((nX + 10) / 10) * 10;
+        }
+    }
+    else if(nX > 1000)
+    {
+        if(nX % 100 != 0)
+        {
+            nX = ((nX + 100) / 100) * 100;
+        }
+    }
+
+    if(nX >= -20 && nX < -10) //负坐标
+    {
+        nX = (nX / 2) * 2;
+    }
+    else if(nX < -20 && nX >= -100)
+    {
+        if(nX % 5 != 0)
+        {
+            nX = (nX / 5) * 5;
+        }
+    }
+    else if(nX < -100 && nX >= -1000)
+    {
+        if(nX % 10 != 0)
+        {
+            nX = (nX / 10) * 10;
+        }
+    }
+    else if(nX < -1000)
+    {
+        if(nX % 100 != 0)
+        {
+            nX = (nX / 100) * 100;
+        }
+    }
+
+    if(*dX >= 0.0f && *dX <= 10.0f)
+    {
+        nX = (int)(*dX * 10.0f) + 1;
+        *dX = (float)nX / 10.0f;
+    }
+    else if(*dX >= -10.0f && *dX < 0.0f)
+    {
+        nX = (int)(*dX * 10.0f);
+        *dX = (float)nX / 10.0f;
+    }
+    else
+    {
+        *dX = (float)nX;
+    }
+}
+//void GetAxisLimits(float *dXMin, float *dXMax, float *dYMin, float *dYMax, float *p_dX, float *p_dY)
+void GetAxisLimits(float *dXMin, float *dXMax, float *dYMin, float *dYMax, double *p_dX, double *p_dY)
+{
+    int i,n = 0;
+	
+    for(i = 0; i < CALIBRATOR_CONCENTRATION_MAX; i++)
+    {
+        if(NormalAnalysis.nCalibratorCount[NormalAnalysis.FilterCurrent][i] > 0)
+        {
+            p_dY[n] = NormalAnalysis.dCalibratorABS[NormalAnalysis.FilterCurrent][i];
+            p_dX[n] = BoardInf.dConcentration[i];
+
+            if(NormalAnalysis.bLogY) //对数坐标
+            {
+							  if(p_dY[n]>0)
+								{
+                    p_dY[n] = log10(p_dY[n]);
+								}
+            }
+            if(NormalAnalysis.bLogX) //对数坐标
+            {
+							  if(p_dX[n]>0)
+								{
+                   p_dX[n] = log10(p_dX[n]);
+								}
+            }
+            n++;
+        }
+    }
+		
+		
+		#ifdef SOFTWARE_DN
+		if(BoardInf.KineticPara.Curve==CURVE_LOGITLOG) 
+		{
+				if(n>0)n--;
+				for(i = 0; i < n; i++)
+				{
+						p_dX[i]=p_dX[i+1];
+						p_dY[i]=CalcuPara.p_dY2[i];
+				}
+	  }
+		else if(BoardInf.KineticPara.Curve==CURVE_CUBIC)
+		{
+				if(n>0)n--;
+				for(i = 0; i < n; i++)
+				{
+						p_dX[i]=p_dX[i+1];
+						p_dY[i]=p_dY[i+1];
+				}
+	  }
+		#endif
+		
+		
+    *dXMin = p_dX[0];
+    *dYMin = p_dY[0];
+    *dXMax = p_dX[0];
+    *dYMax = p_dY[0];
+    for(i = 0; i < n; i++)
+    {
+        if(p_dX[i] > *dXMax)
+        {
+            *dXMax = p_dX[i];
+        }
+
+        if(p_dY[i] > *dYMax)
+        {
+            *dYMax = p_dY[i];
+        }
+
+        if(p_dX[i] < *dXMin)
+        {
+            *dXMin = p_dX[i];
+        }
+
+        if(p_dY[i] < *dYMin)
+        {
+            *dYMin = p_dY[i];
+        }
+    }
+
+    if(BoardInf.KineticPara.Curve==CURVE_LOGISTIC)
+        //if(CString(BoardInf.curentcurve) == _T("Logistic"))
+    {
+        *dYMin = NormalAnalysis.LogisticAnalysis[NormalAnalysis.FilterCurrent].dCoef[0];
+        *dYMax = NormalAnalysis.LogisticAnalysis[NormalAnalysis.FilterCurrent].dCoef[3];
+    }
+
+    GetAxisMin(dXMin);
+    GetAxisMin(dYMin);
+    GetAxisMax(dXMax);
+    GetAxisMax(dYMax);
+}
+
+
+
+//void GetAxisLimits(float *dXMin, float *dXMax, float *dYMin, float *dYMax, float *p_dX, float *p_dY)
+void GetAxisLimits2(float *dYMin, float *dYMax,double *p_dY)
+{
+    int i,n = 0;
+	
+    for(i = 0; i < CALIBRATOR_CONCENTRATION_MAX; i++)
+    {
+        if(NormalAnalysis.nCalibratorCount[NormalAnalysis.FilterCurrent][i] > 0)
+        {
+            p_dY[n] = NormalAnalysis.dCalibratorABS[NormalAnalysis.FilterCurrent][i];
+         
+
+            if(NormalAnalysis.bLogY) //对数坐标
+            {
+							  if(p_dY[n]>0)
+								{
+                    p_dY[n] = log10(p_dY[n]);
+								}
+            }
+            n++;
+        }
+    }
+		
+		
+		#ifdef SOFTWARE_DN
+		if(BoardInf.KineticPara.Curve==CURVE_LOGITLOG) 
+		{
+				if(n>0)n--;
+				for(i = 0; i < n; i++)
+				{
+						p_dY[i]=CalcuPara.p_dY_Lable[i];
+				}
+	  }
+		else if(BoardInf.KineticPara.Curve==CURVE_CUBIC)
+		{
+				if(n>0)n--;
+				for(i = 0; i < n; i++)
+				{
+						p_dY[i]=p_dY[i+1];
+				}
+	  }
+		#endif
+		
+		
+   
+    *dYMin = p_dY[0];
+    *dYMax = p_dY[0];
+    for(i = 0; i < n; i++)
+    {
+       
+
+        if(p_dY[i] > *dYMax)
+        {
+            *dYMax = p_dY[i];
+        }
+
+      
+
+        if(p_dY[i] < *dYMin)
+        {
+            *dYMin = p_dY[i];
+        }
+    }
+    GetAxisMin(dYMin);
+    GetAxisMax(dYMax);
+}
+
+
+
+void GetAxisLimitsKinetic(float *dXMin, float *dXMax, float *dYMin, float *dYMax, double *p_dX, double *p_dY)
+{
+    unsigned char bCompared = 0;
+    unsigned char i,j;
+
+    *dXMin = 1;
+    *dYMin = 0.0;
+    *dXMax = BoardInf.KineticPara.kinetic_readings_analysis;
+    *dYMax = 0.0;
+
+
+
+    for( i = 0; i < BoardInf.KineticPara.kinetic_readings_analysis; i++)
+    {
+        p_dX[i] = i + 1;
+        if(BoardInf.KineticPara.nCurrentSample >= TUBE_MAX)
+        {
+            for(j = 0; j < TUBE_MAX; j++)
+            {
+                if(NormalAnalysis.FilterCurrent < 2)
+                {
+                    p_dY[i] = dABS[i][NormalAnalysis.FilterCurrent][j];
+                    if(bCompared==0)
+                    {
+                        *dYMin = p_dY[i];
+                        bCompared = 1;
+                        *dYMax = p_dY[i];
+                    } //if(!bCompared)
+                    else if(*dYMin > p_dY[i])
+                    {
+                        *dYMin = p_dY[i];
+                    } //else if(dYMin > p_dY[i])
+                    else if(*dYMax < p_dY[i])
+                    {
+                        *dYMax = p_dY[i];
+                    } //else if(dYMax < p_dY[i])
+                } //if(normal_analysis.wcFilterCurrent < 2)
+                else if(BoardInf.KineticPara.bPreCalOK[j])
+                {
+                    p_dY[i] = NormalAnalysis.dPreCal[i][j];
+                    if(bCompared==0)
+                    {
+                        *dYMin = p_dY[i];
+                        *dYMax = p_dY[i];
+                        bCompared = 1;
+                    } //if(!bCompared)
+                    else if(*dYMin > p_dY[i])
+                    {
+                        *dYMin = p_dY[i];
+                    } //else if(dYMin > p_dY[i])
+                    else if(*dYMax < p_dY[i])
+                    {
+                        *dYMax = p_dY[i];
+                    } //else if(dYMax < p_dY[i])
+                } //else if(BoardInf.KineticPara.bPreCalOK[j])
+            } //for(int j = 0; j < TUBE_MAX; j++)
+        } //if(BoardInf.KineticPara.nCurrentSample >= TUBE_MAX)
+        else
+        {
+            if(NormalAnalysis.FilterCurrent < 2)
+            {
+                p_dY[i] = dABS[i][NormalAnalysis.FilterCurrent][BoardInf.KineticPara.nCurrentSample];
+                if(bCompared==0)
+                {
+                    *dYMin = p_dY[i];
+                    bCompared = 1;
+                    *dYMax = p_dY[i];
+                } //if(!bCompared)
+                else if(*dYMin > p_dY[i])
+                {
+                    *dYMin = p_dY[i];
+                } //else if(dYMin > p_dY[i])
+                else if(*dYMax < p_dY[i])
+                {
+                    *dYMax = p_dY[i];
+                } //else if(dYMax < p_dY[i])
+            } //if(normal_analysis.wcFilterCurrent < 2)
+            else if(BoardInf.KineticPara.bPreCalOK[BoardInf.KineticPara.nCurrentSample])
+            {
+                p_dY[i] = NormalAnalysis.dPreCal[i][BoardInf.KineticPara.nCurrentSample];
+                if(bCompared==0)
+                {
+                    *dYMin = p_dY[i];
+                    *dYMax = p_dY[i];
+                    bCompared = 1;
+                } //if(!bCompared)
+                else if(*dYMin > p_dY[i])
+                {
+                    *dYMin = p_dY[i];
+                } //else if(dYMin > p_dY[i])
+                else if(*dYMax < p_dY[i])
+                {
+                    *dYMax = p_dY[i];
+                } //else if(dYMax < p_dY[i])
+            } //else if(BoardInf.KineticPara.bPreCalOK[j])
+        } //if(BoardInf.KineticPara.nCurrentSample >= TUBE_MAX)
+    } //for(int i = 0; i < BoardInf.KineticPara.kinetic_readings_analysis; i++)
+
+    GetAxisMin(dXMin);
+    GetAxisMin(dYMin);
+    GetAxisMax(dXMax);
+    GetAxisMax(dYMax);
+}
+
+
+
+unsigned char PreCalOK(void)
+{
+    unsigned char  bOK = 0;
+    int i,j;
+    for(j = 0; j < TUBE_MAX; j++)
+    {
+        BoardInf.KineticPara.bPreCalOK[j] = 1;
+        for(i = 0; i < BoardInf.KineticPara.kinetic_readings_analysis; i++)
+        {
+            if(NormalAnalysis.bPreCalOK[i][j]==0)
+            {
+                BoardInf.KineticPara.bPreCalOK[j] = 0;
+                break;
+            }
+        }
+
+        bOK |= BoardInf.KineticPara.bPreCalOK[j];
+    }
+
+    return bOK;
+}
+
+
+
+
+//Blank为所有设为BK的孔的数据平均值
+//void SearchForBlanks(void)
+void SearchForBlanks(void)
+{
+    int k,i,nCycles = 1;
+
+    if(BoardInf.KineticPara.Enable)  //开启动力学
+    {
+        nCycles = BoardInf.KineticPara.kinetic_readings_practical;
+    }
+
+    for(k = 0; k < nCycles; k++)
+    {
+        NormalAnalysis.nBlankCount[k][0] = 0; //是否包含空白
+        NormalAnalysis.nBlankCount[k][1] = 0;
+
+        NormalAnalysis.dBlank[k][0] = 0.0; //空白样本初始化
+        NormalAnalysis.dBlank[k][1] = 0.0;
+
+        for(i = 0; i < TUBE_MAX; i++)
+        {
+            if(BoardInf.Layout.WellType[i] == WELLS_TYPE_BK)//"BK"
+            {
+                if(BoardInf.Filter2Locate>=0 && BoardInf.bHasRawData[1])
+                {
+                    NormalAnalysis.nBlankCount[k][1]++;
+                    NormalAnalysis.dBlank[k][1] += dABSInit[k][1][i];
+                }
+
+                NormalAnalysis.nBlankCount[k][0]++;
+                NormalAnalysis.dBlank[k][0] += dABSInit[k][0][i];
+            }
+        }
+
+        for(i = 0; i < FILTER_PLATE_MAX; i++)
+        {
+            if(NormalAnalysis.nBlankCount[k][i] > 0)
+            {
+                NormalAnalysis.dBlank[k][i] /= NormalAnalysis.nBlankCount[k][i];
+            }
+        }
+    }
+}
+
+void SearchForStandards(unsigned char nStandard)
+{
+    unsigned char i;
+//	CString strTemp;
+    //strTemp.Format(_T("%02d"), nStandard + 1);
+    NormalAnalysis.nCalibratorCount[0][nStandard] = 0; //是否包含标准浓度
+    NormalAnalysis.nCalibratorCount[1][nStandard] = 0;
+    NormalAnalysis.nCalibratorCount[2][nStandard] = 0;
+    NormalAnalysis.dCalibratorABS[0][nStandard] = 0.0; //标准浓度初始化
+    NormalAnalysis.dCalibratorABS[1][nStandard] = 0.0;
+    NormalAnalysis.dCalibratorABS[2][nStandard] = 0.0;
+
+    for(i = 0; i < TUBE_MAX; i++)
+    {
+        if( (BoardInf.Layout.WellType[i] ==WELLS_TYPE_SD) && (BoardInf.Layout.Num[i] == nStandard) )//"SD"
+        {
+            if(BoardInf.Filter2Locate>=0  && BoardInf.KineticPara.PreProcess>=0 && BoardInf.bHasRawData[1])
+                //if(BoardInf.Filter_2[0] != _T('N') && BoardInf.KineticPara.PreProcess[0] != _T('N') && BoardInf.bHasRawData[1]) //预计算
+            {
+                if(NormalAnalysis.bPreCalOK[0][i])
+                {
+                    NormalAnalysis.nCalibratorCount[2][nStandard]++;
+                    NormalAnalysis.dCalibratorABS[2][nStandard] += NormalAnalysis.dPreCal[0][i];
+                }
+            }
+
+            if(BoardInf.Filter2Locate>=0 && BoardInf.bHasRawData[1])
+            {
+                NormalAnalysis.nCalibratorCount[1][nStandard]++;
+                NormalAnalysis.dCalibratorABS[1][nStandard] += dABS[0][1][i];
+            }
+
+            NormalAnalysis.nCalibratorCount[0][nStandard]++;
+            NormalAnalysis.dCalibratorABS[0][nStandard] += dABS[0][0][i];
+        }
+    }
+
+    for(i = 0; i < 3; i++)
+    {
+        if(NormalAnalysis.nCalibratorCount[i][nStandard] > 0)
+        {
+            NormalAnalysis.dCalibratorABS[i][nStandard] /= NormalAnalysis.nCalibratorCount[i][nStandard];
+        }
+    }
+}
+
+#ifdef SOFTWARE_DN
+
+void SearchForUD(unsigned short nStandard)
+{  
+    unsigned short i;
+//	CString strTemp;
+    //strTemp.Format(_T("%02d"), nStandard + 1);
+    NormalAnalysis.nUDCount[0][nStandard] = 0; //是否包含未知品
+    NormalAnalysis.nUDCount[1][nStandard] = 0;
+    NormalAnalysis.nUDCount[2][nStandard] = 0;
+    NormalAnalysis.dUD_Conc[0][nStandard] = 0.0; //未知品初始化
+    NormalAnalysis.dUD_Conc[1][nStandard] = 0.0;
+    NormalAnalysis.dUD_Conc[2][nStandard] = 0.0;
+    
+	
+	
+    for(i = 0; i < TUBE_MAX; i++)
+    {
+        if( (BoardInf.Layout.WellType[i] ==WELLS_TYPE_UD) && (BoardInf.Layout.Num[i] == nStandard) )//"SD"
+        {
+            if(BoardInf.Filter2Locate>=0  && BoardInf.KineticPara.PreProcess>=0 && BoardInf.bHasRawData[1] && (NormalAnalysis.nAnalysisResult[2] == ANALYSIS_SUCCESS))
+                //if(BoardInf.Filter_2[0] != _T('N') && BoardInf.KineticPara.PreProcess[0] != _T('N') && BoardInf.bHasRawData[1]) //预计算
+            {
+                if(NormalAnalysis.bPreCalOK[0][i])
+                {
+                    NormalAnalysis.nUDCount[2][nStandard]++;
+                    NormalAnalysis.dUD_Conc[2][nStandard] += NormalAnalysis.dPreCal[0][i];
+                }
+            }
+
+            if(BoardInf.Filter2Locate>=0 && BoardInf.bHasRawData[1] && (NormalAnalysis.nAnalysisResult[1] == ANALYSIS_SUCCESS) )
+            {
+							  if(NormalAnalysis.dConcentration[1][i]>=0)
+								{
+                   NormalAnalysis.nUDCount[1][nStandard]++;
+                   NormalAnalysis.dUD_Conc[1][nStandard] += NormalAnalysis.dConcentration[1][i];//dABS[0][1][i];
+								}
+            }
+
+						if(NormalAnalysis.nAnalysisResult[0] == ANALYSIS_SUCCESS)
+						{
+							  if(NormalAnalysis.dConcentration[1][i]>=0)
+								{
+                  NormalAnalysis.nUDCount[0][nStandard]++;
+                  NormalAnalysis.dUD_Conc[0][nStandard] += NormalAnalysis.dConcentration[0][i];
+								}
+						}
+        }
+    }
+
+    for(i = 0; i < 3; i++)
+    {
+        if(NormalAnalysis.nUDCount[i][nStandard] > 0)
+        {
+            NormalAnalysis.dUD_Conc[i][nStandard] /= NormalAnalysis.nUDCount[i][nStandard];
+        }
+    }
+}
+#endif
+
+int SearchForNCPC(signed char wcCurrentFilter)
+{
+    int i;
+
+    BoardInf.InterpretPara.nTotalNC[wcCurrentFilter] = 0;
+    BoardInf.InterpretPara.nTotalPC[wcCurrentFilter] = 0;
+    BoardInf.InterpretPara.dReferenceNC[wcCurrentFilter] = 0;
+    BoardInf.InterpretPara.dReferencePC[wcCurrentFilter] = 0;
+
+    for(i = 0; i < TUBE_MAX; i++)
+    {
+        if(BoardInf.Layout.WellType[i]==WELLS_TYPE_NC)//"NC"
+            //if(BoardInf.layout[i + 1].Type[0] ==  _T('N'))
+        {
+            if(BoardInf.InterpretPara.AbsFlag )
+                //if(BoardInf.interpret_para.bABS)
+            {
+                if(wcCurrentFilter > 1 && NormalAnalysis.bPreCalOK[0][i])//第3个滤光片为预计算的结果
+                {
+                    BoardInf.InterpretPara.nTotalNC[wcCurrentFilter]++;
+                    BoardInf.InterpretPara.dReferenceNC[wcCurrentFilter] += NormalAnalysis.dPreCal[0][i];
+                } //if(wcCurrentFilter > 1 && NormalAnalysis.bPreCalOK[i])
+                else if(wcCurrentFilter <= 1)
+                {
+                    BoardInf.InterpretPara.nTotalNC[wcCurrentFilter]++;
+                    BoardInf.InterpretPara.dReferenceNC[wcCurrentFilter] += dABS[0][wcCurrentFilter][i];
+                } //else if(wcCurrentFilter <= 1)
+            } //if(BoardInf.interpret_para.bABS)
+            else
+            {
+                if(NormalAnalysis.dConcentration[wcCurrentFilter][i] >= 0.0f)
+                {
+                    if((wcCurrentFilter > 1 && NormalAnalysis.bPreCalOK[i]) || (wcCurrentFilter <= 1))
+                    {
+                        BoardInf.InterpretPara.nTotalNC[wcCurrentFilter]++;
+                        BoardInf.InterpretPara.dReferenceNC[wcCurrentFilter] += NormalAnalysis.dConcentration[wcCurrentFilter][i];
+                    } //if((wcCurrentFilter > 1 && NormalAnalysis.bPreCalOK[i]) || (wcCurrentFilter <= 1))
+                } //if(NormalAnalysis.dConcentration[wcCurrentFilter][i] >= 0.0)
+            } //if(BoardInf.interpret_para.bABS)
+        } //if(BoardInf.layout[i + 1].Type[0] ==  _T('N'))
+
+        if(BoardInf.Layout.WellType[i]==WELLS_TYPE_PC)
+            //if(BoardInf.layout[i + 1].Type[0] ==  _T('P'))
+        {
+            //if(BoardInf.interpret_para.bABS)
+            if(BoardInf.InterpretPara.AbsFlag )
+            {
+                if(wcCurrentFilter > 1 && NormalAnalysis.bPreCalOK[0][i])
+                {
+                    BoardInf.InterpretPara.nTotalPC[wcCurrentFilter]++;
+                    BoardInf.InterpretPara.dReferencePC[wcCurrentFilter] += NormalAnalysis.dPreCal[0][i];
+                } //if(wcCurrentFilter > 1 && NormalAnalysis.bPreCalOK[i])
+                else if(wcCurrentFilter <= 1)
+                {
+                    BoardInf.InterpretPara.nTotalPC[wcCurrentFilter]++;
+                    BoardInf.InterpretPara.dReferencePC[wcCurrentFilter] += dABS[0][wcCurrentFilter][i];
+                } //if(wcCurrentFilter > 1 && NormalAnalysis.bPreCalOK[i])
+            } //if(BoardInf.interpret_para.bABS)
+            else
+            {
+                if(NormalAnalysis.dConcentration[wcCurrentFilter][i] >= 0.0f)
+                {
+                    if((wcCurrentFilter > 1 && NormalAnalysis.bPreCalOK[i]) || (wcCurrentFilter <= 1))
+                    {
+                        BoardInf.InterpretPara.nTotalPC[wcCurrentFilter]++;
+                        BoardInf.InterpretPara.dReferencePC[wcCurrentFilter] += NormalAnalysis.dConcentration[wcCurrentFilter][i];
+                    } //if((wcCurrentFilter > 1 && NormalAnalysis.bPreCalOK[i]) || (wcCurrentFilter <= 1))
+                } //if(NormalAnalysis.dConcentration[wcCurrentFilter][i] >= 0.0)
+            } //if(BoardInf.interpret_para.bABS)
+        } //if(BoardInf.layout[i + 1].Type[0] ==  _T('P'))
+    } //for(int i = 0; i < TUBE_MAX; i++)
+
+    if(BoardInf.InterpretPara.nTotalPC[wcCurrentFilter] < 1)
+    {
+        return ANALYSIS_ERROR_NO_PC;
+    }
+
+    if(BoardInf.InterpretPara.nTotalNC[wcCurrentFilter] < 1)
+    {
+        return ANALYSIS_ERROR_NO_NC;
+    }
+
+    BoardInf.InterpretPara.dReferencePC[wcCurrentFilter] /= BoardInf.InterpretPara.nTotalPC[wcCurrentFilter];  //阳性对照
+    BoardInf.InterpretPara.dReferenceNC[wcCurrentFilter] /= BoardInf.InterpretPara.nTotalNC[wcCurrentFilter];  //阴性对照
+    BoardInf.InterpretPara.dReference[wcCurrentFilter]
+        = BoardInf.InterpretPara.fCoef[0] * BoardInf.InterpretPara.dReferenceNC[wcCurrentFilter]
+          + BoardInf.InterpretPara.fCoef[1] * BoardInf.InterpretPara.dReferencePC[wcCurrentFilter]
+          + BoardInf.InterpretPara.fCoef[2];
+    return ANALYSIS_SUCCESS;
+}
+
+int SearchForQC(unsigned char wcCurrentFilter)
+{
+    int i,j,k;
+    float dX[TUBE_MAX];
+    float dTemp;
+
+    BoardInf.QualityResult.nTotal[wcCurrentFilter] = 0;
+    //BoardInf.quality_para.nTotal[wcCurrentFilter] = 0;
+    for(j = 0; j < QC_MAX; j++)
+    {
+        BoardInf.QualityResult.nTotalQC[wcCurrentFilter][j] = 0;
+        BoardInf.QualityResult.dReferenceQC[wcCurrentFilter][j] = 0;
+        BoardInf.QualityResult.bReferenceOK[wcCurrentFilter][j] = 1;
+        //CString strTemp;
+        //strTemp.Format(_T("%02d"), j + 1);
+
+
+        for(i = 0; i < TUBE_MAX; i++)
+        {
+            if( (BoardInf.Layout.WellType[i]==WELLS_TYPE_QC) && (BoardInf.Layout.Num[i]==j) )
+                //if(BoardInf.layout[i + 1].Type[0] ==  _T('Q') && CString(BoardInf.layout[i + 1].Num) == strTemp)
+            {
+                BoardInf.QualityResult.nTotalQC[wcCurrentFilter][j]++;
+                if(BoardInf.QualityPara.AbsFlag)
+                {
+                    if(wcCurrentFilter > 1 && NormalAnalysis.bPreCalOK[0][i])
+                    {
+                        BoardInf.QualityResult.dReferenceQC[wcCurrentFilter][j] += NormalAnalysis.dPreCal[0][i];
+                        dX[BoardInf.QualityResult.nTotalQC[wcCurrentFilter][j] - 1] = NormalAnalysis.dPreCal[0][i];
+                    } //if(wcCurrentFilter > 1 && NormalAnalysis.bPreCalOK[i])
+                    else if(wcCurrentFilter > 1 && (NormalAnalysis.bPreCalOK[0][i]==0))
+                    {
+                        BoardInf.QualityResult.bReferenceOK[wcCurrentFilter][j] = 0;
+                    } //else if(wcCurrentFilter > 1 && !NormalAnalysis.bPreCalOK[i])
+                    else if(wcCurrentFilter <= 1)
+                    {
+                        BoardInf.QualityResult.dReferenceQC[wcCurrentFilter][j] += dABS[0][wcCurrentFilter][i];
+                        dX[BoardInf.QualityResult.nTotalQC[wcCurrentFilter][j] - 1] = dABS[0][wcCurrentFilter][i];
+                    } //else if(wcCurrentFilter <= 1)
+                } //if(BoardInf.interpret_para.bABS)
+                else
+                {
+                    if(NormalAnalysis.dConcentration[wcCurrentFilter][i] >= 0.0f)
+                    {
+                        if((wcCurrentFilter > 1 && NormalAnalysis.bPreCalOK[i]) || (wcCurrentFilter <= 1))
+                        {
+                            BoardInf.QualityResult.dReferenceQC[wcCurrentFilter][j] += NormalAnalysis.dConcentration[wcCurrentFilter][i];
+                            dX[BoardInf.QualityResult.nTotalQC[wcCurrentFilter][j] - 1] = NormalAnalysis.dConcentration[wcCurrentFilter][i];
+                        } //if((wcCurrentFilter > 1 && NormalAnalysis.bPreCalOK[i]) || (wcCurrentFilter <= 1))
+                        else
+                        {
+                            BoardInf.QualityResult.bReferenceOK[wcCurrentFilter][j] = 0;
+                        }
+                    } //if(NormalAnalysis.dConcentration[wcCurrentFilter][i] >= 0.0)
+                    else
+                    {
+                        BoardInf.QualityResult.bReferenceOK[wcCurrentFilter][j] = 0;
+                    } //if(NormalAnalysis.dConcentration[wcCurrentFilter][i] >= 0.0)
+                } //if(BoardInf.interpret_para.bABS)
+            } //if(BoardInf.layout[i + 1].Type[0] ==  _T('Q') && CString(BoardInf.layout[i + 1].Num) == strTemp)
+        } //for(int i = 0; i < TUBE_MAX; i++)
+
+        if(BoardInf.QualityResult.bReferenceOK[wcCurrentFilter][j]==0)
+        {
+            return ANALYSIS_ERROR_NO_QC_RESULT;
+        } //if(!BoardInf.quality_para.bReferenceOK[wcCurrentFilter][j])
+
+        if(BoardInf.QualityResult.nTotalQC[wcCurrentFilter][j])
+        {
+            BoardInf.QualityResult.nTotal[wcCurrentFilter]++; //总的质控数
+        }
+
+        if(BoardInf.QualityResult.nTotalQC[wcCurrentFilter][j])
+        {
+            BoardInf.QualityResult.dReferenceQC[wcCurrentFilter][j] /= BoardInf.QualityResult.nTotalQC[wcCurrentFilter][j];
+            if(BoardInf.QualityResult.nTotalQC[wcCurrentFilter][j] >0)// 1)lgj170925
+            {
+                dTemp = 0.0;
+                for(k = 0; k < BoardInf.QualityResult.nTotalQC[wcCurrentFilter][j]; k++)
+                {
+                    dTemp += (dX[k] - BoardInf.QualityResult.dReferenceQC[wcCurrentFilter][j])
+                             * (dX[k] - BoardInf.QualityResult.dReferenceQC[wcCurrentFilter][j]);
+                }
+                BoardInf.QualityPara.dSD[wcCurrentFilter][j] = pow( dTemp
+                        / (BoardInf.QualityResult.nTotalQC[wcCurrentFilter][j] - 0), 0.5);//-1
+            }
+            else
+            {
+                BoardInf.QualityPara.dSD[wcCurrentFilter][j] = 0.0;
+            }
+        } //if(BoardInf.quality_para.nTotalQC[wcCurrentFilter][j])
+    } //for(int j = 0; j < QC_MAX; j++)
+
+    if(BoardInf.QualityResult.nTotal[wcCurrentFilter] < 1)
+    {
+        return ANALYSIS_ERROR_NO_QC;
+    }
+
+    return ANALYSIS_SUCCESS;
+}
+
+
+
+//2015-09-08 根据检测数据计算Abs,9channel在这里修改
+//双通道nChannel=2,单通道nChannel=1,nCycle=0-99
+
+void GetResultABS(unsigned char nChannel, unsigned char nCycle)
+{
+    float dCoef;
+    unsigned short i,j,k;
+    unsigned char* pChar = UartInfo.RevData;// + 4;
+
+    if(nChannel == 2)
+    {
+        k = 0;
+
+        //读取输入光强和本底光强
+        for(i = 0; i < CHANNEL_MAX; i++)
+        {
+            nInputIntensity[0][i] = (unsigned int)(pChar[324 + k]) * 65536                               //第1通道－输入光强324=12*9*3
+                                    + (unsigned int)pChar[324 + k + 1] * 256 + (unsigned int)pChar[324 + k + 2];
+
+
+            nInputIntensity[1][i] = (unsigned int)(pChar[378 + 324 + k]) * 65536                    //第2通道－输入光强
+                                    + (unsigned int)pChar[378 + 324+ k + 1] * 256 + (unsigned int)pChar[378 + 324 + k + 2];
+
+            nBackgroundIntensity[0][i] = (unsigned int)(pChar[351 + k]) * 65536                  //第1通道－本底光强
+                                         + (unsigned int)pChar[351 + k + 1] * 256 + (unsigned int)pChar[351 + k + 2];
+
+            nBackgroundIntensity[1][i] = (unsigned int)(pChar[378 + 351 + k]) * 65536           //第2通道－本底光强
+                                         + (unsigned int)pChar[378 + 351 + k + 1] * 256 + (unsigned int)pChar[378 + 351 + k + 2];
+
+            if(nInputIntensity[0][i] <=  nBackgroundIntensity[0][i]) //输入光强非负
+            {
+                nInputIntensity[0][i] = nBackgroundIntensity[0][i] + 1;
+            }
+
+            if(nInputIntensity[1][i] <=  nBackgroundIntensity[1][i]) //输入光强非负
+            {
+                nInputIntensity[1][i] =nBackgroundIntensity[1][i] + 1;
+            }
+
+            k += 3;
+        }
+
+
+        //读取96孔板的光强
+        for(i = 0; i < 12; i++)
+        {
+            k = 0;
+
+            for(j = 0; j < CHANNEL_MAX; j++)
+            {
+
+                nIntensity[nCycle][0][j * 12 + i] = (unsigned int)pChar[i*27+k] * 65536
+                                                    + (unsigned int) pChar[i*27+k+1] * 256 + (unsigned int)pChar[i*27+k+2];
+                nIntensity[nCycle][1][j * 12 + i] = (unsigned int)pChar[378 + i*27+k] * 65536
+                                                    + (unsigned int) pChar[378 + i*27+k+1] * 256	+ (unsigned int)pChar[378 + i*27+k+2];
+
+                if(nIntensity[nCycle][0][j * 12 + i] <=  nBackgroundIntensity[0][j])
+                {
+                    nIntensity[nCycle][0][j * 12 + i] = nBackgroundIntensity[0][j] + 1;
+                }
+                if(nIntensity[0][1][j * 12 + i] <= nBackgroundIntensity[1][j])
+                {
+                    nIntensity[0][1][j * 12 + i] =  nBackgroundIntensity[1][j] + 1;
+                }
+
+                k += 3;
+            }
+        }
+
+        //将光强转化为吸光度
+        for(i = 0; i < 12; i++)
+        {
+            k = 0;
+
+            for(j = 0; j < ABS_CHANNEL_MAX; j++)
+            {
+                //nInputIntensity[0][CHANNEL_MAX]为输入参比通道,nIntensity[nCycle][0][j * 12 + CHANNEL_MAX]为输出参比通道
+                //光强校准公式＝（（输出参比-本底）/（输入参比－本底））*输入光强
+                dCoef=(nIntensity[nCycle][0][ABS_CHANNEL_MAX * 12 + i]-nBackgroundIntensity[0][ABS_CHANNEL_MAX])/(float)(nInputIntensity[0][ABS_CHANNEL_MAX]-nBackgroundIntensity[0][j]);
+                dABS[nCycle][0][j * 12 + i] = log10((float)((nInputIntensity[0][j]*dCoef) - nBackgroundIntensity[0][j])
+                                                    / (float)(nIntensity[nCycle][0][j * 12 + i] - nBackgroundIntensity[0][j]));
+                if(dABS[nCycle][0][j * 12 + i] < 0)
+                {
+                    dABS[nCycle][0][j * 12 + i] = 0;
+                }
+                dABSInit[nCycle][0][j * 12 + i] = dABS[nCycle][0][j * 12 + i];
+
+
+                dCoef= (float)(nIntensity[nCycle][1][ABS_CHANNEL_MAX * 12 +i]-nBackgroundIntensity[1][ABS_CHANNEL_MAX])/(float)(nInputIntensity[1][ABS_CHANNEL_MAX]-nBackgroundIntensity[1][j]);
+                dABS[nCycle][1][j * 12 + i] = log10((float)((nInputIntensity[1][j] * dCoef) - nBackgroundIntensity[1][j])
+                                                    / (float)(nIntensity[nCycle][1][j * 12 + i] - nBackgroundIntensity[1][j]));
+                if(dABS[nCycle][1][j * 12 + i] < 0)
+                {
+                    dABS[nCycle][1][j * 12 + i] = 0;
+                }
+                dABSInit[nCycle][1][j * 12 + i] = dABS[nCycle][1][j * 12 + i];
+                k += 3;
+            }
+        }
+        BoardInf.bHasData = 1;
+        BoardInf.bHasRawData[0] = 1;
+        BoardInf.bHasRawData[1] = 1;
+    }
+    else
+    {
+        k = 0;
+        for(i = 0; i < CHANNEL_MAX; i++)
+        {
+            nInputIntensity[0][i] = (unsigned int)(pChar[324 + k]) * 65536
+                                    + (unsigned int)pChar[324 + k + 1] * 256 + (unsigned int)pChar[324 + k + 2];
+
+            nBackgroundIntensity[0][i] = (unsigned int)(pChar[351 + k]) * 65536
+                                         + (unsigned int)pChar[351 + k + 1] * 256 + (unsigned int)pChar[351 + k + 2];
+
+            if(nInputIntensity[0][i] <=  nBackgroundIntensity[0][i]) //输入光强非负
+            {
+                nInputIntensity[0][i] = nBackgroundIntensity[0][i] + 1;
+            }
+            k += 3;
+        }
+        //读取96孔板的光强
+        for(i = 0; i < 12; i++)
+        {
+            k = 0;
+
+            for(j = 0; j < CHANNEL_MAX; j++)
+            {
+                nIntensity[nCycle][0][j * 12 + i] = (unsigned int)pChar[i*27+k] * 65536
+                                                    + (unsigned int) pChar[i*27+k+1] * 256 + (unsigned int)pChar[i*27+k+2];
+
+                if(nIntensity[nCycle][0][j * 12 + i] <= nBackgroundIntensity[0][j])
+                {
+                    nIntensity[nCycle][0][j * 12 + i] =  nBackgroundIntensity[0][j] + 1;
+                }
+
+                k += 3;
+            }
+        }
+        for(i = 0; i < 12; i++)
+        {
+            for(j = 0; j < ABS_CHANNEL_MAX; j++)
+            {
+                //光强校准公式＝（（输出参比-本底）/（输入参比－本底））*输入光强
+                dCoef=(float)(nIntensity[nCycle][0][ABS_CHANNEL_MAX * 12 + i]-nBackgroundIntensity[0][ABS_CHANNEL_MAX])/(float)(nInputIntensity[0][ABS_CHANNEL_MAX]-nBackgroundIntensity[0][j]);
+                dABS[nCycle][0][j * 12 + i] = log10((float)((nInputIntensity[0][j] * dCoef) - nBackgroundIntensity[0][j])
+                                                    / (float)(nIntensity[nCycle][0][j * 12 + i] - nBackgroundIntensity[0][j]));
+
+                if(dABS[nCycle][0][j * 12 + i] < 0)
+                {
+                    dABS[nCycle][0][j * 12 + i] = 0;
+                }
+                dABSInit[nCycle][0][j * 12 + i] = dABS[nCycle][0][j * 12 + i];
+            }
+        }
+
+        BoardInf.bHasData = 1;
+        BoardInf.bHasRawData[0] = 1;
+        BoardInf.bHasRawData[1] = 0;
+    }
+}
+
+
+//AbsCalPara.dABS吸光度>=0
+void GetCalibrationPara(void)
+{
+    int i,j,k;
+    memcpy(AbsCalPara.dABS[0], SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABS, sizeof(float) * CALIBRATOR_ABS_MAX);
+    //memcpy(AbsCalPara.dABS[0], SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABSPractical, sizeof(float) * CALIBRATOR_ABS_MAX);///
+    memcpy(AbsCalPara.dABSError[0], SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABSError, sizeof(float) * CALIBRATOR_ABS_MAX);
+    if(BoardInf.Filter2Locate >= 0)
+    {
+        memcpy(AbsCalPara.dABS[1], SystemPrameter.AbsCali[BoardInf.Filter2Locate].dABS, sizeof(float) * CALIBRATOR_ABS_MAX);
+        //	memcpy(AbsCalPara.dABS[1], SystemPrameter.AbsCali[BoardInf.Filter1Locate].dABSPractical, sizeof(float) * CALIBRATOR_ABS_MAX);///
+        memcpy(AbsCalPara.dABSError[1], SystemPrameter.AbsCali[BoardInf.Filter2Locate].dABSError, sizeof(float) * CALIBRATOR_ABS_MAX);
+    }
+
+    AbsCalPara.nCount[0] = 0;
+    for(i = 0; i < CALIBRATOR_ABS_MAX; i++)
+    {
+        if(AbsCalPara.dABS[0][i] < 0)
+        {
+            break;
+        }
+
+        AbsCalPara.nCount[0]++;
+    }
+
+    AbsCalPara.nCount[1] = 0;
+    if(BoardInf.Filter2Locate >= 0)
+    {
+        for(i = 0; i < CALIBRATOR_ABS_MAX; i++)
+        {
+            if(AbsCalPara.dABS[1][i] < 0)
+            {
+                break;
+            }
+
+            AbsCalPara.nCount[1]++;
+        }
+    }
+//对设定的标准吸光度进行排序
+    for(i = 0; i < 2; i++)
+    {
+        for(j =0; j < AbsCalPara.nCount[i] - 1; j++)
+        {
+            for(k = j + 1; k < AbsCalPara.nCount[i]; k++)
+            {
+                float dTemp;
+                if(AbsCalPara.dABS[i][j] > AbsCalPara.dABS[i][k])
+                {
+                    dTemp = AbsCalPara.dABS[i][j];
+                    AbsCalPara.dABS[i][j] = AbsCalPara.dABS[i][k];
+                    AbsCalPara.dABS[i][k] = dTemp;
+
+                    dTemp = AbsCalPara.dABSError[i][j];
+                    AbsCalPara.dABSError[i][j] = AbsCalPara.dABSError[i][k];
+                    AbsCalPara.dABSError[i][k] = dTemp;
+                }
+            }
+        }
+    }
+
+}
+
+
+//吸光度校准,对,在dABSInit中校准完后再符值给dABS
+void MakeABSCalibration(void)
+{
+
+    int i,j,k ;
+
+//	memcpy(dABSInitBack, dABSInit, sizeof(float) * TUBE_MAX);
+
+    for(i = 0; i < FILTER_PLATE_MAX; i++)
+    {
+        if((BoardInf.bHasRawData[i]==0) || AbsCalPara.nCount[i] < 1)
+        {
+            continue;
+        } //if(!BoardInf.bHasRawData[i] || AbsCalPara.nCount[i] < 1)
+        for(j = 0; j < TUBE_MAX; j++)
+        {
+            for(k = 0; k < BoardInf.KineticPara.kinetic_readings_practical; k++)
+            {
+                int nPos,m;
+                float dError;
+                if(AbsCalPara.nCount[i] < 2)
+                {
+                    dABSInit[k][i][j] -= AbsCalPara.dABSError[i][0];
+                } //if(AbsCalPara.nCount[i] < 2)
+                else
+                {
+                    nPos = AbsCalPara.nCount[i];
+                    for(m = 0; m < AbsCalPara.nCount[i]; m++)
+                    {
+                        if(dABSInit[k][i][j] < AbsCalPara.dABS[i][m])
+                        {
+                            nPos = m;
+                            break;
+                        } //if(dABSInit[k][i][j] < AbsCalPara.dABS[i][m])
+                    } //for(int m = 0; m < AbsCalPara.nCount[i]; m++)
+
+                    if(nPos <= 0)
+                    {
+                        nPos = 1;
+                    } //if(nPos <= 0)
+                    else if(nPos >= AbsCalPara.nCount[i])
+                    {
+                        nPos = AbsCalPara.nCount[i] - 1;
+                    } //else if(nPos >= AbsCalPara.nCount[i])
+
+                    dError = (dABSInit[k][i][j] - AbsCalPara.dABS[i][nPos - 1]) / (AbsCalPara.dABS[i][nPos] - AbsCalPara.dABS[i][nPos - 1])
+                             * (AbsCalPara.dABSError[i][nPos] - AbsCalPara.dABSError[i][nPos - 1]) + AbsCalPara.dABSError[i][nPos - 1];
+                    dABSInit[k][i][j] -= dError;
+                } //if(AbsCalPara.nCount[i] < 2)
+            } //for(int k = 0; k < BoardInf.kinetic_para.kinetic_readings_practical; k++)
+        } //for(int j = 0; j < TUBE_MAX; j++)
+    } //for(int i = 0; i < FILTER_PLATE_MAX; i++)
+
+    //	if(!remote_info_PAD.bRemote)
+    //if(!remote_info_PAD.bRemote && !remote_info_PC.bRemote)
+    //{
+    memcpy(dABS, dABSInit, sizeof(float) * FILTER_PLATE_MAX * TUBE_MAX * KINETIC_READINGS_MAX);
+    //}
+}
+
+void MeasureFinishProcess(void)
+{
+
+    // ReportMenu.ReportReady=1;
+
+
+    //所有动力学检测完成后,校准吸光度并保存数据
+    if( (run_status.nRunMode == RUN_MODE_IDLE )||(RemoteInfo_PC.RemoteFlag) )
+        //if(run_status.nRunMode == RUN_MODE_IDLE || remote_info_PAD.bRemote || remote_info_PC.bRemote)
+    {
+        GetCalibrationPara();
+        //if(remote_info_PAD.bRemote)
+        //	if(remote_info_PAD.bRemote || remote_info_PC.bRemote)
+        {
+            memcpy(dABSInit, dABS, sizeof(float) * FILTER_PLATE_MAX * TUBE_MAX * KINETIC_READINGS_MAX);
+        }
+        if(SystemPrameter.AbsCaliEnable)//sys_para.bNotCalibrate
+        {
+            MakeABSCalibration();
+        }
+        //发送吸光度检测数据给PC
+        if(RemoteInfo_PC.RemoteFlag)
+        {
+            UartCmdSend_PC(COMMAND_MEASURE_END_PC);
+        }
+        //2015-2-2
+        //if(remote_info_PAD.bRemote)
+        //	{
+        //	pSerialProtocolPAD->PrepareABSDataCommand(uartTxBuffPAD);
+        //	m_Port_Pad->WritePort(uartTxBuffPAD, pSerialProtocolPAD->comm_status.nCommandLength);
+        //	}
+        //else if(remote_info_PC.bRemote)
+        //{
+        //	pSerialProtocolPC->PrepareABSDataCommand(uartTxBuffPC);
+        //	m_Port_PC->WritePort(uartTxBuffPC, pSerialProtocolPC->comm_status.nCommandLength);
+        //	}
+
+        //	if(!remote_info_PAD.bRemote && !remote_info_PC.bRemote)
+        //	{
+        // SaveFile(true);
+        //}
+    }
+    AbsCalibration_auto_flag_end=1;
+    //出报警
+    if( (run_status.nRunMode != RUN_MODE_MEASURE)&&(RemoteInfo_PC.RemoteFlag==0)&&(AbsCalibration_auto_flag==0) )//AbsCalibration_auto_flag默认为1
+    {
+        BoardInf.bHasData=1;
+        ReportMenu.ReportReady=1;
+        LanguageChange.Report=1;
+        gSystem.SystemInterface = MI_REPORT;
+        gSystem.MenuRefreshFlag = 1;
+        //window_Inf.topMenu=2;
+        //	g_bParaOrData = false;
+        //if(!remote_info_PAD.bRemote)
+        //if(!remote_info_PAD.bRemote && !remote_info_PC.bRemote)
+        //{
+        //DisplayReportInterface(dc);
+        //}
+    }
+
+
+}
+
+
+
+
+
+
+
+//计算正常分析的预处理结果
+//NormalAnalysis.dPreCal   NormalAnalysis.dPreCalOk
+void Preproccessing(unsigned char wcCycle) //2014-8-12项
+{
+    int i,j;
+    //CString strTemp = CString(BoardInf.KineticPara.PreProcess);
+    //if(strTemp == _T("No") || !BoardInf.bHasRawData[1])
+    if(BoardInf.Filter2Locate<0  ||  BoardInf.KineticPara.PreProcess ==PRE_CALCULATE_NO)
+    {
+        return;
+    }
+
+    for(i = 0; i < 12; i++)
+    {
+        for(j = 0; j < 8; j++)
+        {
+            NormalAnalysis.bPreCalOK[wcCycle][j * 12 + i] = 1;
+            if(BoardInf.KineticPara.PreProcess == 0) //"M1-M2
+            {
+                NormalAnalysis.dPreCal[wcCycle][j * 12 + i] = dABS[wcCycle][0][j * 12 + i] - dABS[wcCycle][1][j * 12 + i];
+            }
+            else if(BoardInf.KineticPara.PreProcess == 1) //"M1/M2
+            {
+                if(dABS[wcCycle][1][j * 12 + i] > CONCENTRATION_VALUE_MIN || dABS[wcCycle][1][j * 12 + i] < -CONCENTRATION_VALUE_MIN)
+                {
+                    NormalAnalysis.dPreCal[wcCycle][j * 12 + i] = dABS[wcCycle][0][j * 12 + i] / dABS[wcCycle][1][j * 12 + i];
+                }
+                else
+                {
+                    NormalAnalysis.bPreCalOK[wcCycle][j * 12 + i] = 0;
+                }
+            }
+            else if(BoardInf.KineticPara.PreProcess == 2) //"M1+M2
+            {
+                NormalAnalysis.dPreCal[wcCycle][j * 12 + i] = dABS[wcCycle][0][j * 12 + i] + dABS[wcCycle][1][j * 12 + i];
+            }
+            else if(BoardInf.KineticPara.PreProcess == 3) //"M1*M2
+                //else if(strTemp == _T("M1*M2"))
+            {
+                NormalAnalysis.dPreCal[wcCycle][j * 12 + i] = dABS[wcCycle][0][j * 12 + i] * dABS[wcCycle][1][j * 12 + i];
+            }
+            //else if(strTemp == _T("M1/M2"))
+            else if(BoardInf.KineticPara.PreProcess == 4) //"M2-M1"
+                //else if(strTemp == _T("M2-M1"))
+            {
+                NormalAnalysis.dPreCal[wcCycle][j * 12 + i] = dABS[wcCycle][1][j * 12 + i] - dABS[wcCycle][0][j * 12 + i];
+            }
+            else if(BoardInf.KineticPara.PreProcess == 5) //"M2/M1"
+                //else if(strTemp == _T("M2/M1"))
+            {
+                if(dABS[wcCycle][0][j * 12 + i] > CONCENTRATION_VALUE_MIN || dABS[wcCycle][0][j * 12 + i] < -CONCENTRATION_VALUE_MIN)
+                {
+                    NormalAnalysis.dPreCal[wcCycle][j * 12 + i] = dABS[wcCycle][1][j * 12 + i] / dABS[wcCycle][0][j * 12 + i];
+                }
+                else
+                {
+                    NormalAnalysis.bPreCalOK[wcCycle][j * 12 + i] = 0;//false;
+                }
+            }
+        }
+    }
+}
+
+void GetKineticABS(unsigned char wcCycle)
+{
+    int i,j;
+
+    for(i = 0; i < FILTER_PLATE_MAX; i++) //减去空白样本
+    {
+        if(BoardInf.bHasRawData[i]==0)
+        {
+            continue;
+        }
+
+        for(j = 0; j < TUBE_MAX; j++)
+        {
+            if( BoardInf.Layout.WellType[i] ==WELLS_TYPE_BK)//"SD"
+
+                //if(CString(board_inf.layout[j + 1].Type) == _T("BK"))
+            {
+                dABS[wcCycle][i][j] = 0.0f;
+                continue;
+            }
+
+            dABS[wcCycle][i][j] = dABSInit[wcCycle][i][j] - NormalAnalysis.dBlank[wcCycle][i];
+            if(dABS[wcCycle][i][j] < 0.0f)
+            {
+                dABS[wcCycle][i][j] = 0.0f;
+            }
+        }
+    }
+
+    if(BoardInf.Filter2Locate>=0  && BoardInf.KineticPara.PreProcess>0)
+        //if(CString(board_inf.Filter_2) != _T("No") && board_inf.preCalculate[0] != _T('N'))
+    {
+        Preproccessing(wcCycle);
+    }
+}
+
+
+
+int DoFactorAnalysis(unsigned char  wcCurrentFilter)
+{
+    int i,j;
+    int nTotal = NormalAnalysis.nCalibratorCountTotal[wcCurrentFilter];
+    //float *p_dX = (float *)malloc(sizeof(float) * nTotal);
+    //float *p_dY = (float *)malloc(sizeof(float) * nTotal);
+    int nErrorCode = ANALYSIS_SUCCESS;
+    unsigned char bHasResult;
+    float dTemp;
+    int n = 0;
+    float dYAverage = 0.0;
+    float dXAverage = 0.0;
+
+
+    if(NormalAnalysis.bLogX) //对数坐标
+    {
+        //	free(p_dX);
+        //	free(p_dY);
+        nErrorCode = ANALYSIS_ERROR_DISABLE_LOG_CONCENTRATION;
+        return nErrorCode;
+    }
+
+    for(i = 0; i < CALIBRATOR_CONCENTRATION_MAX; i++)
+    {
+        if(NormalAnalysis.nCalibratorCount[wcCurrentFilter][i] > 0)
+        {
+            CalcuPara.p_dY[n] = NormalAnalysis.dCalibratorABS[wcCurrentFilter][i];
+            CalcuPara.p_dX[n] = BoardInf.dConcentration[i];
+
+            if(NormalAnalysis.bLogY) //对数坐标
+            {
+                if(CalcuPara.p_dY[n] <= 0.0f)
+                {
+                    //free(p_dX);
+                    //free(p_dY);
+                    nErrorCode = ANALYSIS_ERROR_LOGY_FAIL;
+                    return nErrorCode;
+                }
+                else
+                {
+                    CalcuPara.p_dY[n] = log10(CalcuPara.p_dY[n]);
+                }
+            }
+            n++;
+        }
+    }
+//lugj180110 modify
+    for(i = 0; i < nTotal; i++) //排序
+    {
+        for(j = i + 1; j < nTotal; j++)
+        {
+            //float dTemp;
+            if(CalcuPara.p_dX[j] < CalcuPara.p_dX[i]) //Lugj180110 modify
+            {
+                dTemp = CalcuPara.p_dX[j];
+                CalcuPara.p_dX[j] = CalcuPara.p_dX[i];
+                CalcuPara.p_dX[i] = dTemp;
+
+                dTemp = CalcuPara.p_dY[j];
+                CalcuPara.p_dY[j] = CalcuPara.p_dY[i];
+                CalcuPara.p_dY[i] = dTemp;
+            }
+        }
+    }
+
+
+
+
+
+
+    if(LsmCreate(CalcuPara.p_dX, CalcuPara.p_dY, nTotal)!=0)//成功
+    {
+    }
+    NormalAnalysis.FactorAnalysis[wcCurrentFilter].dSlope=LinearViaZeroCalculateK(&nErrorCode);
+    if(nErrorCode != ANALYSIS_SUCCESS || NormalAnalysis.FactorAnalysis[wcCurrentFilter].dSlope == 0.0f)
+    {
+        return nErrorCode;
+    }
+    NormalAnalysis.FactorAnalysis[wcCurrentFilter].dRR = LinearViaZeroGetRR(&nErrorCode);
+    if(nErrorCode != ANALYSIS_SUCCESS)
+    {
+        //free(p_dX);
+        //free(p_dY);
+//		   free(m_pXLsm);
+        //  free(m_pYLsm);
+        return nErrorCode;
+    }
+    /*
+
+    dYAverage = 0.0f;
+    dXAverage = 0.0f;
+    for(i = 0; i < nTotal; i++)
+    {
+    	dYAverage += CalcuPara.p_dY[i];
+    	dXAverage += CalcuPara.p_dX[i];
+    }
+
+    NormalAnalysis.FactorAnalysis[wcCurrentFilter].dSlope = dYAverage / dXAverage;
+    if(NormalAnalysis.FactorAnalysis[wcCurrentFilter].dSlope == 0.0f)
+    {
+    	  //free(p_dX);
+       //free(p_dY);
+    	return ANALYSIS_ERROR_FITTING_FAIL;
+    }
+    */
+    for(i = 0; i < 12; i++) //2014-8-20项
+    {
+        for(j = 0; j < 8; j++)
+        {
+            //float dTemp;
+            if(wcCurrentFilter < 2)
+            {
+                dTemp = dABS[0][wcCurrentFilter][j * 12 + i];
+            }
+            else if(NormalAnalysis.bPreCalOK[0][j * 12 + i])
+            {
+                dTemp = NormalAnalysis.dPreCal[0][j * 12 + i];
+            }
+            else
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = -1.0f;
+                continue;
+            }
+
+            bHasResult =1;// true;
+
+            if(NormalAnalysis.bLogY)
+            {
+                if(dTemp <= 0.0f)
+                {
+                    bHasResult = 0;//false;
+                }
+                else
+                {
+                    dTemp = log10(dTemp);
+                }
+            }
+            dTemp /= NormalAnalysis.FactorAnalysis[wcCurrentFilter].dSlope;
+
+            if(bHasResult==0)
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = -1.0;
+            }
+            else if(NormalAnalysis.bLogX)
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = pow(10.0, dTemp);
+            }
+            else if(dTemp < 0.0f)
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = 0.0;
+            }
+            else
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = dTemp;
+            }
+        }
+    }
+
+//	free(p_dX);
+    //free(p_dY);
+    return ANALYSIS_SUCCESS;
+}
+
+
+int DoLinearAnalysis(unsigned char  wcCurrentFilter)
+{
+
+    int i,j;
+    int nTotal = NormalAnalysis.nCalibratorCountTotal[wcCurrentFilter];
+//	float *p_dX = (float *)malloc(sizeof(float) * nTotal);
+    //float *p_dY = (float *)malloc(sizeof(float) * nTotal);
+
+    float dTemp;
+//   int nSeg,k;
+    unsigned char bHasResult;
+    int nErrorCode = ANALYSIS_SUCCESS;
+    int n = 0;
+
+    for(i = 0; i < CALIBRATOR_CONCENTRATION_MAX; i++)
+    {
+        if(NormalAnalysis.nCalibratorCount[wcCurrentFilter][i] > 0)
+        {
+            CalcuPara.p_dY[n] = NormalAnalysis.dCalibratorABS[wcCurrentFilter][i];
+            CalcuPara.p_dX[n] = BoardInf.dConcentration[i];
+
+            if(NormalAnalysis.bLogX) //对数坐标
+            {
+                if(CalcuPara.p_dX[n] <= 0.0f)
+                {
+                    //free(p_dX);
+                    //free(p_dY);
+
+                    nErrorCode = ANALYSIS_ERROR_LOGX_FAIL;
+                    return nErrorCode;
+                }
+                else
+                {
+                    CalcuPara.p_dX[n] = log10(CalcuPara.p_dX[n]);
+                }
+            }
+
+
+            if(NormalAnalysis.bLogY) //对数坐标
+            {
+                if(CalcuPara.p_dY[n] <= 0.0f)
+                {
+                    //free(p_dX);
+                    //free(p_dY);
+                    nErrorCode = ANALYSIS_ERROR_LOGY_FAIL;
+                    return nErrorCode;
+                }
+                else
+                {
+                    CalcuPara.p_dY[n] = log10(CalcuPara.p_dY[n]);
+                }
+            }
+            n++;
+        }
+    }
+
+    for(i = 0; i < nTotal; i++) //排序
+    {
+        for(j = i + 1; j < nTotal; j++)
+        {
+            //float dTemp;
+            if(CalcuPara.p_dX[j] < CalcuPara.p_dX[i]) //Lugj180110 modify
+            {
+                dTemp = CalcuPara.p_dX[j];
+                CalcuPara.p_dX[j] = CalcuPara.p_dX[i];
+                CalcuPara.p_dX[i] = dTemp;
+
+                dTemp = CalcuPara.p_dY[j];
+                CalcuPara.p_dY[j] = CalcuPara.p_dY[i];
+                CalcuPara.p_dY[i] = dTemp;
+            }
+        }
+    }
+
+    LsmCreate(CalcuPara.p_dX, CalcuPara.p_dY, nTotal);
+    //LinearEquationCreate(p_dX, p_dY, nTotal);
+    //p_lsmFitting->Create(p_dX, p_dY, nTotal);
+    //NormalAnalysis.linear_analysis[wcCurrentFilter].dRR = p_lsmFitting->GetRR(nErrorCode);
+    NormalAnalysis.LinearAnalysis[wcCurrentFilter].dRR = LsmGetRR(&nErrorCode);
+    if(nErrorCode != ANALYSIS_SUCCESS)
+    {
+        //free(p_dX);
+        //free(p_dY);
+//		   free(m_pXLsm);
+        //  free(m_pYLsm);
+        return nErrorCode;
+    }
+
+    //NormalAnalysis.linear_analysis[wcCurrentFilter].dSlope = p_lsmFitting->GetSlope(nErrorCode);
+    NormalAnalysis.LinearAnalysis[wcCurrentFilter].dSlope= LsmGetSlope(&nErrorCode);
+    if(nErrorCode != ANALYSIS_SUCCESS || NormalAnalysis.LinearAnalysis[wcCurrentFilter].dSlope == 0.0f)
+    {
+        //  free(p_dX);
+        // free(p_dY);
+//		   free(m_pXLsm);
+        //  free(m_pYLsm);
+        return nErrorCode;
+    }
+    NormalAnalysis.LinearAnalysis[wcCurrentFilter].dIntercept=LsmGetIntercept(&nErrorCode);
+    //NormalAnalysis.linear_analysis[wcCurrentFilter].dIntercept = p_lsmFitting->GetIntercept(nErrorCode);
+    if(nErrorCode != ANALYSIS_SUCCESS)
+    {
+        //  free(p_dX);
+        // free(p_dY);
+//		   free(m_pXLsm);
+        //   free(m_pYLsm);
+        return nErrorCode;
+    }
+
+    for(i = 0; i < 12; i++) //2014-8-20项
+    {
+        for(j = 0; j < 8; j++)
+        {
+            //float dTemp;
+            if(wcCurrentFilter < 2)
+            {
+                dTemp = dABS[0][wcCurrentFilter][j * 12 + i];
+            }
+            else if(NormalAnalysis.bPreCalOK[0][j * 12 + i])
+            {
+                dTemp = NormalAnalysis.dPreCal[0][j * 12 + i];
+            }
+            else
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = -1.0f;
+                continue;
+            }
+
+            bHasResult =1;// true;
+
+            if(NormalAnalysis.bLogY)
+            {
+                if(dTemp <= 0.0f)
+                {
+                    bHasResult = 0;//false;
+                }
+                else
+                {
+                    dTemp = log10(dTemp);
+                }
+            }
+
+            dTemp = (dTemp - NormalAnalysis.LinearAnalysis[wcCurrentFilter].dIntercept)
+                    / NormalAnalysis.LinearAnalysis[wcCurrentFilter].dSlope;
+
+            if(bHasResult==0)
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = -1.0f;
+            }
+            else if(NormalAnalysis.bLogX)
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = pow(10.0f, dTemp);
+            }
+            else if(dTemp < 0.0f)
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = 0.0;
+            }
+            else
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = dTemp;
+            }
+        }
+    }
+
+    //  free(p_dX);
+    //  free(p_dY);
+//		   free(m_pXLsm);
+    //  free(m_pYLsm);
+
+    return nErrorCode;
+}
+
+#ifdef SOFTWARE_DN
+int DoLogitlogAnalysis(unsigned char wcCurrentFilter)
+{
+	   int i,j;
+    int nTotal = NormalAnalysis.nCalibratorCountTotal[wcCurrentFilter];
+//	float *p_dX = (float *)malloc(sizeof(float) * nTotal);
+    //float *p_dY = (float *)malloc(sizeof(float) * nTotal);
+
+    float dTemp;
+//   int nSeg,k;
+    unsigned char bHasResult;
+    int nErrorCode = ANALYSIS_SUCCESS;
+    int n = 0;
+
+    for(i = 0; i < CALIBRATOR_CONCENTRATION_MAX; i++)
+    {
+        if(NormalAnalysis.nCalibratorCount[wcCurrentFilter][i] > 0)
+        {
+            CalcuPara.p_dY[n] = NormalAnalysis.dCalibratorABS[wcCurrentFilter][i];
+            CalcuPara.p_dX[n] = BoardInf.dConcentration[i];
+/*
+           // if(NormalAnalysis.bLogX) //对数坐标
+           // {
+                if(CalcuPara.p_dX[n] <= 0.0f)
+                {
+                    //free(p_dX);
+                    //free(p_dY);
+
+                    nErrorCode = ANALYSIS_ERROR_LOGX_FAIL;
+                    return nErrorCode;
+                }
+                else
+                {
+                    CalcuPara.p_dX[n] = log10(CalcuPara.p_dX[n]);
+                }
+           // }
+
+
+            if(NormalAnalysis.bLogY) //对数坐标
+            {
+                if(CalcuPara.p_dY[n] <= 0.0f)
+                {
+                    //free(p_dX);
+                    //free(p_dY);
+                    nErrorCode = ANALYSIS_ERROR_LOGY_FAIL;
+                    return nErrorCode;
+                }
+                else
+                {
+                    CalcuPara.p_dY[n] = log10(CalcuPara.p_dY[n]);
+                }
+            }*/
+            n++;
+        }
+    }
+		
+    NormalAnalysis.bLogX=1;
+		NormalAnalysis.bLogY=0;
+		
+    for(i = 0; i < nTotal; i++) //排序(按浓度从小到大)
+    {
+        for(j = i + 1; j < nTotal; j++)
+        {
+            //float dTemp;
+            if(CalcuPara.p_dX[j] < CalcuPara.p_dX[i]) //Lugj180110 modify
+            {
+                dTemp = CalcuPara.p_dX[j];
+                CalcuPara.p_dX[j] = CalcuPara.p_dX[i];
+                CalcuPara.p_dX[i] = dTemp;
+
+                dTemp = CalcuPara.p_dY[j];
+                CalcuPara.p_dY[j] = CalcuPara.p_dY[i];
+                CalcuPara.p_dY[i] = dTemp;
+            }
+        }
+    }
+    if(fabs(CalcuPara.p_dX[0])>CONCENTRATION_VALUE_MIN) //没有找到零值数据
+		{
+			    nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;
+          return nErrorCode;  
+		}
+		else if(fabs(CalcuPara.p_dY[0])<CONCENTRATION_VALUE_MIN) //基准吸光度不能为0
+		{
+			    nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;
+          return nErrorCode;  
+		}
+		for(i = 1; i < nTotal; i++)   //基准吸光度应为最大值
+		{
+			  if(CalcuPara.p_dY[0]<=CalcuPara.p_dY[i])
+				{
+					   nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;
+             return nErrorCode; 
+				}
+		}
+		CalcuPara.p_dY_Base=CalcuPara.p_dY[0];//add
+		
+		for(i=1;i<nTotal;i++)
+		{
+			   CalcuPara.p_dY_Lable[i-1]=CalcuPara.p_dY[i];
+		}
+		for(i = 1; i < nTotal; i++) //重新计算浓度:(数量-1)
+		{
+			//X浓度取对数,0值不计算
+			    // if(NormalAnalysis.bLogX) //对数坐标
+           // {
+                if(CalcuPara.p_dX[i] <= 0.0f)
+                {
+                    //free(p_dX);
+                    //free(p_dY);
+
+                    nErrorCode = ANALYSIS_ERROR_LOGX_FAIL;
+                    return nErrorCode;
+                }
+                else
+                {
+                    CalcuPara.p_dX[i-1] = log10(CalcuPara.p_dX[i]);
+                }
+           // }
+        //Y吸光度
+			  CalcuPara.p_dY2[i-1]=log((CalcuPara.p_dY[i]/CalcuPara.p_dY[0])/(1.0f-CalcuPara.p_dY[i]/CalcuPara.p_dY[0]));//ABS
+		}
+		
+		//总的标准品数量-1
+		nTotal = nTotal-1;
+	//	NormalAnalysis.nCalibratorCountTotal[wcCurrentFilter]=nTotal;
+		for(i = 0; i < nTotal; i++)
+		{
+			  CalcuPara.p_dY[i]=CalcuPara.p_dY2[i];
+		}
+		
+		
+		
+		
+    LsmCreate(CalcuPara.p_dX, CalcuPara.p_dY, nTotal);
+    //LinearEquationCreate(p_dX, p_dY, nTotal);
+    //p_lsmFitting->Create(p_dX, p_dY, nTotal);
+    //NormalAnalysis.linear_analysis[wcCurrentFilter].dRR = p_lsmFitting->GetRR(nErrorCode);
+    NormalAnalysis.LogitLogAnalysis[wcCurrentFilter].dRR = LsmGetRR(&nErrorCode);
+    if(nErrorCode != ANALYSIS_SUCCESS)
+    {
+        //free(p_dX);
+        //free(p_dY);
+//		   free(m_pXLsm);
+        //  free(m_pYLsm);
+        return nErrorCode;
+    }
+
+		
+		//b
+		for(i = 0; i < nTotal; i++) //重新计算浓度:浓度/R2
+		{
+			  CalcuPara.p_dY[i]=CalcuPara.p_dY[i]/NormalAnalysis.LogitLogAnalysis[wcCurrentFilter].dRR;
+		}
+		
+		
+    LsmCreate(CalcuPara.p_dX, CalcuPara.p_dY, nTotal);
+
+    NormalAnalysis.LogitLogAnalysis[wcCurrentFilter].dSlope= LsmGetSlope(&nErrorCode);
+    if(nErrorCode != ANALYSIS_SUCCESS || NormalAnalysis.LogitLogAnalysis[wcCurrentFilter].dSlope == 0.0f)
+    {
+        //  free(p_dX);
+        // free(p_dY);
+//		   free(m_pXLsm);
+        //  free(m_pYLsm);
+        return nErrorCode;
+    }
+    NormalAnalysis.LogitLogAnalysis[wcCurrentFilter].dIntercept=LsmGetIntercept(&nErrorCode);
+    //NormalAnalysis.linear_analysis[wcCurrentFilter].dIntercept = p_lsmFitting->GetIntercept(nErrorCode);
+    if(nErrorCode != ANALYSIS_SUCCESS)
+    {
+        //  free(p_dX);
+        // free(p_dY);
+//		   free(m_pXLsm);
+        //   free(m_pYLsm);
+        return nErrorCode;
+    }
+    NormalAnalysis.LogitLogAnalysis[wcCurrentFilter].IC50=pow(10,((0-NormalAnalysis.LogitLogAnalysis[wcCurrentFilter].dIntercept)/ NormalAnalysis.LogitLogAnalysis[wcCurrentFilter].dSlope));
+		
+		
+		
+    for(i = 0; i < 12; i++) //2014-8-20项
+    {
+        for(j = 0; j < 8; j++)
+        {
+					  if( (BoardInf.Layout.WellType[j * 12 + i]==WELLS_TYPE_SD)&&(BoardInf.Layout.Num[j * 12 + i]<SD_MAX)&&(wcCurrentFilter < 2) )
+            {
+               NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i]=BoardInf.dConcentration[BoardInf.Layout.Num[j * 12 + i]];
+            }
+				    else
+						{
+				
+					
+					
+            //float dTemp;
+            if(wcCurrentFilter < 2)
+            {
+                dTemp = dABS[0][wcCurrentFilter][j * 12 + i];
+            }
+            else if(NormalAnalysis.bPreCalOK[0][j * 12 + i])
+            {
+                dTemp = NormalAnalysis.dPreCal[0][j * 12 + i];
+            }
+            else
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = -1.0f;
+                continue;
+            }
+
+            bHasResult =1;// true;
+
+           /* if(NormalAnalysis.bLogY)
+            {
+                if(dTemp <= 0.0f)
+                {
+                    bHasResult = 0;//false;
+                }
+                else
+                {
+                    dTemp = log10(dTemp);
+                }
+            }*/
+            
+						dTemp=log((dTemp/CalcuPara.p_dY_Base)/(1.0f-dTemp/CalcuPara.p_dY_Base));//add
+					
+            dTemp = (dTemp - NormalAnalysis.LogitLogAnalysis[wcCurrentFilter].dIntercept)
+                    / NormalAnalysis.LogitLogAnalysis[wcCurrentFilter].dSlope;
+
+            if(bHasResult==0)
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = -1.0f;
+            }
+            else// if(NormalAnalysis.bLogX)
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = pow(10.0f, dTemp);
+            }
+           /* else if(dTemp < 0.0f)
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = 0.0;
+            }
+            else
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = dTemp;
+            }*/
+					}
+        }
+    }
+
+    //  free(p_dX);
+    //  free(p_dY);
+//		   free(m_pXLsm);
+    //  free(m_pYLsm);
+
+    return nErrorCode;
+	
+}
+#endif
+
+int DoPtoPAnalysis(unsigned char wcCurrentFilter)
+{
+    int i,j,k;
+    int nTotal = NormalAnalysis.nCalibratorCountTotal[wcCurrentFilter];
+    //float *p_dX = (float *)malloc(sizeof(float) * nTotal);
+//	float *p_dY = (float *)malloc(sizeof(float) * nTotal);
+
+    float dTemp;
+//   int nSeg,k;
+    unsigned char bHasResult;
+    int nErrorCode = ANALYSIS_SUCCESS;
+    int n = 0;
+    int nSeg;
+    float dX1, dY1, dX2, dY2;
+    float dSlope1;
+
+
+    for(i = 0; i < CALIBRATOR_CONCENTRATION_MAX; i++)
+    {
+        if(NormalAnalysis.nCalibratorCount[wcCurrentFilter][i] > 0)
+        {
+            CalcuPara.p_dY[n] = NormalAnalysis.dCalibratorABS[wcCurrentFilter][i];
+            CalcuPara.p_dX[n] = BoardInf.dConcentration[i];
+
+            if(NormalAnalysis.bLogX) //对数坐标
+            {
+                if(CalcuPara.p_dX[n] <= 0.0f)
+                {
+                    //free(p_dX);
+                    //free(p_dY);
+                    nErrorCode = ANALYSIS_ERROR_LOGX_FAIL;
+                    return nErrorCode;
+                }
+                else
+                {
+                    CalcuPara.p_dX[n] = log10(CalcuPara.p_dX[n]);
+                }
+            }
+
+            if(NormalAnalysis.bLogY) //对数坐标
+            {
+                if(CalcuPara.p_dY[n] <= 0.0f)
+                {
+                    //	free(p_dX);
+                    //free(p_dY);
+                    nErrorCode = ANALYSIS_ERROR_LOGY_FAIL;
+                    return nErrorCode;
+                }
+                else
+                {
+                    CalcuPara.p_dY[n] = log10(CalcuPara.p_dY[n]);
+                }
+            }
+            n++;
+        }
+    }
+
+    for(i = 0; i < nTotal; i++) //排序
+    {
+        for(j = i + 1; j < nTotal; j++)
+        {
+            //float dTemp;
+            if(CalcuPara.p_dX[j] < CalcuPara.p_dX[i]) //Lugj180110 modify
+            {
+                dTemp = CalcuPara.p_dX[j];
+                CalcuPara.p_dX[j] = CalcuPara.p_dX[i];
+                CalcuPara.p_dX[i] = dTemp;
+
+                dTemp = CalcuPara.p_dY[j];
+                CalcuPara.p_dY[j] = CalcuPara.p_dY[i];
+                CalcuPara.p_dY[i] = dTemp;
+            }
+        }
+    }
+
+    for(i = 0; i < nTotal; i++)
+    {
+        NormalAnalysis.PtopAnalysis[wcCurrentFilter].dY[i] = CalcuPara.p_dY[i];
+        NormalAnalysis.PtopAnalysis[wcCurrentFilter].dX[i] = CalcuPara.p_dX[i];
+    }
+
+    for(i = 0; i < 12; i++) //2014-8-20项
+    {
+        for(j = 0; j < 8; j++)
+        {
+            //float dTemp;
+            if(wcCurrentFilter < 2)
+            {
+                dTemp = dABS[0][wcCurrentFilter][j * 12 + i];
+            }
+            else if(NormalAnalysis.bPreCalOK[0][j * 12 + i])
+            {
+                dTemp = NormalAnalysis.dPreCal[0][j * 12 + i];
+            }
+            else
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = -1.0f;
+                continue;
+            }
+
+            bHasResult = 1;//
+
+            if(NormalAnalysis.bLogY)
+            {
+                if(dTemp <= 0.0f)
+                {
+                    bHasResult = 0;
+                }
+                else
+                {
+                    dTemp = log10(dTemp);
+                }
+            }
+
+            nSeg = NormalAnalysis.nCalibratorCountTotal[wcCurrentFilter] - 1;
+            for(k = 0; k < NormalAnalysis.nCalibratorCountTotal[wcCurrentFilter]; k++)
+            {
+                if(dTemp < NormalAnalysis.PtopAnalysis[wcCurrentFilter].dY[k])
+                {
+                    nSeg = k;
+                    break;
+                }
+            }
+
+            if(nSeg < 1)
+            {
+                nSeg = 1;
+            }
+
+            //float dX1, dY1, dX2, dY2;
+            dX1 = NormalAnalysis.PtopAnalysis[wcCurrentFilter].dX[nSeg - 1];
+            dY1 = NormalAnalysis.PtopAnalysis[wcCurrentFilter].dY[nSeg - 1];
+            dX2 = NormalAnalysis.PtopAnalysis[wcCurrentFilter].dX[nSeg];
+            dY2 = NormalAnalysis.PtopAnalysis[wcCurrentFilter].dY[nSeg];
+            if(dX1 == dX2 || dY1 == dY2)
+            {
+                bHasResult = 0;
+            }
+            else
+            {
+                dSlope1 = (dX2 - dX1) / (dY2 - dY1);
+                dTemp = dSlope1 * (dTemp - dY1) + dX1;
+                if(NormalAnalysis.bLogX)
+                {
+                    dTemp = pow(10.0, dTemp);
+                }
+                else if(dTemp < 0.0f)
+                {
+                    dTemp = 0.0f;
+                }
+            }
+
+            if(bHasResult==0)
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = -1.0f;
+            }
+            else
+            {
+                NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = dTemp;
+            }
+        }
+    }
+
+    //free(p_dX);
+    //free(p_dY);
+    return ANALYSIS_SUCCESS;
+}
+
+
+int DoSplineAnalysis(unsigned char  wcCurrentFilter)
+{
+    signed short i,j;
+    signed short nTotal = NormalAnalysis.nCalibratorCountTotal[wcCurrentFilter];
+//	float *p_dX = (float *)malloc(sizeof(float) * nTotal);
+//	float *p_dY = (float *)malloc(sizeof(float) * nTotal);
+
+    float dTemp;
+    unsigned char bHasResult;
+    int nErrorCode = ANALYSIS_SUCCESS;
+    signed short n = 0;
+	  float max;
+
+    for(i = 0; i < CALIBRATOR_CONCENTRATION_MAX; i++)
+    {
+        if(NormalAnalysis.nCalibratorCount[wcCurrentFilter][i] > 0)
+        {
+            CalcuPara.p_dY[n] = NormalAnalysis.dCalibratorABS[wcCurrentFilter][i];
+            CalcuPara.p_dX[n] = BoardInf.dConcentration[i];
+         
+					  #ifndef SOFTWARE_DN
+            if(NormalAnalysis.bLogX) //对数坐标
+            {
+                if(CalcuPara.p_dX[n] <= 0.0f)
+                {
+                    //free(p_dX);
+                    //free(p_dY);
+
+                    nErrorCode = ANALYSIS_ERROR_LOGX_FAIL;
+                    return nErrorCode;
+                }
+                else
+                {
+                    CalcuPara.p_dX[n] = log10(CalcuPara.p_dX[n]);
+                }
+            }
+
+
+            if(NormalAnalysis.bLogY) //对数坐标
+            {
+                if(CalcuPara.p_dY[n] <= 0.0f)
+                {
+                    // free(p_dX);
+                    // free(p_dY);
+
+                    nErrorCode = ANALYSIS_ERROR_LOGY_FAIL;
+                    return nErrorCode;
+                }
+                else
+                {
+                    CalcuPara.p_dY[n] = log10(CalcuPara.p_dY[n]);
+                }
+            }
+						#endif
+						n++;
+        }
+    }
+
+    for(i = 0; i < nTotal; i++) //浓度排序
+    {
+        for(j = i + 1; j < nTotal; j++)
+        {
+            //float dTemp;
+            if(CalcuPara.p_dX[j] < CalcuPara.p_dX[i]) //浓度从小到大排序
+            {
+                dTemp = CalcuPara.p_dY[j];
+                CalcuPara.p_dY[j] = CalcuPara.p_dY[i];
+                CalcuPara.p_dY[i] = dTemp;
+
+                dTemp = CalcuPara.p_dX[j];
+                CalcuPara.p_dX[j] = CalcuPara.p_dX[i];
+                CalcuPara.p_dX[i] = dTemp;
+            }
+        }
+    }
+
+		#ifdef SOFTWARE_DN
+		          NormalAnalysis.bLogX=1;
+		          NormalAnalysis.bLogY=0;
+		          if(fabs(CalcuPara.p_dX[0])>CONCENTRATION_VALUE_MIN) //没有找到零值数据
+		          {
+										nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;
+										return nErrorCode;  
+							}
+							else if(fabs(CalcuPara.p_dY[0])<CONCENTRATION_VALUE_MIN) //基准吸光度不能为0
+							{
+										nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;
+										return nErrorCode;  
+							}
+							for(i = 1; i < nTotal; i++)   //基准吸光度应为最大值
+							{
+									if(CalcuPara.p_dY[0]<=CalcuPara.p_dY[i])
+									{
+											 nErrorCode = ANALYSIS_ERROR_FITTING_FAIL;
+											 return nErrorCode; 
+									}
+							}
+		
+		
+		        for(n=1;n<nTotal;n++)
+						{
+              if(NormalAnalysis.bLogX) //对数坐标
+              { 
+                if(CalcuPara.p_dX[n] <= 0.0f)
+                {
+                    //free(p_dX);
+                    //free(p_dY);
+
+                    nErrorCode = ANALYSIS_ERROR_LOGX_FAIL;
+                    return nErrorCode;
+                }
+                else
+                {
+                    CalcuPara.p_dX[n] = log10(CalcuPara.p_dX[n]);
+                }
+             }
+					 }
+							
+						for(i = 1; i < nTotal; i++)
+            {
+							 NormalAnalysis.SplineAnalysis[wcCurrentFilter].dY[i-1] = CalcuPara.p_dY[i];
+							 NormalAnalysis.SplineAnalysis[wcCurrentFilter].dX[i-1] = CalcuPara.p_dX[i];
+						}
+						
+						nTotal=nTotal-1;
+//						NormalAnalysis.nCalibratorCountTotal[wcCurrentFilter]=nTotal;
+						max=CalcuPara.p_dY[0]/2;//吸光度最大值的一半
+		#else
+			      for(i = 1; i < nTotal; i++)
+						{
+							 NormalAnalysis.SplineAnalysis[wcCurrentFilter].dY[i] = CalcuPara.p_dY[i];
+							 NormalAnalysis.SplineAnalysis[wcCurrentFilter].dX[i] = CalcuPara.p_dX[i];
+						}			
+		#endif
+	
+   
+   
+
+    //CSpline* p_Spline = new CSpline;
+    //nErrorCode = p_Spline->Create(NormalAnalysis.spline_analysis[wcCurrentFilter].dX
+    //, NormalAnalysis.spline_analysis[wcCurrentFilter].dY, nTotal);
+    nErrorCode = SplineCreate(NormalAnalysis.SplineAnalysis[wcCurrentFilter].dX
+                              , NormalAnalysis.SplineAnalysis[wcCurrentFilter].dY, nTotal);
+    if(nErrorCode == ANALYSIS_SUCCESS)
+    {
+			  int  nErrorCode=ANALYSIS_SUCCESS;
+        GetH(NormalAnalysis.SplineAnalysis[wcCurrentFilter].dH);
+        GetM(NormalAnalysis.SplineAnalysis[wcCurrentFilter].dM);
+			  #ifdef SOFTWARE_DN
+			  NormalAnalysis.SplineAnalysis[wcCurrentFilter].IC50= pow(10,NewTonCalculateXValue(max,&nErrorCode));
+			  if(nErrorCode != ANALYSIS_SUCCESS)
+				{
+					  NormalAnalysis.SplineAnalysis[wcCurrentFilter].IC50= pow(10,GeXianFaCalculateXValue(max,&nErrorCode));
+					  if(nErrorCode != ANALYSIS_SUCCESS)
+				    {
+							  NormalAnalysis.SplineAnalysis[wcCurrentFilter].IC50= pow(10,ErFenFa_CalculateXValue(max,&nErrorCode)); 							
+				    }
+				}
+			  #endif
+			
+			
+        for(i = 0; i < 12; i++) //2014-8-20项
+        {
+            for(j = 0; j < 8; j++)
+            {
+                //float dTemp;
+                if(wcCurrentFilter < 2)
+                {
+                    dTemp = dABS[0][wcCurrentFilter][j * 12 + i];
+                }
+                else if(NormalAnalysis.bPreCalOK[0][j * 12 + i])
+                {
+                    dTemp = NormalAnalysis.dPreCal[0][j * 12 + i];
+                }
+                else
+                {
+                    NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = -1.0f;
+                    continue;
+                }
+
+                bHasResult = 1;
+
+                if(NormalAnalysis.bLogY)
+                {
+                    if(dTemp <= 0.0f)
+                    {
+                        bHasResult = 0;
+                    }
+                    else
+                    {
+                        dTemp = log10(dTemp);
+                    }
+                }
+                /*
+                				int nTotal = NormalAnalysis.nCalibratorCountTotal[wcCurrentFilter];
+                				float dSplineY2, dSplineY1, dSplineX, dSplineX1, dSplineX2;
+                				for(int k = 0; k < nTotal - 1; k++)
+                				{
+                					dSplineX2 = NormalAnalysis.spline_analysis[wcCurrentFilter].dX[k + 1];
+                					dSplineX1 = NormalAnalysis.spline_analysis[wcCurrentFilter].dX[k];
+                					dSplineY2 = NormalAnalysis.spline_analysis[wcCurrentFilter].dY[k + 1];
+                					dSplineY1 = NormalAnalysis.spline_analysis[wcCurrentFilter].dY[k];
+
+                					if(dTemp == dSplineY1)
+                					{
+                						dSplineX = dSplineX1;
+                						break;
+                					}
+                					else if(dTemp == dSplineY2)
+                					{
+                						dSplineX = dSplineX2;
+                						break;
+                					}
+                					else if(k == 0 && dSplineY2 > dSplineY1 && dTemp < dSplineY1)
+                					{
+                						float dSplineLowerLimit = dSplineX1 + SPLINE_EXTEND_TIMES * (dSplineX1 - dSplineX2);
+                						if(!NormalAnalysis.bLogX && dSplineLowerLimit < 0.0)
+                						{
+                							dSplineLowerLimit = 0.0;
+                						}
+                						GetSplineSolution(dSplineX, dTemp, dSplineX1, dSplineLowerLimit, k, true);
+                						break;
+                					}
+                					else if(k == 0 && dSplineY2 < dSplineY1 && dTemp > dSplineY1)
+                					{
+                						float dSplineLowerLimit = dSplineX1 + SPLINE_EXTEND_TIMES * (dSplineX1 - dSplineX2);
+                						if(!NormalAnalysis.bLogX && dSplineLowerLimit < 0.0)
+                						{
+                							dSplineLowerLimit = 0.0;
+                						}
+                						GetSplineSolution(dSplineX, dTemp, dSplineX1, dSplineLowerLimit, k, false);
+                						break;
+                					}
+                					else if(k == nTotal - 2 && dSplineY2 < dSplineY1 && dTemp < dSplineY2)
+                					{
+                						GetSplineSolution(dSplineX, dTemp, dSplineX2 + SPLINE_EXTEND_TIMES * (dSplineX2 - dSplineX1), dSplineX2, k, false);
+                						break;
+                					}
+                					else if(k == nTotal - 2 && dSplineY2 > dSplineY1 && dTemp > dSplineY2)
+                					{
+                						GetSplineSolution(dSplineX, dTemp, dSplineX2 + SPLINE_EXTEND_TIMES * (dSplineX2 - dSplineX1), dSplineX2, k, true);
+                						break;
+                					}
+                					else if(dSplineY2 > dSplineY1 && dTemp < dSplineY2 && dTemp > dSplineY1)
+                					{
+                						GetSplineSolution(dSplineX, dTemp, dSplineX2, dSplineX1, k, true);
+                						break;
+                					}
+                					else if(dSplineY2 < dSplineY1 && dTemp > dSplineY2 && dTemp < dSplineY1)
+                					{
+                						GetSplineSolution(dSplineX, dTemp, dSplineX2, dSplineX1, k, false);
+                						break;
+                					}
+                				}
+                */
+                if(bHasResult)
+                {
+									  float dTemp1;
+									  dTemp1 = NewTonCalculateXValue((float)dTemp, &nErrorCode);
+										if(nErrorCode != ANALYSIS_SUCCESS)
+										{
+											  dTemp1 = GeXianFaCalculateXValue((float)dTemp, &nErrorCode);	
+												if(nErrorCode != ANALYSIS_SUCCESS)
+												{
+													   dTemp1 = ErFenFa_CalculateXValue((float)dTemp, &nErrorCode);		
+												}
+										}
+										dTemp=dTemp1;
+                }
+                //dTemp = dSplineX;
+
+                if( (bHasResult==0)||(nErrorCode != ANALYSIS_SUCCESS) )
+                {
+                    NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = -1.0f;
+                }
+                else if(NormalAnalysis.bLogX)
+                {
+                    NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = pow(10.0f, dTemp);
+                }
+                else if(dTemp < 0.0f)
+                {
+                    NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = 0.0;
+                }
+                else
+                {
+                    NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = dTemp;
+                }
+            }
+        }
+    }
+
+    //free(p_dX);
+    //free(p_dY);
+//	free(m_pXSpline);
+// free(m_pYSpline);
+
+    //delete p_Spline;
+    return nErrorCode;
+}
+
+
+void SearchForPlateLimits(unsigned char wcCurrentFilter, float *dYMin, float *dYMax)
+{
+    unsigned char bInit = 0;
+    unsigned short i;
+    float dTemp;
+
+    for(i = 0; i < TUBE_MAX; i++)
+    {
+        if(BoardInf.Layout.WellType[i] >=WELLS_TYPE_MAX)
+        {
+            continue;
+        }
+        if(wcCurrentFilter < 2)
+        {
+            dTemp = dABS[0][NormalAnalysis.FilterCurrent][i];
+        }
+        else if(NormalAnalysis.bPreCalOK[0][i])
+        {
+            dTemp = NormalAnalysis.dPreCal[0][i];
+        }
+        else
+        {
+            continue;
+        }
+
+        if(NormalAnalysis.bLogY)
+        {
+            if(dTemp <= 0.0f)
+            {
+                continue;;
+            }
+            else
+            {
+                dTemp = log10(dTemp);
+            }
+        }
+
+        if(bInit==0)
+        {
+            *dYMin = dTemp;
+            *dYMax = dTemp;
+            bInit = 1;
+        }
+        else if(*dYMin > dTemp)
+        {
+            *dYMin = dTemp;
+        }
+        else if(*dYMax < dTemp)
+        {
+            *dYMax = dTemp;
+        }
+    }
+}
+
+
+int DoLogisticAnalysis(unsigned char wcCurrentFilter)
+{
+    int i,j;
+    int nTotal = NormalAnalysis.nCalibratorCountTotal[wcCurrentFilter];
+    //float *p_dX = (float *)malloc(sizeof(float) * nTotal);
+    //float *p_dY = (float *)malloc(sizeof(float) * nTotal);
+
+    float dTemp;
+//   int nSeg,k;
+    unsigned char bHasResult;
+    int nErrorCode = ANALYSIS_SUCCESS;
+    int n = 0;
+
+    float dTemp1;
+
+    for(i = 0; i < CALIBRATOR_CONCENTRATION_MAX; i++)
+    {
+        if(NormalAnalysis.nCalibratorCount[wcCurrentFilter][i] > 0)
+        {
+            //NormalAnalysis.dCalibratorABS[NormalAnalysis.FilterCurrent][0]=196;
+            CalcuPara.p_dY[n] = NormalAnalysis.dCalibratorABS[wcCurrentFilter][i];
+            CalcuPara.p_dX[n] = BoardInf.dConcentration[i];
+            if(NormalAnalysis.bLogX) //对数坐标//lgj170831 浓度
+            {
+                if(CalcuPara.p_dX[n] <= 1.0f)//<= lgj170831
+                {
+                    // free(p_dX);
+                    // free(p_dY);
+
+                    nErrorCode = ANALYSIS_ERROR_LOG_CONCENTRATION;
+                    return nErrorCode;
+                }
+                else
+                {
+                    CalcuPara.p_dX[n] = log10(CalcuPara.p_dX[n]);
+                }
+            }
+
+            if(NormalAnalysis.bLogY) //对数坐标 吸光度
+            {
+                if(CalcuPara.p_dY[n] <= 0.0f)
+                {
+                    //free(p_dX);
+                    //free(p_dY);
+                    nErrorCode = ANALYSIS_ERROR_LOGY_FAIL;
+                    return nErrorCode;
+                }
+                else
+                {
+                    CalcuPara.p_dY[n] = log10(CalcuPara.p_dY[n]);
+                }
+            }
+            n++;
+        }
+    }
+    for(i = 0; i < nTotal; i++) //排序
+    {
+        for(j = i + 1; j < nTotal; j++)
+        {
+            //float dTemp;
+            if(CalcuPara.p_dX[j] < CalcuPara.p_dX[i]) //Lugj180110 modify
+            {
+                dTemp = CalcuPara.p_dX[j];
+                CalcuPara.p_dX[j] = CalcuPara.p_dX[i];
+                CalcuPara.p_dX[i] = dTemp;
+
+                dTemp = CalcuPara.p_dY[j];
+                CalcuPara.p_dY[j] = CalcuPara.p_dY[i];
+                CalcuPara.p_dY[i] = dTemp;
+            }
+        }
+    }
+
+    /*
+
+    	//SearchForPlateLimits(wcCurrentFilter, &dYMin, &dYMax);
+    	//SetYMax(dYMax);
+    	//SetYMin(dYMin);
+    	//bool b1 = LogisticCreate(valueX, valueY, 5);
+
+    	CalcuPara.p_dY[0]=196.4592;//NormalAnalysis.dCalibratorABS[wcCurrentFilter][0];
+        CalcuPara.p_dY[1]=225.7828;//NormalAnalysis.dCalibratorABS[wcCurrentFilter][1];
+    	CalcuPara.p_dY[2]=350.0000;//NormalAnalysis.dCalibratorABS[wcCurrentFilter][2];
+    	CalcuPara.p_dY[3]=450;//NormalAnalysis.dCalibratorABS[wcCurrentFilter][3];
+    	CalcuPara.p_dY[4]=550;//NormalAnalysis.dCalibratorABS[wcCurrentFilter][4];
+
+    	//p_dY[0]=NormalAnalysis.dCalibratorABS[wcCurrentFilter][0];
+     //   p_dY[1]=NormalAnalysis.dCalibratorABS[wcCurrentFilter][1];
+    //	p_dY[2]=NormalAnalysis.dCalibratorABS[wcCurrentFilter][2];
+    //	p_dY[3]=NormalAnalysis.dCalibratorABS[wcCurrentFilter][3];
+    //	p_dY[4]=NormalAnalysis.dCalibratorABS[wcCurrentFilter][4];
+
+    	CalcuPara.p_dX[0]=BoardInf.dConcentration[0];
+        CalcuPara.p_dX[1]=BoardInf.dConcentration[1];
+    	CalcuPara.p_dX[2]=BoardInf.dConcentration[2];
+    	CalcuPara.p_dX[3]=BoardInf.dConcentration[3];
+    	CalcuPara.p_dX[4]=BoardInf.dConcentration[4];
+
+
+    */
+
+    //valueX[0] = 1.0;valueX[1] = 2.0;valueX[2] = 3.0;valueX[3] = 4.0; valueX[4] = 5.0;
+    //valueY[0] = 10; valueY[1] = 12; valueY[2] = 23; valueY[3] = 50.0;valueY[4] = 62.0;
+
+
+    nErrorCode = LogisticCreate(CalcuPara.p_dX, CalcuPara.p_dY, nTotal);
+    if(nErrorCode == ANALYSIS_SUCCESS)
+    {
+        GetCoef(NormalAnalysis.LogisticAnalysis[wcCurrentFilter].dCoef);
+        NormalAnalysis.LogisticAnalysis[wcCurrentFilter].dRR=LogisticGetRR();
+        NormalAnalysis.bLogX = 0;////
+
+        for(i = 0; i < 12; i++) //2014-8-20项
+        {
+            for(j = 0; j < 8; j++)
+            {
+                //	float dTemp;
+                if(wcCurrentFilter < 2)
+                {
+                    dTemp = dABS[0][wcCurrentFilter][j * 12 + i];
+                }
+                else if(NormalAnalysis.bPreCalOK[0][j * 12 + i])
+                {
+                    dTemp = NormalAnalysis.dPreCal[0][j * 12 + i];
+                }
+                else
+                {
+                    NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = -1.0;
+                    continue;
+                }
+
+                bHasResult = 1;
+                dTemp1 = dTemp;
+
+                if(NormalAnalysis.bLogY)
+                {
+                    if(dTemp1 <= 0.0f)
+                    {
+                        bHasResult = 0;
+                    }
+                    else
+                    {
+                        dTemp1 = log10(dTemp);
+                    }
+                }
+                if(NormalAnalysis.LogisticAnalysis[wcCurrentFilter].dCoef[3] == dTemp1)
+                {
+                    bHasResult=0;
+                }
+                else if (((dTemp1 - NormalAnalysis.LogisticAnalysis[wcCurrentFilter].dCoef[0])
+                          / (NormalAnalysis.LogisticAnalysis[wcCurrentFilter].dCoef[3] - dTemp1))<=0)
+                {
+                    bHasResult=0;
+                }
+                else if(NormalAnalysis.LogisticAnalysis[wcCurrentFilter].dCoef[2]<=0)
+                {
+                    bHasResult=0;
+                }
+                else
+                {
+                    //NormalAnalysis.LogisticAnalysis[wcCurrentFilter].dCoef[3]=d
+                    dTemp = ((log10((dTemp1 - NormalAnalysis.LogisticAnalysis[wcCurrentFilter].dCoef[0])
+                                    / (NormalAnalysis.LogisticAnalysis[wcCurrentFilter].dCoef[3] - dTemp1)))
+                             / NormalAnalysis.LogisticAnalysis[wcCurrentFilter].dCoef[1])
+                            + log10(NormalAnalysis.LogisticAnalysis[wcCurrentFilter].dCoef[2]);
+                    dTemp1 = pow(10.0f, dTemp);
+                    dTemp=dTemp1;
+                    if(dTemp > CONCENTRATION_MAX)
+                    {
+                        dTemp = CONCENTRATION_MAX;
+                    }
+                }
+                if(bHasResult==0)
+                {
+                    NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = -1.0;
+                }
+                else
+                {
+                    NormalAnalysis.dConcentration[wcCurrentFilter][j * 12 + i] = dTemp;
+                }
+            }
+        }
+    }
+    //free(p_dX);
+    //free(p_dY);
+//	free(m_pX);
+// free(m_pY);
+    //free(m_pXInit);
+//  free(m_pYInit);
+//	free(m_pXLsm);
+// free(m_pYLsm);
+    return nErrorCode;
+}
+
+

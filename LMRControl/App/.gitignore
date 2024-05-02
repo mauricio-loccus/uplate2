@@ -1,0 +1,14 @@
+﻿__history
+BuildDebug
+BuildRelease
+Win32/Debug
+*.il*
+*.tds
+*.map
+*.res
+*.local
+*.exe
+*.local
+*.exe
+Win32/Release/µPlate.exe
+Win32

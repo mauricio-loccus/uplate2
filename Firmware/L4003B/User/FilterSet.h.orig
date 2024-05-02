@@ -1,0 +1,26 @@
+
+
+#ifndef __FILTER_SET_H
+#define __FILTER_SET_H
+
+#define COLOR_RGB(r,g,b)          (unsigned int)(  (unsigned int)r   |    ((unsigned int)g<<8)    |    ((unsigned int)b<<16) )
+	
+typedef struct
+{
+	unsigned short  Filter[FILTER_MAX];
+}FILTER_LUN;
+extern FILTER_LUN FilterLun;
+
+//lgj170718
+typedef struct
+{
+	 unsigned char  r;
+	 unsigned char  g;
+	 unsigned char  b;
+}COLOR_RGB;
+extern COLOR_RGB ColorRGB;
+
+void FilterSet_Interface(void);
+void FilterSet_Go(void);
+void FilterSet_Scan(void);
+#endif
