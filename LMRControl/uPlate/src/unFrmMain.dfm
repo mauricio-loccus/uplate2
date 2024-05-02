@@ -284,8 +284,8 @@ object MainForm: TMainForm
         end
       end
       object grpReadMode: TGroupBox
-        Left = 3
-        Top = 3
+        Left = -1
+        Top = 42
         Width = 534
         Height = 478
         Caption = 'Modo de Leitura'

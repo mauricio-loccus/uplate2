@@ -6,6 +6,7 @@
 #include "unElisaSimulator.h"
 
 #include "unFrmSimulatedValues.h"
+#include <iostream>
 
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -95,6 +96,7 @@ void __fastcall TElisaSimulator::OnReceive(TObject* Sender, AnsiString)
 		}
 
 		default:
+			std::cout << "CODE >>>> " << int(currCommand) << std::endl;
 			throw Exception(TEXT("Comando não reconhecido"));
 	}
 }

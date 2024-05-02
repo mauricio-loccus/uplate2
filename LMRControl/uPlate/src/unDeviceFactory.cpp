@@ -10,6 +10,7 @@
 #include "unLMR962023Device.h"
 #include "unLMR96Device.h"
 #include "unUPlateConfig.h"
+#include <iostream>
 
 PElisaDevice __fastcall DeviceFactory::CreateDevice(ElisaDeviceTypeEnum type)
 {
@@ -27,6 +28,7 @@ PElisaDevice __fastcall DeviceFactory::CreateDevice(ElisaDeviceTypeEnum type)
 
 		case ElisaDeviceTypeEnum::ElisaDeviceLMR96Flex:
 			break;
+
 		case ElisaDeviceTypeEnum::ElisaDeviceLRM96Simulator:
 			pDevice = new TElisaSimulator();
 			break;
