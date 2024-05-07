@@ -20,6 +20,8 @@
 #include <memory>
 #include <utility>
 #include <iterator>
+#include <cmath>
+#include <limits>
 
 #pragma hdrstop
 
@@ -362,8 +364,8 @@ void __fastcall TMainForm::registerForDevicesMessages()
 
 void __fastcall TMainForm::OnDeviceChange(TMessage& m)
 {
-	// Este bloco servirá para a detecção de um device USB pluggado.
-	// No caso específico, servirá para mostrar o cursor do mouse sempre que
+	// Este bloco servirï¿½ para a detecï¿½ï¿½o de um device USB pluggado.
+	// No caso especï¿½fico, servirï¿½ para mostrar o cursor do mouse sempre que
 	// for detectado o inserimento de um mouse usb.
 
 	switch (m.WParam)
@@ -406,7 +408,7 @@ void __fastcall TMainForm::OnDeviceChange(TMessage& m)
 
 				UpdateUi(False);
 
-				throw Exception(TEXT("Comunicação interrompida, perda de comunicação com a leitora."));
+				throw Exception(TEXT("Comunicaï¿½ï¿½o interrompida, perda de comunicaï¿½ï¿½o com a leitora."));
 			}
 
 			UpdateUi(False);
@@ -619,7 +621,7 @@ void __fastcall TMainForm::actConnectExecute(TObject *Sender)
 		if (!m_deviceSimulated)
 			FrmWait->Show();
 
-		// Escrever código para tornar o botão toggle e connectar ou desconectar o equipamento
+		// Escrever cï¿½digo para tornar o botï¿½o toggle e connectar ou desconectar o equipamento
 		m_elisaDevice->Connect(AnsiString(commName.c_str()));
 
 		if (!m_elisaDevice->isAuthenticated)
@@ -627,7 +629,7 @@ void __fastcall TMainForm::actConnectExecute(TObject *Sender)
 			if (!m_deviceSimulated)
 				FrmWait->Close();
 
-			MessageDlg(_T("µPlate - Nenhum equipamento compatível encontrado."),
+			MessageDlg(_T("ï¿½Plate - Nenhum equipamento compatï¿½vel encontrado."),
 					   mtWarning, TMsgDlgButtons() << mbOK, 0);
 
 			actConnect->Enabled = False;
@@ -641,7 +643,7 @@ void __fastcall TMainForm::actConnectExecute(TObject *Sender)
 		{
 			FrmWait->Close();
 
-			MessageDlg(System::Sysutils::Format(_T("Erro ao abrir conexão com a porta \"%s\"."),
+			MessageDlg(System::Sysutils::Format(_T("Erro ao abrir conexï¿½o com a porta \"%s\"."),
 							  ARRAYOFCONST((AnsiString(commName.c_str())))),
 					   mtError, TMsgDlgButtons() << mbOK, 0);
 
@@ -903,7 +905,7 @@ void __fastcall TMainForm::DoProcessCPnCNs()
 
 		loccusEval.AddVariable(LME::Variable(TEXT("CN"), cnAvg));
 
-		// Equações para encontrar os limites
+		// Equaï¿½ï¿½es para encontrar os limites
 		loccusEval.SetExpression(edZone1Limit->Text.w_str());
 		loccusEval.Evaluate();
 
@@ -929,7 +931,7 @@ void __fastcall TMainForm::DoProcessCPnCNs()
 
 		loccusEval.AddVariable(LME::Variable(TEXT("CP"), cpAvg));
 
-		// Equações para encontrar os limites
+		// Equaï¿½ï¿½es para encontrar os limites
 		loccusEval.SetExpression(edZone2Limit->Text.w_str());
 		loccusEval.Evaluate();
 
@@ -1177,7 +1179,7 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 	if ((m_elisaDeviceParams->ReadMode == TElisaReadMode::MultiWaveLength) &&
 		(m_elisaDeviceParams->Filter2 == -1 || (m_elisaDeviceParams->Filter1 == m_elisaDeviceParams->Filter2)))
 	{
-		TaskMessageDlg(TEXT("Atenção"),
+		TaskMessageDlg(TEXT("Atenï¿½ï¿½o"),
 					   TEXT("Quando se usa filtros duplos\n")
 					   TEXT("o \"Filtro 2\" deve ser selecionado e deve ser diferente do \"Filtro 1\""),
 					   mtWarning,
@@ -1187,8 +1189,8 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 
 	if (chkbShake->Checked && meShakeDuration->Text.IsEmpty())
 	{
-		TaskMessageDlg(TEXT("Atenção"),
-					   TEXT("O tempo de duração é obrigatório quando a \"Agitação\" está ativada."),
+		TaskMessageDlg(TEXT("Atenï¿½ï¿½o"),
+					   TEXT("O tempo de duraï¿½ï¿½o ï¿½ obrigatï¿½rio quando a \"Agitaï¿½ï¿½o\" estï¿½ ativada."),
 					   mtWarning,
 					   TMsgDlgButtons() << mbOK, 0);
 		return;
@@ -1197,8 +1199,8 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 	TTime t;
 	if (chkbShake->Checked && !StringToTime(meShakeDuration->Text, t))
 	{
-		TaskMessageDlg(TEXT("Atenção"),
-					   TEXT("Valor para o tempo de agitação inválido"),
+		TaskMessageDlg(TEXT("Atenï¿½ï¿½o"),
+					   TEXT("Valor para o tempo de agitaï¿½ï¿½o invï¿½lido"),
 					   mtWarning,
 					   TMsgDlgButtons() << mbOK, 0);
 		return;
@@ -1207,8 +1209,8 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 	TTime w;
 	if (!StringToTime(meWaitDuration->Text, w))
 	{
-		TaskMessageDlg(TEXT("Atenção"),
-					   TEXT("Valor para o tempo de espera inválido"),
+		TaskMessageDlg(TEXT("Atenï¿½ï¿½o"),
+					   TEXT("Valor para o tempo de espera invï¿½lido"),
 					   mtWarning,
 					   TMsgDlgButtons() << mbOK, 0);
 		return;
@@ -1259,9 +1261,9 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 	wellMatrixListRef[0].filterWellsByType(TWellType::wlEmpty, wlEmpty);
 	if (wlEmpty.size() == m_elisaDeviceParams->PlateRows * m_elisaDeviceParams->PlateCols)
 	{
-		TaskMessageDlg(TEXT("Atenção"),
+		TaskMessageDlg(TEXT("Atenï¿½ï¿½o"),
 					   TEXT("Placa vazia! Para realizar um experimento, "
-							"é necessário designar os tipos de leituras na janela \"Placas\"."),
+							"ï¿½ necessï¿½rio designar os tipos de leituras na janela \"Placas\"."),
 					   mtWarning,
 					   TMsgDlgButtons() << mbOK, 0);
 
@@ -1278,8 +1280,8 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 
 		if (!total)
 		{
-			TaskMessageDlg(TEXT("Atenção"),
-						   TEXT("Foram designados padrões, porém nenhum valor foi adicionado.\n"
+			TaskMessageDlg(TEXT("Atenï¿½ï¿½o"),
+						   TEXT("Foram designados padrï¿½es, porï¿½m nenhum valor foi adicionado.\n"
 								"Por favor insira os valores antes de continuar."),
 						   mtWarning,
 						   TMsgDlgButtons() << mbOK, 0);
@@ -1291,10 +1293,10 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 	{
 		if (!stdWells.empty())
 		{
-			TaskMessageDlg(TEXT("Atenção"),
-						   TEXT("Não é permitido ler uma placa caso hajam \"Padrões\""
+			TaskMessageDlg(TEXT("Atenï¿½ï¿½o"),
+						   TEXT("Nï¿½o ï¿½ permitido ler uma placa caso hajam \"Padrï¿½es\""
 						        " designados e uma curva importada de outro experimento.\n"
-								"Para continuar, primeiro remova os padrões ou inicie um novo Protocolo."),
+								"Para continuar, primeiro remova os padrï¿½es ou inicie um novo Protocolo."),
 						   mtWarning,
 						   TMsgDlgButtons() << mbOK, 0);
 
@@ -1308,9 +1310,9 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 		{
 			if (lvKineticTimes->Items->Count < 1)
 			{
-				TaskMessageDlg(TEXT("Atenção"),
-							   TEXT("É necessário ao menos um elemento inserido na lista de "
-									"intervalos de tempo, quando a leitura cinética está selecionada."),
+				TaskMessageDlg(TEXT("Atenï¿½ï¿½o"),
+							   TEXT("ï¿½ necessï¿½rio ao menos um elemento inserido na lista de "
+									"intervalos de tempo, quando a leitura cinï¿½tica estï¿½ selecionada."),
 							   mtWarning,
 							   TMsgDlgButtons() << mbOK, 0);
 
@@ -1364,13 +1366,13 @@ void __fastcall TMainForm::DoProcessResults()
 	}
 
 	/**//*************************************
-	 * Lógica para blank
+	 * Lï¿½gica para blank
 	 *****************************************/
 	DoProcessBlanks();
 	CalculateForReplicas(TWellType::wlBlank);
 
 	/**//*************************************
-	 * Lógica para Padrões
+	 * Lï¿½gica para Padrï¿½es
 	 *****************************************/
 	WellListPointers conclp = wellMatrixListRef.front().filterWellsPointersByType(TWellType::wlConcentrationStd);
 	if (!conclp.empty() || mCurveImported)
@@ -1429,13 +1431,13 @@ void __fastcall TMainForm::DoProcessResults()
 	}
 
 	/**//************************************************
-	 * Lógica para Controle Positivo e Controle Negativo
+	 * Lï¿½gica para Controle Positivo e Controle Negativo
 	 ****************************************************/
 	if (!unknownWells.empty())
 		DoProcessCPnCNs();
 
 	/**//*************************************
-	 * Lógica para Quality Control
+	 * Lï¿½gica para Quality Control
 	 *****************************************/
 	if (!unknownWells.empty())
 		DoProcessQCs(unknownWells);
@@ -1485,7 +1487,7 @@ void __fastcall TMainForm::DoProcessResults()
 	unknownsGrid->EndUpdate();
 
 	/**//*************************************
-	 * Normaliza as réplicas
+	 * Normaliza as rï¿½plicas
 	 *****************************************/
 	rowPos = plateIdx = 0;
 
@@ -1552,7 +1554,7 @@ void __fastcall TMainForm::cbFilter2Change(TObject *Sender)
 {
 	if (cbFilter2->ItemIndex == cbFilter1->ItemIndex)
 	{
-		TaskMessageDlg(TEXT("Valor não permitido"),
+		TaskMessageDlg(TEXT("Valor nï¿½o permitido"),
 						   TEXT("O Filtro 2 deve ser diferente do Filtro 1!"),
 						   mtError,
 						   TMsgDlgButtons() << mbCancel, 0);
@@ -1620,11 +1622,11 @@ void __fastcall TMainForm::tabStandardsBeforeShowPage(TObject *Sender)
 {
 	stdValuesGrid->Cells[0][0] = "Placa #";
 	stdValuesGrid->ColWidths[0] = 100;
-	stdValuesGrid->Cells[1][0] = "Padrão";
+	stdValuesGrid->Cells[1][0] = "Padrï¿½o";
 	stdValuesGrid->ColWidths[1] = 50;
 	stdValuesGrid->Cells[2][0] = "Valor";
 	stdValuesGrid->ColWidths[2] = 80;
-	stdValuesGrid->Cells[3][0] = "Absorbância";
+	stdValuesGrid->Cells[3][0] = "Absorbï¿½ncia";
 	stdValuesGrid->ColWidths[3] = 80;
 
 	lmdstdValuesGrid->DataRowCount = 0;
@@ -1694,7 +1696,7 @@ void __fastcall TMainForm::colStdValueParse(TObject *Grid, TLMDGridColumn *Colum
 		return;
 
 	if (!ParsedOk)
-		throw new Exception("Valor inserido inválido.");
+		throw new Exception("Valor inserido invï¿½lido.");
 
 	WellMatrixList& wellMatrixListRef = *TWellMatrixSingleton::instance();
 
@@ -2018,11 +2020,11 @@ void __fastcall TMainForm::cbChartScaleChange(TObject *Sender)
 				{
 					String reason;
 
-					reason.sprintf(TEXT("Para curva Logarítmica os eixos Y (%5.3f) e "
+					reason.sprintf(TEXT("Para curva Logarï¿½tmica os eixos Y (%5.3f) e "
 										"X (%5.3f) devem conter valore maiores de 0."),
 										stdCurveChart->LeftAxis->Minimum, stdCurveChart->LeftAxis->Maximum);
 
-					TaskMessageDlg(TEXT("Atenção"),
+					TaskMessageDlg(TEXT("Atenï¿½ï¿½o"),
 								   reason,
                                    mtWarning,
                                    TMsgDlgButtons() << mbOK, 0);
@@ -2048,11 +2050,11 @@ void __fastcall TMainForm::cbChartScaleChange(TObject *Sender)
 				{
 					String reason;
 
-					reason.sprintf(TEXT("Para curva Logarítmica os eixos Y (%5.3f) e "
+					reason.sprintf(TEXT("Para curva Logarï¿½tmica os eixos Y (%5.3f) e "
 										"X (%5.3f) devem conter valore maiores de 0."),
 										stdCurveChart->LeftAxis->Minimum, stdCurveChart->LeftAxis->Maximum);
 
-					TaskMessageDlg(TEXT("Atenção"),
+					TaskMessageDlg(TEXT("Atenï¿½ï¿½o"),
 								   reason,
                                    mtWarning,
                                    TMsgDlgButtons() << mbOK, 0);
@@ -2344,7 +2346,10 @@ void __fastcall TMainForm::acFiltersConfigExecute(TObject *Sender)
 	FrmFiltersEdit = new TFrmFiltersEdit(this);
 
 	PLMR96Device lmr96Device = dynamic_cast<PLMR96Device>(m_elisaDevice);
-	FrmFiltersEdit->Filters = lmr96Device->Filters;
+	if (lmr96Device) // erro aqui
+	{
+		FrmFiltersEdit->Filters = lmr96Device->Filters;
+	}
 
 	TModalResult mr = FrmFiltersEdit->ShowModal();
 
@@ -2356,7 +2361,7 @@ void __fastcall TMainForm::acFiltersConfigExecute(TObject *Sender)
 
 	FrmWait->Show();
 
-	lmr96Device->Filters = FrmFiltersEdit->Filters;
+	lmr96Device->Filters = FrmFiltersEdit->Filters; // erro aqui
 
 	m_elisaDevice->sendSetFilterList();
 
@@ -2660,7 +2665,7 @@ void __fastcall TMainForm::OptUserLoginClick(TObject *Sender)
 {
 	if (UserLogged())
 	{
-		MessageDlg("Existe um usuário ainda logado. Por favor, faça \"Logoff\" antes.",
+		MessageDlg("Existe um usuï¿½rio ainda logado. Por favor, faï¿½a \"Logoff\" antes.",
 				   mtInformation, TMsgDlgButtons() << mbOK, 0);
 
 		return;
@@ -2675,8 +2680,8 @@ void __fastcall TMainForm::OptUserLoginClick(TObject *Sender)
 
 void __fastcall TMainForm::OptUserLogoffClick(TObject *Sender)
 {
-	AskDialog->Title = TEXT("Desconexão do usuário ") + mpAppConfig->UserName;
-	AskDialog->Content = TEXT("A desconexão de usuário implica na perda de dados.\n")
+	AskDialog->Title = TEXT("Desconexï¿½o do usuï¿½rio ") + mpAppConfig->UserName;
+	AskDialog->Content = TEXT("A desconexï¿½o de usuï¿½rio implica na perda de dados.\n")
 						 TEXT("Certifique-se de que o protocolo corrente ou o experimento foram salvos.\n")
 						 TEXT("Deseja realmente prosseguir?");
 
@@ -2752,7 +2757,7 @@ void __fastcall TMainForm::LoadSetupBranch(_di_IXMLNode ProtoNode)
     if (!ReadModeNode || !ReadModeNode->HasChildNodes)
     {
         TaskMessageDlg("Carregamento de Protocolo",
-                       "Formato do arquivo inválido ou corrompido. Tag \"ReadMode\" não encontrada.",
+                       "Formato do arquivo invï¿½lido ou corrompido. Tag \"ReadMode\" nï¿½o encontrada.",
                        mtError,
                        TMsgDlgButtons() << mbOK, 0);
 
@@ -3264,7 +3269,7 @@ void __fastcall TMainForm::OneShotTimerTimer(TObject *Sender)
 
 	if (commNames.empty())
 	{
-		MessageDlg(_T("µPlate - Nenhum equipamento compatível encontrado."),
+		MessageDlg(_T("ï¿½Plate - Nenhum equipamento compatï¿½vel encontrado."),
 				   mtWarning, TMsgDlgButtons() << mbOK, 0);
 
 		toolbar->Buttons->Items[0]->Enabled = False;
@@ -3433,7 +3438,7 @@ void __fastcall TMainForm::FillResultsList()
     for (Integer i = 0; i < tabAbsorbanceScrollBox->ControlCount; i++)
     {
         TPicture *resultImg = ResultPlateToImage(dynamic_cast<TWellResult *>(tabAbsorbanceScrollBox->Controls[i]));
-        ResultPair pair = std::make_pair<String, TPicture *>(TEXT("Absorbância"), resultImg);
+        ResultPair pair = std::make_pair<String, TPicture *>(TEXT("Absorbï¿½ncia"), resultImg);
 
         mResultsList.push_back(pair);
     }
@@ -3441,7 +3446,7 @@ void __fastcall TMainForm::FillResultsList()
     for (Integer i = 0; i < tabConcentrationScrollBox->ControlCount; i++)
     {
         TPicture *resultImg = ResultPlateToImage(dynamic_cast<TWellResult *>(tabConcentrationScrollBox->Controls[i]));
-        ResultPair pair = std::make_pair<String, TPicture *>(TEXT("Concentração"), resultImg);
+        ResultPair pair = std::make_pair<String, TPicture *>(TEXT("Concentraï¿½ï¿½o"), resultImg);
 
         mResultsList.push_back(pair);
     }
@@ -3867,15 +3872,25 @@ void __fastcall TMainForm::CalculateForReplicas(const TWellType type)
             for (WellListPointers::size_type i = 0; i < wl.size(); i++)
                 arrayValues.push_back(replicasValues.get()[i]);
 
-            Double minValue = *std::min_element(arrayValues.begin(), arrayValues.end());
-            Double maxValue = *std::max_element(arrayValues.begin(), arrayValues.end());
-
+			Double minValue = 0;
+			Double maxValue = 0;
+			double NaN = std::numeric_limits<double>::quiet_NaN();
+			if (!arrayValues.empty()) {
+				minValue = maxValue = arrayValues[0];
+				for (size_t i = 1; i < arrayValues.size(); ++i) {
+					double tmp = arrayValues[i];
+					if (tmp = -NaN || tmp == NaN)
+						continue;
+					minValue = std::min(minValue, tmp);
+					maxValue = std::max(maxValue, tmp);
+				}
+			}
             for (WellListPointers::iterator it = wlr.begin(); it != wlr.end(); it++)
             {
                 (*it)->StdDeviation = stdDeviation;
                 (*it)->CoefVariation = coefVariation;
                 (*it)->MinimumValue = minValue;
-                (*it)->MaximumValue = maxValue;
+				(*it)->MaximumValue = maxValue;
             }
         }
     }
@@ -3891,9 +3906,9 @@ void __fastcall TMainForm::acExperimentImportCalibrationExecute(TObject *Sender)
 
     if (!wl.empty())
     {
-		TaskMessageDlg(TEXT("Carregamento da curva de calibração"),
-					   TEXT("Não é permitido importar a curva de calibração em placas que contenham \"Padrões\".\n")
-                       TEXT("Para continuar, remova os padrões da placa e tente novamente."),
+		TaskMessageDlg(TEXT("Carregamento da curva de calibraï¿½ï¿½o"),
+					   TEXT("Nï¿½o ï¿½ permitido importar a curva de calibraï¿½ï¿½o em placas que contenham \"Padrï¿½es\".\n")
+                       TEXT("Para continuar, remova os padrï¿½es da placa e tente novamente."),
                        mtWarning,
                        TMsgDlgButtons() << mbOK, 0);
 
@@ -3925,7 +3940,7 @@ void __fastcall TMainForm::acExperimentImportCalibrationExecute(TObject *Sender)
 
 	TOpenTextFileDialog *FileOpenDialog = new TOpenTextFileDialog(this);
 
-	FileOpenDialog->Title = TEXT("Carregar curva de calibração");
+	FileOpenDialog->Title = TEXT("Carregar curva de calibraï¿½ï¿½o");
 	FileOpenDialog->Filter = TEXT("Arquivo de experimento (*.expr)|*.expr");
 	FileOpenDialog->DefaultExt = TEXT(".expr");
 	FileOpenDialog->InitialDir = AppDataDir;
@@ -3948,8 +3963,8 @@ void __fastcall TMainForm::acExperimentImportCalibrationExecute(TObject *Sender)
 
 	if (!ExperimentNode)
 	{
-		TaskMessageDlg(TEXT("Carregamento da curva de calibração"),
-					   TEXT("Formato do arquivo inválido ou corrompido. Tag \"Experiment\" não encontrada."),
+		TaskMessageDlg(TEXT("Carregamento da curva de calibraï¿½ï¿½o"),
+					   TEXT("Formato do arquivo invï¿½lido ou corrompido. Tag \"Experiment\" nï¿½o encontrada."),
 					   mtError,
 					   TMsgDlgButtons() << mbOK, 0);
 
@@ -3960,8 +3975,8 @@ void __fastcall TMainForm::acExperimentImportCalibrationExecute(TObject *Sender)
 
 	if (!CalibrationNode)
 	{
-		TaskMessageDlg(TEXT("Carregamento da curva de calibração"),
-					   TEXT("O experimento não contém curva de calibração."),
+		TaskMessageDlg(TEXT("Carregamento da curva de calibraï¿½ï¿½o"),
+					   TEXT("O experimento nï¿½o contï¿½m curva de calibraï¿½ï¿½o."),
 					   mtError,
 					   TMsgDlgButtons() << mbOK, 0);
 
@@ -3972,18 +3987,18 @@ void __fastcall TMainForm::acExperimentImportCalibrationExecute(TObject *Sender)
 
 	if (!TimestampNode)
 	{
-		TaskMessageDlg(TEXT("Carregamento da curva de calibração"),
-					   TEXT("Formato do arquivo inválido ou corrompido. Tag \"CreationDate\" não encontrada."),
+		TaskMessageDlg(TEXT("Carregamento da curva de calibraï¿½ï¿½o"),
+					   TEXT("Formato do arquivo invï¿½lido ou corrompido. Tag \"CreationDate\" nï¿½o encontrada."),
 					   mtError,
 					   TMsgDlgButtons() << mbOK, 0);
 
 		return;
 	}
 
-	AskDialog->Title = TEXT("Carregamento da curva de calibração");
-	AskDialog->Content = TEXT("A curva de calibração que está sendo importada foi criada em ") +
+	AskDialog->Title = TEXT("Carregamento da curva de calibraï¿½ï¿½o");
+	AskDialog->Content = TEXT("A curva de calibraï¿½ï¿½o que estï¿½ sendo importada foi criada em ") +
 						 TimestampNode->Text +
-						 TEXT(".\nOs resultados correm o risco de não serem precisos, deseja continuar?");
+						 TEXT(".\nOs resultados correm o risco de nï¿½o serem precisos, deseja continuar?");
 
 	AskDialog->Execute();
 
@@ -4042,8 +4057,8 @@ Boolean __fastcall TMainForm::LoadCurveBranch(_di_IXMLNode Node)
     _di_IXMLNode creationNode = Node->ChildNodes->FindNode("CreationDate");
     if (!TryStrToDateTime(creationNode->Text, mCalibrationCurve->timestamp))
     {
-		TaskMessageDlg(TEXT("Carregamento de curva de calibração"),
-                       TEXT("Formato do arquivo inválido ou corrompido. Tag \"CreationDate\" inválido."),
+		TaskMessageDlg(TEXT("Carregamento de curva de calibraï¿½ï¿½o"),
+                       TEXT("Formato do arquivo invï¿½lido ou corrompido. Tag \"CreationDate\" invï¿½lido."),
                        mtError,
                        TMsgDlgButtons() << mbOK, 0);
 
@@ -4155,7 +4170,7 @@ void __fastcall TMainForm::acLoadExperimentExecute(TObject *Sender)
     if (!ExperimentNode)
     {
 		TaskMessageDlg("Carregamento de Experimento",
-                       "Formato do arquivo inválido ou corrompido. Tag \"Experiment\" não encontrada.",
+                       "Formato do arquivo invï¿½lido ou corrompido. Tag \"Experiment\" nï¿½o encontrada.",
                        mtError,
                        TMsgDlgButtons() << mbOK, 0);
 
@@ -4167,7 +4182,7 @@ void __fastcall TMainForm::acLoadExperimentExecute(TObject *Sender)
     if (!ProtoNode)
     {
 		TaskMessageDlg("Carregamento de Experimento",
-                       "Formato do arquivo inválido ou corrompido. Tag \"Protocol\" não encontrada.",
+                       "Formato do arquivo invï¿½lido ou corrompido. Tag \"Protocol\" nï¿½o encontrada.",
                        mtError,
                        TMsgDlgButtons() << mbOK, 0);
 
@@ -4282,7 +4297,7 @@ void __fastcall TMainForm::acLoadProtocolExecute(TObject *Sender)
 	if (!ProtoNode)
 	{
 		TaskMessageDlg("Carregamento de Protocolo",
-					   "Formato do arquivo inválido ou corrompido. Tag \"Protocol\" não encontrada.",
+					   "Formato do arquivo invï¿½lido ou corrompido. Tag \"Protocol\" nï¿½o encontrada.",
                        mtError,
                        TMsgDlgButtons() << mbOK, 0);
 
@@ -4494,14 +4509,14 @@ void __fastcall TMainForm::acExperimentExportCsvExecute(TObject *Sender)
     if (mpAppConfig->HeadersInCsv)
     {
         csvStringList->Add("Placa");
-        csvStringList->Add("Posição");
+        csvStringList->Add("Posiï¿½ï¿½o");
         csvStringList->Add("Tipo");
-		csvStringList->Add("Absorbância Bruta");
-		csvStringList->Add("Absorbância Processada");
-        csvStringList->Add("Concentração");
-		csvStringList->Add("Desvio Padrão");
-		csvStringList->Add("Coef. Variação");
-		csvStringList->Add("Interpretação");
+		csvStringList->Add("Absorbï¿½ncia Bruta");
+		csvStringList->Add("Absorbï¿½ncia Processada");
+        csvStringList->Add("Concentraï¿½ï¿½o");
+		csvStringList->Add("Desvio Padrï¿½o");
+		csvStringList->Add("Coef. Variaï¿½ï¿½o");
+		csvStringList->Add("Interpretaï¿½ï¿½o");
 		csvStringList->Add("Momento Leitura");
 
 		vectCSVList.push_back(csvStringList->DelimitedText);
@@ -4549,7 +4564,7 @@ void __fastcall TMainForm::acExperimentExportCsvExecute(TObject *Sender)
 	if (FileExists(m_ExperimentName))
 		DeleteFile(m_ExperimentName);
 
-    TStreamWriter *fStream = new TStreamWriter(new TFileStream(m_ExperimentName, fmOption), TEncoding::Unicode, 1024);
+	TStreamWriter *fStream = new TStreamWriter(new TFileStream(m_ExperimentName, fmOption), TEncoding::Unicode, 1024);
 
     for (std::vector<String>::size_type i = 0; i < vectCSVList.size(); i++)
         fStream->WriteLine(vectCSVList[i]);
@@ -4562,7 +4577,7 @@ void __fastcall TMainForm::acExperimentExportCsvExecute(TObject *Sender)
     FormatSettings.DecimalSeparator = decSeparator;
     FormatSettings.ThousandSeparator = thSeparator;
 
-    TaskMessageDlg(TEXT("Exportar CSV"),
+	TaskMessageDlg(TEXT("Exportar CSV"),
                    TEXT("Experimento exportado com sucesso."),
 				   mtInformation,
 				   TMsgDlgButtons() << mbOK, 0);
@@ -4807,8 +4822,8 @@ void __fastcall TMainForm::stdValuesGridSetEditText(TObject *Sender, int ACol, i
 		}
 		catch (const EConvertError& e)
 		{
-			TaskMessageDlg(TEXT("Valor não permitido"),
-						   TEXT("Por favor verifique o valor inserido, os valores devem ser numéricos com ponto decimal."),
+			TaskMessageDlg(TEXT("Valor nï¿½o permitido"),
+						   TEXT("Por favor verifique o valor inserido, os valores devem ser numï¿½ricos com ponto decimal."),
 						   mtError,
 						   TMsgDlgButtons() << mbCancel, 0);
 
