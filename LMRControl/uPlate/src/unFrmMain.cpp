@@ -4603,6 +4603,7 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 	const String AppDataDirName = TPath::GetFileNameWithoutExtension(Application->ExeName);
 	String UserAppData = GetEnvironmentVariable("APPDATA");
 	String PublicAppData = GetEnvironmentVariable("PUBLIC");
+	String rawFileName;
 
 	String AppDataDir = PublicAppData + TEXT("\\") + LoccusDataName + TEXT("\\") + AppDataDirName;
 
@@ -4671,9 +4672,8 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 		String plateName = StringReplace(getNode(plateIdx+101)->Text,
 										   " ", "_", TReplaceFlags() << rfReplaceAll);
 
-		String rawFileName = TPath::Combine(AppDataDir,
-			TPath::GetFileNameWithoutExtension(m_ExperimentName) +
-			"." + plateName + ".raw.csv");
+		rawFileName = FileSaveDialog->FileName;
+		FileSaveDialog->Free();
 
 		LongWord fmOption = fmCreate | fmShareDenyWrite;
 
@@ -4693,7 +4693,7 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 		vectCSVList.clear();
 	}
 
-	String info = Format(TEXT("Dados Brutos salvados com sucesso em\n\"%s\"."), ARRAYOFCONST((AppDataDir)));
+	String info = Format(TEXT("Dados Brutos salvados com sucesso em\n\"%s\"."), ARRAYOFCONST((rawFileName)));
 
 	TaskMessageDlg(TEXT("Dados Brutos"),
 				   info,
