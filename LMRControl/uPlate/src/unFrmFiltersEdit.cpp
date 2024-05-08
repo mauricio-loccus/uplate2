@@ -69,9 +69,6 @@ void __fastcall TFrmFiltersEdit::FormShow(TObject *Sender)
 void __fastcall TFrmFiltersEdit::colFilterValueParse(TObject *Grid, TLMDGridColumn *Column, TLMDString &TextValue, Variant &ResultValue,
 		  bool &IsNull, bool &ParsedOk, PLMDString PErrMsg, bool CanRaiseError)
 {
-	if (filtersEditGrid->CurrentRow == 0)
-		return;
-
 	if (!ParsedOk)
 	{
 		*PErrMsg = String("Valor inválido para o filtro selecionado.");

@@ -2340,45 +2340,36 @@ void __fastcall TMainForm::cbKineticChangeTimeTypeChange(TObject *Sender)
 
 void __fastcall TMainForm::acFiltersConfigExecute(TObject *Sender)
 {
-	if (ElisaDeviceTypeEnum::ElisaDeviceLMR96 != m_elisaDevice->Type && ElisaDeviceTypeEnum::ElisaDeviceLMR96_2023 != m_elisaDevice->Type )
+	if (ElisaDeviceTypeEnum::ElisaDeviceLMR96 != m_elisaDevice->Type
+		&& ElisaDeviceTypeEnum::ElisaDeviceLMR96_2023 != m_elisaDevice->Type )
 		return;
 
 	FrmFiltersEdit = new TFrmFiltersEdit(this);
 
-	PLMR96Device lmr96Device = dynamic_cast<PLMR96Device>(m_elisaDevice);
-	if (lmr96Device)
-	{
-		FrmFiltersEdit->Filters = lmr96Device->Filters;
-	}
+	TLMR96Device* lmr96Device = (TLMR96Device*)m_elisaDevice;
+	FrmFiltersEdit->Filters = lmr96Device->Filters;
 
 	TModalResult mr = FrmFiltersEdit->ShowModal();
-
 	if (mrCancel == mr)
 	{
 		FrmFiltersEdit->Free();
 		return;
 	}
-
 	FrmWait->Show();
-
-	//lmr96Device->Filters = FrmFiltersEdit->Filters;
-
+	lmr96Device->Filters = FrmFiltersEdit->Filters;
 	m_elisaDevice->sendSetFilterList();
 
 	FrmFiltersEdit->Free();
-
 	cbFilter1->Items->Clear();
 	cbFilter2->Items->Clear();
 
 	for (size_t i = 0; i < FILTER_MAX; i++)
 	{
 		AnsiString filterName = AnsiString(lmr96Device->Filters.filter[i]).UpperCase();
-
 		if (filterName.IsEmpty() ||
 			filterName == "OFF"  ||
 			filterName == "NO")
 			continue;
-
 		cbFilter1->Items->Add(filterName.LowerCase());
 		cbFilter2->Items->Add(filterName.LowerCase());
 	}
