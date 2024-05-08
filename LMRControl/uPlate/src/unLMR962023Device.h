@@ -104,13 +104,14 @@ class TLMR962023Device : public TElisaDevice
 		StlStringList __fastcall GetPortNames();
         ByteArray checksum(ByteArray array);
 		double __fastcall calculaValueFilter2(double M1, double M2);
+		PFileFilters mpFilters;
 
 	private:
 		ByteArray bufferSerial;
 		unsigned int idxBufferIni;
 		unsigned int idxBufferFim;
 
-	    PFileFilters mpFilters;
+
 
 		Boolean __fastcall GetConnectionStatus()
 		{

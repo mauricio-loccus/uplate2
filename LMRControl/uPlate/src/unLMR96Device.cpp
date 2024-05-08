@@ -18,6 +18,7 @@
 
 #include "crcfast.h"
 #include "unStrUtils.h"
+#include "unFileFilters.h"
 
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -73,6 +74,29 @@ void __fastcall LMR96SerialPortThread::Execute()
 
 __fastcall TLMR96Device::TLMR96Device(TComponent *owner) : TElisaDevice(owner)
 {
+	// carrega os filtros do arquivo filters.ini
+	mpFilters = FileFiltersSingleton::instance();
+
+	// Ler filtros do arquivo
+	strcpy (m_Filters.filter[0], "");
+	strcpy (m_Filters.filter[1], "");
+	strcpy (m_Filters.filter[2], "");
+	strcpy (m_Filters.filter[3], "");
+	strcpy (m_Filters.filter[4], "");
+	strcpy (m_Filters.filter[5], "");
+	strcpy (m_Filters.filter[6], "");
+	strcpy (m_Filters.filter[7], "");
+	TStringList *filt  = new TStringList();
+	mpFilters->getFilters (filt);
+	for (int i = 0; i < filt->Count; i++) {
+		AnsiString str = filt->Strings[i] + " nm";
+		strncpy(m_Filters.filter[i], str.c_str(), 10);
+	}
+
+//	bufferSerial.resize(2000);
+//	idxBufferFim = 0;
+//	idxBufferIni = 0;
+
 	MyDataModule->ZylSerialPort->AutoReceive = False;
 	MyDataModule->ZylSerialPort->NewLine = "\n";
 	MyDataModule->ZylSerialPort->BaudRate = TBaudRate::br115200;

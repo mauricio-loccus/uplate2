@@ -20,6 +20,7 @@
 #include "unDataModule.h"
 #include "unStrUtils.h"
 #include "memstream.h"
+#include "unFileFilters.h"
 
 class TLMR96Device;
 
@@ -71,8 +72,11 @@ class TLMR96Device : public TElisaDevice
 		Integer __fastcall SendCommand(const ByteArray& cmd, bool waitResponse = false);
 
 		StlStringList __fastcall GetPortNames();
+		PFileFilters mpFilters;
 
 	private:
+
+
 		Boolean __fastcall GetConnectionStatus()
 		{
 			return MyDataModule->ZylSerialPort->IsConnected();

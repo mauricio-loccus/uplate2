@@ -85,7 +85,7 @@ void __fastcall TFrmFiltersEdit::colFilterValueParse(TObject *Grid, TLMDGridColu
 	AnsiString sValue("OFF");
 
 	if (value > 0)
-		sValue = TextValue + "nm";
+		sValue = TextValue + " nm";
 
 	ZeroMemory(mFilters.filter[filtersEditGrid->CurrentRow], sizeof(mFilters.filter[filtersEditGrid->CurrentRow]));
 	strncpy(mFilters.filter[filtersEditGrid->CurrentRow], sValue.c_str(), sValue.Length());

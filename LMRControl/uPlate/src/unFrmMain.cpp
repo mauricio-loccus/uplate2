@@ -39,6 +39,7 @@
 #include "unDataModule.h"
 #include "unFrmConfig.h"
 #include "unFrmAbout.h"
+#include "unFileFilters.h"
 
 #include "unDeviceFactory.h"
 #include "unLMR96Device.h"
@@ -2338,6 +2339,16 @@ void __fastcall TMainForm::cbKineticChangeTimeTypeChange(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
+AnsiString ExtractNumbers(const AnsiString &input) {
+    AnsiString result;
+    for (int i = 1; i <= input.Length(); i++) {
+        if (input[i] >= '0' && input[i] <= '9') {
+            result += input[i];
+        }
+    }
+    return result;
+}
+
 void __fastcall TMainForm::acFiltersConfigExecute(TObject *Sender)
 {
 	if (ElisaDeviceTypeEnum::ElisaDeviceLMR96 != m_elisaDevice->Type
@@ -2346,7 +2357,12 @@ void __fastcall TMainForm::acFiltersConfigExecute(TObject *Sender)
 
 	FrmFiltersEdit = new TFrmFiltersEdit(this);
 
-	TLMR96Device* lmr96Device = (TLMR96Device*)m_elisaDevice;
+	TLMR96Device* lmr96Device;
+	if (m_elisaDevice->Type == ElisaDeviceTypeEnum::ElisaDeviceLMR96)
+		lmr96Device = (TLMR96Device*)m_elisaDevice;
+	else if (ElisaDeviceTypeEnum::ElisaDeviceLMR96_2023 == m_elisaDevice->Type)
+		lmr96Device = (TLMR96Device*)m_elisaDevice; // alterar a tipagem caso precise para a v2023
+
 	FrmFiltersEdit->Filters = lmr96Device->Filters;
 
 	TModalResult mr = FrmFiltersEdit->ShowModal();
@@ -2363,6 +2379,7 @@ void __fastcall TMainForm::acFiltersConfigExecute(TObject *Sender)
 	cbFilter1->Items->Clear();
 	cbFilter2->Items->Clear();
 
+	TStringList *buffer_to_ini = new TStringList();
 	for (size_t i = 0; i < FILTER_MAX; i++)
 	{
 		AnsiString filterName = AnsiString(lmr96Device->Filters.filter[i]).UpperCase();
@@ -2372,11 +2389,14 @@ void __fastcall TMainForm::acFiltersConfigExecute(TObject *Sender)
 			continue;
 		cbFilter1->Items->Add(filterName.LowerCase());
 		cbFilter2->Items->Add(filterName.LowerCase());
+		buffer_to_ini->Add(ExtractNumbers(filterName));
 	}
+	lmr96Device->mpFilters->setFilters(buffer_to_ini);
+	lmr96Device->mpFilters->Save();
+	delete buffer_to_ini;
 
 	cbFilter1->ItemIndex = 0;
 	cbFilter2->ItemIndex = -1;
-
 	FrmWait->Close();
 }
 //---------------------------------------------------------------------------
