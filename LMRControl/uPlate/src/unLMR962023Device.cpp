@@ -525,7 +525,7 @@ void __fastcall TLMR962023Device::OnReceive(TObject *Sender, AnsiString Buffer)
 	using System::Sysutils::Format;
 
 	// Le o buffer todo
-	Integer bufferLen = MyDataModule->ZylSerialPort->GetAvailableInputBufferSize();
+	Integer bufferLen = MyDataModule->ZylSerialPort->GetBufferSize();
 	if (bufferLen < 20){
         // se for menor que 20 (1 comando inteiro), nao processa o buffer
 		return;
