@@ -3056,7 +3056,7 @@ void __fastcall TMainForm::CreateSetupBranch(_di_IXMLNode ProtoNode)
 
 	if (ElisaDeviceTypeEnum::ElisaDeviceLMR96 == m_elisaDevice->Type || ElisaDeviceTypeEnum::ElisaDeviceLMR96_2023 == m_elisaDevice->Type )
 	{
-		PLMR96Device lmr96Device = dynamic_cast<PLMR96Device>(m_elisaDevice);
+		PLMR96Device lmr96Device = PLMR96Device(m_elisaDevice);
 
 		for (size_t i = 0; i < FILTER_MAX; i++)
 		{
@@ -4476,55 +4476,56 @@ void __fastcall TMainForm::acSaveExperimentExecute(TObject *Sender)
 
 void __fastcall TMainForm::acExperimentExportCsvExecute(TObject *Sender)
 {
-    const String LoccusDataName("Loccus Biotecnologia");
+	const String LoccusDataName("Loccus Biotecnologia");
 	const String AppDataDirName = TPath::GetFileNameWithoutExtension(Application->ExeName);
-    String UserAppData = GetEnvironmentVariable("APPDATA");
+	String UserAppData = GetEnvironmentVariable("APPDATA");
 	String PublicAppData = GetEnvironmentVariable("PUBLIC");
 
 	String AppDataDir = PublicAppData + TEXT("\\") + LoccusDataName + TEXT("\\") + AppDataDirName;
 
-    ForceCurrentDirectory = False;
+	ForceCurrentDirectory = False;
 
-    TSaveTextFileDialog *FileSaveDialog = new TSaveTextFileDialog(this);
-    FileSaveDialog->Title = TEXT("Exportar Experimento");
-    FileSaveDialog->Filter = TEXT("Arquivo de experimento CSV (*.expr.csv)|*.expr.csv");
-    FileSaveDialog->DefaultExt = TEXT(".expr.csv");
+	TSaveTextFileDialog *FileSaveDialog = new TSaveTextFileDialog(this);
+	FileSaveDialog->Title = TEXT("Exportar Experimento");
+	FileSaveDialog->Filter = TEXT("Arquivo de experimento CSV (*.expr.csv)|*.expr.csv");
+	FileSaveDialog->DefaultExt = TEXT(".expr.csv");
 	FileSaveDialog->InitialDir = AppDataDir;
 	FileSaveDialog->FileName = m_ExperimentName;
 
-    if (!FileSaveDialog->Execute(this->Handle))
-    {
-        FileSaveDialog->Free();
-        return;
-    }
+	if (!FileSaveDialog->Execute(this->Handle))
+	{
+		FileSaveDialog->Free();
+		return;
+	}
 
 	if (FileSaveDialog->FileName != m_ExperimentName)
 		m_ExperimentName = FileSaveDialog->FileName;
 
-    FileSaveDialog->Free();
+	FileSaveDialog->Free();
 
-    WideChar decSeparator = FormatSettings.DecimalSeparator;
-    WideChar thSeparator  = FormatSettings.ThousandSeparator;
+	WideChar decSeparator = FormatSettings.DecimalSeparator;
+	WideChar thSeparator  = FormatSettings.ThousandSeparator;
 
-    if (mpAppConfig->DecimalSeparator != FormatSettings.DecimalSeparator)
-        FormatSettings.DecimalSeparator = mpAppConfig->DecimalSeparator;
+	if (mpAppConfig->DecimalSeparator != FormatSettings.DecimalSeparator)
+		FormatSettings.DecimalSeparator = mpAppConfig->DecimalSeparator;
 
-    if (mpAppConfig->ThousandSeparator != FormatSettings.ThousandSeparator)
-        FormatSettings.ThousandSeparator = mpAppConfig->ThousandSeparator;
+	if (mpAppConfig->ThousandSeparator != FormatSettings.ThousandSeparator)
+		FormatSettings.ThousandSeparator = mpAppConfig->ThousandSeparator;
 
-    std::vector<String> vectCSVList;
+	std::vector<String> vectCSVList;
 
-    std::unique_ptr<TStringList> csvStringList(new TStringList());
-    csvStringList->Delimiter = ';';
+	std::unique_ptr<TStringList> csvStringList(new TStringList());
+	csvStringList->Delimiter = ';';
+	csvStringList->QuoteChar = '"';
 
-    if (mpAppConfig->HeadersInCsv)
-    {
-        csvStringList->Add("Placa");
-        csvStringList->Add("Posição");
-        csvStringList->Add("Tipo");
+	if (mpAppConfig->HeadersInCsv)
+	{
+		csvStringList->Add("Placa");
+		csvStringList->Add("Posição");
+		csvStringList->Add("Tipo");
 		csvStringList->Add("Absorbância Bruta");
 		csvStringList->Add("Absorbância Processada");
-        csvStringList->Add("Concentração");
+		csvStringList->Add("Concentração");
 		csvStringList->Add("Desvio Padrão");
 		csvStringList->Add("Coef. Variação");
 		csvStringList->Add("Interpretação");
@@ -4549,7 +4550,6 @@ void __fastcall TMainForm::acExperimentExportCsvExecute(TObject *Sender)
 				TWell& w = wm[row][col];
 
 				String wellInfo;
-
 				wellInfo.sprintf(TEXT("%c%d"), row+'A', col+1);
 
 				csvStringList->Add(getNode(plateIdx+101)->Text);
@@ -4575,21 +4575,21 @@ void __fastcall TMainForm::acExperimentExportCsvExecute(TObject *Sender)
 	if (FileExists(m_ExperimentName))
 		DeleteFile(m_ExperimentName);
 
-	TStreamWriter *fStream = new TStreamWriter(new TFileStream(m_ExperimentName, fmOption), TEncoding::Unicode, 1024);
+	TStreamWriter *fStream = new TStreamWriter(new TFileStream(m_ExperimentName, fmOption), TEncoding::UTF8, 1024);
 
-    for (std::vector<String>::size_type i = 0; i < vectCSVList.size(); i++)
-        fStream->WriteLine(vectCSVList[i]);
+	for (std::vector<String>::size_type i = 0; i < vectCSVList.size(); i++)
+		fStream->WriteLine(vectCSVList[i]);
 
-    fStream->Close();
+	fStream->Close();
 
-    fStream->BaseStream->Free();
-    fStream->Free();
+	fStream->BaseStream->Free();
+	fStream->Free();
 
-    FormatSettings.DecimalSeparator = decSeparator;
-    FormatSettings.ThousandSeparator = thSeparator;
+	FormatSettings.DecimalSeparator = decSeparator;
+	FormatSettings.ThousandSeparator = thSeparator;
 
 	TaskMessageDlg(TEXT("Exportar CSV"),
-                   TEXT("Experimento exportado com sucesso."),
+				   TEXT("Experimento exportado com sucesso."),
 				   mtInformation,
 				   TMsgDlgButtons() << mbOK, 0);
 }
@@ -4651,8 +4651,8 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 
 		Integer filtersUsed = 1;
 
-		if (cbFilter1->Items->Count)
-			csvStringList->Add(cbFilter1->Items[cbFilter1->ItemIndex].Text);
+		if (cbFilter1 && cbFilter1->Items->Count && cbFilter1->ItemIndex < cbFilter1->Items->Count)
+			csvStringList->Add(cbFilter1->Items[cbFilter1->ItemIndex].Text); //segfault aqui
 
 		if (rbFilterDouble->Checked && cbFilter2->Items->Count)
 		{
