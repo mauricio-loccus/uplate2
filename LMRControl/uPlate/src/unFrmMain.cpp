@@ -100,6 +100,29 @@
 #pragma link "LMDToolBar"
 #pragma link "LMDTaskDlg"
 #pragma link "frxExportBaseDialog"
+
+#pragma link "Vcl.Dialogs"
+#pragma link "Vcl.FileCtrl"
+#pragma link "Vcl.StdCtrls"
+#pragma link "Vcl.Controls"
+#pragma link "Vcl.Forms"
+#pragma link "Vcl.ExtCtrls"
+#pragma link "Vcl.Graphics"
+#pragma link "Vcl.Imaging.jpeg"
+#pragma link "Vcl.Menus"
+#pragma link "Vcl.ComCtrls"
+#pragma link "Vcl.Grids"
+#pragma link "Vcl.Samples.Spin"
+#pragma link "Vcl.Mask"
+#pragma link "Vcl.Buttons"
+#pragma link "Vcl.CheckLst"
+#pragma link "Vcl.DBCtrls"
+#pragma link "Vcl.DBGrids"
+#pragma link "Vcl.ToolWin"
+#pragma link "Vcl.ActnList"
+#pragma link "Vcl.StdActns"
+#pragma link "Vcl.PlatformDefaultStyleActnCtrls"
+
 #pragma resource "*.dfm"
 
 #define APPMUTEXNAME TEXT("LMR96.0")
@@ -203,8 +226,8 @@ void __fastcall TMainForm::FormShow(TObject *Sender)
 		m_elisaDevice = DeviceFactorySingleton::instance()->CreateDevice(ElisaDeviceTypeEnum::ElisaDeviceLMR96_2023);
 		chbReadSpeed->Visible = true;
 		lblReadSpeed->Visible = true;
-		meWaitDuration->Visible = true;
-		lblWaitDuration->Visible = true;
+		//meWaitDuration->Visible = true;
+		//lblWaitDuration->Visible = true;
 		chbShakeMode->Visible = true;
 		lblShakeMode->Visible = true;
 	}
@@ -1208,14 +1231,14 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 	}
 
 	TTime w;
-	if (!StringToTime(meWaitDuration->Text, w))
-	{
-		TaskMessageDlg(TEXT("Atenção"),
-					   TEXT("Valor para o tempo de espera inválido"),
-					   mtWarning,
-					   TMsgDlgButtons() << mbOK, 0);
-		return;
-	}
+//	if (!StringToTime(meWaitDuration->Text, w))
+//	{
+//		TaskMessageDlg(TEXT("Atenção"),
+//					   TEXT("Valor para o tempo de espera inválido"),
+//					   mtWarning,
+//					   TMsgDlgButtons() << mbOK, 0);
+//		return;
+//	}
 
 	m_elisaDeviceParams->Filter1 = cbFilter1->ItemIndex;
 	m_elisaDeviceParams->Filter2 = cbFilter2->ItemIndex;
@@ -4648,7 +4671,7 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 		}
 
 		csvStringList->Clear();
-
+	   /*
 		Integer filtersUsed = 1;
 
 		if (cbFilter1 && cbFilter1->Items->Count && cbFilter1->ItemIndex < cbFilter1->Items->Count)
@@ -4662,6 +4685,7 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 
 		for (Integer i = filtersUsed; i < cbFilter1->Items->Count; i++)
 			csvStringList->Add("0");
+		*/
 
 		TDateTime tStamp = mCalibrationCurve->timestamp;
 		csvStringList->Add(tStamp.FormatString("yyyy/MM/dd"));
@@ -4868,4 +4892,6 @@ void __fastcall TMainForm::chbReadSpeedChange(TObject *Sender)
 	m_elisaDeviceParams->ReadSpeed = static_cast<TElisaReadSpeed>(chbReadSpeed->ItemIndex);
 }
 //---------------------------------------------------------------------------
+
+
 

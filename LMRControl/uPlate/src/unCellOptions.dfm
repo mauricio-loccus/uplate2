@@ -26,7 +26,7 @@ object CellOptions: TCellOptions
     ItemIndex = 0
     Items.Strings = (
       'Topo -> Fundo (modo linha)'
-      'Esqueda -> Direita (modo coluna)')
+      'Esquerda -> Direita (modo coluna)')
     TabOrder = 0
     TabStop = True
   end

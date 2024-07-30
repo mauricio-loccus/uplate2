@@ -344,8 +344,6 @@ __published:	// IDE-managed Components
 	TComboBox *chbShakeMode;
 	TComboBox *chbReadSpeed;
 	TLabel *lblReadSpeed;
-	TLabel *lblWaitDuration;
-	TMaskEdit *meWaitDuration;
 	void __fastcall actExitExecute(TObject *Sender);
 	void __fastcall FormCloseQuery(TObject *Sender, bool &CanClose);
 	void __fastcall FormShow(TObject *Sender);

@@ -104,14 +104,6 @@ object MainForm: TMainForm
         Caption = 'Unidade de medida: '
         Visible = False
       end
-      object lblWaitDuration: TLabel
-        Left = 573
-        Top = 456
-        Width = 94
-        Height = 15
-        Caption = 'Tempo de espera:'
-        Visible = False
-      end
       object grpShakeParams: TGroupBox
         Left = 557
         Top = 3
@@ -547,15 +539,15 @@ object MainForm: TMainForm
             Enabled = False
             ItemIndex = 0
             TabOrder = 4
-            Text = 'Average Rate'
+            Text = 'Taxa M'#233'dia'
             OnChange = cbKineticTypeChange
             Items.Strings = (
-              'Average Rate'
-              'Maximum Rate'
-              'Time to Maximum Rate'
-              'Time to Change'
-              'Maximum of Well'
-              'Time to Maximum')
+              'Taxa M'#233'dia'
+              'Taxa M'#225'x'
+              'Tempo de Taxa M'#225'x'
+              'Tempo de Mudan'#231'a'
+              'Conc M'#225'x de Po'#231'o'
+              'Tempo de Conc M'#225'x')
           end
           object cbKineticReactionType: TComboBox
             Left = 71
@@ -782,17 +774,6 @@ object MainForm: TMainForm
             'M2-M1'
             'M2/M1')
         end
-      end
-      object meWaitDuration: TMaskEdit
-        Left = 673
-        Top = 453
-        Width = 40
-        Height = 23
-        EditMask = '!90:00;1;_'
-        MaxLength = 5
-        TabOrder = 5
-        Text = '00:00'
-        Visible = False
       end
     end
     object tabPlates: TLMDTabSheet
