@@ -4007,7 +4007,7 @@ void __fastcall TMainForm::acExperimentImportCalibrationExecute(TObject *Sender)
 
 	TOpenTextFileDialog *FileOpenDialog = new TOpenTextFileDialog(this);
 
-	FileOpenDialog->Title = TEXT("Carregar curva de calibração");
+	FileOpenDialog->Title = TEXT("Carregar curva de calibração.");
 	FileOpenDialog->Filter = TEXT("Arquivo de experimento (*.expr)|*.expr");
 	FileOpenDialog->DefaultExt = TEXT(".expr");
 	FileOpenDialog->InitialDir = AppDataDir;
@@ -4420,7 +4420,7 @@ void __fastcall TMainForm::acSaveProtocolExecute(TObject *Sender)
     xmlDoc->XML->Clear();
 
     xmlDoc->Active = True;
-    xmlDoc->Version = "1.0";
+	xmlDoc->Version = "1.0";
     xmlDoc->Encoding = "utf-8";
     xmlDoc->StandAlone = "yes";
 
@@ -4500,7 +4500,7 @@ void __fastcall TMainForm::acSaveExperimentExecute(TObject *Sender)
     xmlDoc->XML->Clear();
 
     xmlDoc->Active = True;
-    xmlDoc->Version = "1.0";
+	xmlDoc->Version = "1.0";
     xmlDoc->Encoding = "utf-8";
     xmlDoc->StandAlone = "yes";
 

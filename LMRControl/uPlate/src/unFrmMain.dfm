@@ -1003,7 +1003,7 @@ object MainForm: TMainForm
           Left = 837
           Top = 3
           Width = 64
-          Height = 509
+          Height = 16
           Align = alRight
           Anchors = [akTop, akRight]
           Caption = 'R2 = 0.000'
@@ -1015,7 +1015,6 @@ object MainForm: TMainForm
           Font.Style = [fsBold]
           ParentColor = False
           ParentFont = False
-          ExplicitHeight = 16
         end
         object curveSerie: TFastLineSeries
           Legend.Visible = False
