@@ -645,7 +645,7 @@ void __fastcall TMainForm::actConnectExecute(TObject *Sender)
 		if (!m_deviceSimulated)
 			FrmWait->Show();
 
-		// Escrever código para tornar o botão toggle e connectar ou desconectar o equipamento
+		// Escrever código para tornar o botão toggle e conectar ou desconectar o equipamento
 		m_elisaDevice->Connect(AnsiString(commName.c_str()));
 
 		if (!m_elisaDevice->isAuthenticated)
@@ -665,12 +665,13 @@ void __fastcall TMainForm::actConnectExecute(TObject *Sender)
 
 		if (!m_elisaDevice->isConnected)
 		{
+			if (!m_deviceSimulated)
 			FrmWait->Close();
 
-			MessageDlg(System::Sysutils::Format(_T("Erro ao abrir conexão com a porta \"%s\"."),
+			MessageDlg(System::Sysutils::Format(_T("Não foi possível conectar ao equipamento.\n Verifique as conexões e tente novamente"),
 							  ARRAYOFCONST((AnsiString(commName.c_str())))),
 					   mtError, TMsgDlgButtons() << mbOK, 0);
-
+			//corrigir a função para que ao clicar em "conectar", mesmo que não encontre um equipamento, habilite para edição, igual quando faz login.
 			return;
 		}
 
@@ -749,14 +750,16 @@ void __fastcall TMainForm::actConnectExecute(TObject *Sender)
 void __fastcall TMainForm::actDisconnectExecute(TObject *Sender)
 {
 	if (!m_deviceSimulated)
+	{
 		FrmWait->Show();
 
 	m_elisaDevice->Disconnect();
 
 	UpdateUi(m_elisaDevice->isConnected);
 
-	if (!m_deviceSimulated)
-		FrmWait->Close();
+	FrmWait->Close();
+	}
+
 }
 //---------------------------------------------------------------------------
 
@@ -915,8 +918,18 @@ void __fastcall TMainForm::DoProcessCPnCNs()
 
 	Single limit1Val = 0;
 
-	if (!cnWells.empty())
+	if (!cpWells.empty())  //a equação está fixa para analisar as variáveis CN e CP. Falta criar a variável Cutoff para exibir o índice
 	{
+		for (WellListPointers::iterator it = cpWells.begin(); it != cpWells.end(); ++it)
+		{
+			if (cbOrigin->ItemIndex == 0)
+				accumulated += (*it)->RawValue;
+			else
+				accumulated += (*it)->ConcentrationValue;
+		}
+
+		Double cpAvg = accumulated / (Double)cpWells.size();
+		accumulated = 0;
 		for (WellListPointers::iterator it = cnWells.begin(); it != cnWells.end(); ++it)
 		{
 			if (cbOrigin->ItemIndex == 0)
@@ -927,8 +940,8 @@ void __fastcall TMainForm::DoProcessCPnCNs()
 
 		Double cnAvg = accumulated / (Double)cnWells.size();
 
+		loccusEval.AddVariable(LME::Variable(TEXT("CP"), cpAvg));
 		loccusEval.AddVariable(LME::Variable(TEXT("CN"), cnAvg));
-
 		// Equações para encontrar os limites
 		loccusEval.SetExpression(edZone1Limit->Text.w_str());
 		loccusEval.Evaluate();
@@ -952,8 +965,18 @@ void __fastcall TMainForm::DoProcessCPnCNs()
 		}
 
 		Double cpAvg = accumulated / (Double)cpWells.size();
+        accumulated = 0;
+		for (WellListPointers::iterator it = cnWells.begin(); it != cnWells.end(); ++it)
+		{
+			if (cbOrigin->ItemIndex == 0)
+				accumulated += (*it)->RawValue;
+			else
+				accumulated += (*it)->ConcentrationValue;
+		}
 
+		Double cnAvg = accumulated / (Double)cnWells.size();
 		loccusEval.AddVariable(LME::Variable(TEXT("CP"), cpAvg));
+		loccusEval.AddVariable(LME::Variable(TEXT("CN"), cnAvg));
 
 		// Equações para encontrar os limites
 		loccusEval.SetExpression(edZone2Limit->Text.w_str());
@@ -1012,7 +1035,7 @@ void __fastcall TMainForm::DoProcessQCs(WellList& ulp)
 	{
 		WellList qcwl;
 
-        wellMatrixListRef[i].filterWellsByType(TWellType::wlQualityControl, qcwl);
+		wellMatrixListRef[i].filterWellsByType(TWellType::wlQualityControl, qcwl);
 
 		if (qcwl.empty())
 			continue;
@@ -1628,17 +1651,20 @@ void __fastcall TMainForm::acRawResultExecute(TObject *Sender)
 
 void __fastcall TMainForm::actOpenCloseDoorExecute(TObject *Sender)
 {
-	FrmWait->Show();
-
-	m_elisaDevice->sendDoorCommand(!m_elisaDevice->DoorStatus);
-
-	do
+	if (!m_deviceSimulated)
 	{
-		m_elisaDevice->sendGetStatus();
-	}
-	while (m_elisaDevice->RunMode != RUN_MODE_IDLE);
+		FrmWait->Show();
 
-	FrmWait->Close();
+		m_elisaDevice->sendDoorCommand(!m_elisaDevice->DoorStatus);
+
+		do
+		{
+			m_elisaDevice->sendGetStatus();
+		}
+		while (m_elisaDevice->RunMode != RUN_MODE_IDLE);
+
+		FrmWait->Close();
+	 }
 }
 //---------------------------------------------------------------------------
 
@@ -2706,8 +2732,15 @@ void __fastcall TMainForm::OptUserLoginClick(TObject *Sender)
 	}
 
 	if (UserLogon() && !m_elisaDevice->isConnected)
+		{
 		actConnectExecute(Sender);
+		UpdateUi(UserLogged());
 
+        actConnect->Enabled = !m_elisaDevice->isConnected && UserLogged();
+		actDisconnect->Enabled = m_elisaDevice->isConnected && UserLogged();
+		actProgramRun->Enabled = m_elisaDevice->isConnected && UserLogged();
+		actOpenCloseDoor->Enabled = m_elisaDevice->isConnected && UserLogged();
+		}
 	UpdateUi(UserLogged());
 }
 //---------------------------------------------------------------------------
@@ -3487,7 +3520,7 @@ void __fastcall TMainForm::FillResultsList()
 
     for (Integer i = 0; i < tabQualitativeScrollBox->ControlCount; i++)
     {
-        TPicture *resultImg = ResultPlateToImage(dynamic_cast<TWellResult *>(tabQualitativeScrollBox->Controls[i]));
+		TPicture *resultImg = ResultPlateToImage(dynamic_cast<TWellResult *>(tabQualitativeScrollBox->Controls[i]));
         ResultPair pair = std::make_pair<String, TPicture *>(TEXT("Qualitativo"), resultImg);
 
         mResultsList.push_back(pair);

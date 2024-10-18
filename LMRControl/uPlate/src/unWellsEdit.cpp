@@ -172,7 +172,7 @@ void __fastcall TWellsEdit::WellsGridDblClick(TObject *Sender)
 		w.Type != TWellType::wlQualityControl)
 		return;
 
-	String caption = TEXT("Insira o valor STD");
+	String caption = TEXT("Insira o valor do Padrão STD");
 
 	if (w.Type == TWellType::wlQualityControl)
         caption = TEXT("Insira o valor do CQ");
@@ -403,4 +403,6 @@ void __fastcall TWellsEdit::btnClearClick(TObject *Sender)
     WellsGrid->Invalidate();
 }
 //---------------------------------------------------------------------------
+
+
 

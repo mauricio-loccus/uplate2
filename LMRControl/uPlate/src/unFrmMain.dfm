@@ -1254,8 +1254,9 @@ object MainForm: TMainForm
             Height = 23
             Hint = 
               'A equa'#231#227'o segue a sintaxe RPN cient'#237'fica, as fun'#231#245'es devem ser e' +
-              'scritas em min'#250'sculo e as vari'#225'veis em MAI'#218'SCULO.'#13#10'Ex.: ln(2) * ' +
-              'CP'
+              'scritas em min'#250'sculo e as vari'#225'veis (CP ou CN) em MAI'#218'SCULO.'#13#10' P' +
+              'ara calcular os limites quando houver "'#195#141'ndice", utilize a equa'#195 +
+              #167#195#163'o (lim sup)*(Cutoff). Ex: 1.1 * CP/2'
             TabOrder = 1
             TextHint = 'Equa'#231#227'o'
           end
@@ -1303,8 +1304,9 @@ object MainForm: TMainForm
             Height = 23
             Hint = 
               'A equa'#231#227'o segue a sintaxe RPN cient'#237'fica, as fun'#231#245'es devem ser e' +
-              'scritas em min'#250'sculo e as vari'#225'veis em MAI'#218'SCULO.'#13#10'Ex.: ln(2) * ' +
-              'CN'
+              'scritas em min'#250'sculo e as vari'#225'veis (CP ou CN) em MAI'#218'SCULO.'#13#10' P' +
+              'ara calcular os limites quando houver "'#195#141'ndice", utilize a equa'#195 +
+              #167#195#163'o (lim inf)*(Cutoff). Ex: 0.9 * CP/2'
             TabOrder = 1
             TextHint = 'Equa'#231#227'o'
           end
