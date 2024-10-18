@@ -4,6 +4,7 @@
 #define unElisaSimulatorH
 
 #include "unElisaDevice.h"
+#include "unFileFilters.h"
 
 class TElisaSimulator : public TElisaDevice
 {
@@ -27,6 +28,7 @@ class TElisaSimulator : public TElisaDevice
 		void __fastcall sendSetParams() {}
 
 		StlStringList __fastcall GetPortNames();
+		PFileFilters mpFilters;
 
 		void __fastcall OnReceive(TObject* Sender, AnsiString = AnsiString());
 		Integer __fastcall SendCommand(const ByteArray& cmd = ByteArray(), bool waitResponse = false);

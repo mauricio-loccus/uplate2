@@ -13,14 +13,25 @@
 
 __fastcall TElisaSimulator::TElisaSimulator(TComponent *owner) : TElisaDevice(owner)
 {
-	Integer i = 0;
+	// carrega os filtros do arquivo filters.ini
+	mpFilters = FileFiltersSingleton::instance();
 
-	do
-	{
-		snprintf(m_Filters.filter[i], sizeof(m_Filters.filter[i]), "Filtro %d", i+1);
-	} while (i++ < FILTER_MAX);
+	// Ler filtros do arquivo
+	strcpy (m_Filters.filter[0], "");
+	strcpy (m_Filters.filter[1], "");
+	strcpy (m_Filters.filter[2], "");
+	strcpy (m_Filters.filter[3], "");
+	strcpy (m_Filters.filter[4], "");
+	strcpy (m_Filters.filter[5], "");
+	strcpy (m_Filters.filter[6], "");
+	strcpy (m_Filters.filter[7], "");
+	TStringList *filt  = new TStringList();
+	mpFilters->getFilters (filt);
+	for (int i = 0; i < filt->Count; i++) {
+		AnsiString str = filt->Strings[i] + " nm";
+		strncpy(m_Filters.filter[i], str.c_str(), 10);
+	}
 }
-
 __fastcall TElisaSimulator::~TElisaSimulator()
 {
 	if (FrmSimulatedValues)
