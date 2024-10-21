@@ -402,7 +402,7 @@ __published:	// IDE-managed Components
     void __fastcall OneShotTimerTimer(TObject *Sender);
     void __fastcall acConfPrefsExecute(TObject *Sender);
     void __fastcall cbUnityChange(TObject *Sender);
-    void __fastcall frxReportRawResultBeforePrint(TfrxReportComponent *Sender);
+	void __fastcall frxReportRawResultBeforePrint(TfrxReportComponent *Sender);
     void __fastcall frxUserDataSetResultsCheckEOF(TObject *Sender, bool &Eof);
     void __fastcall frxUserDataSetResultsGetValue(const UnicodeString VarName, Variant &Value);
     void __fastcall spLambda1Change(TObject *Sender);

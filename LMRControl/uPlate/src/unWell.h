@@ -113,7 +113,7 @@ class TWell
 
 		String __fastcall typeToString();
 
-	private:
+	private:                                       //Adicionar Subject ID e Sample ID
 		// Plate ID - Identificação do plate
 		Integer   mPlateNum;
 

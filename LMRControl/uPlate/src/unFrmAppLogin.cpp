@@ -37,7 +37,7 @@ void __fastcall TFrmAppLogin::btnLogarClick(TObject *Sender)
 	String passwdDecripted = MyDataModule->IdDecoderUUE->DecodeString(fpasswd);
 #endif
 
-	if (Passwd != fpasswd)
+	if (Passwd != fpasswd)  //Login Adminstrador | senha admin
 	{
 		MessageDlg("Senha incorreta, corrija e tente novamente.",
 				   mtWarning, TMsgDlgButtons() << mbOK, 0);
@@ -104,4 +104,5 @@ void __fastcall TFrmAppLogin::FormClose(TObject *Sender, TCloseAction &Action)
     DBModule->Lmr96Connection->Connected = False;
 }
 //---------------------------------------------------------------------------
+
 

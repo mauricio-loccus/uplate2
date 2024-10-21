@@ -671,7 +671,7 @@ void __fastcall TMainForm::actConnectExecute(TObject *Sender)
 			MessageDlg(System::Sysutils::Format(_T("Não foi possível conectar ao equipamento.\n Verifique as conexões e tente novamente"),
 							  ARRAYOFCONST((AnsiString(commName.c_str())))),
 					   mtError, TMsgDlgButtons() << mbOK, 0);
-			//corrigir a função para que ao clicar em "conectar", mesmo que não encontre um equipamento, habilite para edição, igual quando faz login.
+
 			return;
 		}
 
@@ -1624,7 +1624,7 @@ void __fastcall TMainForm::cbFilter1Change(TObject *Sender)
 // Quando a leitura eh feita pelo equipamento
 void __fastcall TMainForm::OnLMR96ReadDone(TObject *Sender, const RawDataMatrix& matrix, const RawDataMatrix& matrixFilter2)
 {
- 	TWellMatrix& refMatrix = (*TWellMatrixSingleton::instance())[currMatrix];
+	TWellMatrix& refMatrix = (*TWellMatrixSingleton::instance())[currMatrix];
 
 	for (RawDataMatrix::size_type row = 0; row < m_elisaDeviceParams->PlateRows; row++)
 	{
@@ -1638,11 +1638,11 @@ void __fastcall TMainForm::OnLMR96ReadDone(TObject *Sender, const RawDataMatrix&
 	}
 }
 
-void __fastcall TMainForm::acRawResultExecute(TObject *Sender)
+void __fastcall TMainForm::acRawResultExecute(TObject *Sender)  //exportar resultados por placa /main menu
 {
-    FillResultsList();
+	FillResultsList();
 
-    resultsCount = 0;
+	resultsCount = 0;
 	frxUserDataSetResults->RangeEndCount = tabAbsorbanceScrollBox->ControlCount * tabResultPageControl->PageCount;
 	frxReportRawResult->PrepareReport();
 	frxReportRawResult->ShowPreparedReport();
@@ -2643,10 +2643,10 @@ Boolean __fastcall TMainForm::UserLogon()
 
     try
 	{
-        if (mrOk != FrmAppLogin->ShowModal())
+		if (mrOk != FrmAppLogin->ShowModal())
             return False;
 
-        mpAppConfig->UserName = FrmAppLogin->UserName;
+		mpAppConfig->UserName = FrmAppLogin->UserName;
 	    mpAppConfig->UserID = FrmAppLogin->UserID;
         mpAppConfig->UserLogin = FrmAppLogin->UserLogin;
         mpAppConfig->IsSuperUser = FrmAppLogin->IsSuperUser;
@@ -2656,8 +2656,8 @@ Boolean __fastcall TMainForm::UserLogon()
     }
     __finally
     {
-        FrmAppLogin->Free();
-        FrmAppLogin = NULL;
+		FrmAppLogin->Free();
+		FrmAppLogin = NULL;
     }
 
 	StatusBar->Panels->BeginUpdate();
@@ -3450,10 +3450,10 @@ void __fastcall TMainForm::frxReportRawResultBeforePrint(TfrxReportComponent *Se
 {
 	TfrxMemoView *frxMemo = dynamic_cast<TfrxMemoView *>(frxReportRawResult->FindObject("ResultTypeTitle"));
 
-    if (!frxMemo)
+	if (!frxMemo)
     {
         TaskMessageDlg("Invalid Reference",
-                       "Invalid reference to report object \"ResultTypeTitle\"",
+					   "Invalid reference to report object \"ResultTypeTitle\"",
                        mtError,
                        TMsgDlgButtons() << mbOK, 0);
 
@@ -3469,7 +3469,7 @@ void __fastcall TMainForm::frxReportRawResultBeforePrint(TfrxReportComponent *Se
     if (!frxPic)
     {
         TaskMessageDlg("Invalid Reference",
-                       "Invalid reference to report object \"ResultPicture\"",
+					   "Invalid reference to report object \"ResultPicture\"",
                        mtError,
                        TMsgDlgButtons() << mbOK, 0);
 
@@ -3489,7 +3489,7 @@ void __fastcall TMainForm::frxUserDataSetResultsCheckEOF(TObject *Sender, bool &
 
 void __fastcall TMainForm::FillResultsList()
 {
-    if (!mResultsList.empty())
+	if (!mResultsList.empty())
     {
         for (ResultsVector::size_type i = 0; i < mResultsList.size(); i++)
         {
@@ -3535,12 +3535,12 @@ void __fastcall TMainForm::frxUserDataSetResultsGetValue(const UnicodeString Var
     {
         Value = pair.first;
 
-        TfrxPictureView *frxPic = dynamic_cast<TfrxPictureView *>(frxReportRawResult->FindObject("ResultPicture"));
+		TfrxPictureView *frxPic = dynamic_cast<TfrxPictureView *>(frxReportRawResult->FindObject("ResultPicture"));
 
         if (!frxPic)
         {
             TaskMessageDlg("Invalid Reference",
-                           "Invalid reference to report object \"ResultPicture\"",
+						   "Invalid reference to report object \"ResultPicture\"",
                            mtError,
                            TMsgDlgButtons() << mbOK, 0);
 
@@ -3697,7 +3697,7 @@ Boolean __fastcall TMainForm::AlreadyRunning()
 	return alreadyRunning;
 }
 
-void __fastcall TMainForm::acResultsRawExecute(TObject *Sender)
+void __fastcall TMainForm::acResultsRawExecute(TObject *Sender)                 // Resultado da leitura
 {
 	frxUserDataSetResultsRaw->RangeEndCount = ReadRawGrid->DataRowCount;
 	frxReportResultsRaw->PrepareReport();
@@ -3712,7 +3712,7 @@ void __fastcall TMainForm::frxUserDataSetResultsRawCheckEOF(TObject *Sender, boo
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::frxUserDataSetResultsRawGetValue(const UnicodeString VarName, Variant &Value)
+void __fastcall TMainForm::frxUserDataSetResultsRawGetValue(const UnicodeString VarName, Variant &Value)  //adicionar sample ID e subject ID
 {
 	if (VarName == "PlateName")
 	{
@@ -3843,7 +3843,7 @@ void __fastcall TMainForm::frxUserDataSetUnknowsGetValue(const UnicodeString Var
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::acResultUnknowsExecute(TObject *Sender)
+void __fastcall TMainForm::acResultUnknowsExecute(TObject *Sender)      // exportar Relatório de Desconhecidos
 {
 	frxUserDataSetUnknows->RangeEndCount = unknownsGrid->DataRowCount;
 	frxReportUnknows->PrepareReport();
@@ -4518,7 +4518,7 @@ void __fastcall TMainForm::acSaveExperimentExecute(TObject *Sender)
 	CreateCurveBranch(ExperimentNode);
 
     _di_IXMLNode node = ExperimentNode->AddChild("Author");
-    node->SetNodeValue(mpAppConfig->UserLogin);
+	node->SetNodeValue(mpAppConfig->UserLogin);
 
     node = ExperimentNode->AddChild("CreationDate");
     node->SetNodeValue(Now());
@@ -4574,7 +4574,7 @@ void __fastcall TMainForm::acExperimentExportCsvExecute(TObject *Sender)
 	csvStringList->Delimiter = ';';
 	csvStringList->QuoteChar = '"';
 
-	if (mpAppConfig->HeadersInCsv)
+	if (mpAppConfig->HeadersInCsv)         // configurações de exportação - RESULTADOS DE LEITURA
 	{
 		csvStringList->Add("Placa");
 		csvStringList->Add("Posição");
@@ -4925,6 +4925,7 @@ void __fastcall TMainForm::chbReadSpeedChange(TObject *Sender)
 	m_elisaDeviceParams->ReadSpeed = static_cast<TElisaReadSpeed>(chbReadSpeed->ItemIndex);
 }
 //---------------------------------------------------------------------------
+
 
 
 

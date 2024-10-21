@@ -6,7 +6,7 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 
-String __fastcall TWell::typeToString()
+String __fastcall TWell::typeToString()          // adicionar Sample_ID e Subject_ID
 {
 	switch (mType)
     {
@@ -28,7 +28,7 @@ String __fastcall TWell::typeToString()
 		case TWellType::wlConcentrationStd:
 			return TEXT("Standard");
 
-		case TWellType::wlQualityControl:
+		case TWellType::wlQualityControl:                 //Implementar
 			return TEXT("Controle de Qualidade");
 	}
 
