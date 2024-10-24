@@ -6,7 +6,7 @@
         <AppType>Application</AppType>
         <MainSource>µPlate.cpp</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Release</Config>
+        <Config Condition="'$(Config)'==''">Debug</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>1</TargetedPlatforms>
     </PropertyGroup>
@@ -55,7 +55,7 @@
         <Icon_MainIcon>images\Elisa.ico</Icon_MainIcon>
         <_TCHARMapping>wchar_t</_TCHARMapping>
         <Multithreaded>true</Multithreaded>
-        <AllPackageLibs>rtl.lib;vcl.lib;xmlrtl.lib;vclactnband.lib;vclx.lib;VclSmp.lib;vclimg.lib;frx21.lib;fs21.lib;frxe21.lib;lmdrtl.lib;lmdrtrtlx.lib;lmdrtcore.lib;lmdrttools.lib;lmdrtprint.lib;lmdrtgrid.lib;lmdrtthemes.lib;vclribbon.lib;vcldb.lib;dbrtl.lib;sdlmathpack_rt_104X7.lib;sdlbasepack_rt_104X7.lib;IndySystem.lib;IndyProtocols.lib;IndyCore.lib;dsnap.lib;dbexpress.lib;DbxCommonDriver.lib;DBXSqliteDriver.lib;ZylSerialPortPack.lib;lmdrttoolsdb.lib;sdlguipack_rt_104X7.lib;Tee.lib;Teeui.lib;Tee.lib;sdlmathpack_rt_103X7.lib;sdlbasepack_rt_103X7.lib</AllPackageLibs>
+        <AllPackageLibs>rtl.lib;vcl.lib;xmlrtl.lib;vclactnband.lib;vclx.lib;VclSmp.lib;vclimg.lib;frx21.lib;fs21.lib;frxe21.lib;lmdrtl.lib;lmdrtrtlx.lib;lmdrtcore.lib;lmdrttools.lib;lmdrtprint.lib;lmdrtgrid.lib;lmdrtthemes.lib;vclribbon.lib;vcldb.lib;dbrtl.lib;sdlmathpack_rt_104X7.lib;sdlbasepack_rt_104X7.lib;IndySystem.lib;IndyProtocols.lib;IndyCore.lib;dsnap.lib;dbexpress.lib;DbxCommonDriver.lib;DBXSqliteDriver.lib;ZylSerialPortPack.lib;lmdrttoolsdb.lib;sdlguipack_rt_104X7.lib;Tee.lib;Teeui.lib;Tee.lib;sdlmathpack_rt_103X7.lib;sdlbasepack_rt_103X7.lib;sdlguipack_rt_103X7.lib</AllPackageLibs>
         <ProjectType>CppVCLApplication</ProjectType>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
         <DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
@@ -123,7 +123,7 @@
         <BCC_MonitorThis>true</BCC_MonitorThis>
         <BCC_MonitorInlinePtrAccess>true</BCC_MonitorInlinePtrAccess>
         <BCC_MonitorGlobalAndStackData>true</BCC_MonitorGlobalAndStackData>
-        <LinkPackageStatics>ZylSerialPortPack.lib;sdlmathpack_rt_103X7.lib;sdlbasepack_rt_103X7.lib</LinkPackageStatics>
+        <LinkPackageStatics>ZylSerialPortPack.lib;sdlmathpack_rt_103X7.lib;sdlbasepack_rt_103X7.lib;sdlguipack_rt_103X7.lib</LinkPackageStatics>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <ILINK_LibraryPath>$(BDS)\lib\Win32\debug\;$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;D:\Users\rogerio.moreira.LOCCUSBR\Documents\Embarcadero\Studio\15.0/BPL\;C:\Users\rogerio.moreira\Documents\Embarcadero\Studio\15.0/BPL\;G:\Users\rogerio.moreira\Documents\Embarcadero\Studio\15.0\BPL\$(PLATFORM);$(BDS)\lib\SDL\X7\;E:\Program Files (x86)\FastReports\LibD21\;C:\Program Files (x86)\FastReports\LibD21\;C:\LMD2015\lib\d21\Win32\;$(BDSUSERDIR)/BPL\;$(BDS)\lib\win32\$(config)\;$(BDSUSERDIR)/BPL;$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;$(BDS)\ObjRepos\EN\Cpp\;crc\;C:\Program Files (x86)\Delphi7\Lib;C:\Program Files (x86)\Delphi7\Lib\IDL45;C:\Program Files (x86)\Delphi7\Lib\Debug\IDL45</ILINK_LibraryPath>
         <BT_BuildType>Debug</BT_BuildType>
@@ -824,11 +824,11 @@
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="ProjectOSXDebug">
-                    <Platform Name="OSX64">
+                    <Platform Name="OSXARM64">
                         <RemoteDir>..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
-                    <Platform Name="OSXARM64">
+                    <Platform Name="OSX64">
                         <RemoteDir>..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>

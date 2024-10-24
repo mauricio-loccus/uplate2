@@ -129,7 +129,7 @@ Word parseDeviceIdentifier(const StlString& instanceIdentifier,
 	return value;
 }
 
-Word deviceVendorIdentifier(const StlString& instanceIdentifier, bool &ok)
+Word deviceVendorIdentifier(const StlString& instanceIdentifier, bool &ok)                //identificação do USB
 {
 	static const Word vendorIdentifierSize = 4;
 

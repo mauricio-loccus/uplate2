@@ -4894,7 +4894,7 @@ void __fastcall TMainForm::stdValuesGridSetEditText(TObject *Sender, int ACol, i
 			TaskMessageDlg(TEXT("Valor não permitido"),
 						   TEXT("Por favor verifique o valor inserido, os valores devem ser numéricos com ponto decimal."),
 						   mtError,
-						   TMsgDlgButtons() << mbCancel, 0);
+						   TMsgDlgButtons() << mbOK, 0);
 
 			stdValuesGrid->Col = m_editingCol;
 			stdValuesGrid->Row = m_editingRow;
@@ -4925,6 +4925,8 @@ void __fastcall TMainForm::chbReadSpeedChange(TObject *Sender)
 	m_elisaDeviceParams->ReadSpeed = static_cast<TElisaReadSpeed>(chbReadSpeed->ItemIndex);
 }
 //---------------------------------------------------------------------------
+
+
 
 
 

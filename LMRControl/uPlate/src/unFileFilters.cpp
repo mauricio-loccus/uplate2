@@ -18,6 +18,7 @@ __fastcall FileFilters::FileFilters(TComponent *owner) : TComponent(owner),
 					  mFilter5(""),
 					  mFilter6(""),
 					  mFilter7(""),
+					  mFilter8(""),
 					  qtdFilterSet(4)
 {
 	Load();
@@ -33,7 +34,7 @@ void __fastcall FileFilters::Load()
     String cfgFName = ChangeFileExt(Application->ExeName, "_filters.ini");
 
     if (FileExists(cfgFName, False))
-        loadConfig(cfgFName);
+		loadConfig(cfgFName);
 }
 
 void __fastcall FileFilters::Save()

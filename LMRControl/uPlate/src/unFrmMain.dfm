@@ -86,7 +86,7 @@ object MainForm: TMainForm
     TabPosition = tpBottom
     ThemeGlobalMode = True
     DockOrientation = doNoOrient
-    ActivePage = tabParamRead
+    ActivePage = tabUnknowns
     object tabParamRead: TLMDTabSheet
       Left = 4
       Top = 4
@@ -1003,7 +1003,7 @@ object MainForm: TMainForm
           Left = 837
           Top = 3
           Width = 64
-          Height = 509
+          Height = 16
           Align = alRight
           Anchors = [akTop, akRight]
           Caption = 'R2 = 0.000'
@@ -1015,7 +1015,6 @@ object MainForm: TMainForm
           Font.Style = [fsBold]
           ParentColor = False
           ParentFont = False
-          ExplicitHeight = 16
         end
         object curveSerie: TFastLineSeries
           Legend.Visible = False
@@ -1794,7 +1793,6 @@ object MainForm: TMainForm
     ImageList = MyDataModule.pngImageList
     TabOrder = 2
     TransparentBorder = True
-    ExplicitTop = 1
   end
   object StatusBar: TStatusBar
     Left = 0
@@ -8229,8 +8227,8 @@ object MainForm: TMainForm
           Height = 18.897650000000000000
           DataSet = frxUserDataSetUnknows
           DataSetName = 'Unknows'
-          DisplayFormat.DecimalSeparator = ','
-          DisplayFormat.ThousandSeparator = '.'
+          DisplayFormat.DecimalSeparator = '.'
+          DisplayFormat.ThousandSeparator = ','
           DisplayFormat.FormatStr = '%2.3n'
           DisplayFormat.Kind = fkNumeric
           Font.Charset = ANSI_CHARSET
@@ -8253,8 +8251,8 @@ object MainForm: TMainForm
           Height = 18.897650000000000000
           DataSet = frxUserDataSetUnknows
           DataSetName = 'Unknows'
-          DisplayFormat.DecimalSeparator = ','
-          DisplayFormat.ThousandSeparator = '.'
+          DisplayFormat.DecimalSeparator = '.'
+          DisplayFormat.ThousandSeparator = ','
           DisplayFormat.FormatStr = '%2.3n'
           DisplayFormat.Kind = fkNumeric
           Font.Charset = ANSI_CHARSET
@@ -8354,8 +8352,8 @@ object MainForm: TMainForm
           DataField = 'CoefVariation'
           DataSet = frxUserDataSetUnknows
           DataSetName = 'Unknows'
-          DisplayFormat.DecimalSeparator = ','
-          DisplayFormat.ThousandSeparator = '.'
+          DisplayFormat.DecimalSeparator = '.'
+          DisplayFormat.ThousandSeparator = ','
           DisplayFormat.FormatStr = '%2.3n'
           DisplayFormat.Kind = fkNumeric
           Font.Charset = ANSI_CHARSET
@@ -8797,7 +8795,7 @@ object MainForm: TMainForm
       OnExecute = actConnectExecute
     end
     object actDisconnect: TAction
-      Caption = '&Disconectar'
+      Caption = '&Desconectar'
       Enabled = False
       Hint = 'Fecha a conex'#227'o com o equipamento'
       ImageIndex = 31
