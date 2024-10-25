@@ -170,6 +170,7 @@ __published:	// IDE-managed Components
 	TLMDGrid *unknownsGrid;
 	TLMDTabSheet *tabQuality;
 	TLMDGridTextColumn *colUnknownWellID;
+	TLMDGridTextColumn *colSampleID;
 	TLMDTabSheet *tabReadRAW;
 	TLMDGrid *ReadRawGrid;
 	TLMDGridTextColumn *colReadRawCoord;
@@ -290,6 +291,7 @@ __published:	// IDE-managed Components
     TLMDGridFloatColumn *colCoefVariation;
     TLMDTaskDialog *AskDialog;
 	TLMDGridTextColumn *colUnknownCoord;
+	TLMDGridTextColumn *colSampleID;
 	TLMDGridFloatColumn *colUnknownStdDev;
 	TLMDGridFloatColumn *colUnknownCoefVar;
 	TMainMenu *MainMenu;
@@ -421,7 +423,7 @@ __published:	// IDE-managed Components
 	void __fastcall frxUserDataSetUnknowsCheckEOF(TObject *Sender, bool &Eof);
 	void __fastcall frxUserDataSetUnknowsGetValue(const UnicodeString VarName, Variant &Value);
 	void __fastcall acResultUnknowsExecute(TObject *Sender);
-    void __fastcall lmdstdValuesGridChange(TObject *Sender, TLMDGridChangeFlags AChangedFlags);
+	void __fastcall lmdstdValuesGridChange(TObject *Sender, TLMDGridChangeFlags AChangedFlags);
     void __fastcall cbCurveTypesChange(TObject *Sender);
 	void __fastcall acAboutExecute(TObject *Sender);
     void __fastcall acExperimentImportCalibrationExecute(TObject *Sender);
@@ -440,6 +442,15 @@ __published:	// IDE-managed Components
 	void __fastcall stdValuesGridSetEditText(TObject *Sender, int ACol, int ARow, const UnicodeString Value);
 	void __fastcall chbShakeModeChange(TObject *Sender);
 	void __fastcall chbReadSpeedChange(TObject *Sender);
+//	void __fastcall UnknownsGridSelectCell(TObject *Sender, TMouseButton Button, TShiftState Shift, int X, int Y);
+//	void __fastcall UnknownsGridGetEditText(TObject *Sender, int ACol, int ARow, UnicodeString &Value);
+	void __fastcall UnknownsGridEnter(TObject *Sender);
+	void __fastcall UnknownsGridExit(TObject *Sender);
+//	void __fastcall UnknownsGridEditText(TObject *Sender, int ACol, int ARow, const UnicodeString Value);
+	void __fastcall UnknownsGridSetEditText(TObject *Sender, TLMDGridChangeFlags AChangedFlags);
+
+
+
 
 public:
 	void __fastcall setDevice(PElisaDevice pDev);

@@ -86,7 +86,7 @@ object MainForm: TMainForm
     TabPosition = tpBottom
     ThemeGlobalMode = True
     DockOrientation = doNoOrient
-    ActivePage = tabUnknowns
+    ActivePage = tabStandards
     object tabParamRead: TLMDTabSheet
       Left = 4
       Top = 4
@@ -935,6 +935,11 @@ object MainForm: TMainForm
         OnGetEditText = stdValuesGridGetEditText
         OnSelectCell = stdValuesGridSelectCell
         OnSetEditText = stdValuesGridSetEditText
+        ColWidths = (
+          64
+          64
+          64
+          64)
       end
     end
     object tabCurveStd: TLMDTabSheet
@@ -1003,7 +1008,7 @@ object MainForm: TMainForm
           Left = 837
           Top = 3
           Width = 64
-          Height = 16
+          Height = 509
           Align = alRight
           Anchors = [akTop, akRight]
           Caption = 'R2 = 0.000'
@@ -1015,6 +1020,7 @@ object MainForm: TMainForm
           Font.Style = [fsBold]
           ParentColor = False
           ParentFont = False
+          ExplicitHeight = 16
         end
         object curveSerie: TFastLineSeries
           Legend.Visible = False
@@ -1022,7 +1028,7 @@ object MainForm: TMainForm
           SeriesColor = 15652653
           ShowInLegend = False
           Title = 'Curve'
-          ValueFormat = '#,##0.#'
+          ValueFormat = '###0.#'
           LinePen.Color = 15652653
           LinePen.Width = 2
           LinePen.Fill.Gradient.EndColor = clGray
@@ -1046,7 +1052,7 @@ object MainForm: TMainForm
           Marks.Callout.Length = 20
           Marks.Color = 5066061
           Title = 'Points'
-          ValueFormat = '#,##0.000'
+          ValueFormat = '###0.000'
           ClickableLine = False
           Pointer.Brush.Color = 541936973
           Pointer.FullGradient = True
@@ -1114,7 +1120,7 @@ object MainForm: TMainForm
         object QZone1: TLineSeries
           ColorEachLine = False
           SeriesColor = 4227327
-          Title = 'Cutoff Positivo'
+          Title = 'Limite Superior'
           Brush.BackColor = clDefault
           LinePen.Width = 2
           Pointer.InflateMargins = True
@@ -1126,7 +1132,7 @@ object MainForm: TMainForm
         end
         object QZone2: TLineSeries
           SeriesColor = 16512
-          Title = 'Cutoff Negativo'
+          Title = 'Limite Infeior'
           Brush.BackColor = clDefault
           LinePen.Width = 2
           Pointer.InflateMargins = True
@@ -1348,6 +1354,9 @@ object MainForm: TMainForm
         Align = alClient
         ParentColor = True
         TabOrder = 0
+        OnChange = unknownsGridSetEditText
+        OnEnter = UnknownsGridEnter
+        OnExit = UnknownsGridExit
         object colUnknownPlateName: TLMDGridTextColumn
           Width = 150
           Position = 0
@@ -1371,9 +1380,16 @@ object MainForm: TMainForm
           Title.Caption = 'ID'
           ReadOnly = True
         end
-        object colUnknownPosProcessValue: TLMDGridFloatColumn
+        object colSampleID: TLMDGridTextColumn
           Width = 100
           Position = 3
+          SortingAllowed = False
+          Alignment = taCenter
+          Title.Caption = 'SampleID'
+        end
+        object colUnknownPosProcessValue: TLMDGridFloatColumn
+          Width = 100
+          Position = 4
           SortingAllowed = False
           Alignment = taRightJustify
           Title.Caption = 'Absorb'#226'ncias'
@@ -1387,7 +1403,7 @@ object MainForm: TMainForm
         end
         object colUnknownConcentrationValue: TLMDGridFloatColumn
           Width = 100
-          Position = 4
+          Position = 5
           SortingAllowed = False
           Alignment = taRightJustify
           Title.Caption = 'Concentra'#231#245'es'
@@ -1401,7 +1417,7 @@ object MainForm: TMainForm
         end
         object colUnknownStdDev: TLMDGridFloatColumn
           Width = 65
-          Position = 5
+          Position = 6
           SortingAllowed = False
           Alignment = taRightJustify
           Title.Caption = 'Desv. Pad.'
@@ -1416,7 +1432,7 @@ object MainForm: TMainForm
         end
         object colUnknownCoefVar: TLMDGridFloatColumn
           Width = 60
-          Position = 6
+          Position = 7
           SortingAllowed = False
           Alignment = taRightJustify
           Title.Caption = 'CV%'
@@ -1433,7 +1449,7 @@ object MainForm: TMainForm
         end
         object colUnknownInterpretValue: TLMDGridTextColumn
           Width = 120
-          Position = 7
+          Position = 8
           SortingAllowed = False
           Alignment = taCenter
           Title.Caption = 'Interpreta'#231#227'o'
@@ -1561,7 +1577,7 @@ object MainForm: TMainForm
         Style.EmptyBannerFont.Height = -11
         Style.EmptyBannerFont.Name = 'Tahoma'
         Style.EmptyBannerFont.Style = []
-        Options = [opHeaderVertLine, opIndicatorHorzLine, opVertLine, opHorzLine, opRangeSelect, opDrawFocusSelected, opColSizing, opThumbTracking, opShowIndicator, opShowHeader, opConfirmDeleteRow, opCancelOnExit, opHighlightHeaders]
+        Options = [opHeaderVertLine, opIndicatorHorzLine, opVertLine, opHorzLine, opRangeSelect, opDrawFocusSelected, opColSizing, opEditing, opThumbTracking, opShowIndicator, opShowHeader, opConfirmDeleteRow, opCancelOnExit, opHighlightHeaders]
         Align = alClient
         ParentColor = True
         TabOrder = 0
@@ -1824,8 +1840,8 @@ object MainForm: TMainForm
       'begin'
       ''
       'end.')
-    Left = 352
-    Top = 320
+    Left = 424
+    Top = 256
     Datasets = <
       item
         DataSet = frxUserDataSetResults

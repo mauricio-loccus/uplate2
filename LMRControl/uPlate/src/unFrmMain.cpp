@@ -1436,7 +1436,7 @@ void __fastcall TMainForm::DoProcessResults()
 	unElements = std::distance(bkpUnknows.begin(), last);
 	bkpUnknows.resize(unElements);
 
-	for (WellMatrixList::size_type i = 0, plateIdx = 0, rowPos = 0; i < wellMatrixListRef.size(); ++i, plateIdx++)
+	for (WellMatrixList::size_type i = 0, plateIdx = 0, rowPos = 0; i < wellMatrixListRef.size(); ++i, plateIdx++)   //logica para preencher os unkown wells
 	{
 		WellList unkWells;
 		wellMatrixListRef[i].filterWellsByType(TWellType::wlUnknown, unkWells);
@@ -1524,6 +1524,7 @@ void __fastcall TMainForm::DoProcessResults()
 			unknownsGrid->Cells[colUnknownPlateName->Position][rowPos] = getNode(plateIdx+101)->Text;
 			unknownsGrid->Cells[colUnknownCoord->Position][rowPos] = wellInfo;
 			unknownsGrid->Cells[colUnknownWellID->Position][rowPos] = Format(TEXT("%2.2d"), ARRAYOFCONST(((*cit)->ID)));
+			unknownsGrid->Cells[colSampleID->Position][rowPos] = "";//Format(TEXT("%2.2d"),ARRAYOFCONST(((*cit)->SampleID)));  // Deixe em branco para o usuário preencher
 			unknownsGrid->Cells[colUnknownPosProcessValue->Position][rowPos] = (*cit)->RawBlankReducedValue;
 			unknownsGrid->Cells[colUnknownConcentrationValue->Position][rowPos] = (*cit)->ConcentrationValue;
 			unknownsGrid->Cells[colUnknownStdDev->Position][rowPos] = (*cit)->StdDeviation;
@@ -1544,33 +1545,34 @@ void __fastcall TMainForm::DoProcessResults()
 	ReadRawGrid->DataRowCount = m_elisaDeviceParams->PlateRows * m_elisaDeviceParams->PlateCols * wellMatrixListRef.size();
 
 	ReadRawGrid->BeginUpdate();
-	for (Integer plateNumber = 0; plateNumber < wellMatrixListRef.size(); plateNumber++, plateIdx++)
-	{
-		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
-		{
-			for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++, rowPos++)
-			{
-				TWell& w = (wellMatrixListRef[plateNumber])[row][col];
+for (Integer plateNumber = 0; plateNumber < wellMatrixListRef.size(); plateNumber++, plateIdx++)
+{
+    for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
+    {
+        for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++, rowPos++)
+        {
+            TWell& w = (wellMatrixListRef[plateNumber])[row][col];
 
-				String wellInfo;
-				wellInfo.sprintf(TEXT("%c%2.2d"), w.Row+'A', w.Col+1);
+            String wellInfo;
+            wellInfo.sprintf(TEXT("%c%2.2d"), w.Row+'A', w.Col+1);
 
-				ReadRawGrid->Cells[colReadRawPlateName->Position][rowPos] = getNode(plateIdx+101)->Text;
-				ReadRawGrid->Cells[colReadRawCoord->Position][rowPos] = wellInfo;
-				ReadRawGrid->Cells[colReadWellID->Position][rowPos] = Format(TEXT("%2.2d"), ARRAYOFCONST((w.ID)));
-				ReadRawGrid->Cells[colReadRawType->Position][rowPos]  = w.typeToString();
-				ReadRawGrid->Cells[colReadRawValue->Position][rowPos] = w.RawValue;
-				ReadRawGrid->Cells[colReadRawBlankReducedValue->Position][rowPos] = w.RawBlankReducedValue;
-				ReadRawGrid->Cells[colPostprocessedValue->Position][rowPos] = (Double)w.ConcentrationValue;
-				ReadRawGrid->Cells[colStdDeviation->Position][rowPos] = w.StdDeviation;
-				ReadRawGrid->Cells[colCoefVariation->Position][rowPos] = w.CoefVariation;
-				ReadRawGrid->Cells[colReadRawInterpretValue->Position][rowPos] = w.Interpret;
+            ReadRawGrid->Cells[colReadRawPlateName->Position][rowPos] = getNode(plateIdx+101)->Text;
+            ReadRawGrid->Cells[colReadRawCoord->Position][rowPos] = wellInfo;
+			ReadRawGrid->Cells[colReadWellID->Position][rowPos] = Format(TEXT("%2.2d"), ARRAYOFCONST((w.ID)));
+//			ReadRawGrid->Cells[colSampleID->Position][rowPos] = "";  // Deixe em branco para o usuário preencher
+			ReadRawGrid->Cells[colReadRawType->Position][rowPos]  = w.typeToString();
+			ReadRawGrid->Cells[colReadRawValue->Position][rowPos] = w.RawValue;
+			ReadRawGrid->Cells[colReadRawBlankReducedValue->Position][rowPos] = w.RawBlankReducedValue;
+			ReadRawGrid->Cells[colPostprocessedValue->Position][rowPos] = (Double)w.ConcentrationValue;
+			ReadRawGrid->Cells[colStdDeviation->Position][rowPos] = w.StdDeviation;
+			ReadRawGrid->Cells[colCoefVariation->Position][rowPos] = w.CoefVariation;
+			ReadRawGrid->Cells[colReadRawInterpretValue->Position][rowPos] = w.Interpret;
 
 				if (w.Timestamp != TTime(0))
 					ReadRawGrid->Cells[colReadRawTimestampValue->Position][rowPos] = FormatDateTime("hh:nn:ss", w.Timestamp);
-			}
-		}
-	}
+        }
+    }
+}
 	ReadRawGrid->EndUpdate();
 	ReadRawGrid->Enabled = True;
 
@@ -1588,7 +1590,7 @@ void __fastcall TMainForm::DoProcessResults()
 	acRawResult->Enabled = True;
 	acResultsRaw->Enabled = True;
 	acResultUnknows->Enabled = True;
-    OptExperimentSave->Enabled = True;
+	OptExperimentSave->Enabled = True;
 	OptExperimentExportCSV->Enabled = True;
 	OptExportarValoresBrutos->Enabled = True;
 
@@ -3811,6 +3813,12 @@ void __fastcall TMainForm::frxUserDataSetUnknowsGetValue(const UnicodeString Var
 		return;
 	}
 
+		// Novo código para a coluna SampleID
+	if ("SampleID" == VarName)
+	{
+		Value = unknownsGrid->Cells[colSampleID->Position][frxUserDataSetUnknows->RecNo];
+		 return;
+	}
 	if ("Absorbance" == VarName)
 	{
 		Value = unknownsGrid->Cells[colUnknownPosProcessValue->Position][frxUserDataSetUnknows->RecNo];
@@ -3854,7 +3862,7 @@ void __fastcall TMainForm::acResultUnknowsExecute(TObject *Sender)      // expor
 void __fastcall TMainForm::lmdstdValuesGridChange(TObject *Sender, TLMDGridChangeFlags AChangedFlags)
 {
 	if (colStdValue && lmdstdValuesGrid->CurrentColumn != colStdValue->Position)
-        lmdstdValuesGrid->CurrentColumn = colStdValue->Position;
+		lmdstdValuesGrid->CurrentColumn = colStdValue->Position;
 }
 //---------------------------------------------------------------------------
 
@@ -4486,7 +4494,7 @@ void __fastcall TMainForm::acSaveExperimentExecute(TObject *Sender)
     FileSaveDialog->InitialDir = AppDataDir;
     FileSaveDialog->Encodings->Assign(encodings);
 
-    if (!FileSaveDialog->Execute(this->Handle))
+	if (!FileSaveDialog->Execute(this->Handle))
     {
         FileSaveDialog->Free();
         return;
@@ -4808,6 +4816,96 @@ void __fastcall TMainForm::stdValuesGridDrawCell(TObject *Sender, int ACol, int 
 }
 //---------------------------------------------------------------------------
 
+/*void __fastcall TMainForm::unknownsGridSetEditText(TObject *Sender, int ACol, int ARow, const String Value)
+{
+	if (ACol == colSampleID->Position)
+	{
+		ShowMessage("SampleID alterado: " + Value);
+	}
+}
+  */
+
+
+//void __fastcall TMainForm::unknownsGridSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect)
+
+//---------------------------------------------------------------------------
+
+/*void __fastcall TMainForm::unknownsGridGetEditText(TObject *Sender, int ACol, int ARow, UnicodeString &Value)
+{
+	for (Integer i = 0; i < unknownsGrid->ControlCount; i++)
+	{
+		if (unknownsGrid->Controls[i]->ClassName() == "TInplaceEdit")
+		{
+			TInplaceEdit *ie = dynamic_cast<TInplaceEdit *>(unknownsGrid->SampleID[i]);
+
+			ie->Alignment = System::Classes::taCenter;
+		}
+	}
+}*/
+//---------------------------------------------------------------------------
+
+
+void __fastcall TMainForm::UnknownsGridEnter(TObject *Sender)
+{
+	m_editingCol = -1;
+	m_editingRow = -1;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::UnknownsGridExit(TObject *Sender)
+{
+	if (m_editingCol != -1 && m_editingRow != -1)
+	{
+   unknownsGrid->Col = m_editingCol;
+   unknownsGrid->Row = m_editingRow;
+	}
+}
+//---------------------------------------------------------------------------
+
+//void __fastcall TMainForm::unknownsGridSetEditText(TObject *Sender, int ACol, int ARow, const UnicodeString Value)
+void __fastcall TMainForm::UnknownsGridSetEditText(TObject *Sender, TLMDGridChangeFlags AChangedFlags)
+
+	if (!unknownsGrid->EditorMode)
+	{
+		try
+		{
+			WellMatrixList& wellMatrixListRef = *TWellMatrixSingleton::instance();
+
+			Integer cellId = unknownsGrid->Cells[1][ARow].ToInt();
+
+			TWell w;
+
+			w.PlateNumber = 0;
+			w.ID = cellId;
+			w.Type = TWellType::wlSampleID;
+
+			WellListPointers wl = wellMatrixListRef.front().getAllReplicas(w);
+
+			if (!wl.empty())
+			{
+				for (WellListPointers::iterator it = wl.begin(); it < wl.end(); ++it)
+					(*it)->SampleID = v;
+			}
+		}
+		{
+		{
+	  unknownsGrid->Col = m_editingCol;
+	  unknownsGrid->Row = m_editingRow;
+	  unknownsGrid->EditorMode = True;
+			return;
+		}
+
+		m_editingCol = -1;
+		m_editingRow = -1;
+
+		return;
+	}
+
+	m_editingCol = ACol;
+	m_editingRow = ARow;
+
+
+
 void __fastcall TMainForm::stdValuesGridSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect)
 {
 	if (ACol == 3)
@@ -4925,6 +5023,9 @@ void __fastcall TMainForm::chbReadSpeedChange(TObject *Sender)
 	m_elisaDeviceParams->ReadSpeed = static_cast<TElisaReadSpeed>(chbReadSpeed->ItemIndex);
 }
 //---------------------------------------------------------------------------
+
+
+
 
 
 
