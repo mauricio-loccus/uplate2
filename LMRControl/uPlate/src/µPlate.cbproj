@@ -6,7 +6,7 @@
         <AppType>Application</AppType>
         <MainSource>µPlate.cpp</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Release</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>1</TargetedPlatforms>
     </PropertyGroup>
@@ -115,7 +115,7 @@
         <BCC_IntegerSizedEnums>false</BCC_IntegerSizedEnums>
         <BCC_AddProjectDirToIncludePath>true</BCC_AddProjectDirToIncludePath>
         <BCC_IncludePath>C:\Projetos\Componentes_Loccus\zylserialport;$(BCC_IncludePath)</BCC_IncludePath>
-        <IncludePath>..\..\3rdparty\MathEvaluator;C:\work\vcl;C:\Projetos\Componentes_Loccus\FastReports\LibD21;C:\Projetos\Componentes_Loccus\MathEvaluator;C:\lib\SDL\basepack;$(IncludePath)</IncludePath>
+        <IncludePath>..\..\3rdparty\MathEvaluator;C:\work\vcl;C:\Projetos\Componentes_Loccus\FastReports\LibD21;C:\Projetos\Componentes_Loccus\MathEvaluator;C:\lib\SDL\basepack;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\-X7;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\.X7;$(IncludePath)</IncludePath>
         <BCC_wcsu>false</BCC_wcsu>
         <PackageImports>adort;$(PackageImports)</PackageImports>
         <VerInfo_Keys>CompanyName=Loccus Biotecnologia;FileDescription=Programa para controle remoto da leitora de microplacas ELISA;FileVersion=1.0.1.0;InternalName=LRM96 Remote;LegalCopyright=Copyright © 2006-2019 - Loccus do Brasil Ltda;LegalTrademarks=;OriginalFilename=LRM96 Remote.exe;ProductName=LRM96 Remote;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
@@ -125,7 +125,7 @@
         <BCC_MonitorGlobalAndStackData>true</BCC_MonitorGlobalAndStackData>
         <LinkPackageStatics>ZylSerialPortPack.lib;sdlmathpack_rt_103X7.lib;sdlbasepack_rt_103X7.lib;sdlguipack_rt_103X7.lib</LinkPackageStatics>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <ILINK_LibraryPath>$(BDS)\lib\Win32\debug\;$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;D:\Users\rogerio.moreira.LOCCUSBR\Documents\Embarcadero\Studio\15.0/BPL\;C:\Users\rogerio.moreira\Documents\Embarcadero\Studio\15.0/BPL\;G:\Users\rogerio.moreira\Documents\Embarcadero\Studio\15.0\BPL\$(PLATFORM);$(BDS)\lib\SDL\X7\;E:\Program Files (x86)\FastReports\LibD21\;C:\Program Files (x86)\FastReports\LibD21\;C:\LMD2015\lib\d21\Win32\;$(BDSUSERDIR)/BPL\;$(BDS)\lib\win32\$(config)\;$(BDSUSERDIR)/BPL;$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;$(BDS)\ObjRepos\EN\Cpp\;crc\;C:\Program Files (x86)\Delphi7\Lib;C:\Program Files (x86)\Delphi7\Lib\IDL45;C:\Program Files (x86)\Delphi7\Lib\Debug\IDL45</ILINK_LibraryPath>
+        <ILINK_LibraryPath>$(BDS)\lib\Win32\debug\;$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;D:\Users\rogerio.moreira.LOCCUSBR\Documents\Embarcadero\Studio\15.0/BPL\;C:\Users\rogerio.moreira\Documents\Embarcadero\Studio\15.0/BPL\;G:\Users\rogerio.moreira\Documents\Embarcadero\Studio\15.0\BPL\$(PLATFORM);$(BDS)\lib\SDL\X7\;E:\Program Files (x86)\FastReports\LibD21\;C:\Program Files (x86)\FastReports\LibD21\;C:\LMD2015\lib\d21\Win32\;$(BDSUSERDIR)/BPL\;$(BDS)\lib\win32\$(config)\;$(BDSUSERDIR)/BPL;$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;$(BDS)\ObjRepos\EN\Cpp\;crc\;C:\Program Files (x86)\Delphi7\Lib;C:\Program Files (x86)\Delphi7\Lib\IDL45;C:\Program Files (x86)\Delphi7\Lib\Debug\IDL45;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\-X7;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\.X7</ILINK_LibraryPath>
         <BT_BuildType>Debug</BT_BuildType>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
     </PropertyGroup>
@@ -135,13 +135,13 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <IncludePath>..\..\3rdparty\MathEvaluator;C:\work\vcl;C:\Projetos\Componentes_Loccus\FastReports\LibD21;C:\Projetos\Componentes_Loccus\MathEvaluator;C:\lib\SDL\basepack;$(IncludePath)</IncludePath>
+        <IncludePath>..\..\3rdparty\MathEvaluator;C:\work\vcl;C:\Projetos\Componentes_Loccus\FastReports\LibD21;C:\Projetos\Componentes_Loccus\MathEvaluator;C:\lib\SDL\basepack;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\-X7;$(IncludePath)</IncludePath>
         <VerInfo_Keys>CompanyName=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
         <BCC_AddProjectDirToIncludePath>true</BCC_AddProjectDirToIncludePath>
         <BCC_IncludePath>C:\Projetos\Componentes_Loccus\zylserialport;..\..\3rdparty\MathEvaluator;C:\work\vcl;C:\Projetos\Componentes_Loccus\FastReports\LibD21;C:\Projetos\Componentes_Loccus\MathEvaluator;C:\lib\SDL\basepack;$(BCC_IncludePath)</BCC_IncludePath>
         <PackageImports>adortl;APogeelib;bcbie;bcbsmp;bindcomp;bindcompdbx;bindcompfmx;bindcompvcl;bindengine;CloudService;CodeSiteExpressPkg;CustomIPTransport;dbexpress;dbrtl;dbxcds;DbxClientDriver;DbxCommonDriver;DBXInterBaseDriver;DBXMySQLDriver;DBXSqliteDriver;dsnap;dsnapcon;dsnapxml;emsclient;emsclientfiredac;FireDAC;FireDACADSDriver;FireDACASADriver;FireDACCommon;FireDACCommonDriver;FireDACIBDriver;FireDACMSAccDriver;FireDACMySQLDriver;FireDACODBCDriver;FireDACPgDriver;FireDACSqliteDriver;flickerNewBkg;fmx;fmxase;fmxdae;fmxFireDAC;fmxobj;FMXTee;FmxTeeUI;frx21;frxDB21;frxe21;frxTee;ibxpress;IndyCore;IndyIPClient;IndyIPCommon;IndyIPServer;IndyProtocols;IndySystem;inet;inetdb;inetdbxpress;Intraweb;lmdrtbar;lmdrtchart;lmdrtchartdb;lmdrtcore;lmdrtdialog;lmdrtdocking;lmdrtfx;lmdrtgrid;lmdrtinspector;lmdrtl;lmdrtplugin;lmdrtprint;lmdrtrtf;lmdrtrtfdb;lmdrtrtlx;lmdrtsearch;lmdrtsearchdb;lmdrtshell;lmdrtstorage;lmdrtsys;lmdrtthemes;lmdrttools;lmdrttoolsdb;lmdrttxt;lmdrttxtdb;lmdrtweb;MetropolisUILiveTile;RESTBackendComponents;RESTComponents;rtl;sdlbasepack_rt_104X7;sdlchartpack_104X7;sdlchartpack_rt_104X7;sdlguipack_104X7;sdlguipack_rt_104X7;sdlmathpack_104X7;sdlmathpack_rt_104X7;soapmidas;soaprtl;soapserver;svn;Tee;TeeDB;TeeUI;tethering;vcl;vclactnband;vcldb;vcldsnap;vclFireDAC;vclib;vclie;vclimg;VCLRESTComponents;vclribbon;VclSmp;vcltouch;vclx;xmlrtl</PackageImports>
-        <ILINK_LibraryPath>$(BDS)\lib\Win32\debug\;$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;D:\Users\rogerio.moreira.LOCCUSBR\Documents\Embarcadero\Studio\15.0/BPL\;C:\Users\rogerio.moreira\Documents\Embarcadero\Studio\15.0/BPL\;G:\Users\rogerio.moreira\Documents\Embarcadero\Studio\15.0\BPL\$(PLATFORM);$(BDS)\lib\SDL\X7\;E:\Program Files (x86)\FastReports\LibD21\;C:\Program Files (x86)\FastReports\LibD21\;C:\LMD2015\lib\d21\Win32\;$(BDSUSERDIR)/BPL\;$(BDS)\lib\win32\$(config)\;$(BDSUSERDIR)/BPL;$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;$(BDS)\ObjRepos\EN\Cpp\;crc\;C:\Program Files (x86)\Delphi7\Lib;C:\Program Files (x86)\Delphi7\Lib\IDL45;C:\Program Files (x86)\Delphi7\Lib\Debug\IDL45</ILINK_LibraryPath>
-        <LinkPackageStatics>rtl.lib;vcl.lib;xmlrtl.lib;vclactnband.lib;vclx.lib;VclSmp.lib;vclimg.lib;frx21.lib;fs21.lib;frxe21.lib;lmdrtl.lib;lmdrtrtlx.lib;lmdrtcore.lib;lmdrttools.lib;lmdrtprint.lib;lmdrtgrid.lib;lmdrtthemes.lib;vclribbon.lib;vcldb.lib;dbrtl.lib;sdlmathpack_rt_104X7.lib;sdlbasepack_rt_104X7.lib;IndySystem.lib;IndyProtocols.lib;IndyCore.lib;dsnap.lib;dbexpress.lib;DbxCommonDriver.lib;DBXSqliteDriver.lib;ZylSerialPortPack.lib;lmdrttoolsdb.lib;sdlguipack_rt_104X7.lib;Tee.lib;Teeui.lib;sdlmathpack_rt_103X7.lib;sdlbasepack_rt_103X7.lib</LinkPackageStatics>
+        <ILINK_LibraryPath>$(BDS)\lib\Win32\debug\;$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;D:\Users\rogerio.moreira.LOCCUSBR\Documents\Embarcadero\Studio\15.0/BPL\;C:\Users\rogerio.moreira\Documents\Embarcadero\Studio\15.0/BPL\;G:\Users\rogerio.moreira\Documents\Embarcadero\Studio\15.0\BPL\$(PLATFORM);$(BDS)\lib\SDL\X7\;E:\Program Files (x86)\FastReports\LibD21\;C:\Program Files (x86)\FastReports\LibD21\;C:\LMD2015\lib\d21\Win32\;$(BDSUSERDIR)/BPL\;$(BDS)\lib\win32\$(config)\;$(BDSUSERDIR)/BPL;$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;$(BDS)\ObjRepos\EN\Cpp\;crc\;C:\Program Files (x86)\Delphi7\Lib;C:\Program Files (x86)\Delphi7\Lib\IDL45;C:\Program Files (x86)\Delphi7\Lib\Debug\IDL45;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\-X7</ILINK_LibraryPath>
+        <LinkPackageStatics>rtl.lib;vcl.lib;xmlrtl.lib;vclactnband.lib;vclx.lib;VclSmp.lib;vclimg.lib;frx21.lib;fs21.lib;frxe21.lib;lmdrtl.lib;lmdrtrtlx.lib;lmdrtcore.lib;lmdrttools.lib;lmdrtprint.lib;lmdrtgrid.lib;lmdrtthemes.lib;vclribbon.lib;vcldb.lib;dbrtl.lib;sdlmathpack_rt_104X7.lib;sdlbasepack_rt_104X7.lib;IndySystem.lib;IndyProtocols.lib;IndyCore.lib;dsnap.lib;dbexpress.lib;DbxCommonDriver.lib;DBXSqliteDriver.lib;ZylSerialPortPack.lib;lmdrttoolsdb.lib;sdlguipack_rt_104X7.lib;Tee.lib;Teeui.lib;sdlmathpack_rt_103X7.lib;sdlbasepack_rt_103X7.lib;sdlguipack_rt_103X7.lib</LinkPackageStatics>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
     </PropertyGroup>
     <ItemGroup>
@@ -824,11 +824,11 @@
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="ProjectOSXDebug">
-                    <Platform Name="OSXARM64">
+                    <Platform Name="OSX64">
                         <RemoteDir>..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
-                    <Platform Name="OSX64">
+                    <Platform Name="OSXARM64">
                         <RemoteDir>..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
