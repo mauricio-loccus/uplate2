@@ -889,7 +889,7 @@ void __fastcall TMainForm::DoProcessConcentrations()
 
 	cbChartScaleChange(NULL);
 }
-
+//calculo de CP e CN
 void __fastcall TMainForm::DoProcessCPnCNs()
 {
 	using System::Sysutils::Format;
@@ -900,26 +900,31 @@ void __fastcall TMainForm::DoProcessCPnCNs()
 
 	WellListPointers cpWells;
 	WellListPointers cnWells;
+	WellListPointers stdWells;    // wlConcentrationStd
 
+	// Preencher as listas cpWells, cnWells e stdWells
 	for (WellMatrixList::size_type i = 0; i < wellMatrixListRef.size(); ++i)
 	{
 		WellListPointers cpwl = wellMatrixListRef[i].filterWellsPointersByType(TWellType::wlPositiveControl);
-
 		if (!cpwl.empty())
 			std::copy(cpwl.begin(), cpwl.end(), std::back_inserter(cpWells));
 
 		WellListPointers cnwl = wellMatrixListRef[i].filterWellsPointersByType(TWellType::wlNegativeControl);
+		if (!cnwl.empty())
+			std::copy(cnwl.begin(), cnwl.end(), std::back_inserter(cnWells));
 
-		if (cnwl.empty())
-			continue;
-
-		std::copy(cnwl.begin(), cnwl.end(), std::back_inserter(cnWells));
+		WellListPointers stdwl = wellMatrixListRef[i].filterWellsPointersByType(TWellType::wlConcentrationStd);
+		if (!stdwl.empty())
+			std::copy(stdwl.begin(), stdwl.end(), std::back_inserter(stdWells));
 	}
 
 	Single limit1Val = 0;
+	Double cpAvg = 0, cnAvg = 0, stdAvg = 0;
 
-	if (!cpWells.empty())  //a equação está fixa para analisar as variáveis CN e CP. Falta criar a variável Cutoff para exibir o índice
+	// Cálculo de CP
+	if (!cpWells.empty())
 	{
+		accumulated = 0;
 		for (WellListPointers::iterator it = cpWells.begin(); it != cpWells.end(); ++it)
 		{
 			if (cbOrigin->ItemIndex == 0)
@@ -927,8 +932,12 @@ void __fastcall TMainForm::DoProcessCPnCNs()
 			else
 				accumulated += (*it)->ConcentrationValue;
 		}
+		cpAvg = accumulated / (Double)cpWells.size();
+	}
 
-		Double cpAvg = accumulated / (Double)cpWells.size();
+	// Cálculo de CN
+	if (!cnWells.empty())
+	{
 		accumulated = 0;
 		for (WellListPointers::iterator it = cnWells.begin(); it != cnWells.end(); ++it)
 		{
@@ -937,52 +946,41 @@ void __fastcall TMainForm::DoProcessCPnCNs()
 			else
 				accumulated += (*it)->ConcentrationValue;
 		}
-
-		Double cnAvg = accumulated / (Double)cnWells.size();
-
-		loccusEval.AddVariable(LME::Variable(TEXT("CP"), cpAvg));
-		loccusEval.AddVariable(LME::Variable(TEXT("CN"), cnAvg));
-		// Equações para encontrar os limites
-		loccusEval.SetExpression(edZone1Limit->Text.w_str());
-		loccusEval.Evaluate();
-
-		limit1Val = loccusEval.GetCurrValue();
-		lbZone1Limit->Caption = Format(_T("Limite Zona 1: %5.5f"), ARRAYOFCONST((limit1Val)));
+		cnAvg = accumulated / (Double)cnWells.size();
 	}
 
-	accumulated = 0;
-
-	Single limit2Val = 0;
-
-	if (!cpWells.empty())
+	// Cálculo de STD (Padrões)
+	if (!stdWells.empty())
 	{
-		for (WellListPointers::iterator it = cpWells.begin(); it != cpWells.end(); ++it)
+		accumulated = 0;
+		for (WellListPointers::iterator it = stdWells.begin(); it != stdWells.end(); ++it)
 		{
 			if (cbOrigin->ItemIndex == 0)
 				accumulated += (*it)->RawValue;
 			else
 				accumulated += (*it)->ConcentrationValue;
 		}
+		stdAvg = accumulated / (Double)stdWells.size();
+	}
 
-		Double cpAvg = accumulated / (Double)cpWells.size();
-        accumulated = 0;
-		for (WellListPointers::iterator it = cnWells.begin(); it != cnWells.end(); ++it)
-		{
-			if (cbOrigin->ItemIndex == 0)
-				accumulated += (*it)->RawValue;
-			else
-				accumulated += (*it)->ConcentrationValue;
-		}
-
-		Double cnAvg = accumulated / (Double)cnWells.size();
+	// Adicionar variáveis no loccusEval e calcular limites
+	if (!cpWells.empty() && !cnWells.empty())
+	{
 		loccusEval.AddVariable(LME::Variable(TEXT("CP"), cpAvg));
 		loccusEval.AddVariable(LME::Variable(TEXT("CN"), cnAvg));
+		if (!stdWells.empty())
+			loccusEval.AddVariable(LME::Variable(TEXT("STD"), stdAvg));
 
-		// Equações para encontrar os limites
+		// Cálculo do limite 1
+		loccusEval.SetExpression(edZone1Limit->Text.w_str());
+		loccusEval.Evaluate();
+		limit1Val = loccusEval.GetCurrValue();
+		lbZone1Limit->Caption = Format(_T("Limite Zona 1: %5.5f"), ARRAYOFCONST((limit1Val)));
+
+		// Cálculo do limite 2
 		loccusEval.SetExpression(edZone2Limit->Text.w_str());
 		loccusEval.Evaluate();
-
-		limit2Val = loccusEval.GetCurrValue();
+		Single limit2Val = loccusEval.GetCurrValue();
 		lbZone2Limit->Caption = Format(_T("Limite Zona 2: %5.5f"), ARRAYOFCONST((limit2Val)));
 	}
 
@@ -995,7 +993,7 @@ void __fastcall TMainForm::DoProcessCPnCNs()
 
 		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
 		{
-            TWell& w = refMatrix[row].front();
+			TWell& w = refMatrix[row].front();
 
 			for (WellList::iterator it = refMatrix[row].begin(); it != refMatrix[row].end(); it++)
 			{
