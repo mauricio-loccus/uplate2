@@ -2,6 +2,7 @@
 #include <Vcl.h>
 #include <System.Classes.hpp>
 #include <System.SysUtils.hpp>
+#include <SDL_math2.hpp>
 #include <limits>
 
 #pragma hdrstop
@@ -11,7 +12,6 @@
 
 #include "unFrmMain.h"
 #include "unLoccusLinFit.h"
-
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma link "LMDVistaDialogs"
@@ -25,6 +25,7 @@ TMyDataModule *MyDataModule;
 __fastcall TMyDataModule::TMyDataModule(TComponent* Owner)
 	: TDataModule(Owner)
 {
+curveFit = new TCurveFit(this);
 }
 //---------------------------------------------------------------------------
 

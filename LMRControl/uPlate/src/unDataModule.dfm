@@ -7279,10 +7279,6 @@ object MyDataModule: TMyDataModule
     Left = 32
     Top = 88
   end
-  object curveFit: TCurveFit
-    Left = 760
-    Top = 24
-  end
   object ZylSerialPort: TZylSerialPort
     BaudRate = br115200
     EnableRTSOnOpen = False

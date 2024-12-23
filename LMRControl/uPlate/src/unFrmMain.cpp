@@ -919,6 +919,7 @@ void __fastcall TMainForm::DoProcessCPnCNs()
 	}
 
 	Single limit1Val = 0;
+	Single limit2Val = 0;
 	Double cpAvg = 0, cnAvg = 0, stdAvg = 0;
 
 	// Cálculo de CP

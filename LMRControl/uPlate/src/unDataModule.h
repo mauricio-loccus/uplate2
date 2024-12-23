@@ -33,10 +33,10 @@ class TMyDataModule : public TDataModule
 {
 __published:	// IDE-managed Components
 	TIdEncoderUUE *IdEncoderUUE;
+	TCurveFit *curveFit;
 	TLMDPNGImageList *pngImageList;
     TXMLDocument *XMLDocument;
     TIdDecoderUUE *IdDecoderUUE;
-    TCurveFit *curveFit;
     TZylSerialPort *ZylSerialPort;
 	TLMDFileSaveDialog *FileSaveDialog;
 
