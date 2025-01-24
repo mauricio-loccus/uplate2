@@ -534,7 +534,7 @@ private:	// User declarations
 
 	void __fastcall InitCPCNParams();
 
-    void __fastcall LoadResultsBranch(_di_IXMLNode ResultsNode);
+	void __fastcall LoadResultsBranch(_di_IXMLNode ResultsNode);
 	void __fastcall CreateResultsBranch(_di_IXMLNode ResultsNode);
 
     void __fastcall CalculateForReplicas(const TWellType type);

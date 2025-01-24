@@ -197,18 +197,18 @@ void __fastcall TKineticControler::DoAverageRateAlgorithm(TWellMatrix& wm)
 
 	for (KineticReadList::iterator kit = readList.begin(); kit != readList.end(); ++kit)
 	{
-		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
+		for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++)
 		{
-			for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++)
+			for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
 				raw[row][col] += (*kit)[row][col];
 		}
 	}
 
 	TWell& w = wm[0][0];
 
-	for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
+	for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++)
 	{
-		for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++)
+		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
 		{
 			w = wm[row][col];
 			w.RawValue = raw[row][col] / totalIntervalValue;
@@ -218,9 +218,10 @@ void __fastcall TKineticControler::DoAverageRateAlgorithm(TWellMatrix& wm)
 
 void __fastcall TKineticControler::DoMaximumOfWellAlgorithm(TWellMatrix& wm, Boolean hasTimeElapsed, TTime elapsedTime)
 {
-	for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
+
+	for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++)
 	{
-		for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++)
+		 for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
 		{
 			std::vector<Single> wellMaxValueList;
 

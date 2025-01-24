@@ -86,7 +86,7 @@ object MainForm: TMainForm
     TabPosition = tpBottom
     ThemeGlobalMode = True
     DockOrientation = doNoOrient
-    ActivePage = tabUnknowns
+    ActivePage = tabReadRAW
     object tabParamRead: TLMDTabSheet
       Left = 4
       Top = 4
@@ -1366,6 +1366,7 @@ object MainForm: TMainForm
           Mask = '>L00;0;_'
         end
         object colUnknownWellID: TLMDGridTextColumn
+          Width = 53
           Position = 2
           SortingAllowed = False
           Alignment = taCenter

@@ -1222,12 +1222,13 @@ void __fastcall TMainForm::DoNormalRead(TWinControl *parent)
 
 void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 {
-	if ((m_elisaDeviceParams->ReadMode == TElisaReadMode::MultiWaveLength) &&
+	m_elisaDeviceParams->Filter1 = cbFilter1->ItemIndex;
+	m_elisaDeviceParams->Filter2 = cbFilter2->ItemIndex;if ((m_elisaDeviceParams->ReadMode == TElisaReadMode::MultiWaveLength) &&
 		(m_elisaDeviceParams->Filter2 == -1 || (m_elisaDeviceParams->Filter1 == m_elisaDeviceParams->Filter2)))
 	{
 		TaskMessageDlg(TEXT("Atenção"),
-					   TEXT("Quando se usa filtros duplos\n")
-					   TEXT("o \"Filtro 2\" deve ser selecionado e deve ser diferente do \"Filtro 1\""),
+
+					   TEXT("O \"Filtro 2\" deve ser selecionado e deve ser diferente do \"Filtro 1\""),
 					   mtWarning,
 					   TMsgDlgButtons() << mbOK, 0);
 		return;
@@ -1512,24 +1513,36 @@ void __fastcall TMainForm::DoProcessResults()
 		if (unkWells.empty())
 			continue;
 
-		for (WellListPointers::iterator cit = unkWells.begin(); cit != unkWells.end(); cit++, rowPos++)
+for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; ++col)
+{
+    for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; ++row)
+	{
+        for (WellListPointers::iterator cit = unkWells.begin(); cit != unkWells.end(); ++cit)
 		{
-			if ((*cit)->PlateNumber > i)
-				break;
+            if ((*cit)->PlateNumber > i)
+                break;
 
-			String wellInfo;
-			wellInfo.sprintf(TEXT("%c%2.2d"), (*cit)->Row +'A', (*cit)->Col+1);
+            // Verifica se o poço atual é o que estamos processando
+            if ((*cit)->Row == row && (*cit)->Col == col)
+			{
+                String wellInfo;
+                wellInfo.sprintf(TEXT("%c%2.2d"), row + 'A', col + 1);
 
-			unknownsGrid->Cells[colUnknownPlateName->Position][rowPos] = getNode(plateIdx+101)->Text;
-			unknownsGrid->Cells[colUnknownCoord->Position][rowPos] = wellInfo;
-			unknownsGrid->Cells[colUnknownWellID->Position][rowPos] = Format(TEXT("%2.2d"), ARRAYOFCONST(((*cit)->ID)));
-			unknownsGrid->Cells[colUnknownPosProcessValue->Position][rowPos] = (*cit)->RawBlankReducedValue;
-			unknownsGrid->Cells[colUnknownConcentrationValue->Position][rowPos] = (*cit)->ConcentrationValue;
-			unknownsGrid->Cells[colUnknownStdDev->Position][rowPos] = (*cit)->StdDeviation;
-			unknownsGrid->Cells[colUnknownCoefVar->Position][rowPos] = (*cit)->CoefVariation;
-			unknownsGrid->Cells[colUnknownInterpretValue->Position][rowPos] = (*cit)->Interpret;
-		}
-	}
+                unknownsGrid->Cells[colUnknownPlateName->Position][rowPos] = getNode(plateIdx + 101)->Text;
+                unknownsGrid->Cells[colUnknownCoord->Position][rowPos] = wellInfo;
+                unknownsGrid->Cells[colUnknownWellID->Position][rowPos] = Format(TEXT("%2.2d"), ARRAYOFCONST(((*cit)->ID)));
+                unknownsGrid->Cells[colUnknownPosProcessValue->Position][rowPos] = (*cit)->RawBlankReducedValue;
+                unknownsGrid->Cells[colUnknownConcentrationValue->Position][rowPos] = (*cit)->ConcentrationValue;
+                unknownsGrid->Cells[colUnknownStdDev->Position][rowPos] = (*cit)->StdDeviation;
+                unknownsGrid->Cells[colUnknownCoefVar->Position][rowPos] = (*cit)->CoefVariation;
+                unknownsGrid->Cells[colUnknownInterpretValue->Position][rowPos] = (*cit)->Interpret;
+
+                rowPos++; // Incrementa a posição somente após adicionar o poço correspondente
+            }
+        }
+    }
+ }
+}
 	unknownsGrid->EndUpdate();
 
 	/**//*************************************
@@ -1545,9 +1558,9 @@ void __fastcall TMainForm::DoProcessResults()
 	ReadRawGrid->BeginUpdate();
 	for (Integer plateNumber = 0; plateNumber < wellMatrixListRef.size(); plateNumber++, plateIdx++)
 	{
-		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
+		for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++)
 		{
-			for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++, rowPos++)
+			for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++, rowPos++)
 			{
 				TWell& w = (wellMatrixListRef[plateNumber])[row][col];
 
@@ -2647,7 +2660,7 @@ Boolean __fastcall TMainForm::UserLogon()
 
 		mpAppConfig->UserName = FrmAppLogin->UserName;
 	    mpAppConfig->UserID = FrmAppLogin->UserID;
-        mpAppConfig->UserLogin = FrmAppLogin->UserLogin;
+		mpAppConfig->UserLogin = FrmAppLogin->UserLogin;
         mpAppConfig->IsSuperUser = FrmAppLogin->IsSuperUser;
 
         SMenuExperiment->Enabled = True;
@@ -2892,59 +2905,54 @@ void __fastcall TMainForm::LoadSetupBranch(_di_IXMLNode ProtoNode)
 	   //	chbShakeModeChange(this);
 
 		xmlNode = ShakeNode->ChildNodes->FindNode("Duration");
-        String timeValue = xmlNode->NodeValue;
-        TTime t = StrToTime(timeValue);
+		String timeValue = xmlNode->NodeValue;
+		TTime t = StrToTime(timeValue);
 
 		meShakeDuration->Text = FormatDateTime("nn:ss", t);
 	}
 
-	_di_IXMLNode FiltersNode = ProtoNode->ChildNodes->FindNode("Filters");
-	if (FiltersNode->HasChildNodes)
-	{
-		xmlNode = FiltersNode->ChildNodes->FindNode("FiltersValues");
-		if (xmlNode && xmlNode->HasChildNodes)
-		{
-			cbFilter1->Items->Clear();
-			cbFilter2->Items->Clear();
+_di_IXMLNode FiltersNode = ProtoNode->ChildNodes->FindNode("Filters");
 
-			_di_IXMLNode filterValueNode = xmlNode->ChildNodes->First();
+if (FiltersNode && FiltersNode->HasChildNodes)
+{
+    // Configurar o estado dos botões primeiro
+    xmlNode = FiltersNode->ChildNodes->FindNode("Single");
+    rbFilterSingle->Checked = xmlNode && xmlNode->NodeValue == "true";
 
-			if (filterValueNode)
-            {
-				do
-				{
-					cbFilter1->Items->Add(filterValueNode->NodeValue);
-					cbFilter2->Items->Add(filterValueNode->NodeValue);
+    xmlNode = FiltersNode->ChildNodes->FindNode("Double");
+    rbFilterDouble->Checked = xmlNode && xmlNode->NodeValue == "true";
 
-					filterValueNode = filterValueNode->NextSibling();
-				} while (filterValueNode);
+    // Chamar o evento correspondente para garantir a configuração correta
+    if (rbFilterDouble->Checked)
+    {
+        rbFilterDoubleClick(this); // Garante que o modo Double é ativado corretamente
+    }
+    else if (rbFilterSingle->Checked)
+    {
+        rbFilterSingleClick(this); // Configura o modo Single, se necessário
+    }
 
+    // Preencher os comboboxes
+    xmlNode = FiltersNode->ChildNodes->FindNode("Position1");
+    if (xmlNode)
+    {
+        int pos1 = StrToInt(xmlNode->NodeValue);
+        if (pos1 >= 0 && pos1 < cbFilter1->Items->Count)
+        {
+            cbFilter1->ItemIndex = pos1;
+        }
+    }
+
+    xmlNode = FiltersNode->ChildNodes->FindNode("Position2");
+    if (xmlNode)
+    {
+		int pos2 = StrToInt(xmlNode->NodeValue);
+		if (pos2 >= 0 && pos2 < cbFilter2->Items->Count)
+			{
+				cbFilter2->ItemIndex = pos2;
 			}
-		}
-
-		xmlNode = FiltersNode->ChildNodes->FindNode("Single");
-		rbFilterSingle->Checked = xmlNode->NodeValue;
-
-		if (rbFilterSingle->Checked)
-			rbFilterSingleClick(this);
-
-		xmlNode = FiltersNode->ChildNodes->FindNode("Position1");
-		cbFilter1->ItemIndex = xmlNode->NodeValue;
-		cbFilter1Change(this);
-
-		xmlNode = FiltersNode->ChildNodes->FindNode("Double");
-		rbFilterDouble->Checked = xmlNode->NodeValue;
-
-		if (rbFilterDouble->Checked)
-		{
-			rbFilterDoubleClick(this);
-
-			xmlNode = FiltersNode->ChildNodes->FindNode("Position2");
-			cbFilter2->ItemIndex = xmlNode->NodeValue;
-			cbFilter2Change(this);
-		}
-	}
-
+    }
+}
 	_di_IXMLNode WavesNode = ProtoNode->AddChild("WaveLenghts");
 	if (WavesNode->HasChildNodes)
 	{
@@ -2952,33 +2960,33 @@ void __fastcall TMainForm::LoadSetupBranch(_di_IXMLNode ProtoNode)
 		rbSimpleLambda->Checked = xmlNode->NodeValue;
 
 		if (rbSimpleLambda->Checked)
-            rbSimpleLambdaClick(this);
+			rbSimpleLambdaClick(this);
 
-        xmlNode = WavesNode->ChildNodes->FindNode("Double");
-        rbDoubleLambda->Checked = xmlNode->NodeValue;
+		xmlNode = WavesNode->ChildNodes->FindNode("Double");
+		rbDoubleLambda->Checked = xmlNode->NodeValue;
 
-        if (rbDoubleLambda->Checked)
-            rbDoubleLambdaClick(this);
+		if (rbDoubleLambda->Checked)
+			rbDoubleLambdaClick(this);
 
-        xmlNode = WavesNode->ChildNodes->FindNode("Lambda1");
-        spLambda1->Value = xmlNode->NodeValue;
+		xmlNode = WavesNode->ChildNodes->FindNode("Lambda1");
+		spLambda1->Value = xmlNode->NodeValue;
 
-        xmlNode = WavesNode->ChildNodes->FindNode("Lambda2");
-        spLambda2->Value = xmlNode->NodeValue;
+		xmlNode = WavesNode->ChildNodes->FindNode("Lambda2");
+		spLambda2->Value = xmlNode->NodeValue;
 
-        xmlNode = WavesNode->ChildNodes->FindNode("CalcMethod");
-        cbCalcMethod2->ItemIndex = xmlNode->NodeValue;
-    }
+		xmlNode = WavesNode->ChildNodes->FindNode("CalcMethod");
+		cbCalcMethod2->ItemIndex = xmlNode->NodeValue;
+	}
 
-    _di_IXMLNode ShakeIntervalsNode = ProtoNode->ChildNodes->FindNode("ShakeIntervals");
-    if (ShakeIntervalsNode->HasChildNodes)
-    {
-        lvKineticTimes->Items->Clear();
+	_di_IXMLNode ShakeIntervalsNode = ProtoNode->ChildNodes->FindNode("ShakeIntervals");
+	if (ShakeIntervalsNode->HasChildNodes)
+	{
+		lvKineticTimes->Items->Clear();
 
 		xmlNode = ShakeIntervalsNode->ChildNodes->FindNode("CycleNum");
 
 		while (xmlNode)
-        {
+		{
             Integer cycleNum = xmlNode->NodeValue;
 
             xmlNode = xmlNode->NextSibling();
@@ -3296,9 +3304,9 @@ void __fastcall TMainForm::CreatePlatesBranch(_di_IXMLNode PlatesNode)
 
 		TWellMatrix& refMatrix = wellMatrixListRef[matrixIndex++];
 
-		for (Integer Row = 0; Row < m_elisaDeviceParams->PlateRows; Row++)
+		for (Integer Col = 0; Col < m_elisaDeviceParams->PlateCols; Col++)
 		{
-			for (Integer Col = 0; Col < m_elisaDeviceParams->PlateCols; Col++)
+			for (Integer Row = 0; Row < m_elisaDeviceParams->PlateRows; Row++)
 			{
 				TWell& w = refMatrix[Row][Col];
 
@@ -3365,10 +3373,11 @@ void __fastcall TMainForm::CreateResultsBranch(_di_IXMLNode ResultsNode)
 
 		TWellMatrix& refMatrix = wellMatrixListRef[i];
 
-        for (Integer Row = 0; Row < m_elisaDeviceParams->PlateRows; Row++)
-        {
-            for (Integer Col = 0; Col < m_elisaDeviceParams->PlateCols; Col++)
-            {
+
+		for (Integer Col = 0; Col < m_elisaDeviceParams->PlateCols; Col++)
+		{
+			for (Integer Row = 0; Row < m_elisaDeviceParams->PlateRows; Row++)
+			{
                 TWell& w = refMatrix[Row][Col];
 
                 _di_IXMLNode xmlWell = plate->AddChild("Well");
@@ -3389,43 +3398,59 @@ void __fastcall TMainForm::CreateResultsBranch(_di_IXMLNode ResultsNode)
 
 void __fastcall TMainForm::LoadResultsBranch(_di_IXMLNode ResultsNode)
 {
-	WellMatrixList& wellMatrixListRef = *TWellMatrixSingleton::instance();
+    WellMatrixList& wellMatrixListRef = *TWellMatrixSingleton::instance();
 
-	_di_IXMLNode PlatesNode = ResultsNode->ChildNodes->FindNode("Plates");
-	_di_IXMLNode PlateNode = PlatesNode->ChildNodes->First();
+    _di_IXMLNode PlatesNode = ResultsNode->ChildNodes->FindNode("Plates");
+    _di_IXMLNode PlateNode = PlatesNode->ChildNodes->First();
 
-	if (!PlateNode) {
-		TaskMessageDlg(TEXT("Carregar experimento"),
-					   TEXT("Erro durante o carregamento dos resultados, arquivo incompleto ou corrompido."),
-					   mtError,
-					   TMsgDlgButtons() << mbOK, 0);
+    if (!PlateNode)
+    {
+        TaskMessageDlg(TEXT("Carregar experimento"),
+                       TEXT("Erro durante o carregamento dos resultados, arquivo incompleto ou corrompido."),
+                       mtError,
+                       TMsgDlgButtons() << mbOK, 0);
+        return;
+    }
 
-		return;
-	}
+    // Configurações de formato para garantir o ponto como separador decimal
+    TFormatSettings fs;
+    GetLocaleFormatSettings(LOCALE_USER_DEFAULT, fs);
+    fs.DecimalSeparator = '.';
+    fs.ThousandSeparator = '\0'; // Desabilita separador de milhar
 
-//	TWellMatrix& refMatrix = wellMatrixListRef[PlateNum-1];
+    do
+    {
+        Integer PlateNum = PlateNode->GetAttribute("Number");
 
-	do
-	{
-		Integer PlateNum = PlateNode->GetAttribute("Number");
+        TWellMatrix& refMatrix = wellMatrixListRef[PlateNum - 1];
+        _di_IXMLNode wellNode = PlateNode->ChildNodes->First();
 
-		TWellMatrix& refMatrix = wellMatrixListRef[PlateNum-1];
-		_di_IXMLNode wellNode = PlateNode->ChildNodes->First();
+        for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
+        {
+            for (WellList::iterator it = refMatrix[row].begin(); it != refMatrix[row].end(); it++)
+            {
+                _di_IXMLNode rawValueNode = wellNode->ChildNodes->FindNode("RawValue");
+                if (rawValueNode)
+                {
+                    try
+                    {
+                        String rawValueStr = rawValueNode->NodeValue;
+                        // Converte a string para um número usando o formato configurado
+                        it->RawValue = StrToFloat(rawValueStr, fs);
+                    }
+                    catch (const EConvertError& e)
+                    {
+                        ShowMessage("Erro ao converter RawValue: " + rawValueNode->NodeValue);
+                        it->RawValue = 0.0; // Define um valor padrão em caso de erro
+                    }
+                }
 
-		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
-		{
-			for (WellList::iterator it = refMatrix[row].begin(); it != refMatrix[row].end(); it++)
-			{
-				_di_IXMLNode rawValueNode = wellNode->ChildNodes->FindNode("RawValue");
+                wellNode = wellNode->NextSibling();
+            }
+        }
 
-				it->RawValue = rawValueNode->NodeValue;
-
-				wellNode = wellNode->NextSibling();
-			}
-		}
-
-		PlateNode = PlateNode->NextSibling();
-	} while(PlateNode);
+        PlateNode = PlateNode->NextSibling();
+    } while (PlateNode);
 }
 
 
@@ -3459,7 +3484,7 @@ void __fastcall TMainForm::frxReportRawResultBeforePrint(TfrxReportComponent *Se
         return;
     }
 
-    ResultPair pair = mResultsList[frxUserDataSetResults->RecNo];
+	ResultPair pair = mResultsList[frxUserDataSetResults->RecNo];
 
     frxMemo->Text = pair.first;
 
@@ -4231,7 +4256,7 @@ void __fastcall TMainForm::acLoadExperimentExecute(TObject *Sender)
     TXMLDocument *xmlDoc = MyDataModule->XMLDocument;
     xmlDoc->LoadFromFile(m_ExperimentName);
 
-    _di_IXMLNode ExperimentNode = xmlDoc->ChildNodes->FindNode("Experiment");
+	_di_IXMLNode ExperimentNode = xmlDoc->ChildNodes->FindNode("Experiment");
 
     if (!ExperimentNode)
     {
@@ -4364,18 +4389,18 @@ void __fastcall TMainForm::acLoadProtocolExecute(TObject *Sender)
 	{
 		TaskMessageDlg("Carregamento de Protocolo",
 					   "Formato do arquivo inválido ou corrompido. Tag \"Protocol\" não encontrada.",
-                       mtError,
-                       TMsgDlgButtons() << mbOK, 0);
+					   mtError,
+					   TMsgDlgButtons() << mbOK, 0);
 
-        return;
-    }
+		return;
+	}
 
-    LoadSetupBranch(ProtoNode);
+	LoadSetupBranch(ProtoNode);
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainForm::acSaveProtocolExecute(TObject *Sender)
 {
-    const String LoccusDataName("Loccus Biotecnologia");
+	const String LoccusDataName("Loccus Biotecnologia");
 	const String AppDataDirName = TPath::GetFileNameWithoutExtension(Application->ExeName);
     String UserAppData = GetEnvironmentVariable("APPDATA");
     String PublicAppData = GetEnvironmentVariable("PUBLIC");
@@ -4516,7 +4541,7 @@ void __fastcall TMainForm::acSaveExperimentExecute(TObject *Sender)
 
 	CreateCurveBranch(ExperimentNode);
 
-    _di_IXMLNode node = ExperimentNode->AddChild("Author");
+	_di_IXMLNode node = ExperimentNode->AddChild("Author");
 	node->SetNodeValue(mpAppConfig->UserLogin);
 
     node = ExperimentNode->AddChild("CreationDate");
@@ -4596,34 +4621,33 @@ void __fastcall TMainForm::acExperimentExportCsvExecute(TObject *Sender)
 	Integer rowPos = 0, plateIdx = 0;
 
 	for (plateIdx = 0; plateIdx < wellMatrixListRef.size(); plateIdx++)
-	{
-		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
-		{
-			for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++, rowPos++)
-			{
-				TWellMatrix& wm = wellMatrixListRef[plateIdx];
-				TWell& w = wm[row][col];
+	   {
+		for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++)
+		 {
+				for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
+			   {
+				   TWellMatrix& wm = wellMatrixListRef[plateIdx];
+				 TWell& w = wm[row][col];
 
-				String wellInfo;
-				wellInfo.sprintf(TEXT("%c%d"), row+'A', col+1);
+				 String wellInfo;
+				  wellInfo.sprintf(TEXT("%c%d"), row + 'A', col + 1);
 
-				csvStringList->Add(getNode(plateIdx+101)->Text);
-				csvStringList->Add(wellInfo);
-				csvStringList->Add(w.typeToString());
-				csvStringList->Add(FloatToStrF(w.RawValue, ffFixed, 6, 3));
-				csvStringList->Add(FloatToStrF(w.RawBlankReducedValue, ffFixed, 6, 3));
-				csvStringList->Add(FloatToStrF(w.ConcentrationValue, ffFixed, 6, 3));
-				csvStringList->Add(FloatToStrF(w.StdDeviation, ffFixed, 6, 3));
-				csvStringList->Add(FloatToStrF(w.CoefVariation, ffFixed, 3, 2));
-				csvStringList->Add(VarToStr(w.Interpret));
-				csvStringList->Add(FormatDateTime("hh:nn:ss", w.Timestamp));
+				  csvStringList->Add(getNode(plateIdx + 101)->Text); // Nome da placa
+				  csvStringList->Add(wellInfo);                     // Informação da posição
+				  csvStringList->Add(w.typeToString());             // Tipo do poço
+				  csvStringList->Add(FloatToStrF(w.RawValue, ffFixed, 6, 3)); // Absorbância Bruta
+				  csvStringList->Add(FloatToStrF(w.RawBlankReducedValue, ffFixed, 6, 3)); // Absorbância Processada
+				  csvStringList->Add(FloatToStrF(w.ConcentrationValue, ffFixed, 6, 3)); // Concentração
+				  csvStringList->Add(FloatToStrF(w.StdDeviation, ffFixed, 6, 3));       // Desvio Padrão
+				  csvStringList->Add(FloatToStrF(w.CoefVariation, ffFixed, 3, 2));     // Coef. Variação
+				  csvStringList->Add(VarToStr(w.Interpret));                           // Interpretação
+				  csvStringList->Add(FormatDateTime("hh:nn:ss", w.Timestamp));         // Momento de Leitura
 
-				vectCSVList.push_back(csvStringList->DelimitedText);
-
-				csvStringList->Clear();
-			}
-		}
-	}
+            vectCSVList.push_back(csvStringList->DelimitedText);
+            csvStringList->Clear();
+        }
+    }
+}
 
 	LongWord fmOption = fmCreate | fmShareDenyWrite;
 
@@ -4676,6 +4700,16 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 		return;
 	}
 
+	WideChar decSeparator = FormatSettings.DecimalSeparator;
+	WideChar thSeparator = FormatSettings.ThousandSeparator;
+
+	// Ajustar os separadores com base nas configurações do software
+	if (mpAppConfig->DecimalSeparator != FormatSettings.DecimalSeparator)
+		FormatSettings.DecimalSeparator = mpAppConfig->DecimalSeparator;
+
+	if (mpAppConfig->ThousandSeparator != FormatSettings.ThousandSeparator)
+		FormatSettings.ThousandSeparator = mpAppConfig->ThousandSeparator;
+
 	WellMatrixList wellMatrixListRef = *TWellMatrixSingleton::instance();
 
 	Integer rowPos = 0, plateIdx = 0;
@@ -4687,46 +4721,45 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 
 		std::vector<String> vectCSVList;
 
-		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
-		{
-			for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++, rowPos++)
+		// Exportar dados da tabela
+		for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++)
+				{
+			for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++, rowPos++)
 			{
 				TWellMatrix& wm = wellMatrixListRef[plateIdx];
 				TWell& w = wm[row][col];
 
+				// Adiciona os valores brutos ao CSV
 				csvStringList->Add(FloatToStrF(w.RawValue, ffFixed, 6, 3));
 			}
 
+			// Armazena a linha completa
 			vectCSVList.push_back(csvStringList->DelimitedText);
-
 			csvStringList->Clear();
 		}
 
-		csvStringList->Clear();
-	   /*
-		Integer filtersUsed = 1;
+		// Adiciona as informações extras após a tabela
+		String plateName = StringReplace(getNode(plateIdx + 101)->Text, " ", "_", TReplaceFlags() << rfReplaceAll);
+		String author = mpAppConfig->UserLogin; // Obtenção correta do campo UserLogin
+		String filter1 = "";
+		String filter2 = "";
 
 		if (cbFilter1 && cbFilter1->Items->Count && cbFilter1->ItemIndex < cbFilter1->Items->Count)
-			csvStringList->Add(cbFilter1->Items[cbFilter1->ItemIndex].Text); //segfault aqui
+			filter1 = cbFilter1->Items->Strings[cbFilter1->ItemIndex];
 
-		if (rbFilterDouble->Checked && cbFilter2->Items->Count)
-		{
-			csvStringList->Add(cbFilter2->Items[cbFilter1->ItemIndex].Text);
-			filtersUsed++;
-		}
+		if (rbFilterDouble->Checked && cbFilter2 && cbFilter2->Items->Count)
+			filter2 = cbFilter2->Items->Strings[cbFilter2->ItemIndex];
 
-		for (Integer i = filtersUsed; i < cbFilter1->Items->Count; i++)
-			csvStringList->Add("0");
-		*/
+		// Adiciona cada linha separada
+		vectCSVList.push_back(TEXT("Nome_da_Placa: ") + plateName);
+		vectCSVList.push_back(TEXT("Autor: ") + author);
+		vectCSVList.push_back(TEXT("Filtro1: ") + filter1);
+		vectCSVList.push_back(TEXT("Filtro2: ") + filter2);
 
+		// Adiciona data e hora formatados
 		TDateTime tStamp = mCalibrationCurve->timestamp;
-		csvStringList->Add(tStamp.FormatString("yyyy/MM/dd"));
-		csvStringList->Add(tStamp.FormatString("hh:nn:ss"));
-
-		vectCSVList.push_back(csvStringList->DelimitedText);
-
-		String plateName = StringReplace(getNode(plateIdx+101)->Text,
-										   " ", "_", TReplaceFlags() << rfReplaceAll);
+		vectCSVList.push_back(TEXT("Data: ") + tStamp.FormatString("yyyy/MM/dd"));
+		vectCSVList.push_back(TEXT("Hora: ") + tStamp.FormatString("hh:nn:ss"));
 
 		rawFileName = FileSaveDialog->FileName;
 		FileSaveDialog->Free();
@@ -4736,7 +4769,7 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 		if (FileExists(rawFileName))
 			DeleteFile(rawFileName);
 
-		TStreamWriter *fStream = new TStreamWriter(new TFileStream(rawFileName, fmOption), TEncoding::Unicode, 1024); // ERRO AQUI
+		TStreamWriter *fStream = new TStreamWriter(new TFileStream(rawFileName, fmOption), TEncoding::Unicode, 1024);
 
 		for (std::vector<String>::size_type i = 0; i < vectCSVList.size(); i++)
 			fStream->WriteLine(vectCSVList[i]);
@@ -4756,6 +4789,9 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 				   mtInformation,
 				   TMsgDlgButtons() << mbOK, 0);
 }
+
+
+
 //---------------------------------------------------------------------------
 
 void __fastcall TMainForm::stdValuesGridDrawCell(TObject *Sender, int ACol, int ARow, TRect &Rect, TGridDrawState State)
@@ -4924,6 +4960,7 @@ void __fastcall TMainForm::chbReadSpeedChange(TObject *Sender)
 	m_elisaDeviceParams->ReadSpeed = static_cast<TElisaReadSpeed>(chbReadSpeed->ItemIndex);
 }
 //---------------------------------------------------------------------------
+
 
 
 

@@ -27,9 +27,9 @@ __fastcall TFrmSimulatedValues::TFrmSimulatedValues(RawDataMatrix& data, TCompon
 //---------------------------------------------------------------------------
 void __fastcall TFrmSimulatedValues::btnRandomClick(TObject *Sender)
 {
-	for (Integer row = 0; row < RawValuesGrid->RowCount-1; row++)
+	for (Integer col = 0; col < RawValuesGrid->ColCount-1; col++)
 	{
-		for (Integer col = 0; col < RawValuesGrid->ColCount-1; col++)
+		for (Integer row = 0; row < RawValuesGrid->RowCount-1; row++)
 		{
 			Single value = RandGen->Random;
 
@@ -93,11 +93,11 @@ void __fastcall TFrmSimulatedValues::btnLoadCSVClick(TObject *Sender)
 
 	try
 	{
-		for (Integer row = 0; row < RawValuesGrid->RowCount-1; row++)
+		for (Integer col = 0; col < RawValuesGrid->ColCount-1; col++)
 		{
 			csvStringList->DelimitedText = fStream->ReadLine();
 
-			for (Integer col = 0; col < RawValuesGrid->ColCount-1 && !fStream->EndOfStream; col++)
+			for (Integer row = 0; row < RawValuesGrid->RowCount-1 && !fStream->EndOfStream; row++)
 			{
 				RawValuesGrid->Cells[col+1][row+1] = 0;
 
