@@ -794,7 +794,7 @@ void __fastcall TMainForm::DoProcessBlanks()
 		{
 			TWellMatrix& refMatrix = wellMatrixListRef[i];
 
-			for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
+			for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)       //exibe corretamente os dados linha/coluna após leitura
 			{
                 WellList& wlRef = refMatrix[row];
 
@@ -820,7 +820,7 @@ void __fastcall TMainForm::DoProcessBlanks()
 	{
 		TWellMatrix& refMatrix = wellMatrixListRef[i];
 
-		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
+		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)  //exibe corretamente os dados linha/coluna após leitura
 		{
 			for (WellList::iterator it = refMatrix[row].begin(); it != refMatrix[row].end(); it++)
 			{
@@ -992,7 +992,7 @@ void __fastcall TMainForm::DoProcessCPnCNs()
 	{
 		TWellMatrix& refMatrix = wellMatrixListRef[i];
 
-		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
+		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)          //exibe corretamente os dados linha/coluna após leitura
 		{
 			TWell& w = refMatrix[row].front();
 
@@ -1287,7 +1287,7 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 	{
 		TWellMatrix& wlp = wellMatrixListRef[i];
 
-		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
+		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)    //exibe corretamente os dados linha/coluna após leitura
 		{
 			TWell& w = wlp[row][0];
 
@@ -1558,7 +1558,7 @@ for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; ++col)
 	ReadRawGrid->BeginUpdate();
 	for (Integer plateNumber = 0; plateNumber < wellMatrixListRef.size(); plateNumber++, plateIdx++)
 	{
-		for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++)
+		for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++)      //verificar se há problema no linha/coluna
 		{
 			for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++, rowPos++)
 			{
@@ -1638,7 +1638,7 @@ void __fastcall TMainForm::OnLMR96ReadDone(TObject *Sender, const RawDataMatrix&
 {
 	TWellMatrix& refMatrix = (*TWellMatrixSingleton::instance())[currMatrix];
 
-	for (RawDataMatrix::size_type row = 0; row < m_elisaDeviceParams->PlateRows; row++)
+	for (RawDataMatrix::size_type row = 0; row < m_elisaDeviceParams->PlateRows; row++)     //exibe corretamente os dados linha/coluna após leitura
 	{
         WellList::iterator it = refMatrix[row].begin();
 
@@ -1705,7 +1705,7 @@ void __fastcall TMainForm::tabStandardsBeforeShowPage(TObject *Sender)
 
 		Integer row = 0;
 
-		for (cit = mCalibrationCurve->stdValues.begin(); cit != mCalibrationCurve->stdValues.end(); ++cit, row++)
+		for (cit = mCalibrationCurve->stdValues.begin(); cit != mCalibrationCurve->stdValues.end(); ++cit, row++)  //exibe corretamente os dados linha/coluna após leitura
 		{
 			lmdstdValuesGrid->Cells[colStdValue->Position][row]  = cit->second;
 			lmdstdValuesGrid->Cells[colAbsorbance->Position][row] = cit->first;
@@ -1735,7 +1735,7 @@ void __fastcall TMainForm::tabStandardsBeforeShowPage(TObject *Sender)
 		lmdstdValuesGrid->DataRowCount += wl.size();
 		stdValuesGrid->RowCount += wl.size()-1;
 
-		for (WellList::const_iterator cit = wl.begin(); cit != wl.end(); ++cit, row++)
+		for (WellList::const_iterator cit = wl.begin(); cit != wl.end(); ++cit, row++)   //exibe corretamente os dados linha/coluna após leitura
 		{
 			stdValuesGrid->Cells[0][row+1] = getNode(matIndex+101)->Text;
 			stdValuesGrid->Cells[1][row+1] = cit->ID;
@@ -3252,11 +3252,11 @@ void __fastcall TMainForm::LoadPlatesBranch(_di_IXMLNode PlatesNode)
 
 		_di_IXMLNode wellNode = layoutNode->ChildNodes->FindNode("Well");
 
-		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
+		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows;  row++)      //iteração para preencher std values do experimento
 		{
-            WellList& wl = refWellMatrix[row];
+			WellList& wl = refWellMatrix[row];
 
-            for (WellList::iterator it = wl.begin(); it != wl.end(); it++)
+			for (WellList::iterator it = wl.begin(); it != wl.end(); it++)
 			{
 				it->ID = wellNode->GetAttribute("ID");
 				it->Row = wellNode->ChildValues["Row"] - 1;
@@ -3304,10 +3304,11 @@ void __fastcall TMainForm::CreatePlatesBranch(_di_IXMLNode PlatesNode)
 
 		TWellMatrix& refMatrix = wellMatrixListRef[matrixIndex++];
 
-		for (Integer Col = 0; Col < m_elisaDeviceParams->PlateCols; Col++)
+		for (Integer Row = 0; Row < m_elisaDeviceParams->PlateRows;  Row++)
 		{
-			for (Integer Row = 0; Row < m_elisaDeviceParams->PlateRows; Row++)
+			for (Integer Col = 0; Col < m_elisaDeviceParams->PlateCols; Col++)
 			{
+
 				TWell& w = refMatrix[Row][Col];
 
 				_di_IXMLNode xmlWell = xmlLayout->AddChild("Well");
@@ -3373,11 +3374,11 @@ void __fastcall TMainForm::CreateResultsBranch(_di_IXMLNode ResultsNode)
 
 		TWellMatrix& refMatrix = wellMatrixListRef[i];
 
-
-		for (Integer Col = 0; Col < m_elisaDeviceParams->PlateCols; Col++)
+		for (Integer Row = 0; Row < m_elisaDeviceParams->PlateRows; Row++)
 		{
-			for (Integer Row = 0; Row < m_elisaDeviceParams->PlateRows; Row++)
+			for (Integer Col = 0; Col < m_elisaDeviceParams->PlateCols; Col++)
 			{
+
                 TWell& w = refMatrix[Row][Col];
 
                 _di_IXMLNode xmlWell = plate->AddChild("Well");
@@ -3387,9 +3388,12 @@ void __fastcall TMainForm::CreateResultsBranch(_di_IXMLNode ResultsNode)
                 node->SetNodeValue(w.Row+1);
 
                 node = xmlWell->AddChild("Col");
-                node->SetNodeValue(w.Col+1);
+				node->SetNodeValue(w.Col+1);
 
-                node = xmlWell->AddChild("RawValue");
+				node = xmlWell->AddChild("Type");
+				node->SetNodeValue(static_cast<Integer>(w.Type));
+
+				node = xmlWell->AddChild("RawValue");
 				node->SetNodeValue(w.RawValue);
             }
         }
@@ -4145,11 +4149,11 @@ Boolean __fastcall TMainForm::LoadCurveBranch(_di_IXMLNode Node)
         stdValuePairNode = stdValuePairNode->NextSibling();
     }
 
-    _di_IXMLNode creationNode = Node->ChildNodes->FindNode("CreationDate");
+	_di_IXMLNode creationNode = Node->ChildNodes->FindNode("CreationDate");
     if (!TryStrToDateTime(creationNode->Text, mCalibrationCurve->timestamp))
     {
 		TaskMessageDlg(TEXT("Carregamento de curva de calibração"),
-                       TEXT("Formato do arquivo inválido ou corrompido. Tag \"CreationDate\" inválido."),
+					   TEXT("Formato do arquivo inválido ou corrompido. Tag \"CreationDate\" inválido."),
                        mtError,
                        TMsgDlgButtons() << mbOK, 0);
 
@@ -4204,9 +4208,10 @@ void __fastcall TMainForm::CreateCurveBranch(_di_IXMLNode Node)
 		stdValue->SetNodeValue(it->StdValue);
 	}
 
-    _di_IXMLNode creationNode = curveNode->AddChild("CreationDate");
-    creationNode->SetNodeValue(mCalibrationCurve->timestamp.DateTimeString());
-}
+	_di_IXMLNode creationNode = curveNode->AddChild("CreationDate");
+	//creationNode->SetNodeValue(mCalibrationCurve->timestamp.DateTimeString());                 //TODO: CORRIGIR VALORES EXPORTADOS
+	creationNode->SetNodeValue(Now());
+	}
 
 void __fastcall TMainForm::acLoadExperimentExecute(TObject *Sender)
 {
@@ -4544,8 +4549,8 @@ void __fastcall TMainForm::acSaveExperimentExecute(TObject *Sender)
 	_di_IXMLNode node = ExperimentNode->AddChild("Author");
 	node->SetNodeValue(mpAppConfig->UserLogin);
 
-    node = ExperimentNode->AddChild("CreationDate");
-    node->SetNodeValue(Now());
+	node = ExperimentNode->AddChild("CreationDate");
+	node->SetNodeValue(Now());
 
 	if (FileExists(m_ExperimentName))
 		DeleteFile(m_ExperimentName);
