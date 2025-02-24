@@ -166,7 +166,7 @@ void __fastcall TFrmSimulatedValues::RawValuesGridSetEditText(TObject *Sender, i
 		catch (const EConvertError& e)
 		{
 			TaskMessageDlg(TEXT("Valor não permitido"),
-						   TEXT("Por favor verifique o valor inserido, os valores devem ser numéricos com ponto decimal."),
+						   TEXT("Por favor verifique o separador decimal configurado."),
 						   mtError,
 						   TMsgDlgButtons() << mbCancel, 0);
 

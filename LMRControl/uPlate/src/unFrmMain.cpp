@@ -1537,7 +1537,7 @@ for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; ++col)
                 unknownsGrid->Cells[colUnknownCoefVar->Position][rowPos] = (*cit)->CoefVariation;
                 unknownsGrid->Cells[colUnknownInterpretValue->Position][rowPos] = (*cit)->Interpret;
 
-                rowPos++; // Incrementa a posição somente após adicionar o poço correspondente
+				rowPos++; // Incrementa a posição somente após adicionar o poço correspondente
             }
         }
     }
@@ -3407,20 +3407,20 @@ void __fastcall TMainForm::LoadResultsBranch(_di_IXMLNode ResultsNode)
     _di_IXMLNode PlatesNode = ResultsNode->ChildNodes->FindNode("Plates");
     _di_IXMLNode PlateNode = PlatesNode->ChildNodes->First();
 
-    if (!PlateNode)
+	if (!PlateNode)
     {
-        TaskMessageDlg(TEXT("Carregar experimento"),
-                       TEXT("Erro durante o carregamento dos resultados, arquivo incompleto ou corrompido."),
+		TaskMessageDlg(TEXT("Carregar experimento"),
+					   TEXT("Erro durante o carregamento dos resultados, arquivo incompleto ou corrompido."),
                        mtError,
-                       TMsgDlgButtons() << mbOK, 0);
-        return;
+					   TMsgDlgButtons() << mbOK, 0);
+		return;
     }
 
-    // Configurações de formato para garantir o ponto como separador decimal
+	// Configurações de formato para garantir o ponto como separador decimal
     TFormatSettings fs;
     GetLocaleFormatSettings(LOCALE_USER_DEFAULT, fs);
     fs.DecimalSeparator = '.';
-    fs.ThousandSeparator = '\0'; // Desabilita separador de milhar
+	fs.ThousandSeparator = '\0'; // Desabilita separador de milhar
 
     do
     {
@@ -3429,41 +3429,51 @@ void __fastcall TMainForm::LoadResultsBranch(_di_IXMLNode ResultsNode)
         TWellMatrix& refMatrix = wellMatrixListRef[PlateNum - 1];
         _di_IXMLNode wellNode = PlateNode->ChildNodes->First();
 
-        for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
-        {
+		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
+		{
             for (WellList::iterator it = refMatrix[row].begin(); it != refMatrix[row].end(); it++)
             {
                 _di_IXMLNode rawValueNode = wellNode->ChildNodes->FindNode("RawValue");
-                if (rawValueNode)
+				if (rawValueNode)
                 {
-                    try
-                    {
-                        String rawValueStr = rawValueNode->NodeValue;
-                        // Converte a string para um número usando o formato configurado
-                        it->RawValue = StrToFloat(rawValueStr, fs);
-                    }
-                    catch (const EConvertError& e)
-                    {
-                        ShowMessage("Erro ao converter RawValue: " + rawValueNode->NodeValue);
-                        it->RawValue = 0.0; // Define um valor padrão em caso de erro
-                    }
-                }
+						String rawValueStr = rawValueNode->NodeValue;
 
-                wellNode = wellNode->NextSibling();
+// Normaliza o separador decimal conforme a configuração do software
+if (fs.DecimalSeparator == ',')
+{
+    rawValueStr = StringReplace(rawValueStr, ".", ",", TReplaceFlags() << rfReplaceAll);
+}
+else
+{
+    rawValueStr = StringReplace(rawValueStr, ",", ".", TReplaceFlags() << rfReplaceAll);
+}
+
+try
+{
+	it->RawValue = StrToFloat(rawValueStr, fs);
+					}
+					catch (const EConvertError& e)
+					{
+						ShowMessage("Erro ao converter RawValue: " + rawValueNode->NodeValue);
+						it->RawValue = 0.0; // Define um valor padrão em caso de erro
+                    }
+				}
+
+				wellNode = wellNode->NextSibling();
             }
         }
 
-        PlateNode = PlateNode->NextSibling();
-    } while (PlateNode);
+		PlateNode = PlateNode->NextSibling();
+	} while (PlateNode);
 }
 
 
 void __fastcall TMainForm::acConfPrefsExecute(TObject *Sender)
 {
 	FrmAppConfig = new TFrmAppConfig(this);
-    FrmAppConfig->ShowModal();
+	FrmAppConfig->ShowModal();
     FrmAppConfig->Free();
-    FrmAppConfig = NULL;
+	FrmAppConfig = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -4254,7 +4264,16 @@ void __fastcall TMainForm::acLoadExperimentExecute(TObject *Sender)
 
 	m_ExperimentName = FileOpenDialog->FileName;
 
-    FileOpenDialog->Free();
+	FileOpenDialog->Free();
+
+	 WideChar decSeparator = FormatSettings.DecimalSeparator;
+	WideChar thSeparator  = FormatSettings.ThousandSeparator;
+
+	if (mpAppConfig->DecimalSeparator != FormatSettings.DecimalSeparator)
+		FormatSettings.DecimalSeparator = mpAppConfig->DecimalSeparator;
+
+	if (mpAppConfig->ThousandSeparator != FormatSettings.ThousandSeparator)
+		FormatSettings.ThousandSeparator = mpAppConfig->ThousandSeparator;
 
 	InitAll();
 
@@ -4523,8 +4542,17 @@ void __fastcall TMainForm::acSaveExperimentExecute(TObject *Sender)
 
 	m_ExperimentName = FileSaveDialog->FileName;
 
-    FileSaveDialog->Free();
+	FileSaveDialog->Free();
+   /*
+	WideChar decSeparator = FormatSettings.DecimalSeparator;
+	WideChar thSeparator  = FormatSettings.ThousandSeparator;
 
+	if (mpAppConfig->DecimalSeparator != FormatSettings.DecimalSeparator)
+		FormatSettings.DecimalSeparator = mpAppConfig->DecimalSeparator;
+
+	if (mpAppConfig->ThousandSeparator != FormatSettings.ThousandSeparator)
+		FormatSettings.ThousandSeparator = mpAppConfig->ThousandSeparator;
+    */
     TXMLDocument *xmlDoc = MyDataModule->XMLDocument;
     xmlDoc->XML->Clear();
 
@@ -4571,7 +4599,7 @@ void __fastcall TMainForm::acExperimentExportCsvExecute(TObject *Sender)
 	ForceCurrentDirectory = False;
 
 	TSaveTextFileDialog *FileSaveDialog = new TSaveTextFileDialog(this);
-	FileSaveDialog->Title = TEXT("Exportar Experimento");
+	FileSaveDialog->Title = TEXT("Exportar CSV");
 	FileSaveDialog->Filter = TEXT("Arquivo de experimento CSV (*.expr.csv)|*.expr.csv");
 	FileSaveDialog->DefaultExt = TEXT(".expr.csv");
 	FileSaveDialog->InitialDir = AppDataDir;
@@ -4695,7 +4723,7 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 
 	TSaveTextFileDialog *FileSaveDialog = new TSaveTextFileDialog(this);
 	FileSaveDialog->Title = TEXT("Exportar Dados Brutos");
-	FileSaveDialog->Filter = TEXT("Arquivo de experimento CSV (*.raw.csv)|*.raw.csv");
+	FileSaveDialog->Filter = TEXT("Arquivo RAW.CSV (*.raw.csv)|*.raw.csv");
 	FileSaveDialog->DefaultExt = TEXT(".raw.csv");
 	FileSaveDialog->InitialDir = AppDataDir;
 
@@ -4705,10 +4733,21 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 		return;
 	}
 
+	rawFileName = FileSaveDialog->FileName;
+	FileSaveDialog->Free();
+
+	LongWord fmOption = fmCreate | fmShareDenyWrite;
+
+	// Se o arquivo já existe, deletamos para evitar sobrescrita errada
+	if (FileExists(rawFileName))
+		DeleteFile(rawFileName);
+
+	// Abrir o arquivo uma única vez em modo de adição (fmOpenWrite | fmShareDenyWrite)
+	TStreamWriter *fStream = new TStreamWriter(new TFileStream(rawFileName, fmCreate | fmShareDenyWrite), TEncoding::Unicode, 1024);
+
 	WideChar decSeparator = FormatSettings.DecimalSeparator;
 	WideChar thSeparator = FormatSettings.ThousandSeparator;
 
-	// Ajustar os separadores com base nas configurações do software
 	if (mpAppConfig->DecimalSeparator != FormatSettings.DecimalSeparator)
 		FormatSettings.DecimalSeparator = mpAppConfig->DecimalSeparator;
 
@@ -4727,25 +4766,23 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 		std::vector<String> vectCSVList;
 
 		// Exportar dados da tabela
-		for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++)
-				{
-			for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++, rowPos++)
+		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
+		{
+			for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++)
 			{
 				TWellMatrix& wm = wellMatrixListRef[plateIdx];
 				TWell& w = wm[row][col];
 
-				// Adiciona os valores brutos ao CSV
 				csvStringList->Add(FloatToStrF(w.RawValue, ffFixed, 6, 3));
 			}
 
-			// Armazena a linha completa
 			vectCSVList.push_back(csvStringList->DelimitedText);
 			csvStringList->Clear();
 		}
 
 		// Adiciona as informações extras após a tabela
 		String plateName = StringReplace(getNode(plateIdx + 101)->Text, " ", "_", TReplaceFlags() << rfReplaceAll);
-		String author = mpAppConfig->UserLogin; // Obtenção correta do campo UserLogin
+		String author = mpAppConfig->UserLogin;
 		String filter1 = "";
 		String filter2 = "";
 
@@ -4755,7 +4792,6 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 		if (rbFilterDouble->Checked && cbFilter2 && cbFilter2->Items->Count)
 			filter2 = cbFilter2->Items->Strings[cbFilter2->ItemIndex];
 
-		// Adiciona cada linha separada
 		vectCSVList.push_back(TEXT("Nome_da_Placa: ") + plateName);
 		vectCSVList.push_back(TEXT("Autor: ") + author);
 		vectCSVList.push_back(TEXT("Filtro1: ") + filter1);
@@ -4766,28 +4802,19 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 		vectCSVList.push_back(TEXT("Data: ") + tStamp.FormatString("yyyy/MM/dd"));
 		vectCSVList.push_back(TEXT("Hora: ") + tStamp.FormatString("hh:nn:ss"));
 
-		rawFileName = FileSaveDialog->FileName;
-		FileSaveDialog->Free();
-
-		LongWord fmOption = fmCreate | fmShareDenyWrite;
-
-		if (FileExists(rawFileName))
-			DeleteFile(rawFileName);
-
-		TStreamWriter *fStream = new TStreamWriter(new TFileStream(rawFileName, fmOption), TEncoding::Unicode, 1024);
-
+		// Escreve no arquivo (sem reabrir em cada iteração!)
 		for (std::vector<String>::size_type i = 0; i < vectCSVList.size(); i++)
 			fStream->WriteLine(vectCSVList[i]);
-
-		fStream->Close();
-
-		fStream->BaseStream->Free();
-		fStream->Free();
 
 		vectCSVList.clear();
 	}
 
-	String info = Format(TEXT("Dados Brutos salvados com sucesso em\n\"%s\"."), ARRAYOFCONST((rawFileName)));
+	// Fecha o arquivo após todo o loop
+	fStream->Close();
+	fStream->BaseStream->Free();
+	fStream->Free();
+
+	String info = Format(TEXT("Dados Brutos salvos com sucesso."), ARRAYOFCONST((rawFileName)));
 
 	TaskMessageDlg(TEXT("Dados Brutos"),
 				   info,
@@ -4932,7 +4959,7 @@ void __fastcall TMainForm::stdValuesGridSetEditText(TObject *Sender, int ACol, i
 		catch (const EConvertError& e)
 		{
 			TaskMessageDlg(TEXT("Valor não permitido"),
-						   TEXT("Por favor verifique o valor inserido, os valores devem ser numéricos com ponto decimal."),
+						   TEXT("Por favor verifique o separador decimal configurado."),
 						   mtError,
 						   TMsgDlgButtons() << mbOK, 0);
 

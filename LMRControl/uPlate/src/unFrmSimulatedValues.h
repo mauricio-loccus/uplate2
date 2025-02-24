@@ -44,7 +44,7 @@ __published:	// IDE-managed Components
 private:	// User declarations
 	RawDataMatrix& rawData;
 	PAppConfig m_appConfig;
-
+   // PAppConfig mpAppConfig
 	Integer m_editingCol, m_editingRow;
 
 public:		// User declarations
