@@ -981,7 +981,7 @@ void __fastcall TMainForm::DoProcessCPnCNs()
 		// Cálculo do limite 2
 		loccusEval.SetExpression(edZone2Limit->Text.w_str());
 		loccusEval.Evaluate();
-		Single limit2Val = loccusEval.GetCurrValue();
+		limit2Val = loccusEval.GetCurrValue();
 		lbZone2Limit->Caption = Format(_T("Limite Zona 2: %5.5f"), ARRAYOFCONST((limit2Val)));
 	}
 
