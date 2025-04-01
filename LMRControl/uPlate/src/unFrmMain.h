@@ -131,19 +131,19 @@ enum class InternalMessages
 struct CalibrationData
 {
     Word curveType;
-    Word qtdParameters;
-    std::vector<Double> parameters;
-    std::vector< std::pair<Double, Double> > stdValues;
-    TDateTime timestamp;
+	Word qtdParameters;
+	std::vector<Double> parameters;
+	std::vector< std::pair<Double, Double> > stdValues;
+	TDateTime timestamp;
 
-    CalibrationData() : curveType(0), qtdParameters(0), timestamp(-1) {}
+	CalibrationData() : curveType(0), qtdParameters(0), timestamp(-1) {}
 };
 
 class TMainForm : public TForm
 {
-    typedef TForm ancestor;
+	typedef TForm ancestor;
 
-    friend class TMyDataModule;
+	friend class TMyDataModule;
 
 __published:	// IDE-managed Components
 	TTreeView *treeview;
@@ -241,19 +241,19 @@ __published:	// IDE-managed Components
 	TLMDScrollBox *tabPlatesScrollBox;
 	TLMDToolBar *toolbar;
 	TStatusBar *StatusBar;
-    TTimer *OneShotTimer;
-    TLabel *lbUnity;
-    TComboBox *cbUnity;
-    TGroupBox *grpWaveLength;
-    TLabel *Label12;
-    TLabel *lbLambda2;
-    TLabel *Label13;
-    TRadioButton *rbSimpleLambda;
-    TRadioButton *rbDoubleLambda;
-    TSpinEdit *spLambda1;
-    TSpinEdit *spLambda2;
-    TComboBox *cbCalcMethod2;
-    TLMDTaskDialog *ProfileTypeDialog;
+	TTimer *OneShotTimer;
+	TLabel *lbUnity;
+	TComboBox *cbUnity;
+	TGroupBox *grpWaveLength;
+	TLabel *Label12;
+	TLabel *lbLambda2;
+	TLabel *Label13;
+	TRadioButton *rbSimpleLambda;
+	TRadioButton *rbDoubleLambda;
+	TSpinEdit *spLambda1;
+	TSpinEdit *spLambda2;
+	TComboBox *cbCalcMethod2;
+	TLMDTaskDialog *ProfileTypeDialog;
 	TSpinEdit *spKineticBaselineReadings;
 	TLabel *lbKineticChangeThreshold;
 	TSpinEdit *spKineticChangeThreshold;
@@ -286,9 +286,9 @@ __published:	// IDE-managed Components
 	TLMDTaskDialog *QuitAppDialog;
 	TFastLineSeries *curveSerie;
 	TPointSeries *pointsSerie;
-    TLMDGridFloatColumn *colStdDeviation;
-    TLMDGridFloatColumn *colCoefVariation;
-    TLMDTaskDialog *AskDialog;
+	TLMDGridFloatColumn *colStdDeviation;
+	TLMDGridFloatColumn *colCoefVariation;
+	TLMDTaskDialog *AskDialog;
 	TLMDGridTextColumn *colUnknownCoord;
 	TLMDGridFloatColumn *colUnknownStdDev;
 	TLMDGridFloatColumn *colUnknownCoefVar;
@@ -399,16 +399,16 @@ __published:	// IDE-managed Components
 	void __fastcall toolbarButtons3Click(TObject *Sender, int index);
 	void __fastcall OptUserLoginClick(TObject *Sender);
 	void __fastcall OptUserLogoffClick(TObject *Sender);
-    void __fastcall OneShotTimerTimer(TObject *Sender);
-    void __fastcall acConfPrefsExecute(TObject *Sender);
-    void __fastcall cbUnityChange(TObject *Sender);
+	void __fastcall OneShotTimerTimer(TObject *Sender);
+	void __fastcall acConfPrefsExecute(TObject *Sender);
+	void __fastcall cbUnityChange(TObject *Sender);
 	void __fastcall frxReportRawResultBeforePrint(TfrxReportComponent *Sender);
-    void __fastcall frxUserDataSetResultsCheckEOF(TObject *Sender, bool &Eof);
-    void __fastcall frxUserDataSetResultsGetValue(const UnicodeString VarName, Variant &Value);
-    void __fastcall spLambda1Change(TObject *Sender);
-    void __fastcall spLambda2Change(TObject *Sender);
-    void __fastcall rbSimpleLambdaClick(TObject *Sender);
-    void __fastcall rbDoubleLambdaClick(TObject *Sender);
+	void __fastcall frxUserDataSetResultsCheckEOF(TObject *Sender, bool &Eof);
+	void __fastcall frxUserDataSetResultsGetValue(const UnicodeString VarName, Variant &Value);
+	void __fastcall spLambda1Change(TObject *Sender);
+	void __fastcall spLambda2Change(TObject *Sender);
+	void __fastcall rbSimpleLambdaClick(TObject *Sender);
+	void __fastcall rbDoubleLambdaClick(TObject *Sender);
 	void __fastcall spKineticChangeThresholdChange(TObject *Sender);
 	void __fastcall spKineticBaselineReadingsChange(TObject *Sender);
 	void __fastcall tabAbsorbanceScrollBoxResize(TObject *Sender);
@@ -421,16 +421,16 @@ __published:	// IDE-managed Components
 	void __fastcall frxUserDataSetUnknowsCheckEOF(TObject *Sender, bool &Eof);
 	void __fastcall frxUserDataSetUnknowsGetValue(const UnicodeString VarName, Variant &Value);
 	void __fastcall acResultUnknowsExecute(TObject *Sender);
-    void __fastcall lmdstdValuesGridChange(TObject *Sender, TLMDGridChangeFlags AChangedFlags);
-    void __fastcall cbCurveTypesChange(TObject *Sender);
+	void __fastcall lmdstdValuesGridChange(TObject *Sender, TLMDGridChangeFlags AChangedFlags);
+	void __fastcall cbCurveTypesChange(TObject *Sender);
 	void __fastcall acAboutExecute(TObject *Sender);
-    void __fastcall acExperimentImportCalibrationExecute(TObject *Sender);
-    void __fastcall acLoadExperimentExecute(TObject *Sender);
-    void __fastcall acLoadProtocolExecute(TObject *Sender);
-    void __fastcall acSaveProtocolExecute(TObject *Sender);
-    void __fastcall acNewProtocolExecute(TObject *Sender);
-    void __fastcall acSaveExperimentExecute(TObject *Sender);
-    void __fastcall acExperimentExportCsvExecute(TObject *Sender);
+	void __fastcall acExperimentImportCalibrationExecute(TObject *Sender);
+	void __fastcall acLoadExperimentExecute(TObject *Sender);
+	void __fastcall acLoadProtocolExecute(TObject *Sender);
+	void __fastcall acSaveProtocolExecute(TObject *Sender);
+	void __fastcall acNewProtocolExecute(TObject *Sender);
+	void __fastcall acSaveExperimentExecute(TObject *Sender);
+	void __fastcall acExperimentExportCsvExecute(TObject *Sender);
 	void __fastcall acExportRawValuesExecute(TObject *Sender);
 	void __fastcall stdValuesGridDrawCell(TObject *Sender, int ACol, int ARow, TRect &Rect, TGridDrawState State);
 	void __fastcall stdValuesGridSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect);
@@ -445,6 +445,20 @@ public:
 	void __fastcall setDevice(PElisaDevice pDev);
 
 private:	// User declarations
+	enum TValueKind {
+		Raw,
+		Concentration
+	};
+
+	enum TSummarization {
+		Unknown,
+		Zero,
+		Minimum,
+		Maximum,
+		Mean,
+		Median
+	};
+
 	static HANDLE singletonEventHandle;
 
 	String m_ExperimentName;
@@ -467,7 +481,7 @@ private:	// User declarations
 
 	HDEVNOTIFY hDevNotify;
 
-    PAppConfig mpAppConfig;
+	PAppConfig mpAppConfig;
 
 	ResultsVector mResultsList;
 
@@ -487,11 +501,19 @@ private:	// User declarations
 	TTreeNode * __fastcall getNode(String name, TTreeNode *parent = NULL) const;
 	void __fastcall setNodeEnabled(TTreeNode *node, Boolean enabled = True);
 
-    void __fastcall DoProcessResults();
+	double __fastcall WellSummarize(WellListPointers, TSummarization, TValueKind);
+
+	void __fastcall DoProcessResults();
 	void __fastcall DoProcessBlanks();
 	void __fastcall DoProcessConcentrations();
 	void __fastcall DoProcessCPnCNs();
 	void __fastcall DoProcessQCs(WellList& ulp);
+
+	void __fastcall PreviousDoProcessCPnCNs(TValueKind, WellMatrixList&);
+	void __fastcall     NextDoProcessCPnCNs(TValueKind, WellMatrixList&);
+
+	void __fastcall OldDoProcessCPnCNs();
+	void __fastcall NewDoProcessCPnCNs();
 
 	void __fastcall DoKineticRead(TWinControl *parent);
 	void __fastcall DoNormalRead(TWinControl *parent);

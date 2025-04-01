@@ -23,6 +23,8 @@
 #include <cmath>
 #include <limits>
 
+#include <exception>
+
 #pragma hdrstop
 
 #include "unFrmMain.h"
@@ -241,11 +243,11 @@ void __fastcall TMainForm::FormShow(TObject *Sender)
 	TTreeNode *node = treeview->Items->GetFirstNode()->getFirstChild();
 	treeview->Select(node);
 
-    FillUnitiesComboBox();
+	FillUnitiesComboBox();
 
 	UpdateUi(False);
 
-    OneShotTimer->Enabled = True;
+	OneShotTimer->Enabled = True;
 
 	Application->HintHidePause = 10000;
 }
@@ -629,7 +631,7 @@ void __fastcall TMainForm::UpdateUi(Boolean enabled)
 
 	acConfPrefs->Enabled = False;
 	acFiltersConfig->Enabled = False;
-    acExperimentImportCalibration->Enabled = False;
+	acExperimentImportCalibration->Enabled = False;
 }
 
 void __fastcall TMainForm::actExitExecute(TObject *Sender)
@@ -796,9 +798,9 @@ void __fastcall TMainForm::DoProcessBlanks()
 
 			for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)       //exibe corretamente os dados linha/coluna após leitura
 			{
-                WellList& wlRef = refMatrix[row];
+				WellList& wlRef = refMatrix[row];
 
-                for (WellList::iterator it = wlRef.begin(); it != wlRef.end(); it++)
+				for (WellList::iterator it = wlRef.begin(); it != wlRef.end(); it++)
 				{
 					if (it->Type == TWellType::wlEmpty)
 						continue;
@@ -816,6 +818,7 @@ void __fastcall TMainForm::DoProcessBlanks()
 
 	blankAvg = accumulated / std::max((Double)blankWells.size(), 1.0);
 
+	{
 	for (WellMatrixList::size_type i = 0; i < wellMatrixListRef.size(); ++i)
 	{
 		TWellMatrix& refMatrix = wellMatrixListRef[i];
@@ -837,12 +840,13 @@ void __fastcall TMainForm::DoProcessBlanks()
 			}
 		}
 	}
+	}
 }
 
 void __fastcall TMainForm::DoProcessConcentrations()
 {
-    curveSerie->Clear();
-    pointsSerie->Clear();
+	curveSerie->Clear();
+	pointsSerie->Clear();
 
 	switch (cbCurveTypes->ItemIndex)
 	{
@@ -889,8 +893,309 @@ void __fastcall TMainForm::DoProcessConcentrations()
 
 	cbChartScaleChange(NULL);
 }
-//calculo de CP e CN
+
+
 void __fastcall TMainForm::DoProcessCPnCNs()
+{
+	Single limit1Val = 0;
+	Single limit2Val = 0;
+
+	TValueKind       kind = (cbOrigin->ItemIndex == 0 ? TValueKind::Raw : TValueKind::Concentration);
+	WellMatrixList&  wellMatrixListRef = *TWellMatrixSingleton::instance();
+
+	this->NextDoProcessCPnCNs(kind, wellMatrixListRef);
+	//this->PreviousDoProcessCPnCNs(kind, wellMatrixListRef);
+
+	// Cálculo do limite 1
+	loccusEval.SetExpression(edZone1Limit->Text.w_str());
+	loccusEval.Evaluate();
+	limit1Val = loccusEval.GetCurrValue();
+	lbZone1Limit->Caption = Sysutils::Format(L"Limite Zona 1: %5.5f", ARRAYOFCONST((limit1Val)));
+
+	// Cálculo do limite 2
+	loccusEval.SetExpression(edZone2Limit->Text.w_str());
+	loccusEval.Evaluate();
+	limit2Val = loccusEval.GetCurrValue();
+	lbZone2Limit->Caption = Sysutils::Format(L"Limite Zona 2: %5.5f", ARRAYOFCONST((limit2Val)));
+
+	for (WellMatrixList::size_type i = 0; i < wellMatrixListRef.size(); ++i)
+	{
+		TWellMatrix& refMatrix = wellMatrixListRef[i];
+
+		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)          //exibe corretamente os dados linha/coluna após leitura
+		{
+			TWell& w = refMatrix[row].front();
+
+			for (WellList::iterator it = refMatrix[row].begin(); it != refMatrix[row].end(); it++)
+			{
+				if (it->Type != TWellType::wlUnknown)
+					continue;
+
+				if (cbOrigin->ItemIndex == 0)
+				{
+					if (it->RawValue < limit1Val)
+						it->Interpret = edZone1Interpret->Text;
+					else
+						if (it->RawValue >= limit1Val && it->RawValue < limit2Val)
+							it->Interpret = String(edZone2Interpret->Text);
+						else
+							it->Interpret = String(edZone3Interpret->Text);
+				}
+				else
+				{
+					if (it->ConcentrationValue < limit1Val)
+						it->Interpret = String(edZone1Interpret->Text);
+					else
+						if (it->ConcentrationValue >= limit1Val && w.ConcentrationValue < limit2Val)
+							it->Interpret = String(edZone2Interpret->Text);
+						else
+							it->Interpret = String(edZone3Interpret->Text);
+				}
+			}
+		}
+	}
+}
+
+
+void __fastcall TMainForm::NextDoProcessCPnCNs(TValueKind kind, WellMatrixList& wellMatrixListRef)
+{
+	std::map<String, WellListPointers> Wells;
+	std::map<String, double>           Summarizes;
+	std::map<String, size_t>           Counts;
+
+	try
+	{
+		Wells[L"CP"] = WellListPointers();
+		Wells[L"CN"] = WellListPointers();
+
+		for (WellMatrixList::size_type i = 0; i < wellMatrixListRef.size(); ++i)
+		{
+			for (int row = 0; row < wellMatrixListRef[i].Rows; row++)
+			{
+				for (WellList::iterator it = wellMatrixListRef[i][row].begin(); it != wellMatrixListRef[i][row].end(); it++)
+				{
+					String key = L"";
+
+					switch (it->Type)
+					{
+
+						case TWellType::wlPositiveControl:
+							key = L"CP";
+							break;
+
+						case TWellType::wlNegativeControl:
+							key = L"CN";
+							break;
+
+						case TWellType::wlConcentrationStd:
+							key = String("STD") + String(it->ID);
+							if (Wells.find(key) == Wells.end())
+							{
+								Wells[key] = WellListPointers();
+							}
+							break;
+					}
+
+					if (key == "")
+						continue;
+
+					Wells[key].push_back(&(*it));
+				}
+			}
+		}
+
+		TSummarization summarization = TSummarization::Mean;
+		//TSummarization summarization = TSummarization::Maximum;
+
+		for(std::map<String, WellListPointers>::iterator item = Wells.begin(); item != Wells.end(); ++item)
+		{
+			if (item->second.size() == 0)
+				throw std::runtime_error("Zero");
+
+			Summarizes[item->first] = this->WellSummarize(item->second, summarization, kind);
+		}
+
+		// Start : Trecho para debug provisório das variáveis selecionadas
+		String message = "";
+		for(std::map<String, WellListPointers>::iterator item = Wells.begin(); item != Wells.end(); ++item)
+		{
+			double value = Summarizes[item->first];
+			String name  = String(item->first.c_str());
+			String item  = Sysutils::Format(L"%5s : %5.3f\n", ARRAYOFCONST((name, value)));
+
+			message += item;
+		}
+		ShowMessage(message);
+		// Finish
+
+		for(std::map<String, WellListPointers>::iterator item = Wells.begin(); item != Wells.end(); ++item)
+		{
+			loccusEval.AddVariable(LME::Variable(item->first.c_str(), (Double)Summarizes[item->first]));
+		}
+	}
+	catch (const std::exception& e)
+	{
+		ShowMessage(e.what());
+	}
+	catch(...)
+	{
+		ShowMessage("Erro inesperado");
+	}
+}
+
+
+double __fastcall TMainForm::WellSummarize(WellListPointers Wells, TSummarization summarization, TValueKind kind)
+{
+	switch (summarization)
+	{
+		case TSummarization::Mean:
+			{
+				double Sum = 0;
+				for (WellListPointers::iterator item = Wells.begin(); item != Wells.end(); ++item)
+				{
+					Sum += (kind == TValueKind::Raw) ? (*item)->RawValue : (*item)->ConcentrationValue;
+				}
+				return (Sum / Wells.size());
+			}
+
+		case TSummarization::Maximum:
+			{
+				double Maximum;
+				double Current;
+				bool   swap    = true;
+				WellListPointers::iterator item = Wells.begin();
+				while (true)
+				{
+					if (swap)
+					{
+						Maximum = (kind == TValueKind::Raw) ? (*item)->RawValue : (*item)->ConcentrationValue;
+					}
+
+					item++;
+					if (item == Wells.end())
+						break;
+
+					swap = Maximum < ((kind == TValueKind::Raw) ? (*item)->RawValue : (*item)->ConcentrationValue);
+				}
+				return Maximum;
+			}
+
+		default:
+			return 0;
+
+	}
+}
+
+
+//calculo de CP e CN
+void __fastcall TMainForm::PreviousDoProcessCPnCNs(TValueKind kind, WellMatrixList& wellMatrixListRef)
+{
+	using System::Sysutils::Format;
+
+	Double accumulated = 0;
+
+	WellListPointers cpWells;
+	WellListPointers cnWells;
+	WellListPointers stdWells;    // wlConcentrationStd
+
+	// Preencher as listas cpWells, cnWells e stdWells
+	for (WellMatrixList::size_type i = 0; i < wellMatrixListRef.size(); ++i)
+	{
+		WellListPointers cpwl = wellMatrixListRef[i].filterWellsPointersByType(TWellType::wlPositiveControl);
+		if (!cpwl.empty())
+			std::copy(cpwl.begin(), cpwl.end(), std::back_inserter(cpWells));
+
+		WellListPointers cnwl = wellMatrixListRef[i].filterWellsPointersByType(TWellType::wlNegativeControl);
+		if (!cnwl.empty())
+			std::copy(cnwl.begin(), cnwl.end(), std::back_inserter(cnWells));
+
+		WellListPointers stdwl = wellMatrixListRef[i].filterWellsPointersByType(TWellType::wlConcentrationStd);
+		if (!stdwl.empty())
+			std::copy(stdwl.begin(), stdwl.end(), std::back_inserter(stdWells));
+	}
+
+	Single limit1Val = 0;
+	Single limit2Val = 0;
+	Double cpAvg = 0, cnAvg = 0, stdAvg = 0;
+
+	// Cálculo de CP
+	if (!cpWells.empty())
+	{
+		accumulated = 0;
+		for (WellListPointers::iterator it = cpWells.begin(); it != cpWells.end(); ++it)
+		{
+			if (cbOrigin->ItemIndex == 0)
+				accumulated += (*it)->RawValue;
+			else
+				accumulated += (*it)->ConcentrationValue;
+		}
+		cpAvg = accumulated / (Double)cpWells.size();
+	}
+
+	// Cálculo de CN
+	if (!cnWells.empty())
+	{
+		accumulated = 0;
+		for (WellListPointers::iterator it = cnWells.begin(); it != cnWells.end(); ++it)
+		{
+			if (cbOrigin->ItemIndex == 0)
+				accumulated += (*it)->RawValue;
+			else
+				accumulated += (*it)->ConcentrationValue;
+		}
+		cnAvg = accumulated / (Double)cnWells.size();
+	}
+
+	// Cálculo de STD (Padrões)
+	if (!stdWells.empty())
+	{
+		accumulated = 0;
+		for (WellListPointers::iterator it = stdWells.begin(); it != stdWells.end(); ++it)
+		{
+			switch (kind)
+			{
+
+				case TValueKind::Raw:
+					accumulated += (*it)->RawValue;
+					break;
+
+				case TValueKind::Concentration:
+					accumulated += (*it)->ConcentrationValue;
+					break;
+
+				default:
+					accumulated = 0;
+					break;
+			}
+		}
+		stdAvg = accumulated / (Double)stdWells.size();
+	}
+
+	// Adicionar variáveis no loccusEval e calcular limites
+	if (!cpWells.empty() && !cnWells.empty())
+	{
+		loccusEval.AddVariable(LME::Variable(TEXT("CP"), cpAvg));
+		loccusEval.AddVariable(LME::Variable(TEXT("CN"), cnAvg));
+		if (!stdWells.empty())
+			loccusEval.AddVariable(LME::Variable(TEXT("STD"), stdAvg));
+
+		// Cálculo do limite 1
+		loccusEval.SetExpression(edZone1Limit->Text.w_str());
+		loccusEval.Evaluate();
+		limit1Val = loccusEval.GetCurrValue();
+		lbZone1Limit->Caption = Format(_T("Limite Zona 1: %5.5f"), ARRAYOFCONST((limit1Val)));
+
+		// Cálculo do limite 2
+		loccusEval.SetExpression(edZone2Limit->Text.w_str());
+		loccusEval.Evaluate();
+		limit2Val = loccusEval.GetCurrValue();
+		lbZone2Limit->Caption = Format(_T("Limite Zona 2: %5.5f"), ARRAYOFCONST((limit2Val)));
+	}
+}
+
+
+//calculo de CP e CN
+void __fastcall TMainForm::OldDoProcessCPnCNs()
 {
 	using System::Sysutils::Format;
 
@@ -988,43 +1293,9 @@ void __fastcall TMainForm::DoProcessCPnCNs()
 	if (cnWells.empty() || cpWells.empty())
 		return;
 
-	for (WellMatrixList::size_type i = 0; i < wellMatrixListRef.size(); ++i)
-	{
-		TWellMatrix& refMatrix = wellMatrixListRef[i];
 
-		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)          //exibe corretamente os dados linha/coluna após leitura
-		{
-			TWell& w = refMatrix[row].front();
-
-			for (WellList::iterator it = refMatrix[row].begin(); it != refMatrix[row].end(); it++)
-			{
-				if (it->Type != TWellType::wlUnknown)
-					continue;
-
-				if (cbOrigin->ItemIndex == 0)
-				{
-					if (it->RawValue < limit1Val)
-						it->Interpret = edZone1Interpret->Text;
-					else
-						if (it->RawValue >= limit1Val && it->RawValue < limit2Val)
-							it->Interpret = String(edZone2Interpret->Text);
-						else
-							it->Interpret = String(edZone3Interpret->Text);
-				}
-				else
-				{
-					if (it->ConcentrationValue < limit1Val)
-						it->Interpret = String(edZone1Interpret->Text);
-					else
-						if (it->ConcentrationValue >= limit1Val && w.ConcentrationValue < limit2Val)
-							it->Interpret = String(edZone2Interpret->Text);
-						else
-							it->Interpret = String(edZone3Interpret->Text);
-				}
-			}
-		}
-	}
 }
+
 
 void __fastcall TMainForm::DoProcessQCs(WellList& ulp)
 {

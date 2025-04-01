@@ -116,6 +116,7 @@
         <BCC_AddProjectDirToIncludePath>true</BCC_AddProjectDirToIncludePath>
         <BCC_IncludePath>C:\Projetos\Componentes_Loccus\zylserialport;$(BCC_IncludePath)</BCC_IncludePath>
         <IncludePath>..\..\3rdparty\MathEvaluator;C:\work\vcl;C:\Projetos\Componentes_Loccus\FastReports\LibD21;C:\Projetos\Componentes_Loccus\MathEvaluator;C:\lib\SDL\basepack;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\-X7;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL</IncludePath>
+        <IncludePath>..\..\3rdparty\MathEvaluator;C:\work\vcl;C:\Projetos\Componentes_Loccus\FastReports\LibD21;C:\Projetos\Componentes_Loccus\MathEvaluator;C:\lib\SDL\basepack;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\-X7;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\X7</IncludePath>
         <BCC_wcsu>false</BCC_wcsu>
         <PackageImports>adort;$(PackageImports)</PackageImports>
         <VerInfo_Keys>CompanyName=Loccus Biotecnologia;FileDescription=Programa para controle remoto da leitora de microplacas ELISA;FileVersion=1.0.1.0;InternalName=LRM96 Remote;LegalCopyright=Copyright © 2006-2019 - Loccus do Brasil Ltda;LegalTrademarks=;OriginalFilename=LRM96 Remote.exe;ProductName=LRM96 Remote;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>

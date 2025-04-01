@@ -84,8 +84,10 @@ class TWellMatrix
 		WellListPointers::size_type __fastcall setAllReplicas(TWell w);
 		WellListPointers __fastcall getAllReplicas(TWell w);
 
+		Integer Rows;
+
 	private:
-		Integer Rows, Cols;
+		Integer Cols;
 		std::vector< std::vector<TWell> > mMatrixWells;
 };
 
