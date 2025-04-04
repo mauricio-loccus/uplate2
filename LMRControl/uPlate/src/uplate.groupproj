@@ -1,0 +1,36 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{0AA92C8D-B731-45EE-9636-1ED6EDF52FF9}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="µPlate.cbproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="µPlate">
+        <MSBuild Projects="µPlate.cbproj"/>
+    </Target>
+    <Target Name="µPlate:Clean">
+        <MSBuild Projects="µPlate.cbproj" Targets="Clean"/>
+    </Target>
+    <Target Name="µPlate:Make">
+        <MSBuild Projects="µPlate.cbproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="µPlate"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="µPlate:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="µPlate:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
