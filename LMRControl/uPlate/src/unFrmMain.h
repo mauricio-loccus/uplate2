@@ -352,8 +352,10 @@ __published:	// IDE-managed Components
 	void __fastcall chkbShakeClick(TObject *Sender);
 	void __fastcall actConnectExecute(TObject *Sender);
 	void __fastcall actDisconnectExecute(TObject *Sender);
-	void __fastcall chbShakeIntensityChange(TObject *Sender);
+
 	void __fastcall actProgramRunExecute(TObject *Sender);
+	void __fastcall actLabelAssignment(TObject *Sender);
+	void __fastcall chbShakeIntensityChange(TObject *Sender);
 	void __fastcall cbFilter2Change(TObject *Sender);
 	void __fastcall cbFilter1Change(TObject *Sender);
 
@@ -397,6 +399,7 @@ __published:	// IDE-managed Components
 	void __fastcall toolbarButtons1Click(TObject *Sender, int index);
 	void __fastcall toolbarButtons2Click(TObject *Sender, int index);
 	void __fastcall toolbarButtons3Click(TObject *Sender, int index);
+	void __fastcall toolbarButtons4Click(TObject *Sender, int index);
 	void __fastcall OptUserLoginClick(TObject *Sender);
 	void __fastcall OptUserLogoffClick(TObject *Sender);
 	void __fastcall OneShotTimerTimer(TObject *Sender);
@@ -440,6 +443,7 @@ __published:	// IDE-managed Components
 	void __fastcall stdValuesGridSetEditText(TObject *Sender, int ACol, int ARow, const UnicodeString Value);
 	void __fastcall chbShakeModeChange(TObject *Sender);
 	void __fastcall chbReadSpeedChange(TObject *Sender);
+
 
 public:
 	void __fastcall setDevice(PElisaDevice pDev);

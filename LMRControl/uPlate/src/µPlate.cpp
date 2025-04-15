@@ -7,15 +7,15 @@
 //---------------------------------------------------------------------------
 USEFORM("unInputFloatValue.cpp", InputFloatValue);
 USEFORM("unFrmWait.cpp", FrmWait);
-USEFORM("unFrmMain.cpp", MainForm);
-USEFORM("unFrmKineticStatus.cpp", FrmKineticStatus);
-USEFORM("unFrmProtocol.cpp", FrmProtocol);
 USEFORM("unfrmSplash.cpp", FrmSplash);
+USEFORM("unFrmKineticStatus.cpp", FrmKineticStatus);
+USEFORM("unFrmFiltersEdit.cpp", FrmFiltersEdit);
+USEFORM("unFrmMain.cpp", MainForm);
 USEFORM("unFrmSimulatedValues.cpp", FrmSimulatedValues);
+USEFORM("unFrmProtocol.cpp", FrmProtocol);
 USEFORM("unWellResult.cpp", WellResult); /* TFrame: File Type */
 USEFORM("unWellsEdit.cpp", WellsEdit); /* TFrame: File Type */
 USEFORM("unRenamePlate.cpp", FrmRenamePlate);
-USEFORM("unFrmFiltersEdit.cpp", FrmFiltersEdit);
 USEFORM("unCellOptions.cpp", CellOptions);
 USEFORM("unFrmAppLogin.cpp", FrmAppLogin);
 USEFORM("unFrmAbout.cpp", FrmAbout);
@@ -24,6 +24,7 @@ USEFORM("unFrmEditUserData.cpp", FrmEditUserData);
 USEFORM("unFrmEditUnities.cpp", FrmEditUnities);
 USEFORM("unDBModule.cpp", DBModule); /* TDataModule: File Type */
 USEFORM("unDataModule.cpp", MyDataModule); /* TDataModule: File Type */
+USEFORM("unFrmLabelAssign.cpp", FrmLabelAssignment);
 //---------------------------------------------------------------------------
 #include "unFrmSplash.h"
 #include "unFrmMain.h"
@@ -52,6 +53,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 		Application->CreateForm(__classid(TMainForm), &MainForm);
 		Application->CreateForm(__classid(TFrmSplash), &FrmSplash);
 		Application->CreateForm(__classid(TDBModule), &DBModule);
+		Application->CreateForm(__classid(TFrmLabelAssignment), &FrmLabelAssignment);
 		FormatSettings.ShortDateFormat = TEXT("dd/mm/yyyy");
 		FormatSettings.LongDateFormat  = TEXT("dddddd, d de mmmm de yyyy");
 		FormatSettings.ShortTimeFormat = TEXT("hh:nn:ss");

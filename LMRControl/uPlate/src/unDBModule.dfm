@@ -17,9 +17,7 @@ object DBModule: TDBModule
         'MetaDataPackageLoader=TDBXSqliteMetaDataCommandFactory,DbxSqlite' +
         'Driver210.bpl'
       'FailIfMissing=True'
-      
-        'Database=D:\Projetos\ELISA\LRMControl\App\V1.0.0\Win32\Debug\Dat' +
-        'a\lrm96.db3'
+      'Database='
       '')
     Left = 37
     Top = 22

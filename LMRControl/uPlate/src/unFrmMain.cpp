@@ -42,6 +42,7 @@
 #include "unFrmConfig.h"
 #include "unFrmAbout.h"
 #include "unFileFilters.h"
+#include "unFrmLabelAssign.h"
 
 #include "unDeviceFactory.h"
 #include "unLMR96Device.h"
@@ -1613,7 +1614,7 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 		{
 			TaskMessageDlg(TEXT("Atenção"),
 						   TEXT("Não é permitido ler uma placa caso hajam \"Padrões\""
-						        " designados e uma curva importada de outro experimento.\n"
+								" designados e uma curva importada de outro experimento.\n"
 								"Para continuar, primeiro remova os padrões ou inicie um novo Protocolo."),
 						   mtWarning,
 						   TMsgDlgButtons() << mbOK, 0);
@@ -1660,6 +1661,15 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 		Application->ShowException(&e);
 	}
 }
+
+
+void __fastcall TMainForm::actLabelAssignment(TObject *Sender)
+{
+	FrmLabelAssignment = new TFrmLabelAssignment(this, *TWellMatrixSingleton::instance());
+	FrmLabelAssignment->ShowModal();
+	FrmLabelAssignment->Free();
+}
+
 
 void __fastcall TMainForm::DoProcessResults()
 {
@@ -2494,8 +2504,8 @@ void __fastcall TMainForm::rbEndPointClick(TObject *Sender)
 	lbKineticChangeThreshold->Enabled = False;
 	spKineticChangeThreshold->Enabled = False;
 	lvKineticTimes->Enabled = False;
-	btnAdd->Enabled = False;
-	btnSub->Enabled = False;
+	//btnAdd->Enabled = False;
+	//btnSub->Enabled = False;
 }
 //---------------------------------------------------------------------------
 
@@ -2915,6 +2925,13 @@ void __fastcall TMainForm::toolbarButtons3Click(TObject *Sender, int index)
 	actOpenCloseDoorExecute(Sender);
 }
 //---------------------------------------------------------------------------
+
+void __fastcall TMainForm::toolbarButtons4Click(TObject *Sender, int index)
+{
+	actLabelAssignment(Sender);
+}
+//---------------------------------------------------------------------------
+
 
 Boolean __fastcall TMainForm::UserLogon()
 {
@@ -5264,9 +5281,5 @@ void __fastcall TMainForm::chbReadSpeedChange(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-
-
-
-
-
+//---------------------------------------------------------------------------
 

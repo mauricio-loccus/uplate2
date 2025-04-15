@@ -1,7 +1,7 @@
 object MyDataModule: TMyDataModule
   OldCreateOrder = True
-  Height = 504
-  Width = 818
+  Height = 262
+  Width = 479
   object IdEncoderUUE: TIdEncoderUUE
     FillChar = '`'
     Left = 32
@@ -7279,19 +7279,6 @@ object MyDataModule: TMyDataModule
     Left = 32
     Top = 88
   end
-  object ZylSerialPort: TZylSerialPort
-    BaudRate = br115200
-    EnableRTSOnOpen = False
-    XonLim = 34412
-    XoffLim = 8603
-    EofChar = #0
-    EvtChar = #0
-    CustomPortName = 'vcom1'
-    AutoReceive = False
-    NewLine = #39'\n'#39
-    Left = 616
-    Top = 24
-  end
   object FileSaveDialog: TLMDFileSaveDialog
     DefaultExtension = '.csv'
     FavoriteLinks = <>
@@ -7302,7 +7289,20 @@ object MyDataModule: TMyDataModule
       end>
     FileTypeIndex = 0
     Options = [fdoOverWritePrompt, fdoNoChangeDir, fdoDontAddToRecent]
-    Left = 618
+    Left = 322
     Top = 88
+  end
+  object ZylSerialPort: TZylSerialPort
+    BaudRate = br115200
+    EnableRTSOnOpen = False
+    XonLim = 34412
+    XoffLim = 8603
+    EofChar = #0
+    EvtChar = #0
+    CustomPortName = 'vcom1'
+    AutoReceive = False
+    NewLine = #39'\n'#39
+    Left = 320
+    Top = 24
   end
 end

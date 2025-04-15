@@ -26,17 +26,17 @@ object MainForm: TMainForm
   TextHeight = 15
   object Splitter: TSplitter
     Left = 193
-    Top = 94
-    Height = 549
+    Top = 104
+    Height = 539
     ExplicitLeft = 376
     ExplicitTop = 128
     ExplicitHeight = 100
   end
   object treeview: TTreeView
     Left = 0
-    Top = 94
+    Top = 104
     Width = 193
-    Height = 549
+    Height = 539
     Align = alLeft
     Enabled = False
     Indent = 19
@@ -71,9 +71,9 @@ object MainForm: TMainForm
   end
   object pageControl: TLMDPageControl
     Left = 196
-    Top = 94
+    Top = 104
     Width = 912
-    Height = 549
+    Height = 539
     Hint = ''
     Align = alClient
     Enabled = False
@@ -91,7 +91,7 @@ object MainForm: TMainForm
       Left = 4
       Top = 4
       Width = 904
-      Height = 515
+      Height = 505
       Hint = ''
       Bevel.Mode = bmCustom
       Caption = 'Par'#226'metros de leitura'
@@ -320,42 +320,6 @@ object MainForm: TMainForm
           Height = 402
           TabOrder = 2
           Visible = False
-          object btnAdd: TLMDMMButton
-            Left = 206
-            Top = 328
-            Width = 69
-            Height = 31
-            Enabled = False
-            AutoSize = False
-            OnClick = btnAddClick
-            RepeatingInterval = 50
-            AllowMouseOver = False
-            ButtonFaceStyle = sbStretch
-            ButtonFaceImageList = MyDataModule.pngImageList
-            ButtonFaceIndicesNew2 = {
-              0000310000003200000030000000300000003200000030000000310000003200
-              0000010032000000310000003000000032000000300000003000000032000000
-              3100000032000000}
-            ButtonFaceTransColNew = {FFFFFF1D}
-          end
-          object btnSub: TLMDMMButton
-            Left = 301
-            Top = 327
-            Width = 69
-            Height = 32
-            Enabled = False
-            AutoSize = False
-            OnClick = btnSubClick
-            RepeatingInterval = 50
-            AllowMouseOver = False
-            ButtonFaceStyle = sbStretch
-            ButtonFaceImageList = MyDataModule.pngImageList
-            ButtonFaceIndicesNew2 = {
-              0000340000003500000033000000330000003500000033000000340000003500
-              0000010035000000340000003300000035000000330000003300000035000000
-              3400000035000000}
-            ButtonFaceTransColNew = {FFFFFF1D}
-          end
           object Label2: TLabel
             Left = 252
             Top = 372
@@ -780,7 +744,7 @@ object MainForm: TMainForm
       Left = 4
       Top = 4
       Width = 904
-      Height = 515
+      Height = 505
       Hint = ''
       Bevel.Mode = bmCustom
       Caption = 'Placas'
@@ -790,7 +754,7 @@ object MainForm: TMainForm
         Left = 0
         Top = 0
         Width = 904
-        Height = 515
+        Height = 505
         Align = alClient
         BevelInner = bvNone
         BevelOuter = bvNone
@@ -804,7 +768,7 @@ object MainForm: TMainForm
       Left = 4
       Top = 4
       Width = 904
-      Height = 515
+      Height = 505
       Hint = ''
       Bevel.Mode = bmCustom
       Caption = 'Padr'#245'es'
@@ -876,7 +840,7 @@ object MainForm: TMainForm
       end
       object Panel1: TPanel
         Left = 0
-        Top = 482
+        Top = 472
         Width = 904
         Height = 33
         Align = alBottom
@@ -941,7 +905,7 @@ object MainForm: TMainForm
       Left = 4
       Top = 4
       Width = 904
-      Height = 515
+      Height = 505
       Hint = ''
       Bevel.Mode = bmCustom
       Caption = 'Curva de Calibra'#231#227'o'
@@ -951,7 +915,7 @@ object MainForm: TMainForm
         Left = 0
         Top = 0
         Width = 904
-        Height = 515
+        Height = 505
         Gradient.Direction = gdLeftRight
         Gradient.EndColor = 5592405
         Gradient.MidColor = clGray
@@ -1003,7 +967,7 @@ object MainForm: TMainForm
           Left = 837
           Top = 3
           Width = 64
-          Height = 509
+          Height = 16
           Align = alRight
           Anchors = [akTop, akRight]
           Caption = 'R2 = 0.000'
@@ -1015,7 +979,6 @@ object MainForm: TMainForm
           Font.Style = [fsBold]
           ParentColor = False
           ParentFont = False
-          ExplicitHeight = 16
         end
         object curveSerie: TFastLineSeries
           Legend.Visible = False
@@ -1081,7 +1044,7 @@ object MainForm: TMainForm
       Left = 4
       Top = 4
       Width = 904
-      Height = 515
+      Height = 505
       Hint = ''
       Bevel.Mode = bmCustom
       Caption = 'Qualitativo'
@@ -1091,7 +1054,7 @@ object MainForm: TMainForm
         Left = 0
         Top = 0
         Width = 904
-        Height = 377
+        Height = 367
         Gradient.EndColor = clGray
         Gradient.StartColor = clSilver
         Title.Color = clBlack
@@ -1140,7 +1103,7 @@ object MainForm: TMainForm
       end
       object Panel2: TPanel
         Left = 0
-        Top = 377
+        Top = 367
         Width = 904
         Height = 138
         Align = alBottom
@@ -1329,7 +1292,7 @@ object MainForm: TMainForm
       Left = 4
       Top = 4
       Width = 904
-      Height = 515
+      Height = 505
       Hint = ''
       Bevel.Mode = bmCustom
       Caption = 'Desconhecidos'
@@ -1338,7 +1301,7 @@ object MainForm: TMainForm
         Left = 0
         Top = 0
         Width = 904
-        Height = 515
+        Height = 505
         Style.HeaderRowHeight = 36
         Style.EmptyBannerFont.Charset = DEFAULT_CHARSET
         Style.EmptyBannerFont.Color = clWindowText
@@ -1447,7 +1410,7 @@ object MainForm: TMainForm
       Left = 4
       Top = 4
       Width = 904
-      Height = 515
+      Height = 505
       Hint = ''
       Bevel.Mode = bmCustom
       Caption = 'Resultados'
@@ -1458,7 +1421,7 @@ object MainForm: TMainForm
         Left = 3
         Top = 3
         Width = 898
-        Height = 509
+        Height = 499
         Hint = ''
         Align = alClient
         ParentColor = True
@@ -1471,7 +1434,7 @@ object MainForm: TMainForm
           Left = 4
           Top = 29
           Width = 890
-          Height = 476
+          Height = 466
           Hint = ''
           Bevel.Mode = bmCustom
           Caption = 'Absorb'#226'ncia'
@@ -1481,7 +1444,7 @@ object MainForm: TMainForm
             Left = 3
             Top = 3
             Width = 884
-            Height = 470
+            Height = 460
             VertScrollBar.Increment = 40
             Align = alClient
             BorderStyle = bsNone
@@ -1497,7 +1460,7 @@ object MainForm: TMainForm
           Left = 4
           Top = 29
           Width = 890
-          Height = 476
+          Height = 466
           Hint = ''
           Bevel.Mode = bmCustom
           Caption = 'Concentra'#231#227'o'
@@ -1507,7 +1470,7 @@ object MainForm: TMainForm
             Left = 3
             Top = 3
             Width = 884
-            Height = 470
+            Height = 460
             VertScrollBar.Increment = 40
             Align = alClient
             BorderStyle = bsNone
@@ -1521,7 +1484,7 @@ object MainForm: TMainForm
           Left = 4
           Top = 29
           Width = 890
-          Height = 476
+          Height = 466
           Hint = ''
           Bevel.Mode = bmCustom
           Caption = 'Qualitativo'
@@ -1531,7 +1494,7 @@ object MainForm: TMainForm
             Left = 3
             Top = 3
             Width = 884
-            Height = 470
+            Height = 460
             VertScrollBar.Increment = 40
             Align = alClient
             BorderStyle = bsNone
@@ -1547,7 +1510,7 @@ object MainForm: TMainForm
       Left = 4
       Top = 4
       Width = 904
-      Height = 515
+      Height = 505
       Hint = ''
       Bevel.Mode = bmCustom
       Caption = 'Resultado de Leitura (RAW)'
@@ -1556,7 +1519,7 @@ object MainForm: TMainForm
         Left = 0
         Top = 0
         Width = 904
-        Height = 515
+        Height = 505
         Style.HeaderRowHeight = 30
         Style.EmptyBannerFont.Charset = DEFAULT_CHARSET
         Style.EmptyBannerFont.Color = clWindowText
@@ -1697,7 +1660,7 @@ object MainForm: TMainForm
     Left = 0
     Top = 0
     Width = 1108
-    Height = 94
+    Height = 104
     Hint = ''
     AutoSize = True
     ParentBackground = True
@@ -1785,6 +1748,26 @@ object MainForm: TMainForm
         Width = 54
         Height = 53
         Margin = 1
+      end
+      item
+        Hint = 'Inicia entrada de R'#243'tulos'
+        ParentFont = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        Index = 4
+        DisplayName = 'TLMDToolButton'
+        ThemeMode = ttmPlatform
+        ImageList = MyDataModule.pngImageList
+        ImageIndex = 3
+        ListIndex = 0
+        OnClick = toolbarButtons4Click
+        UsePngGlyph = False
+        Width = 54
+        Height = 53
+        Margin = 1
       end>
     ButtonHeight = 53
     ButtonWidth = 54
@@ -1812,7 +1795,7 @@ object MainForm: TMainForm
     SizeGrip = False
   end
   object frxReportRawResult: TfrxReport
-    Version = '6.4.11'
+    Version = '2022.2.10'
     DotMatrixReport = False
     IniFile = '\Software\Fast Reports'
     PreviewOptions.Buttons = [pbPrint, pbLoad, pbSave, pbExport, pbZoom, pbFind, pbOutline, pbPageSetup, pbTools, pbEdit, pbNavigator, pbExportQuick]
@@ -1852,6 +1835,10 @@ object MainForm: TMainForm
       MirrorMode = []
       object MasterData1: TfrxMasterData
         FillType = ftBrush
+        FillGap.Top = 0
+        FillGap.Left = 0
+        FillGap.Bottom = 0
+        FillGap.Right = 0
         Frame.Typ = []
         Height = 540.472790000000000000
         Top = 124.724490000000000000
@@ -1900,6 +1887,10 @@ object MainForm: TMainForm
       end
       object PageFooter1: TfrxPageFooter
         FillType = ftBrush
+        FillGap.Top = 0
+        FillGap.Left = 0
+        FillGap.Bottom = 0
+        FillGap.Right = 0
         Frame.Typ = []
         Height = 22.677180000000000000
         Top = 725.669760000000000000
@@ -1939,6 +1930,10 @@ object MainForm: TMainForm
       end
       object PageHeader1: TfrxPageHeader
         FillType = ftBrush
+        FillGap.Top = 0
+        FillGap.Left = 0
+        FillGap.Bottom = 0
+        FillGap.Right = 0
         Frame.Typ = []
         Height = 45.354360000000000000
         Top = 18.897650000000000000
@@ -3783,6 +3778,8 @@ object MainForm: TMainForm
     ShowProgress = True
     OverwritePrompt = False
     DataOnly = False
+    EmbedFontsIfProtected = False
+    InteractiveFormsFontSubset = 'A-Z,a-z,0-9,#43-#47 '
     OpenAfterExport = False
     PrintOptimized = False
     Outline = False
@@ -3875,7 +3872,7 @@ object MainForm: TMainForm
     Top = 322
   end
   object frxReportResultsRaw: TfrxReport
-    Version = '6.4.11'
+    Version = '2022.2.10'
     DotMatrixReport = False
     IniFile = '\Software\Fast Reports'
     PreviewOptions.Buttons = [pbPrint, pbLoad, pbSave, pbExport, pbZoom, pbFind, pbOutline, pbPageSetup, pbTools, pbEdit, pbNavigator, pbExportQuick]
@@ -3921,6 +3918,10 @@ object MainForm: TMainForm
       MirrorMode = []
       object ReportTitle1: TfrxReportTitle
         FillType = ftBrush
+        FillGap.Top = 0
+        FillGap.Left = 0
+        FillGap.Bottom = 0
+        FillGap.Right = 0
         Frame.Typ = []
         Height = 37.795300000000000000
         Top = 18.897650000000000000
@@ -5759,6 +5760,10 @@ object MainForm: TMainForm
       end
       object MasterData1: TfrxMasterData
         FillType = ftBrush
+        FillGap.Top = 0
+        FillGap.Left = 0
+        FillGap.Bottom = 0
+        FillGap.Right = 0
         Frame.Typ = []
         Height = 18.897650000000000000
         Top = 170.078850000000000000
@@ -6012,6 +6017,10 @@ object MainForm: TMainForm
       end
       object PageFooter1: TfrxPageFooter
         FillType = ftBrush
+        FillGap.Top = 0
+        FillGap.Left = 0
+        FillGap.Bottom = 0
+        FillGap.Right = 0
         Frame.Typ = []
         Height = 22.677180000000000000
         Top = 249.448980000000000000
@@ -6062,6 +6071,10 @@ object MainForm: TMainForm
       end
       object PageHeader1: TfrxPageHeader
         FillType = ftBrush
+        FillGap.Top = 0
+        FillGap.Left = 0
+        FillGap.Bottom = 0
+        FillGap.Right = 0
         Frame.Typ = []
         Height = 30.236240000000000000
         Top = 79.370130000000000000
@@ -6294,7 +6307,7 @@ object MainForm: TMainForm
     Top = 496
   end
   object frxReportUnknows: TfrxReport
-    Version = '6.4.11'
+    Version = '2022.2.10'
     DotMatrixReport = False
     IniFile = '\Software\Fast Reports'
     PreviewOptions.Buttons = [pbPrint, pbLoad, pbSave, pbExport, pbZoom, pbFind, pbOutline, pbPageSetup, pbTools, pbEdit, pbNavigator, pbExportQuick]
@@ -6334,6 +6347,10 @@ object MainForm: TMainForm
       MirrorMode = []
       object ReportTitle1: TfrxReportTitle
         FillType = ftBrush
+        FillGap.Top = 0
+        FillGap.Left = 0
+        FillGap.Bottom = 0
+        FillGap.Right = 0
         Frame.Typ = []
         Height = 45.354360000000000000
         Top = 18.897650000000000000
@@ -8171,6 +8188,10 @@ object MainForm: TMainForm
       end
       object MasterData1: TfrxMasterData
         FillType = ftBrush
+        FillGap.Top = 0
+        FillGap.Left = 0
+        FillGap.Bottom = 0
+        FillGap.Right = 0
         Frame.Typ = []
         Height = 22.677180000000000000
         Top = 177.637910000000000000
@@ -8372,6 +8393,10 @@ object MainForm: TMainForm
       end
       object PageFooter1: TfrxPageFooter
         FillType = ftBrush
+        FillGap.Top = 0
+        FillGap.Left = 0
+        FillGap.Bottom = 0
+        FillGap.Right = 0
         Frame.Typ = []
         Height = 22.677180000000000000
         Top = 260.787570000000000000
@@ -8433,6 +8458,10 @@ object MainForm: TMainForm
       end
       object PageHeader1: TfrxPageHeader
         FillType = ftBrush
+        FillGap.Top = 0
+        FillGap.Left = 0
+        FillGap.Bottom = 0
+        FillGap.Right = 0
         Frame.Typ = []
         Height = 30.236240000000000000
         Top = 86.929190000000000000
