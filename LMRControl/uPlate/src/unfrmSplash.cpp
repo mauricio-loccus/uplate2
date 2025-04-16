@@ -24,12 +24,23 @@ void __fastcall TFrmSplash::CloseTimerTimer(TObject *Sender)
     this->Close();
 }
 //---------------------------------------------------------------------------
+
 void __fastcall TFrmSplash::FormClose(TObject *Sender, TCloseAction &Action)
 {
     this->CloseTimer->Enabled = false;
 	Action = caFree;
 }
 //---------------------------------------------------------------------------
+
+void __fastcall TFrmSplash::FormKeyPress(TObject *Sender, System::WideChar &Key)
+{
+	if (Key == vkEscape)
+	{
+     	this->Close();
+	}
+}
+//---------------------------------------------------------------------------
+
 void __fastcall TFrmSplash::FormDestroy(TObject *Sender)
 {
 	TMainForm* owner = dynamic_cast<TMainForm*>(Owner);
@@ -39,3 +50,5 @@ void __fastcall TFrmSplash::FormDestroy(TObject *Sender)
 	}
 }
 //---------------------------------------------------------------------------
+
+

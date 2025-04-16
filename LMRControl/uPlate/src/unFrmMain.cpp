@@ -28,6 +28,7 @@
 #pragma hdrstop
 
 #include "unFrmMain.h"
+#include "unFrmSplash.h"
 #include "unDataModule.h"
 #include "unDBModule.h"
 #include "unInputFloatValue.h"
@@ -35,7 +36,6 @@
 #include "unFrmWait.h"
 #include "unKineticControler.h"
 #include "unFrmFiltersEdit.h"
-#include "unFrmSplash.h"
 #include "unFrmAppLogin.h"
 #include "unFrmProtocol.h"
 #include "unDataModule.h"
@@ -275,8 +275,18 @@ __fastcall TMainForm::TMainForm(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TMainForm::FormCreate(TObject *Sender)
 {
+    this->Initialized = false;
+
+	#if !( defined(_DEBUG) && defined(SPEEDY) )
+
 	FrmSplash = new TFrmSplash(this);
 	FrmSplash->Show();
+
+	#else
+
+	FrmSplash = NULL;
+
+	#endif
 
 	FrmWait = new TFrmWait(this);
 
@@ -3657,9 +3667,11 @@ void __fastcall TMainForm::OneShotTimerTimer(TObject *Sender)
 
 	actConnectExecute(Sender);       // comando pra conectar ao equipamento
 
-	UserLogon();
-
-	UpdateUi(UserLogged());
+	this->Initialized = true;
+	if (!FrmSplash)
+	{
+		this->LoginRequest();
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -5292,6 +5304,17 @@ void __fastcall TMainForm::chbShakeModeChange(TObject *Sender)
 void __fastcall TMainForm::chbReadSpeedChange(TObject *Sender)
 {
 	m_elisaDeviceParams->ReadSpeed = static_cast<TElisaReadSpeed>(chbReadSpeed->ItemIndex);
+}
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::FormActivate(TObject *Sender)
+{
+	if (!Initialized && FrmSplash && FrmSplash->Visible)
+	{
+        FrmSplash->SetFocus();
+	}
 }
 //---------------------------------------------------------------------------
 

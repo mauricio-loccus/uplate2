@@ -14,8 +14,8 @@ object FrmAppLogin: TFrmAppLogin
   OldCreateOrder = False
   Position = poOwnerFormCenter
   OnClose = FormClose
+  OnCreate = FormCreate
   OnKeyDown = FormKeyDown
-  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 15
   object Image1: TImage

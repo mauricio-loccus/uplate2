@@ -16,6 +16,7 @@ object MainForm: TMainForm
   OldCreateOrder = False
   Position = poDesktopCenter
   ShowHint = True
+  OnActivate = FormActivate
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate

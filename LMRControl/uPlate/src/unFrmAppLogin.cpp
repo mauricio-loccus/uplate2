@@ -13,12 +13,15 @@
 #pragma package(smart_init)
 #pragma resource "*.dfm"
 TFrmAppLogin *FrmAppLogin;
+
 //---------------------------------------------------------------------------
-__fastcall TFrmAppLogin::TFrmAppLogin(TComponent* Owner)
-	: TForm(Owner), userID(-1)
+
+__fastcall TFrmAppLogin::TFrmAppLogin(TComponent* Owner) : TForm(Owner), userID(-1)
 {
 }
+
 //---------------------------------------------------------------------------
+
 void __fastcall TFrmAppLogin::btnLogarClick(TObject *Sender)
 {
 	String Passwd = MyDataModule->EncryptString(PasswordEdit->Text.Trim());
@@ -33,14 +36,13 @@ void __fastcall TFrmAppLogin::btnLogarClick(TObject *Sender)
 
 	String fpasswd = DBModule->UserQuery->FieldByName("PASSWORD")->AsString;
 
-#ifdef _DEBUG
+	#ifdef _DEBUG
 	String passwdDecripted = MyDataModule->IdDecoderUUE->DecodeString(fpasswd);
-#endif
+	#endif
 
 	if (Passwd != fpasswd)  //Login Adminstrador | senha admin
 	{
-		MessageDlg("Senha incorreta, corrija e tente novamente.",
-				   mtWarning, TMsgDlgButtons() << mbOK, 0);
+		MessageDlg("Senha incorreta, corrija e tente novamente.", mtWarning, TMsgDlgButtons() << mbOK, 0);
 
 		ModalResult = mrNone;
 
@@ -78,31 +80,33 @@ void __fastcall TFrmAppLogin::FormKeyDown(TObject *Sender, WORD &Key, TShiftStat
 }
 //---------------------------------------------------------------------------
 
-
-void __fastcall TFrmAppLogin::FormShow(TObject *Sender)
+void __fastcall TFrmAppLogin::FormClose(TObject *Sender, TCloseAction &Action)
 {
-    DBModule->Lmr96Connection->Connected = True;
+	DBModule->Lmr96Connection->Connected = False;
+}
 
-	DBModule->UserSQLQuery->Open();
+//---------------------------------------------------------------------------
 
+void __fastcall TFrmAppLogin::FormCreate(TObject *Sender)
+{
 	ComboBoxUserName->Clear();
 
-	DBModule->UserSQLQuery->First();
+	DBModule->Lmr96Connection->Connected = True;
 
+	DBModule->UserSQLQuery->Open();
+	DBModule->UserSQLQuery->First();
 	while (!DBModule->UserSQLQuery->Eof)
 	{
 		ComboBoxUserName->AddItem(DBModule->UserSQLQuery->FieldByName("Column0")->AsString, NULL);
 		DBModule->UserSQLQuery->Next();
 	}
-
 	DBModule->UserSQLQuery->Close();
+
+	#if ( defined(_DEBUG) && defined(SPEEDY) )
+	ComboBoxUserName->ItemIndex = 0;
+	ComboBoxUserName->OnChange(this);
+	PasswordEdit->Text = "admin";
+	#endif
 }
 //---------------------------------------------------------------------------
-
-void __fastcall TFrmAppLogin::FormClose(TObject *Sender, TCloseAction &Action)
-{
-    DBModule->Lmr96Connection->Connected = False;
-}
-//---------------------------------------------------------------------------
-
 

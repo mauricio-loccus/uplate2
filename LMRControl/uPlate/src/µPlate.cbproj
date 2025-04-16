@@ -123,6 +123,7 @@
         <ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\debug\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <Defines>SPEEDY;$(Defines)</Defines>
         <LinkPackageImports>rtl.bpi;vcl.bpi;xmlrtl.bpi;vclactnband.bpi;vclx.bpi;VclSmp.bpi;vclimg.bpi;frx21.bpi;fs21.bpi;frxe21.bpi;lmdrtl.bpi;lmdrtrtlx.bpi;lmdrtcore.bpi;lmdrttools.bpi;lmdrtprint.bpi;lmdrtgrid.bpi;lmdrtthemes.bpi;vclribbon.bpi;vcldb.bpi;dbrtl.bpi;IndySystem.bpi;IndyProtocols.bpi;IndyCore.bpi;dsnap.bpi;dbexpress.bpi;DbxCommonDriver.bpi;DBXSqliteDriver.bpi;lmdrttoolsdb.bpi;Tee.bpi;Teeui.bpi;Tee.bpi</LinkPackageImports>
         <BCC_AllCompatibilityFlags>false</BCC_AllCompatibilityFlags>
         <BCC_SmartPCHCache>false</BCC_SmartPCHCache>

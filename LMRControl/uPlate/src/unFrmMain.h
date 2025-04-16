@@ -443,6 +443,7 @@ __published:	// IDE-managed Components
 	void __fastcall stdValuesGridSetEditText(TObject *Sender, int ACol, int ARow, const UnicodeString Value);
 	void __fastcall chbShakeModeChange(TObject *Sender);
 	void __fastcall chbReadSpeedChange(TObject *Sender);
+	void __fastcall FormActivate(TObject *Sender);
 
 
 public:
@@ -466,6 +467,7 @@ private:	// User declarations
 
 	static HANDLE singletonEventHandle;
 
+	bool   Initialized;
 	String m_ExperimentName;
 	System::Largeint CurrentProtocol;
 	std::vector<Boolean> controlEnabledArray;
