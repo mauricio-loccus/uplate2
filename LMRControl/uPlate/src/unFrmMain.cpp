@@ -181,6 +181,26 @@ Boolean __fastcall StringToTime(const String& sTime, TTime& t)
 }
 
 //---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::WndProc(TMessage& message)
+{
+	ancestor::WndProc(message);
+
+	switch (message.Msg)
+	{
+		case InternalMessages::WM_PLATE_ADDED:
+		{
+			TWellsEdit *pwe = reinterpret_cast<TWellsEdit *>(message.LParam);
+
+			pwe->Enabled = True;
+			break;
+		}
+
+		default:
+			break;
+	}
+}
 __fastcall TMainForm::TMainForm(TComponent* Owner)
 	: TForm(Owner), currMatrix(-1),
 	  m_elisaDeviceParams(ElisaParamsSingleton::instance()),
@@ -254,26 +274,7 @@ void __fastcall TMainForm::FormShow(TObject *Sender)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TMainForm::WndProc(TMessage& message)
-{
-	ancestor::WndProc(message);
 
-	switch (message.Msg)
-	{
-		case InternalMessages::WM_PLATE_ADDED:
-		{
-			TWellsEdit *pwe = reinterpret_cast<TWellsEdit *>(message.LParam);
-
-			pwe->Enabled = True;
-			break;
-		}
-
-		default:
-			break;
-	}
-}
-
-//---------------------------------------------------------------------------
 void __fastcall TMainForm::InitAll()
 {
 	currMatrix = 0;
