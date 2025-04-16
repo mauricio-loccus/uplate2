@@ -181,6 +181,11 @@ Boolean __fastcall StringToTime(const String& sTime, TTime& t)
 }
 
 //---------------------------------------------------------------------------
+
+void __fastcall TMainForm::setDevice(PElisaDevice pDev)
+{
+}
+
 //---------------------------------------------------------------------------
 
 void __fastcall TMainForm::WndProc(TMessage& message)
@@ -458,11 +463,6 @@ void __fastcall TMainForm::FormCloseQuery(TObject *Sender, bool &CanClose)
 	}
 
 	CanClose = True;
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TMainForm::setDevice(PElisaDevice pDev)
-{
 }
 
 //---------------------------------------------------------------------------
