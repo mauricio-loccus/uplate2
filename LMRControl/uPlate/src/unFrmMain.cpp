@@ -182,6 +182,45 @@ Boolean __fastcall StringToTime(const String& sTime, TTime& t)
 
 //---------------------------------------------------------------------------
 
+ Boolean __fastcall TMainForm::UserLogon()
+{
+	StatusBar->Panels->BeginUpdate();
+	StatusBar->Panels->Items[0]->Text = "";
+	StatusBar->Panels->EndUpdate();
+
+	try
+	{
+		TFrmAppLogin *FrmAppLogin = new TFrmAppLogin(this);
+
+		if (mrOk != FrmAppLogin->ShowModal())
+			return False;
+
+		mpAppConfig->UserName = FrmAppLogin->UserName;
+		mpAppConfig->UserID = FrmAppLogin->UserID;
+		mpAppConfig->UserLogin = FrmAppLogin->UserLogin;
+		mpAppConfig->IsSuperUser = FrmAppLogin->IsSuperUser;
+
+		SMenuExperiment->Enabled = True;
+		SMenuProtocol->Enabled = True;
+	}
+	__finally
+	{
+		FrmAppLogin->Free();
+		FrmAppLogin = NULL;
+	}
+
+	StatusBar->Panels->BeginUpdate();
+	StatusBar->Panels->Items[0]->Text = "@" + mpAppConfig->UserName;
+	StatusBar->Panels->EndUpdate();
+
+	OptUserLogin->Enabled = False;
+	OptUserLogoff->Enabled = True;
+
+	return True;
+}
+
+//---------------------------------------------------------------------------
+
 void __fastcall TMainForm::setDevice(PElisaDevice pDev)
 {
 }
@@ -2931,45 +2970,8 @@ void __fastcall TMainForm::toolbarButtons4Click(TObject *Sender, int index)
 {
 	actLabelAssignment(Sender);
 }
+
 //---------------------------------------------------------------------------
-
-
-Boolean __fastcall TMainForm::UserLogon()
-{
-	StatusBar->Panels->BeginUpdate();
-	StatusBar->Panels->Items[0]->Text = "";
-	StatusBar->Panels->EndUpdate();
-
-	TFrmAppLogin *FrmAppLogin(new TFrmAppLogin(this));
-
-    try
-	{
-		if (mrOk != FrmAppLogin->ShowModal())
-            return False;
-
-		mpAppConfig->UserName = FrmAppLogin->UserName;
-	    mpAppConfig->UserID = FrmAppLogin->UserID;
-		mpAppConfig->UserLogin = FrmAppLogin->UserLogin;
-        mpAppConfig->IsSuperUser = FrmAppLogin->IsSuperUser;
-
-        SMenuExperiment->Enabled = True;
-        SMenuProtocol->Enabled = True;
-    }
-    __finally
-    {
-		FrmAppLogin->Free();
-		FrmAppLogin = NULL;
-    }
-
-	StatusBar->Panels->BeginUpdate();
-	StatusBar->Panels->Items[0]->Text = "@" + mpAppConfig->UserName;
-	StatusBar->Panels->EndUpdate();
-
-	OptUserLogin->Enabled = False;
-	OptUserLogoff->Enabled = True;
-
-	return True;
-}
 
 void __fastcall TMainForm::FillUnitiesComboBox()
 {
