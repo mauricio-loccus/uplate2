@@ -446,6 +446,7 @@ __published:	// IDE-managed Components
 
 
 public:
+	void __fastcall LoginRequest();
 	void __fastcall setDevice(PElisaDevice pDev);
 
 private:	// User declarations

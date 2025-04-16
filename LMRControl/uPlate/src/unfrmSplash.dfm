@@ -16,13 +16,11 @@ object FrmSplash: TFrmSplash
   Position = poDesktopCenter
   PixelsPerInch = 96
   TextHeight = 13
-  object Image1: TImage
-    Left = 0
-    Top = 0
-    Width = 372
-    Height = 372
-    Align = alClient
-    AutoSize = True
+  object Image: TImage
+    Left = 8
+    Top = 8
+    Width = 289
+    Height = 273
     Center = True
     Picture.Data = {
       0954506E67496D61676589504E470D0A1A0A0000000D49484452000001740000
@@ -880,6 +878,11 @@ object FrmSplash: TFrmSplash
       1173A06C21E8005086117400B0044107004B107400B0044107004B107400B004
       4107004B107400B0044107004B107400B0044107004B107400B0044107004B10
       7400B0044107004BFC0F51F3C03EFD23B46A0000000049454E44AE426082}
-    ExplicitWidth = 373
+  end
+  object CloseTimer: TTimer
+    Interval = 4000
+    OnTimer = CloseTimerTimer
+    Left = 272
+    Top = 296
   end
 end

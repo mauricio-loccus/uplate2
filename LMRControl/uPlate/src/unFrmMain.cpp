@@ -182,6 +182,13 @@ Boolean __fastcall StringToTime(const String& sTime, TTime& t)
 
 //---------------------------------------------------------------------------
 
+void __fastcall TMainForm::LoginRequest()
+{
+	this->UserLogon();
+}
+
+//---------------------------------------------------------------------------
+
  Boolean __fastcall TMainForm::UserLogon()
 {
 	StatusBar->Panels->BeginUpdate();
@@ -262,6 +269,9 @@ __fastcall TMainForm::TMainForm(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TMainForm::FormCreate(TObject *Sender)
 {
+	FrmSplash = new TFrmSplash(this);
+	FrmSplash->Show();
+
 	FrmWait = new TFrmWait(this);
 
 	mpAppConfig = AppConfigSingleton::instance();
@@ -3629,7 +3639,6 @@ void __fastcall TMainForm::OneShotTimerTimer(TObject *Sender)
 {
 	OneShotTimer->Enabled = False;
 
-	FrmSplash->Close();
 
 	StlStringList commNames = m_elisaDevice->GetPortNames();
 
