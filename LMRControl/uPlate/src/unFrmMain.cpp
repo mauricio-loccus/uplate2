@@ -134,6 +134,9 @@ TMainForm *MainForm = NULL;
 
 HANDLE TMainForm::singletonEventHandle = INVALID_HANDLE_VALUE;
 
+
+//---------------------------------------------------------------------------
+
 Boolean __fastcall StringToTime(const String& sTime, TTime& t)
 {
 	uint16_t hh = 0, mm = 0, ss = 0;
@@ -252,6 +255,9 @@ void __fastcall TMainForm::WndProc(TMessage& message)
 			break;
 	}
 }
+
+//-------------------------------------------------------------
+
 __fastcall TMainForm::TMainForm(TComponent* Owner)
 	: TForm(Owner), currMatrix(-1),
 	  m_elisaDeviceParams(ElisaParamsSingleton::instance()),
@@ -275,11 +281,9 @@ void __fastcall TMainForm::FormCreate(TObject *Sender)
 	FrmWait = new TFrmWait(this);
 
 	mpAppConfig = AppConfigSingleton::instance();
-
 	pageControl->ActivePage = tabParamRead;
 
 	controlEnabledArray[0] = True;
-
 	for (LongWord i = 1; i < controlEnabledArray.size(); i++)
 		controlEnabledArray[i] = False;
 
@@ -290,6 +294,8 @@ void __fastcall TMainForm::FormCreate(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TMainForm::FormShow(TObject *Sender)
 {
+
+
 	if (mpAppConfig->ElisaSimulated)
 	{
 		PElisaDevice pDev = DeviceFactorySingleton::instance()->CreateDevice(ElisaDeviceTypeEnum::ElisaDeviceLRM96Simulator);
@@ -1960,7 +1966,6 @@ void __fastcall TMainForm::cbFilter2Change(TObject *Sender)
 void __fastcall TMainForm::cbFilter1Change(TObject *Sender)
 {
 	m_elisaDeviceParams->Filter1 = cbFilter1->ItemIndex;
-
 	cbFilter2->ItemIndex = -1;
 }
 //---------------------------------------------------------------------------
@@ -3045,7 +3050,7 @@ void __fastcall TMainForm::OptUserLoginClick(TObject *Sender)
 	}
 
 	if (UserLogon() && !m_elisaDevice->isConnected)
-		{
+	{
 		actConnectExecute(Sender);
 		UpdateUi(UserLogged());
 
@@ -3053,7 +3058,7 @@ void __fastcall TMainForm::OptUserLoginClick(TObject *Sender)
 		actDisconnect->Enabled = m_elisaDevice->isConnected && UserLogged();
 		actProgramRun->Enabled = m_elisaDevice->isConnected && UserLogged();
 		actOpenCloseDoor->Enabled = m_elisaDevice->isConnected && UserLogged();
-		}
+	}
 	UpdateUi(UserLogged());
 }
 //---------------------------------------------------------------------------
@@ -3066,7 +3071,6 @@ void __fastcall TMainForm::OptUserLogoffClick(TObject *Sender)
 						 TEXT("Deseja realmente prosseguir?");
 
 	AskDialog->Execute();
-
 	if (AskDialog->ResultButtonId != 200)
 		return;
 
@@ -3639,7 +3643,6 @@ void __fastcall TMainForm::OneShotTimerTimer(TObject *Sender)
 {
 	OneShotTimer->Enabled = False;
 
-
 	StlStringList commNames = m_elisaDevice->GetPortNames();
 
 	if (commNames.empty())
@@ -3650,7 +3653,6 @@ void __fastcall TMainForm::OneShotTimerTimer(TObject *Sender)
 		toolbar->Buttons->Items[0]->Enabled = False;
 		return;
 	}
-
 	commName = commNames[0];
 
 	actConnectExecute(Sender);       // comando pra conectar ao equipamento
@@ -5291,7 +5293,5 @@ void __fastcall TMainForm::chbReadSpeedChange(TObject *Sender)
 {
 	m_elisaDeviceParams->ReadSpeed = static_cast<TElisaReadSpeed>(chbReadSpeed->ItemIndex);
 }
-//---------------------------------------------------------------------------
-
 //---------------------------------------------------------------------------
 
