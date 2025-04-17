@@ -219,6 +219,8 @@ void __fastcall TMainForm::LoginRequest()
 		FrmAppLogin = NULL;
 	}
 
+	UpdateUi(mpAppConfig->UserID != -1);
+
 	StatusBar->Panels->BeginUpdate();
 	StatusBar->Panels->Items[0]->Text = "@" + mpAppConfig->UserName;
 	StatusBar->Panels->EndUpdate();
@@ -227,6 +229,113 @@ void __fastcall TMainForm::LoginRequest()
 	OptUserLogoff->Enabled = True;
 
 	return True;
+}
+
+//---------------------------------------------------------------------------
+
+Boolean __fastcall TMainForm::UserLogoff()
+{
+	AskDialog->Title   = TEXT("DesconexÃ£o do usuÃ¡rio ") + mpAppConfig->UserName;
+	AskDialog->Content = TEXT("A desconexÃ£o de usuÃ¡rio implica na perda de dados.\n")
+						 TEXT("Certifique-se de que o protocolo corrente ou o experimento foram salvos.\n")
+						 TEXT("Deseja realmente prosseguir?");
+
+	AskDialog->Execute();
+	if (AskDialog->ResultButtonId != 200)
+		return False;
+
+	InitAll();
+	AddPlateMenuItemClick(this);
+
+	CurrentProtocol = -1;
+	mpAppConfig->UserID = -1;
+
+	UpdateUi(False);
+
+	OptUserLogoff->Enabled = False;
+	OptUserLogin->Enabled = True;
+
+	SMenuExperiment->Enabled = False;
+	SMenuProtocol->Enabled = False;
+}
+
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::UpdateUi(Boolean enabled)
+{
+	TTreeNode *resultsNode = getNode(_T("Resultados"));
+
+	setNodeEnabled(resultsNode,
+				   (tabAbsorbanceScrollBox->ControlCount > 0 &&
+					tabConcentrationScrollBox->ControlCount > 0 &&
+					tabQualitativeScrollBox->ControlCount > 0));
+
+
+	tabResultPageControl->Enabled = (tabAbsorbanceScrollBox->ControlCount > 0 &&
+									 tabConcentrationScrollBox->ControlCount > 0 &&
+									 tabQualitativeScrollBox->ControlCount > 0);
+
+	cbUnity->Enabled = enabled;
+
+	toolbar->Buttons->Items[0]->Enabled = !m_elisaDevice->isConnected && UserLogged();
+
+	for (Integer i = 1; i < toolbar->Buttons->Count; i++)
+		toolbar->Buttons->Items[i]->Enabled = m_elisaDevice->isConnected && UserLogged();
+
+	actConnect->Enabled = !m_elisaDevice->isConnected && UserLogged();
+	actDisconnect->Enabled = m_elisaDevice->isConnected && UserLogged();
+	actProgramRun->Enabled = m_elisaDevice->isConnected && UserLogged();
+	actOpenCloseDoor->Enabled = m_elisaDevice->isConnected && UserLogged();
+
+	if (enabled)
+	{
+		grpReadMode->Enabled = True;
+		rbEndPoint->Enabled = True;
+		rbKinetic->Enabled = True;
+		grpShakeParams->Enabled = True;
+		grpFilters->Enabled = True;
+		lbFilter1->Enabled = True;
+		cbFilter1->Enabled = True;
+
+		treeview->Enabled = True;
+		pageControl->Enabled = True;
+
+		toolbar->Buttons->Items[0]->Enabled = False;
+		for (Integer i = 1; i < toolbar->Buttons->Count; i++)
+			toolbar->Buttons->Items[i]->Enabled = True;
+
+		treeview->Enabled = True;
+		pageControl->Enabled = True;
+
+		acConfPrefs->Enabled = True;
+
+		if (ElisaDeviceTypeEnum::ElisaDeviceLMR96 == m_elisaDevice->Type || ElisaDeviceTypeEnum::ElisaDeviceLMR96_2023 == m_elisaDevice->Type )
+			acFiltersConfig->Enabled = True;
+
+		//	ElisaDeviceTypeEnum::ElisaDeviceLMR96_2023 == m_elisaDevice->Type
+
+		acExperimentImportCalibration->Enabled = True;
+
+		return;
+	}
+
+	grpReadMode->Enabled = False;
+	grpShakeParams->Enabled = False;
+	grpFilters->Enabled = False;
+	lbFilter1->Enabled = False;
+	cbFilter1->Enabled = False;
+
+	if (!rbKinetic->Checked)
+		rbEndPointClick(NULL);
+
+	treeview->Enabled = False;
+
+	pageControl->TabIndex = 0;
+	pageControl->Enabled = False;
+
+	acConfPrefs->Enabled = False;
+	acFiltersConfig->Enabled = False;
+	acExperimentImportCalibration->Enabled = False;
 }
 
 //---------------------------------------------------------------------------
@@ -623,83 +732,6 @@ void __fastcall TMainForm::chkbShakeClick(TObject *Sender)
 	meShakeDuration->Enabled = chkbShake->Checked;
 }
 //---------------------------------------------------------------------------
-void __fastcall TMainForm::UpdateUi(Boolean enabled)
-{
-	TTreeNode *resultsNode = getNode(_T("Resultados"));
-
-	setNodeEnabled(resultsNode,
-				   (tabAbsorbanceScrollBox->ControlCount > 0 &&
-					tabConcentrationScrollBox->ControlCount > 0 &&
-					tabQualitativeScrollBox->ControlCount > 0));
-
-
-	tabResultPageControl->Enabled = (tabAbsorbanceScrollBox->ControlCount > 0 &&
-									 tabConcentrationScrollBox->ControlCount > 0 &&
-									 tabQualitativeScrollBox->ControlCount > 0);
-
-	cbUnity->Enabled = enabled;
-
-	toolbar->Buttons->Items[0]->Enabled = !m_elisaDevice->isConnected && UserLogged();
-
-	for (Integer i = 1; i < toolbar->Buttons->Count; i++)
-		toolbar->Buttons->Items[i]->Enabled = m_elisaDevice->isConnected && UserLogged();
-
-	actConnect->Enabled = !m_elisaDevice->isConnected && UserLogged();
-	actDisconnect->Enabled = m_elisaDevice->isConnected && UserLogged();
-	actProgramRun->Enabled = m_elisaDevice->isConnected && UserLogged();
-	actOpenCloseDoor->Enabled = m_elisaDevice->isConnected && UserLogged();
-
-	if (enabled)
-	{
-		grpReadMode->Enabled = True;
-		rbEndPoint->Enabled = True;
-		rbKinetic->Enabled = True;
-		grpShakeParams->Enabled = True;
-		grpFilters->Enabled = True;
-		lbFilter1->Enabled = True;
-		cbFilter1->Enabled = True;
-
-		treeview->Enabled = True;
-		pageControl->Enabled = True;
-
-		toolbar->Buttons->Items[0]->Enabled = False;
-
-		for (Integer i = 1; i < toolbar->Buttons->Count; i++)
-			toolbar->Buttons->Items[i]->Enabled = True;
-
-		treeview->Enabled = True;
-		pageControl->Enabled = True;
-
-		acConfPrefs->Enabled = True;
-
-		if (ElisaDeviceTypeEnum::ElisaDeviceLMR96 == m_elisaDevice->Type || ElisaDeviceTypeEnum::ElisaDeviceLMR96_2023 == m_elisaDevice->Type )
-			acFiltersConfig->Enabled = True;
-
-	   //	ElisaDeviceTypeEnum::ElisaDeviceLMR96_2023 == m_elisaDevice->Type
-
-		acExperimentImportCalibration->Enabled = True;
-
-		return;
-	}
-
-	grpReadMode->Enabled = False;
-	grpShakeParams->Enabled = False;
-	grpFilters->Enabled = False;
-	lbFilter1->Enabled = False;
-	cbFilter1->Enabled = False;
-
-	if (!rbKinetic->Checked)
-		rbEndPointClick(NULL);
-
-	treeview->Enabled = False;
-
-	pageControl->TabIndex = 0;
-	pageControl->Enabled = False;
-
-	acConfPrefs->Enabled = False;
-	acFiltersConfig->Enabled = False;
-	acExperimentImportCalibration->Enabled = False;
-}
 
 void __fastcall TMainForm::actExitExecute(TObject *Sender)
 {
@@ -3071,34 +3103,14 @@ void __fastcall TMainForm::OptUserLoginClick(TObject *Sender)
 	}
 	UpdateUi(UserLogged());
 }
+
 //---------------------------------------------------------------------------
 
 void __fastcall TMainForm::OptUserLogoffClick(TObject *Sender)
 {
-	AskDialog->Title = TEXT("Desconexão do usuário ") + mpAppConfig->UserName;
-	AskDialog->Content = TEXT("A desconexão de usuário implica na perda de dados.\n")
-						 TEXT("Certifique-se de que o protocolo corrente ou o experimento foram salvos.\n")
-						 TEXT("Deseja realmente prosseguir?");
 
-	AskDialog->Execute();
-	if (AskDialog->ResultButtonId != 200)
-		return;
-
-	InitAll();
-	AddPlateMenuItemClick(Sender);
-
-	CurrentProtocol = -1;
-	mpAppConfig->UserID = -1;
-
-	UpdateUi(False);
-
-	OptUserLogoff->Enabled = False;
-	OptUserLogin->Enabled = True;
-
-    SMenuExperiment->Enabled = False;
-    SMenuProtocol->Enabled = False;
+	UserLogoff();
 }
-//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 

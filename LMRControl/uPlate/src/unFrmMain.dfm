@@ -8702,7 +8702,6 @@ object MainForm: TMainForm
         Caption = 'Logoff'
         Enabled = False
         Hint = 'Desabilita um usu'#225'rio a acessar a aplica'#231#227'o.'
-        OnClick = OptUserLogoffClick
       end
       object N2: TMenuItem
         Caption = '-'

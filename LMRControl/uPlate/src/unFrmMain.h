@@ -502,6 +502,9 @@ private:	// User declarations
 
 	Integer m_editingCol, m_editingRow;
 
+	Boolean __fastcall UserLogon();
+	Boolean __fastcall UserLogoff();
+
 	void __fastcall treeviewAddPlateNode(TTreeNodes *Node);
 	void __fastcall treeviewRemovePlateNode(TTreeNode *Node);
 	TTreeNode * __fastcall getNode(Integer index, TTreeNode *parent = NULL) const;
@@ -542,7 +545,6 @@ private:	// User declarations
 
 	void __fastcall UpdateUi(Boolean enabled = False);
 
-	Boolean __fastcall UserLogon();
 
 	void __fastcall InitAll();
 
