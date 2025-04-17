@@ -6,7 +6,7 @@
         <AppType>Application</AppType>
         <MainSource>µPlate.cpp</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Debug with SPEEDY</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>3</TargetedPlatforms>
     </PropertyGroup>
@@ -49,6 +49,17 @@
         <Cfg_2_Win32>true</Cfg_2_Win32>
         <CfgParent>Cfg_2</CfgParent>
         <Cfg_2>true</Cfg_2>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Debug with SPEEDY' or '$(Cfg_8)'!=''">
+        <Cfg_8>true</Cfg_8>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_8)'=='true') or '$(Cfg_8_Win32)'!=''">
+        <Cfg_8_Win32>true</Cfg_8_Win32>
+        <CfgParent>Cfg_8</CfgParent>
+        <Cfg_8>true</Cfg_8>
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
@@ -97,6 +108,7 @@
         <UWP_CppLogo150>$(BDS)\bin\Artwork\Windows\UWP\cppreg_UwpDefault_150.png</UWP_CppLogo150>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
+        <FinalOutputDir>..\bin\$(Platform)\$(Config)</FinalOutputDir>
         <DCC_UnitSearchPath>C:\projetos\libs\FastReports\LibD21;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <BCC_AddProjectDirToIncludePath>true</BCC_AddProjectDirToIncludePath>
         <BCC_IncludePath>C:\projetos\libs\zylserial\include;$(BCC_IncludePath)</BCC_IncludePath>
@@ -123,7 +135,6 @@
         <ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\debug\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <Defines>SPEEDY;$(Defines)</Defines>
         <LinkPackageImports>rtl.bpi;vcl.bpi;xmlrtl.bpi;vclactnband.bpi;vclx.bpi;VclSmp.bpi;vclimg.bpi;frx21.bpi;fs21.bpi;frxe21.bpi;lmdrtl.bpi;lmdrtrtlx.bpi;lmdrtcore.bpi;lmdrttools.bpi;lmdrtprint.bpi;lmdrtgrid.bpi;lmdrtthemes.bpi;vclribbon.bpi;vcldb.bpi;dbrtl.bpi;IndySystem.bpi;IndyProtocols.bpi;IndyCore.bpi;dsnap.bpi;dbexpress.bpi;DbxCommonDriver.bpi;DBXSqliteDriver.bpi;lmdrttoolsdb.bpi;Tee.bpi;Teeui.bpi;Tee.bpi</LinkPackageImports>
         <BCC_AllCompatibilityFlags>false</BCC_AllCompatibilityFlags>
         <BCC_SmartPCHCache>false</BCC_SmartPCHCache>
@@ -155,15 +166,27 @@
         <TASM_Debugging>None</TASM_Debugging>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+        <IntermediateOutputDir>.\Build$(Config)</IntermediateOutputDir>
+        <FinalOutputDir>..\bin\$(Platform)\$(Config)</FinalOutputDir>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <IncludePath>..\..\3rdparty\MathEvaluator;C:\work\vcl;C:\Projetos\Componentes_Loccus\FastReports\LibD21;C:\Projetos\Componentes_Loccus\MathEvaluator;C:\lib\SDL\basepack;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\X7;$(IncludePath)</IncludePath>
         <VerInfo_Keys>CompanyName=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
         <BCC_AddProjectDirToIncludePath>true</BCC_AddProjectDirToIncludePath>
         <BCC_IncludePath>C:\Projetos\Componentes_Loccus\zylserialport;..\..\3rdparty\MathEvaluator;C:\work\vcl;C:\Projetos\Componentes_Loccus\FastReports\LibD21;C:\Projetos\Componentes_Loccus\MathEvaluator;C:\lib\SDL\basepack;$(BCC_IncludePath)</BCC_IncludePath>
         <PackageImports>adortl;APogeelib;bcbie;bcbsmp;bindcomp;bindcompdbx;bindcompfmx;bindcompvcl;bindengine;CloudService;CodeSiteExpressPkg;CustomIPTransport;dbexpress;dbrtl;dbxcds;DbxClientDriver;DbxCommonDriver;DBXInterBaseDriver;DBXMySQLDriver;DBXSqliteDriver;dsnap;dsnapcon;dsnapxml;emsclient;emsclientfiredac;FireDAC;FireDACADSDriver;FireDACASADriver;FireDACCommon;FireDACCommonDriver;FireDACIBDriver;FireDACMSAccDriver;FireDACMySQLDriver;FireDACODBCDriver;FireDACPgDriver;FireDACSqliteDriver;flickerNewBkg;fmx;fmxase;fmxdae;fmxFireDAC;fmxobj;FMXTee;FmxTeeUI;frx21;frxDB21;frxe21;frxTee;ibxpress;IndyCore;IndyIPClient;IndyIPCommon;IndyIPServer;IndyProtocols;IndySystem;inet;inetdb;inetdbxpress;Intraweb;lmdrtbar;lmdrtchart;lmdrtchartdb;lmdrtcore;lmdrtdialog;lmdrtdocking;lmdrtfx;lmdrtgrid;lmdrtinspector;lmdrtl;lmdrtplugin;lmdrtprint;lmdrtrtf;lmdrtrtfdb;lmdrtrtlx;lmdrtsearch;lmdrtsearchdb;lmdrtshell;lmdrtstorage;lmdrtsys;lmdrtthemes;lmdrttools;lmdrttoolsdb;lmdrttxt;lmdrttxtdb;lmdrtweb;MetropolisUILiveTile;RESTBackendComponents;RESTComponents;rtl;soapmidas;soaprtl;soapserver;svn;Tee;TeeDB;TeeUI;tethering;vcl;vclactnband;vcldb;vcldsnap;vclFireDAC;vclib;vclie;vclimg;VCLRESTComponents;vclribbon;VclSmp;vcltouch;vclx;xmlrtl</PackageImports>
-        <ILINK_LibraryPath>$(BDS)\lib\Win32\debug\;$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;D:\Users\rogerio.moreira.LOCCUSBR\Documents\Embarcadero\Studio\15.0/BPL\;C:\Users\rogerio.moreira\Documents\Embarcadero\Studio\15.0/BPL\;G:\Users\rogerio.moreira\Documents\Embarcadero\Studio\15.0\BPL\$(PLATFORM);$(BDS)\lib\SDL\X7\;E:\Program Files (x86)\FastReports\LibD21\;C:\Program Files (x86)\FastReports\LibD21\;C:\LMD2015\lib\d21\Win32\;$(BDSUSERDIR)/BPL\;$(BDS)\lib\win32\$(config)\;$(BDSUSERDIR)/BPL;$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;$(BDS)\ObjRepos\EN\Cpp\;crc\;C:\Program Files (x86)\Delphi7\Lib;C:\Program Files (x86)\Delphi7\Lib\IDL45;C:\Program Files (x86)\Delphi7\Lib\Debug\IDL45;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\X7</ILINK_LibraryPath>
+        <ILINK_LibraryPath>$(BDS)\ObjRepos\EN\Cpp\;$(BDS)\lib\Win32\debug\;C:\LMD2015\lib\d21\Win32\;C:\projetos\libs\MathEvaluator\LIB;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\X7;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL;crc\;C:\projetos\libs\zylserial\BPL;C:\Program Files (x86)\FastReport VCL RAD\LibD21</ILINK_LibraryPath>
         <LinkPackageStatics>rtl.lib;vcl.lib;xmlrtl.lib;vclactnband.lib;vclx.lib;VclSmp.lib;vclimg.lib;frx21.lib;fs21.lib;frxe21.lib;lmdrtl.lib;lmdrtrtlx.lib;lmdrtcore.lib;lmdrttools.lib;lmdrtprint.lib;lmdrtgrid.lib;lmdrtthemes.lib;vclribbon.lib;vcldb.lib;dbrtl.lib;IndySystem.lib;IndyProtocols.lib;IndyCore.lib;dsnap.lib;dbexpress.lib;DbxCommonDriver.lib;DBXSqliteDriver.lib;ZylSerialPortPack.lib;lmdrttoolsdb.lib;Tee.lib;Teeui.lib;sdlmathpack_rt_103X7.lib;sdlbasepack_rt_103X7.lib;sdlguipack_rt_103X7.lib</LinkPackageStatics>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_8_Win32)'!=''">
+        <IntermediateOutputDir>..\Build\$(Config)</IntermediateOutputDir>
+        <FinalOutputDir>..\bin\$(Platform)\$(Config)</FinalOutputDir>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <Defines>SPEEDY;_DEBUG;$(Defines)</Defines>
+        <LinkPackageStatics>rtl.lib;vcl.lib;xmlrtl.lib;vclactnband.lib;vclx.lib;VclSmp.lib;vclimg.lib;frx21.lib;fs21.lib;frxe21.lib;lmdrtl.lib;lmdrtrtlx.lib;lmdrtcore.lib;lmdrttools.lib;lmdrtprint.lib;lmdrtgrid.lib;lmdrtthemes.lib;vclribbon.lib;vcldb.lib;dbrtl.lib;IndySystem.lib;IndyProtocols.lib;IndyCore.lib;dsnap.lib;dbexpress.lib;DbxCommonDriver.lib;DBXSqliteDriver.lib;ZylSerialPortPack.lib;lmdrttoolsdb.lib;Tee.lib;Teeui.lib;sdlmathpack_rt_103X7.lib;sdlbasepack_rt_103X7.lib;sdlguipack_rt_103X7.lib</LinkPackageStatics>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Keys>CompanyName=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
+        <ILINK_LibraryPath>crc\;..\..\..\..\libs\MathEvaluator\LIB;..\..\..\..\libs\zylserial\BPL;$(BDS)\lib\Win32\debug\;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\X7;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL;C:\Program Files (x86)\FastReport VCL RAD\LibD21</ILINK_LibraryPath>
     </PropertyGroup>
     <ItemGroup>
         <CppCompile Include="crcfast.cpp">
@@ -397,6 +420,10 @@
         <FormResources Include="unDataModule.dfm"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Debug with SPEEDY">
+            <Key>Cfg_8</Key>
             <CfgParent>Base</CfgParent>
         </BuildConfiguration>
         <BuildConfiguration Include="Base">
@@ -852,11 +879,11 @@
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="ProjectOSXDebug">
-                    <Platform Name="OSXARM64">
+                    <Platform Name="OSX64">
                         <RemoteDir>..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
-                    <Platform Name="OSX64">
+                    <Platform Name="OSXARM64">
                         <RemoteDir>..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
