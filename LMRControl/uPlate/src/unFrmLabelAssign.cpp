@@ -51,7 +51,7 @@ void __fastcall TFrmLabelAssignment::RawValuesGridDrawCell(TObject *Sender, int 
 	content = "";
 	color = clWhite;
 
-	TWell& well = (*wellMatrixSelected)[ACol - 1][ARow - 1];
+	TWell& well = (*wellMatrixSelected)[ARow - 1][ACol - 1];
 	switch (well.Type)
 	{
 		case TWellType::wlConcentrationStd:
@@ -100,12 +100,6 @@ void __fastcall TFrmLabelAssignment::RawValuesGridDrawCell(TObject *Sender, int 
 
 void __fastcall TFrmLabelAssignment::btnCloseClick(TObject *Sender)
 {
-	//for (Integer col = 0; col < RawValuesGrid->ColCount-1; col++)
-	//{
-	// (Integer row = 0; row < RawValuesGrid->RowCount-1; row++)
-	//		rawData[row][col] = RawValuesGrid->Cells[col+1][row+1].ToDouble();
-	//}
-
 	ModalResult = mrClose;
 }
 
