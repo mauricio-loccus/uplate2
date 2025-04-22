@@ -1,6 +1,6 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
-        <ProjectGuid>{0AA92C8D-B731-45EE-9636-1ED6EDF52FF9}</ProjectGuid>
+        <ProjectGuid>{06C386ED-A727-46C2-A558-67E323DE3616}</ProjectGuid>
     </PropertyGroup>
     <ItemGroup>
         <Projects Include="µPlate.cbproj">

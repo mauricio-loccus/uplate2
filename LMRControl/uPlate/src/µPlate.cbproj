@@ -6,7 +6,7 @@
         <AppType>Application</AppType>
         <MainSource>µPlate.cpp</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug with SPEEDY</Config>
+        <Config Condition="'$(Config)'==''">Debug</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>3</TargetedPlatforms>
     </PropertyGroup>
@@ -51,15 +51,15 @@
         <Cfg_2>true</Cfg_2>
         <Base>true</Base>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(Config)'=='Debug with SPEEDY' or '$(Cfg_8)'!=''">
-        <Cfg_8>true</Cfg_8>
+    <PropertyGroup Condition="'$(Config)'=='Debug with SPEEDY' or '$(Cfg_4)'!=''">
+        <Cfg_4>true</Cfg_4>
         <CfgParent>Base</CfgParent>
         <Base>true</Base>
     </PropertyGroup>
-    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_8)'=='true') or '$(Cfg_8_Win32)'!=''">
-        <Cfg_8_Win32>true</Cfg_8_Win32>
-        <CfgParent>Cfg_8</CfgParent>
-        <Cfg_8>true</Cfg_8>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_4)'=='true') or '$(Cfg_4_Win32)'!=''">
+        <Cfg_4_Win32>true</Cfg_4_Win32>
+        <CfgParent>Cfg_4</CfgParent>
+        <Cfg_4>true</Cfg_4>
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
@@ -108,6 +108,9 @@
         <UWP_CppLogo150>$(BDS)\bin\Artwork\Windows\UWP\cppreg_UwpDefault_150.png</UWP_CppLogo150>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
+        <VerInfo_Keys>CompanyName=Loccus Biotecnologia;FileDescription=Programa para controle remoto da leitora de microplacas ELISA;FileVersion=1.1.0.0;InternalName=µPlate;LegalCopyright=Copyright © 2006-2019 - Loccus do Brasil Ltda;LegalTrademarks=;OriginalFilename=µPlate.exe;ProductName=µPlate;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_MinorVer>1</VerInfo_MinorVer>
         <FinalOutputDir>..\bin\$(Platform)\$(Config)</FinalOutputDir>
         <DCC_UnitSearchPath>C:\projetos\libs\FastReports\LibD21;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <BCC_AddProjectDirToIncludePath>true</BCC_AddProjectDirToIncludePath>
@@ -135,6 +138,9 @@
         <ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\debug\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <Debugger_CWD>..\..\..\workings\one</Debugger_CWD>
+        <Defines>SPEEDY;$(Defines)</Defines>
+        <VerInfo_MinorVer>0</VerInfo_MinorVer>
         <LinkPackageImports>rtl.bpi;vcl.bpi;xmlrtl.bpi;vclactnband.bpi;vclx.bpi;VclSmp.bpi;vclimg.bpi;frx21.bpi;fs21.bpi;frxe21.bpi;lmdrtl.bpi;lmdrtrtlx.bpi;lmdrtcore.bpi;lmdrttools.bpi;lmdrtprint.bpi;lmdrtgrid.bpi;lmdrtthemes.bpi;vclribbon.bpi;vcldb.bpi;dbrtl.bpi;IndySystem.bpi;IndyProtocols.bpi;IndyCore.bpi;dsnap.bpi;dbexpress.bpi;DbxCommonDriver.bpi;DBXSqliteDriver.bpi;lmdrttoolsdb.bpi;Tee.bpi;Teeui.bpi;Tee.bpi</LinkPackageImports>
         <BCC_AllCompatibilityFlags>false</BCC_AllCompatibilityFlags>
         <BCC_SmartPCHCache>false</BCC_SmartPCHCache>
@@ -153,7 +159,6 @@
         <BCC_MonitorInlinePtrAccess>true</BCC_MonitorInlinePtrAccess>
         <BCC_MonitorGlobalAndStackData>true</BCC_MonitorGlobalAndStackData>
         <LinkPackageStatics>ZylSerialPortPack.lib;sdlmathpack_rt_103X7.lib;sdlbasepack_rt_103X7.lib;sdlguipack_rt_103X7.lib</LinkPackageStatics>
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <ILINK_LibraryPath>$(BDS)\ObjRepos\EN\Cpp\;$(BDS)\lib\Win32\debug\;C:\LMD2015\lib\d21\Win32\;C:\projetos\libs\MathEvaluator\LIB;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\X7;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL;crc\;C:\projetos\libs\zylserial\BPL;C:\Program Files (x86)\FastReport VCL RAD\LibD21</ILINK_LibraryPath>
         <BT_BuildType>Debug</BT_BuildType>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
@@ -178,15 +183,28 @@
         <LinkPackageStatics>rtl.lib;vcl.lib;xmlrtl.lib;vclactnband.lib;vclx.lib;VclSmp.lib;vclimg.lib;frx21.lib;fs21.lib;frxe21.lib;lmdrtl.lib;lmdrtrtlx.lib;lmdrtcore.lib;lmdrttools.lib;lmdrtprint.lib;lmdrtgrid.lib;lmdrtthemes.lib;vclribbon.lib;vcldb.lib;dbrtl.lib;IndySystem.lib;IndyProtocols.lib;IndyCore.lib;dsnap.lib;dbexpress.lib;DbxCommonDriver.lib;DBXSqliteDriver.lib;ZylSerialPortPack.lib;lmdrttoolsdb.lib;Tee.lib;Teeui.lib;sdlmathpack_rt_103X7.lib;sdlbasepack_rt_103X7.lib;sdlguipack_rt_103X7.lib</LinkPackageStatics>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(Cfg_8_Win32)'!=''">
-        <IntermediateOutputDir>..\Build\$(Config)</IntermediateOutputDir>
+    <PropertyGroup Condition="'$(Cfg_4)'!=''">
+        <ILINK_LibraryPath>$(BDSLIB)\$(PLATFORM)\debug;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+        <BCC_IncludePath>C:\projetos\libs\zylserial\include;$(BCC_IncludePath)</BCC_IncludePath>
+        <VerInfo_Keys>CompanyName=Loccus Biotecnologia;FileDescription=Programa para controle remoto da leitora de microplacas ELISA;FileVersion=1.0.0.0;InternalName=µPlate;LegalCopyright=Copyright © 2006-2019 - Loccus do Brasil Ltda;LegalTrademarks=;OriginalFilename=µPlate.exe;ProductName=µPlate;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
         <FinalOutputDir>..\bin\$(Platform)\$(Config)</FinalOutputDir>
+        <Defines>_DEBUG;$(Defines)</Defines>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_4_Win32)'!=''">
+        <Defines>SPEEDY;$(Defines)</Defines>
+        <BCC_MonitorThis>true</BCC_MonitorThis>
+        <BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
+        <BCC_SmartPCHCache>false</BCC_SmartPCHCache>
+        <BCC_MonitorInlinePtrAccess>true</BCC_MonitorInlinePtrAccess>
+        <BCC_AllCodeguardOptions>true</BCC_AllCodeguardOptions>
+        <BCC_MonitorGlobalAndStackData>true</BCC_MonitorGlobalAndStackData>
+        <Debugger_CWD>..\..\..\..\workings\one</Debugger_CWD>
+        <BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
+        <DCC_RunTimeTypeInfo>true</DCC_RunTimeTypeInfo>
+        <ILINK_LibraryPath>$(BDS)\lib\Win32\debug\;C:\projetos\libs\MathEvaluator\LIB;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\X7;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL;C:\projetos\libs\zylserial\BPL;C:\Program Files (x86)\FastReport VCL RAD\LibD21</ILINK_LibraryPath>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <Defines>SPEEDY;_DEBUG;$(Defines)</Defines>
-        <LinkPackageStatics>rtl.lib;vcl.lib;xmlrtl.lib;vclactnband.lib;vclx.lib;VclSmp.lib;vclimg.lib;frx21.lib;fs21.lib;frxe21.lib;lmdrtl.lib;lmdrtrtlx.lib;lmdrtcore.lib;lmdrttools.lib;lmdrtprint.lib;lmdrtgrid.lib;lmdrtthemes.lib;vclribbon.lib;vcldb.lib;dbrtl.lib;IndySystem.lib;IndyProtocols.lib;IndyCore.lib;dsnap.lib;dbexpress.lib;DbxCommonDriver.lib;DBXSqliteDriver.lib;ZylSerialPortPack.lib;lmdrttoolsdb.lib;Tee.lib;Teeui.lib;sdlmathpack_rt_103X7.lib;sdlbasepack_rt_103X7.lib;sdlguipack_rt_103X7.lib</LinkPackageStatics>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>CompanyName=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
-        <ILINK_LibraryPath>crc\;..\..\..\..\libs\MathEvaluator\LIB;..\..\..\..\libs\zylserial\BPL;$(BDS)\lib\Win32\debug\;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\X7;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL;C:\Program Files (x86)\FastReport VCL RAD\LibD21</ILINK_LibraryPath>
+        <LinkPackageStatics>rtl.lib;vcl.lib;xmlrtl.lib;vclactnband.lib;vclx.lib;VclSmp.lib;vclimg.lib;frx21.lib;fs21.lib;frxe21.lib;lmdrtl.lib;lmdrtrtlx.lib;lmdrtcore.lib;lmdrttools.lib;lmdrtprint.lib;lmdrtgrid.lib;lmdrtthemes.lib;vclribbon.lib;vcldb.lib;dbrtl.lib;IndySystem.lib;IndyProtocols.lib;IndyCore.lib;dsnap.lib;dbexpress.lib;DbxCommonDriver.lib;DBXSqliteDriver.lib;ZylSerialPortPack.lib;lmdrttoolsdb.lib;Tee.lib;Teeui.lib;sdlmathpack_rt_103X7.lib;sdlbasepack_rt_103X7.lib;sdlguipack_rt_103X7.lib</LinkPackageStatics>
     </PropertyGroup>
     <ItemGroup>
         <CppCompile Include="crcfast.cpp">
@@ -423,7 +441,7 @@
             <CfgParent>Base</CfgParent>
         </BuildConfiguration>
         <BuildConfiguration Include="Debug with SPEEDY">
-            <Key>Cfg_8</Key>
+            <Key>Cfg_4</Key>
             <CfgParent>Base</CfgParent>
         </BuildConfiguration>
         <BuildConfiguration Include="Base">
