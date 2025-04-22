@@ -64,7 +64,7 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
         <BCC_IncludePath>C:\projetos\libs\FastReports\LibD21;$(BCC_IncludePath)</BCC_IncludePath>
-        <VerInfo_Keys>CompanyName=Loccus Biotecnologia;FileDescription=Programa para controle remoto da leitora de microplacas ELISA;FileVersion=1.0.1.0;InternalName=µPlate;LegalCopyright=Copyright © 2006-2019 - Loccus do Brasil Ltda;LegalTrademarks=;OriginalFilename=µPlate.exe;ProductName=µPlate;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Loccus Biotecnologia;FileDescription=Programa para controle remoto da leitora de microplacas ELISA;FileVersion=1.0.0.0;InternalName=µPlate;LegalCopyright=Copyright © 2006-2019 - Loccus do Brasil Ltda;LegalTrademarks=;OriginalFilename=µPlate.exe;ProductName=µPlate;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <VerInfo_Locale>1046</VerInfo_Locale>
         <ILINK_LibraryPath>crc\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
@@ -138,7 +138,7 @@
         <ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\debug\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <Debugger_CWD>..\..\..\workings\one</Debugger_CWD>
+        <Debugger_CWD>..\..\..\workings\two</Debugger_CWD>
         <Defines>SPEEDY;$(Defines)</Defines>
         <VerInfo_MinorVer>0</VerInfo_MinorVer>
         <LinkPackageImports>rtl.bpi;vcl.bpi;xmlrtl.bpi;vclactnband.bpi;vclx.bpi;VclSmp.bpi;vclimg.bpi;frx21.bpi;fs21.bpi;frxe21.bpi;lmdrtl.bpi;lmdrtrtlx.bpi;lmdrtcore.bpi;lmdrttools.bpi;lmdrtprint.bpi;lmdrtgrid.bpi;lmdrtthemes.bpi;vclribbon.bpi;vcldb.bpi;dbrtl.bpi;IndySystem.bpi;IndyProtocols.bpi;IndyCore.bpi;dsnap.bpi;dbexpress.bpi;DbxCommonDriver.bpi;DBXSqliteDriver.bpi;lmdrttoolsdb.bpi;Tee.bpi;Teeui.bpi;Tee.bpi</LinkPackageImports>
@@ -186,7 +186,6 @@
     <PropertyGroup Condition="'$(Cfg_4)'!=''">
         <ILINK_LibraryPath>$(BDSLIB)\$(PLATFORM)\debug;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <BCC_IncludePath>C:\projetos\libs\zylserial\include;$(BCC_IncludePath)</BCC_IncludePath>
-        <VerInfo_Keys>CompanyName=Loccus Biotecnologia;FileDescription=Programa para controle remoto da leitora de microplacas ELISA;FileVersion=1.0.0.0;InternalName=µPlate;LegalCopyright=Copyright © 2006-2019 - Loccus do Brasil Ltda;LegalTrademarks=;OriginalFilename=µPlate.exe;ProductName=µPlate;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
         <FinalOutputDir>..\bin\$(Platform)\$(Config)</FinalOutputDir>
         <Defines>_DEBUG;$(Defines)</Defines>
     </PropertyGroup>
