@@ -1,6 +1,8 @@
 object FrmLabelAssignment: TFrmLabelAssignment
   Left = 0
   Top = 0
+  BorderIcons = [biSystemMenu, biMaximize]
+  BorderStyle = bsSingle
   Caption = 'R'#243'tulos'
   ClientHeight = 457
   ClientWidth = 885
@@ -11,6 +13,7 @@ object FrmLabelAssignment: TFrmLabelAssignment
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  Position = poOwnerFormCenter
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
