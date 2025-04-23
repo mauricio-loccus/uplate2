@@ -34,8 +34,14 @@ object FrmLabelAssignment: TFrmLabelAssignment
     Left = 734
     Top = 263
     Width = 131
-    Height = 25
+    Height = 34
     Caption = 'Fechar'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -15
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
     TabOrder = 1
     OnClick = btnCloseClick
   end
