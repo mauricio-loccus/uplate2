@@ -15,9 +15,9 @@ __fastcall TFrmLabelAssignment::TFrmLabelAssignment(TComponent* Owner, WellMatri
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TFrmLabelAssignment::RawValuesGridDrawCell(TObject *Sender, int ACol, int ARow, TRect &Rect, TGridDrawState State)
+void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol, int ARow, TRect &Rect, TGridDrawState State)
 {
-	TCanvas* canvas = RawValuesGrid->Canvas;
+	TCanvas* canvas = LabelGrid->Canvas;
 	String   content;
 	TColor   color;
 
@@ -31,7 +31,7 @@ void __fastcall TFrmLabelAssignment::RawValuesGridDrawCell(TObject *Sender, int 
 
 
 
-		canvas->Brush->Color = RawValuesGrid->FixedColor;
+		canvas->Brush->Color = LabelGrid->FixedColor;
 		canvas->FillRect(Rect);
 
 		Integer pixelsTextWidth = canvas->TextWidth(content);
@@ -40,8 +40,8 @@ void __fastcall TFrmLabelAssignment::RawValuesGridDrawCell(TObject *Sender, int 
 		Integer textPosX = (Rect.Width() / 2 - pixelsTextWidth / 2);
 		Integer textPosY = (Rect.Height() / 2 - pixelsTextHeight / 2);
 
-		RawValuesGrid->Canvas->Font->Style = TFontStyles() << fsBold;
-		RawValuesGrid->Canvas->Font->Size  = 12;
+		LabelGrid->Canvas->Font->Style = TFontStyles() << fsBold;
+		LabelGrid->Canvas->Font->Size  = 12;
 
 		canvas->TextOut(Rect.Left + textPosX, Rect.Top + textPosY, content);
 
@@ -105,7 +105,7 @@ void __fastcall TFrmLabelAssignment::btnCloseClick(TObject *Sender)
 
 
 //---------------------------------------------------------------------------
-void __fastcall TFrmLabelAssignment::RawValuesGridSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect)
+void __fastcall TFrmLabelAssignment::LabelGridSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect)
 {
 	if (ACol == 4 && ARow == 5)
 	{

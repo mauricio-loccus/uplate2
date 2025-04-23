@@ -16,8 +16,8 @@
 class TFrmLabelAssignment : public TForm
 {
 __published:	// IDE-managed Components
-	TStringGrid *RawValuesGrid;
 	TButton* btnClose;
+	TStringGrid *LabelGrid;
 
 	//TButton *btnClearValues;
 	//TButton *btnLoadCSV;
@@ -29,9 +29,9 @@ __published:	// IDE-managed Components
 	//void __fastcall RawValuesGridEnter(TObject *Sender);
 	//void __fastcall RawValuesGridExit(TObject *Sender);
 
-	void __fastcall RawValuesGridDrawCell(TObject *Sender, int ACol, int ARow, TRect &Rect, TGridDrawState State);
+	void __fastcall LabelGridDrawCell(TObject *Sender, int ACol, int ARow, TRect &Rect, TGridDrawState State);
 	void __fastcall btnCloseClick(TObject *Sender);
-	void __fastcall RawValuesGridSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect);
+	void __fastcall LabelGridSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect);
 	void __fastcall FormCreate(TObject *Sender);
 
 	//void __fastcall RawValuesGridGetEditText(TObject *Sender, int ACol, int ARow, UnicodeString &Value);

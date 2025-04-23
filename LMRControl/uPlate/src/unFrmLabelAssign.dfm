@@ -17,22 +17,9 @@ object FrmLabelAssignment: TFrmLabelAssignment
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
-  object RawValuesGrid: TStringGrid
-    Left = 16
-    Top = 16
-    Width = 849
-    Height = 233
-    ColCount = 13
-    RowCount = 9
-    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goEditing]
-    ScrollBars = ssNone
-    TabOrder = 0
-    OnDrawCell = RawValuesGridDrawCell
-    OnSelectCell = RawValuesGridSelectCell
-  end
   object btnClose: TButton
-    Left = 734
-    Top = 263
+    Left = 726
+    Top = 428
     Width = 131
     Height = 34
     Caption = 'Fechar'
@@ -44,5 +31,19 @@ object FrmLabelAssignment: TFrmLabelAssignment
     ParentFont = False
     TabOrder = 1
     OnClick = btnCloseClick
+  end
+  object LabelGrid: TStringGrid
+    Left = 16
+    Top = 16
+    Width = 841
+    Height = 372
+    ColCount = 13
+    DefaultRowHeight = 40
+    RowCount = 9
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goEditing]
+    ScrollBars = ssNone
+    TabOrder = 2
+    OnDrawCell = LabelGridDrawCell
+    OnSelectCell = LabelGridSelectCell
   end
 end
