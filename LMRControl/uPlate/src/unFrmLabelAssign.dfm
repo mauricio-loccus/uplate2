@@ -4,8 +4,8 @@ object FrmLabelAssignment: TFrmLabelAssignment
   BorderIcons = [biSystemMenu, biMaximize]
   BorderStyle = bsSingle
   Caption = 'R'#243'tulos'
-  ClientHeight = 313
-  ClientWidth = 882
+  ClientHeight = 475
+  ClientWidth = 873
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
