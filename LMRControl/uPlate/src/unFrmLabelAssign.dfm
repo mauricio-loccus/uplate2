@@ -4,7 +4,7 @@ object FrmLabelAssignment: TFrmLabelAssignment
   BorderIcons = [biSystemMenu, biMaximize]
   BorderStyle = bsSingle
   Caption = 'R'#243'tulos'
-  ClientHeight = 475
+  ClientHeight = 478
   ClientWidth = 873
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -19,7 +19,7 @@ object FrmLabelAssignment: TFrmLabelAssignment
   TextHeight = 13
   object btnClose: TButton
     Left = 726
-    Top = 428
+    Top = 430
     Width = 131
     Height = 34
     Caption = 'Fechar'
@@ -58,8 +58,23 @@ object FrmLabelAssignment: TFrmLabelAssignment
     RowCount = 9
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goEditing]
     ScrollBars = ssNone
-    TabOrder = 2
+    TabOrder = 0
     OnDrawCell = LabelGridDrawCell
     OnSelectCell = LabelGridSelectCell
+  end
+  object btnImport: TButton
+    Left = 8
+    Top = 430
+    Width = 131
+    Height = 34
+    Caption = 'Importar...'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -15
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 3
+    OnClick = btnImportClick
   end
 end

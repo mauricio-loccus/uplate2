@@ -142,5 +142,16 @@ void __fastcall TFrmLabelAssignment::FormCreate(TObject *Sender)
 	}
 	*/
 }
+
+
+//---------------------------------------------------------------------------
+
+
+void __fastcall TFrmLabelAssignment::btnImportClick(TObject *Sender)
+{
+     ShowMessage("Importar");
+}
+
+
 //---------------------------------------------------------------------------
 
