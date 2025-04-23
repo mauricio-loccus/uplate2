@@ -32,6 +32,22 @@ object FrmLabelAssignment: TFrmLabelAssignment
     TabOrder = 1
     OnClick = btnCloseClick
   end
+  object tsPlates: TTabSet
+    AlignWithMargins = True
+    Left = 16
+    Top = 388
+    Width = 841
+    Height = 28
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -15
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    SoftTop = True
+    Tabs.Strings = (
+      '...   ')
+    TabIndex = 0
+  end
   object LabelGrid: TStringGrid
     Left = 16
     Top = 16
