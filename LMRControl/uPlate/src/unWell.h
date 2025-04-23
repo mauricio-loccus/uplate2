@@ -20,7 +20,7 @@ class TWell
 {
 	public:
 		__fastcall TWell() : mPlateNum(0), mRow(0), mCol(0), mType(TWellType::wlEmpty),
-							 mId(0), mStdValue(0), mRawValue(0), mRawBlankReducedValue(0),
+							 mId(0), mLabel(""), mStdValue(0), mRawValue(0), mRawBlankReducedValue(0),
 							 mConcentration(0), mStdDeviation(0), mCoefVariation(0),
                              mMinValRepl(0), mMaxValRepl(0) {}
 
@@ -31,6 +31,7 @@ class TWell
 			mCol = well.mCol;
 			mType = well.mType;
 			mId = well.mId;
+			mLabel = well.mLabel;
 			mStdValue = well.mStdValue;
 			mRawValue = well.mRawValue;
 			mRawBlankReducedValue = well.mRawBlankReducedValue;
@@ -99,6 +100,7 @@ class TWell
 		__property Integer Row = {read=mRow, write=mRow};
 		__property Integer Col = {read=mCol, write=mCol};
 		__property Integer ID = {read=mId, write=mId};
+		__property String Label = {read=mLabel, write=mLabel};
 		__property Double StdValue = {read=mStdValue, write=mStdValue};
 		__property Double RawValue = {read=mRawValue, write=mRawValue};
 		__property Double RawValueFilter2 = {read=mRawValueFilter2, write=mRawValueFilter2};
@@ -125,6 +127,9 @@ class TWell
 
 		// Número do tipo do well (ex.: tipo: blank1, blank2... blankN
 		Integer   mId;
+
+		// Rótulo do well
+		String    mLabel;
 
 		// Valor Raw obtido da leitura
 		Double    mRawValue;
