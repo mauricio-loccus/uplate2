@@ -32,6 +32,7 @@ __published:	// IDE-managed Components
 private:	// User declarations
   WellMatrixList* wellMatrixListRef;
   TWellMatrix*    wellMatrixSelected;
+  TTaskDialog*    TaskDialog;
 
 public:		// User declarations
 	__fastcall TFrmLabelAssignment(TComponent* Owner, WellMatrixList&);

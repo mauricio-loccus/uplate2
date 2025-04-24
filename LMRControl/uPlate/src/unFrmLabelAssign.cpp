@@ -11,6 +11,7 @@ TFrmLabelAssignment *FrmLabelAssignment;
 //---------------------------------------------------------------------------
 __fastcall TFrmLabelAssignment::TFrmLabelAssignment(TComponent* Owner, WellMatrixList& wellMatrixListRef) : TForm(Owner)
 {
+	this->TaskDialog = new TTaskDialog(this);
 	this->wellMatrixListRef = &wellMatrixListRef;
 }
 //---------------------------------------------------------------------------
@@ -116,7 +117,15 @@ void __fastcall TFrmLabelAssignment::LabelGridSelectCell(TObject *Sender, int AC
 
 void __fastcall TFrmLabelAssignment::FormCreate(TObject *Sender)
 {
+	this->TaskDialog->Caption = L"Importa��o de R�tulos";
+	this->TaskDialog->MainIcon = tdiWarning;
+	this->TaskDialog->CommonButtons = TTaskDialogCommonButtons() << tcbYes << tcbNo;
+	this->TaskDialog->DefaultButton = tcbNo;
+
+	this->OpenFileDialog->InitialDir = GetCurrentDir();
+
 	this->wellMatrixSelected = &(*wellMatrixListRef)[0];
+}
 
 /*
 	WellMatrixList& wellMatrixListRef = *TWellMatrixSingleton::instance();
