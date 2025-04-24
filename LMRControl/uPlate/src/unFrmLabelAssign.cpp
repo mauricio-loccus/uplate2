@@ -128,31 +128,6 @@ void __fastcall TFrmLabelAssignment::FormCreate(TObject *Sender)
 	this->wellMatrixSelected = &(*wellMatrixListRef)[0];
 }
 
-/*
-	WellMatrixList& wellMatrixListRef = *TWellMatrixSingleton::instance();
-	for (WellMatrixList::size_type i = 0; i < wellMatrixListRef.size(); i++)
-	{
-		TWellMatrix& wlp = wellMatrixListRef[i];
-
-		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)    //exibe corretamente os dados linha/coluna após leitura
-		{
-			TWell& w = wlp[row][0];
-
-			for (WellList::iterator it = wlp[row].begin(); it != wlp[row].end(); it++)
-			{
-				if (it->Type != TWellType::wlConcentrationStd)
-					it->StdValue = 0;
-
-				it->RawValue = 0;
-				it->RawValueFilter2 = 0;
-				it->RawBlankReducedValue = 0;
-				it->ConcentrationValue = 0;
-			}
-		}
-	}
-	*/
-}
-
 
 //---------------------------------------------------------------------------
 
