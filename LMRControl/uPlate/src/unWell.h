@@ -74,15 +74,6 @@ class TWell
 		inline __fastcall Boolean operator >(const TWell *w)
 		{
 			return (*this) > (*w);
-
-
-
-
-
-
-
-
-
 		}
 
 		inline __fastcall Boolean operator ==(const TWell& w)

@@ -17,14 +17,19 @@
 #pragma link "LMDCustomComponent"
 #pragma link "LMDVistaDialogs"
 #pragma resource "*.dfm"
+
+
 TFrmSimulatedValues *FrmSimulatedValues;
+
 //---------------------------------------------------------------------------
+
 __fastcall TFrmSimulatedValues::TFrmSimulatedValues(RawDataMatrix& data, TComponent* Owner)
 	: TForm(Owner), rawData(data), m_editingCol(-1), m_editingRow(-1)
 {
 }
 
 //---------------------------------------------------------------------------
+
 void __fastcall TFrmSimulatedValues::btnRandomClick(TObject *Sender)
 {
 	for (Integer col = 0; col < RawValuesGrid->ColCount-1; col++)
@@ -38,7 +43,9 @@ void __fastcall TFrmSimulatedValues::btnRandomClick(TObject *Sender)
 		}
 	}
 }
+
 //---------------------------------------------------------------------------
+
 void __fastcall TFrmSimulatedValues::btnClearValuesClick(TObject *Sender)
 {
 	for (Integer col = 0; col < RawValuesGrid->ColCount-1; col++)
@@ -50,40 +57,40 @@ void __fastcall TFrmSimulatedValues::btnClearValuesClick(TObject *Sender)
 		}
 	}
 }
-//---------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------
 
 void __fastcall TFrmSimulatedValues::btnLoadCSVClick(TObject *Sender)
 {
-    const String LoccusDataName("Loccus Biotecnologia");
+	const String LoccusDataName("Loccus Biotecnologia");
 	const String AppDataDirName = TPath::GetFileNameWithoutExtension(Application->ExeName);
-    String UserAppData = GetEnvironmentVariable("APPDATA");
-    String PublicAppData = GetEnvironmentVariable("PUBLIC");
+	String UserAppData = GetEnvironmentVariable("APPDATA");
+	String PublicAppData = GetEnvironmentVariable("PUBLIC");
 
 	String AppDataDir = PublicAppData + TEXT("\\") + LoccusDataName + TEXT("\\") + AppDataDirName;
 
-    std::unique_ptr<TOpenTextFileDialog> FileOpenDialog(new TOpenTextFileDialog(this));
-    FileOpenDialog->Title = TEXT("Salvar Protocolo");
-    FileOpenDialog->Filter = TEXT("Arquivo de dados RAW (*.csv)|*.csv");
-    FileOpenDialog->DefaultExt = TEXT(".csv");
-    FileOpenDialog->InitialDir = AppDataDir;
+	std::unique_ptr<TOpenTextFileDialog> FileOpenDialog(new TOpenTextFileDialog(this));
+	FileOpenDialog->Title = TEXT("Salvar Protocolo");
+	FileOpenDialog->Filter = TEXT("Arquivo de dados RAW (*.csv)|*.csv");
+	FileOpenDialog->DefaultExt = TEXT(".csv");
+	FileOpenDialog->InitialDir = AppDataDir;
 
-    if (!FileOpenDialog->Execute(Handle))
-        return;
+	if (!FileOpenDialog->Execute(Handle))
+		return;
 
-    String rawDataFile = FileOpenDialog->FileName;
+	String rawDataFile = FileOpenDialog->FileName;
 
-    WideChar decSeparator = FormatSettings.DecimalSeparator;
-    WideChar thSeparator  = FormatSettings.ThousandSeparator;
+	WideChar decSeparator = FormatSettings.DecimalSeparator;
+	WideChar thSeparator  = FormatSettings.ThousandSeparator;
 
-    if (m_appConfig->DecimalSeparator != FormatSettings.DecimalSeparator)
-        FormatSettings.DecimalSeparator = m_appConfig->DecimalSeparator;
+	if (m_appConfig->DecimalSeparator != FormatSettings.DecimalSeparator)
+		FormatSettings.DecimalSeparator = m_appConfig->DecimalSeparator;
 
-    if (m_appConfig->ThousandSeparator != FormatSettings.ThousandSeparator)
-        FormatSettings.ThousandSeparator = m_appConfig->ThousandSeparator;
+	if (m_appConfig->ThousandSeparator != FormatSettings.ThousandSeparator)
+		FormatSettings.ThousandSeparator = m_appConfig->ThousandSeparator;
 
-    TStringList *csvStringList = new TStringList();
-    csvStringList->Delimiter = ';';
+	TStringList *csvStringList = new TStringList();
+	csvStringList->Delimiter = ';';
 
 	btnClearValuesClick(Sender);
 
@@ -141,6 +148,7 @@ void __fastcall TFrmSimulatedValues::FormCreate(TObject *Sender)
 			RawValuesGrid->Cells[col+RawValuesGrid->FixedCols][row+RawValuesGrid->FixedRows] = FloatToStrF(rawData[row][col], ffFixed, 6, 3);
 	}
 }
+
 //---------------------------------------------------------------------------
 
 void __fastcall TFrmSimulatedValues::btnCloseClick(TObject *Sender)
@@ -153,6 +161,7 @@ void __fastcall TFrmSimulatedValues::btnCloseClick(TObject *Sender)
 
 	ModalResult = mrClose;
 }
+
 //---------------------------------------------------------------------------
 
 void __fastcall TFrmSimulatedValues::RawValuesGridSetEditText(TObject *Sender, int ACol, int ARow, const UnicodeString Value)
@@ -185,6 +194,7 @@ void __fastcall TFrmSimulatedValues::RawValuesGridSetEditText(TObject *Sender, i
 	m_editingCol = ACol;
 	m_editingRow = ARow;
 }
+
 //---------------------------------------------------------------------------
 
 void __fastcall TFrmSimulatedValues::RawValuesGridEnter(TObject *Sender)
@@ -192,6 +202,7 @@ void __fastcall TFrmSimulatedValues::RawValuesGridEnter(TObject *Sender)
 	m_editingCol = -1;
 	m_editingRow = -1;
 }
+
 //---------------------------------------------------------------------------
 
 void __fastcall TFrmSimulatedValues::RawValuesGridExit(TObject *Sender)
@@ -202,6 +213,7 @@ void __fastcall TFrmSimulatedValues::RawValuesGridExit(TObject *Sender)
 		RawValuesGrid->Row = m_editingRow;
 	}
 }
+
 //---------------------------------------------------------------------------
 
 void __fastcall TFrmSimulatedValues::RawValuesGridSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect)
@@ -216,6 +228,7 @@ void __fastcall TFrmSimulatedValues::RawValuesGridSelectCell(TObject *Sender, in
 		}
 	}
 }
+
 //---------------------------------------------------------------------------
 
 void __fastcall TFrmSimulatedValues::RawValuesGridDrawCell(TObject *Sender, int ACol, int ARow, TRect &Rect, TGridDrawState State)
@@ -275,6 +288,7 @@ void __fastcall TFrmSimulatedValues::RawValuesGridDrawCell(TObject *Sender, int 
 
 	canvas->TextOut(Rect.Left + textPosX, Rect.Top + textPosY, s);
 }
+
 //---------------------------------------------------------------------------
 
 void __fastcall TFrmSimulatedValues::RawValuesGridGetEditText(TObject *Sender, int ACol, int ARow, UnicodeString &Value)
@@ -289,5 +303,7 @@ void __fastcall TFrmSimulatedValues::RawValuesGridGetEditText(TObject *Sender, i
 		}
 	}
 }
+
 //---------------------------------------------------------------------------
+
 
