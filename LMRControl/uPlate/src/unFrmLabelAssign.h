@@ -12,6 +12,8 @@
 
 #include "unWellMatrix.h"
 #include <Vcl.Tabs.hpp>
+#include <Vcl.Dialogs.hpp>
+#include <Vcl.ExtDlgs.hpp>
 
 
 class TFrmLabelAssignment : public TForm
@@ -21,6 +23,7 @@ __published:	// IDE-managed Components
 	TButton*     btnImport;
 	TStringGrid* LabelGrid;
 	TTabSet*     tsPlates;
+	TOpenTextFileDialog *FileOpenDialog;
 
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall btnCloseClick(TObject *Sender);

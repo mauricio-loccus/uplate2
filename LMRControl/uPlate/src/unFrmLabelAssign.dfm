@@ -77,4 +77,11 @@ object FrmLabelAssignment: TFrmLabelAssignment
     TabOrder = 3
     OnClick = btnImportClick
   end
+  object FileOpenDialog: TOpenTextFileDialog
+    Filter = 
+      'Todos os arquivos|*.*|Arquivo Texto (*.txt)|*.txt|Arquivo CSV (*' +
+      '.csv)|*.csv'
+    Left = 208
+    Top = 432
+  end
 end

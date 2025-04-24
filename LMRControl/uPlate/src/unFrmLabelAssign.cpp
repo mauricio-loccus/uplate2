@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 
 #include <vcl.h>
+#include <Vcl.Dialogs.hpp>
 #pragma hdrstop
 
 #include "unFrmLabelAssign.h"
