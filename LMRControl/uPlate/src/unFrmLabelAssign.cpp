@@ -15,6 +15,22 @@ __fastcall TFrmLabelAssignment::TFrmLabelAssignment(TComponent* Owner, WellMatri
 	this->TaskDialog = new TTaskDialog(this);
 	this->wellMatrixListRef = &wellMatrixListRef;
 }
+
+
+//---------------------------------------------------------------------------
+
+
+void __fastcall TFrmLabelAssignment::FormCreate(TObject *Sender)
+{
+	this->TaskDialog->Caption = L"Importa��o de R�tulos";
+	this->TaskDialog->MainIcon = tdiWarning;
+	this->TaskDialog->CommonButtons = TTaskDialogCommonButtons() << tcbYes << tcbNo;
+	this->TaskDialog->DefaultButton = tcbNo;
+
+	this->FileOpenDialog->InitialDir = GetCurrentDir();
+
+	this->wellMatrixSelected = &(*wellMatrixListRef)[0];
+}
 //---------------------------------------------------------------------------
 
 void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol, int ARow, TRect &Rect, TGridDrawState State)
@@ -113,19 +129,6 @@ void __fastcall TFrmLabelAssignment::LabelGridSelectCell(TObject *Sender, int AC
 	{
 		CanSelect = false;
 	}
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TFrmLabelAssignment::FormCreate(TObject *Sender)
-{
-	this->TaskDialog->Caption = L"Importa��o de R�tulos";
-	this->TaskDialog->MainIcon = tdiWarning;
-	this->TaskDialog->CommonButtons = TTaskDialogCommonButtons() << tcbYes << tcbNo;
-	this->TaskDialog->DefaultButton = tcbNo;
-
-	this->OpenFileDialog->InitialDir = GetCurrentDir();
-
-	this->wellMatrixSelected = &(*wellMatrixListRef)[0];
 }
 
 
