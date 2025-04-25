@@ -31,7 +31,19 @@ void __fastcall TFrmLabelAssignment::FormCreate(TObject *Sender)
 
 	this->wellMatrixSelected = &(*wellMatrixListRef)[0];
 }
+
+
 //---------------------------------------------------------------------------
+
+
+void __fastcall TFrmLabelAssignment::btnCloseClick(TObject *Sender)
+{
+	ModalResult = mrClose;
+}
+
+
+//---------------------------------------------------------------------------
+
 
 void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol, int ARow, TRect &Rect, TGridDrawState State)
 {
@@ -116,13 +128,9 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol
 }
 
 
-void __fastcall TFrmLabelAssignment::btnCloseClick(TObject *Sender)
-{
-	ModalResult = mrClose;
-}
-
-
 //---------------------------------------------------------------------------
+
+
 void __fastcall TFrmLabelAssignment::LabelGridSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect)
 {
 	if (ACol == 4 && ARow == 5)
