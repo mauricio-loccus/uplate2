@@ -63,7 +63,7 @@ object FrmLabelAssignment: TFrmLabelAssignment
     OnSelectCell = LabelGridSelectCell
   end
   object btnImport: TButton
-    Left = 8
+    Left = 16
     Top = 430
     Width = 131
     Height = 34

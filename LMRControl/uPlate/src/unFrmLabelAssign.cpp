@@ -45,6 +45,15 @@ void __fastcall TFrmLabelAssignment::btnCloseClick(TObject *Sender)
 //---------------------------------------------------------------------------
 
 
+void __fastcall TFrmLabelAssignment::btnImportClick(TObject *Sender)
+{
+	ShowMessage("Importar");
+}
+
+
+//---------------------------------------------------------------------------
+
+
 void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol, int ARow, TRect &Rect, TGridDrawState State)
 {
 	TCanvas* canvas = LabelGrid->Canvas;
@@ -142,12 +151,4 @@ void __fastcall TFrmLabelAssignment::LabelGridSelectCell(TObject *Sender, int AC
 
 //---------------------------------------------------------------------------
 
-
-void __fastcall TFrmLabelAssignment::btnImportClick(TObject *Sender)
-{
-     ShowMessage("Importar");
-}
-
-
-//---------------------------------------------------------------------------
 
