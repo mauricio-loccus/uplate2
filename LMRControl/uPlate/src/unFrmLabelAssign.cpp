@@ -182,21 +182,12 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol
 	Integer textPosY = (Rect.Height() / 2 - pixelsTextHeight / 2);
 
 	canvas->TextOut(Rect.Left + textPosX, Rect.Top + textPosY, content);
-}
-
-
-//---------------------------------------------------------------------------
-
-
-void __fastcall TFrmLabelAssignment::LabelGridSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect)
 {
-	if (ACol == 4 && ARow == 5)
-	{
-		CanSelect = false;
 	}
 }
 
 
 //---------------------------------------------------------------------------
+
 
 
