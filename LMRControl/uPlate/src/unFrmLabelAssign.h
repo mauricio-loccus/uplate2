@@ -37,6 +37,8 @@ private:	// User declarations
   TWellMatrix*    wellMatrixSelected;
   TTaskDialog*    TaskDialog;
 
+  void __fastcall InputData(std::vector<String>, int Row, int Column);
+
 public:		// User declarations
 	__fastcall TFrmLabelAssignment(TComponent* Owner, WellMatrixList&);
 };

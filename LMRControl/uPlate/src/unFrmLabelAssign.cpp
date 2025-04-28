@@ -8,8 +8,21 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
+
+
 TFrmLabelAssignment *FrmLabelAssignment;
+
+
 //---------------------------------------------------------------------------
+
+
+void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int Row, int Column)
+{
+
+}
+//---------------------------------------------------------------------------
+
+
 __fastcall TFrmLabelAssignment::TFrmLabelAssignment(TComponent* Owner, WellMatrixList& wellMatrixListRef) : TForm(Owner)
 {
 	this->TaskDialog = new TTaskDialog(this);
@@ -47,7 +60,42 @@ void __fastcall TFrmLabelAssignment::btnCloseClick(TObject *Sender)
 
 void __fastcall TFrmLabelAssignment::btnImportClick(TObject *Sender)
 {
-	ShowMessage("Importar");
+	using namespace std;
+
+	try
+	{
+		unique_ptr<TStringList> Message(new TStringList());
+
+		Message->Add(L"A importação ocorrerá a partir da célula atualmente selecionada.");
+		Message->Add(L"");
+		Message->Add(L"Gostaria de continuar?");
+
+		TaskDialog->Text = Message->Text;
+		if (TaskDialog->Execute() == mrNo)
+			return;
+
+		if (!FileOpenDialog->Execute())
+			return;
+
+		TEncoding* encoding = TEncoding::UTF8;
+
+		unique_ptr<TFileStream>   fileStream(new TFileStream(FileOpenDialog->FileName, fmOpenRead | fmShareExclusive));
+		unique_ptr<TStreamReader> reader    (new TStreamReader( fileStream.get(), encoding ));
+
+		vector<String> labels;
+		while (!reader->EndOfStream)
+		{
+			labels.push_back(reader->ReadLine());
+		}
+		reader->Close();
+
+		this->InputData(labels, LabelGrid->Row, LabelGrid->Col);
+	}
+
+	catch(Exception& exception)
+	{
+		Application->ShowException(&exception);
+	}
 }
 
 
