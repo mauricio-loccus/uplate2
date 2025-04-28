@@ -35,7 +35,7 @@ __fastcall TFrmLabelAssignment::TFrmLabelAssignment(TComponent* Owner, WellMatri
 
 void __fastcall TFrmLabelAssignment::FormCreate(TObject *Sender)
 {
-	this->TaskDialog->Caption = L"Importaï¿½ï¿½o de Rï¿½tulos";
+	this->TaskDialog->Caption = L"Importação de Rótulos";
 	this->TaskDialog->MainIcon = tdiWarning;
 	this->TaskDialog->CommonButtons = TTaskDialogCommonButtons() << tcbYes << tcbNo;
 	this->TaskDialog->DefaultButton = tcbNo;
