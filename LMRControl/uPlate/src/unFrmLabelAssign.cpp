@@ -18,7 +18,29 @@ TFrmLabelAssignment *FrmLabelAssignment;
 
 void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int Row, int Column)
 {
+	String Values;
 
+    ShowMessage(L"__cplusplus : " + AnsiString(__cplusplus));
+
+	std::vector<String>::iterator iterator = labels.begin();
+	while(iterator != labels.end())
+	{
+		 LabelGrid->Cells[Column][Row] = *iterator;
+		 Row++;
+		 if (Row >= LabelGrid->RowCount)
+		 {
+			Row = 1;
+			Column++;
+			if (Column >= LabelGrid->ColCount)
+			{
+                break;
+			}
+		 }
+
+		 ++iterator;
+	}
+
+	//ShowMessage(Values);
 }
 //---------------------------------------------------------------------------
 
