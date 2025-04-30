@@ -16,6 +16,16 @@ TFrmLabelAssignment *FrmLabelAssignment;
 //---------------------------------------------------------------------------
 
 
+__fastcall TFrmLabelAssignment::TFrmLabelAssignment(TComponent* Owner, WellMatrixList& wellMatrixListRef) : TForm(Owner)
+{
+	this->TaskDialog = new TTaskDialog(this);
+	this->wellMatrixListRef = &wellMatrixListRef;
+}
+
+
+//---------------------------------------------------------------------------
+
+
 void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int Row, int Column)
 {
 	String Values;
@@ -41,14 +51,6 @@ void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int R
 	}
 
 	//ShowMessage(Values);
-}
-//---------------------------------------------------------------------------
-
-
-__fastcall TFrmLabelAssignment::TFrmLabelAssignment(TComponent* Owner, WellMatrixList& wellMatrixListRef) : TForm(Owner)
-{
-	this->TaskDialog = new TTaskDialog(this);
-	this->wellMatrixListRef = &wellMatrixListRef;
 }
 
 
