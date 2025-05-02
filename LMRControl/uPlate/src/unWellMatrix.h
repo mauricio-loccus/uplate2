@@ -18,7 +18,7 @@ typedef std::vector<TWell *> WellListPointers;
 class TWellMatrix
 {
 	public:
-		__fastcall TWellMatrix() : Rows(0), Cols(0) {}
+		__fastcall TWellMatrix();
 		__fastcall TWellMatrix(Integer rows_, Integer cols_) : Rows(rows_), Cols(cols_)
 		{
 			for (Integer row = 0; row < Rows; row++)
@@ -27,8 +27,9 @@ class TWellMatrix
 
 		__fastcall TWellMatrix(const TWellMatrix& rhs)
         {
-            Rows = rhs.Rows;
-            Cols = rhs.Cols;
+			Rows  = rhs.Rows;
+			Cols  = rhs.Cols;
+			mName = "";
 
             mMatrixWells.clear();
             for (Integer row = 0; row < Rows; ++row)
@@ -86,8 +87,11 @@ class TWellMatrix
 
 		Integer Rows;
 
+		__property String Name = { read = mName, write = mName };
+
 	private:
 		Integer Cols;
+		String  mName;
 		std::vector< std::vector<TWell> > mMatrixWells;
 };
 

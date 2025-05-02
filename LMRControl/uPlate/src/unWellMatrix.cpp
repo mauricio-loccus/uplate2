@@ -7,6 +7,13 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 
+__fastcall TWellMatrix::TWellMatrix()
+{
+	Rows = 0;
+	Cols = 0;
+    mName = "";
+}
+
 void __fastcall TWellMatrix::filterWellsByType(TWellType type, WellList& wl)
 {
 	for (Integer row = 0; row < Rows; row++)
