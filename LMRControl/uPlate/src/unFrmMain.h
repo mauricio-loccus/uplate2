@@ -205,8 +205,6 @@ __published:	// IDE-managed Components
 	TRadioButton *rbEndPoint;
 	TRadioButton *rbKinetic;
 	TGroupBox *grpKineticParams;
-	TLMDMMButton *btnAdd;
-	TLMDMMButton *btnSub;
 	TLMDListBox *lvKineticTimes;
 	TLMDSpinEdit *spHours;
 	TLMDSpinEdit *spMinutes;

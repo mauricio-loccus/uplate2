@@ -2574,8 +2574,8 @@ void __fastcall TMainForm::rbKineticClick(TObject *Sender)
 	cbKineticTypeChange(Sender);
 
 	lvKineticTimes->Enabled = True;
-	btnAdd->Enabled = True;
-	btnSub->Enabled = Boolean(lvKineticTimes->Items->Count > 0);
+	//btnAdd->Enabled = True;
+	//btnSub->Enabled = Boolean(lvKineticTimes->Items->Count > 0);
 }
 //---------------------------------------------------------------------------
 
@@ -2612,7 +2612,7 @@ void __fastcall TMainForm::btnAddClick(TObject *Sender)
 
 	lvKineticTimes->Items->Add(Format("%2d;%s;---", ARRAYOFCONST((lvKineticTimes->Items->Count+1, TEXT("00:00:10")))));
 
-	btnSub->Enabled = Boolean(lvKineticTimes->Items->Count > 0);
+	//btnSub->Enabled = Boolean(lvKineticTimes->Items->Count > 0);
 
 	lvKineticTimes->ItemIndex = lvKineticTimes->Items->Count-1;
 	spHours->Enabled = True;
@@ -2641,7 +2641,7 @@ void __fastcall TMainForm::btnSubClick(TObject *Sender)
 		spMinutes->Value = 0;
 		spSeconds->Value = 10;
 
-		btnSub->Enabled = False;
+		//btnSub->Enabled = False;
 	}
 
 	spHours->Enabled = Boolean(lvKineticTimes->Items->Count > 0);
