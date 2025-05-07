@@ -3548,6 +3548,7 @@ void __fastcall TMainForm::LoadPlatesBranch(_di_IXMLNode PlatesNode)
 	m_elisaDeviceParams->PlateCols = xmlNode->NodeValue;
 
 	WellMatrixList::size_type mIndex = 0;
+	WellMatrixList& wellMatrixListRef = *TWellMatrixSingleton::instance();
 
 	TTreeNode *treePlatesNode = NULL;
 
@@ -3561,19 +3562,20 @@ void __fastcall TMainForm::LoadPlatesBranch(_di_IXMLNode PlatesNode)
 
 		AddPlateMenuItemClick(this);
 
-	    WellMatrixList& wellMatrixListRef = *TWellMatrixSingleton::instance();
-
 		TWellMatrix& refWellMatrix = wellMatrixListRef[mIndex++];
-
-		String PlateName = plateNode->GetAttribute("Name");
 
 		if (treePlatesNode == NULL)
 			treePlatesNode = getNode("Placas")->getFirstChild();
 		else
 			treePlatesNode = treePlatesNode->getNextSibling();
 
+		String PlateName = plateNode->GetAttribute("Name");
+
 		if (treePlatesNode->Text != PlateName)
 			treePlatesNode->Text = PlateName;
+
+		refWellMatrix.Name = PlateName;
+		//wellMatrixListRef[mIndex - 1].Name = PlateName;
 
 		_di_IXMLNode layoutNode = plateNode->ChildNodes->FindNode("Layout");
 
