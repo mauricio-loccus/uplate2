@@ -29,7 +29,7 @@ object FrmLabelAssignment: TFrmLabelAssignment
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
-    TabOrder = 1
+    TabOrder = 3
     OnClick = btnCloseClick
   end
   object tsPlates: TTabSet
@@ -44,14 +44,12 @@ object FrmLabelAssignment: TFrmLabelAssignment
     Font.Name = 'Tahoma'
     Font.Style = []
     SoftTop = True
-    Tabs.Strings = (
-      '...   ')
-    TabIndex = 0
+    OnChange = tsPlatesChange
   end
   object LabelGrid: TStringGrid
     Left = 16
     Top = 16
-    Width = 841
+    Width = 848
     Height = 372
     ColCount = 13
     DefaultRowHeight = 40
@@ -74,7 +72,7 @@ object FrmLabelAssignment: TFrmLabelAssignment
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
-    TabOrder = 3
+    TabOrder = 1
     OnClick = btnImportClick
   end
   object FileOpenDialog: TOpenTextFileDialog

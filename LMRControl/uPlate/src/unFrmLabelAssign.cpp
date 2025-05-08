@@ -30,8 +30,6 @@ void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int R
 {
 	String Values;
 
-    ShowMessage(L"__cplusplus : " + AnsiString(__cplusplus));
-
 	std::vector<String>::iterator iterator = labels.begin();
 	while(iterator != labels.end())
 	{
@@ -43,14 +41,11 @@ void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int R
 			Column++;
 			if (Column >= LabelGrid->ColCount)
 			{
-                break;
+				break;
 			}
 		 }
-
 		 ++iterator;
 	}
-
-	//ShowMessage(Values);
 }
 
 
@@ -67,6 +62,18 @@ void __fastcall TFrmLabelAssignment::FormCreate(TObject *Sender)
 	this->FileOpenDialog->InitialDir = GetCurrentDir();
 
 	this->wellMatrixSelected = &(*wellMatrixListRef)[0];
+
+	if (wellMatrixListRef->size() <= 0)
+		return;
+
+	std::vector<TWellMatrix>::iterator iterator = this->wellMatrixListRef->begin();
+	while( iterator != this->wellMatrixListRef->end() )
+	{
+	    String Name = iterator->Name;
+		tsPlates->Tabs->Add(iterator->Name);
+		++iterator;
+	}
+	tsPlates->TabIndex = 0;
 }
 
 
@@ -151,7 +158,7 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol
 			content = IntToStr(ACol);
 
 
-        canvas->Font->Style = TFontStyles() << fsBold;
+		canvas->Font->Style = TFontStyles() << fsBold;
 		canvas->Font->Size  = 12;
 
 		canvas->Brush->Color = LabelGrid->FixedColor;
@@ -169,8 +176,12 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol
 	}
 }
 
-
 //---------------------------------------------------------------------------
 
+void __fastcall TFrmLabelAssignment::tsPlatesChange(TObject *Sender, int NewTab, bool &AllowChange)
+{
+	ShowMessage(String(NewTab));
+}
 
+//---------------------------------------------------------------------------
 
