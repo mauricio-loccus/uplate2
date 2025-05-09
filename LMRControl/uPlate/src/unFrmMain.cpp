@@ -534,6 +534,23 @@ void __fastcall TMainForm::InitAll()
 	InitSetup();
 	InitCPCNParams();
 }
+
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::UpdatePlatesNames()
+{
+	int index = 0;
+
+	WellMatrixList& wellMatrixListRef = *TWellMatrixSingleton::instance();
+
+	TTreeNode* platesNode = getNode("Placas")->getFirstChild();
+	while (platesNode)
+	{
+		wellMatrixListRef[index++].Name = platesNode->Text;
+		platesNode = platesNode->getNextSibling();
+	}
+}
+
 //---------------------------------------------------------------------------
 
 void __fastcall TMainForm::registerForDevicesMessages()
@@ -2202,6 +2219,8 @@ void __fastcall TMainForm::treeviewAddPlateNode(TTreeNodes *Node)
 	treeview->OnChange = ev;
 
 	treeview->Invalidate();
+
+	this->UpdatePlatesNames();
 }
 
 void __fastcall TMainForm::treeviewRemovePlateNode(TTreeNode *Node)
@@ -2408,18 +2427,19 @@ void __fastcall TMainForm::RenamePlateMenuItemClick(TObject *Sender)
 	TTreeNode *platesNode = getNode("Placas", treeview->TopItem);
 	Integer index = treeview->Selected->SelectedIndex / platesNode->SelectedIndex;
 
-	if (treeview->Selected->SelectedIndex > 0 && index < 100)
+	if (treeview->Selected->SelectedIndex <= 0 || index > 100)
+		return;
+
+	String newName;
+	FrmRenamePlate = new TFrmRenamePlate(this, newName);
+	Integer modalResult = FrmRenamePlate->ShowModal();
+	FrmRenamePlate->Free();
+
+	if (mrOk != modalResult)
+		return;
+
+	for (Integer i = 0; i < tabPlatesScrollBox->ControlCount; i++)
 	{
-		String newName;
-		FrmRenamePlate = new TFrmRenamePlate(this, newName);
-		Integer modalResult = FrmRenamePlate->ShowModal();
-		FrmRenamePlate->Free();
-
-		if (mrOk != modalResult)
-			return;
-
-		for (Integer i = 0; i < tabPlatesScrollBox->ControlCount; i++)
-		{
 			TWellsEdit *pWe = dynamic_cast<TWellsEdit *>(tabPlatesScrollBox->Controls[i]);
 
 			if (pWe->lbPlateCaption->Caption == treeview->Selected->Text)
@@ -2427,10 +2447,16 @@ void __fastcall TMainForm::RenamePlateMenuItemClick(TObject *Sender)
 				pWe->lbPlateCaption->Caption = newName;
 				break;
 			}
-		}
-
-		treeview->Selected->Text = newName;
 	}
+
+	treeview->Selected->Text = newName;
+
+	//this->UpdatePlatesNames();
+	WellMatrixList& wellMatrixList = *TWellMatrixSingleton::instance();
+	if (index < wellMatrixList.size())
+	{
+        wellMatrixList[index].Name = newName;
+    }
 }
 //---------------------------------------------------------------------------
 
@@ -3365,7 +3391,7 @@ if (FiltersNode && FiltersNode->HasChildNodes)
 
     _di_IXMLNode platesNode = ProtoNode->ChildNodes->FindNode("Plates");
 
-    if (platesNode->HasChildNodes)
+	if (platesNode->HasChildNodes)
 		LoadPlatesBranch(platesNode);
 
 	TTreeNode *node = treeview->Items->GetFirstNode();
@@ -3594,8 +3620,8 @@ void __fastcall TMainForm::LoadPlatesBranch(_di_IXMLNode PlatesNode)
 				Integer wellType = wellNode->ChildValues["Type"];
 				it->Type = static_cast<TWellType>(wellType);
 
-                if (TWellType::wlConcentrationStd ==it->Type)
-                    it->StdValue = wellNode->ChildValues["StdValue"];
+				if (TWellType::wlConcentrationStd ==it->Type)
+					it->StdValue = wellNode->ChildValues["StdValue"];
 
 				wellNode = wellNode->NextSibling();
 			}
@@ -3603,6 +3629,8 @@ void __fastcall TMainForm::LoadPlatesBranch(_di_IXMLNode PlatesNode)
 
 		plateNode = plateNode->NextSibling();
 	}
+
+	this->UpdatePlatesNames();
 }
 
 void __fastcall TMainForm::CreatePlatesBranch(_di_IXMLNode PlatesNode)

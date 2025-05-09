@@ -509,6 +509,8 @@ private:	// User declarations
 	TTreeNode * __fastcall getNode(String name, TTreeNode *parent = NULL) const;
 	void __fastcall setNodeEnabled(TTreeNode *node, Boolean enabled = True);
 
+	void __fastcall UpdatePlatesNames();
+
 	double __fastcall WellSummarize(WellListPointers, TSummarization, TValueKind);
 
 	void __fastcall DoProcessResults();
