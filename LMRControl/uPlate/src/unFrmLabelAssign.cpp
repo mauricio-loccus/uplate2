@@ -18,7 +18,17 @@ TFrmLabelAssignment *FrmLabelAssignment;
 
 __fastcall TFrmLabelAssignment::TFrmLabelAssignment(TComponent* Owner, WellMatrixList& wellMatrixListRef) : TForm(Owner)
 {
-	this->TaskDialog = new TTaskDialog(this);
+	TTaskDialogBaseButtonItem* button;
+
+	button = TaskDialog->Buttons->Add();
+	button->Caption = "Sim";
+	button->ModalResult = mrYes;
+
+	button = TaskDialog->Buttons->Add();
+	button->Caption = "Nï¿½o";
+	button->ModalResult = mrNo;
+
+
 	this->wellMatrixListRef = &wellMatrixListRef;
 }
 
@@ -93,10 +103,6 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawWell(int ACol, int ARow, TRect
 
 void __fastcall TFrmLabelAssignment::FormCreate(TObject *Sender)
 {
-	this->TaskDialog->Caption = L"Importação de Rótulos";
-	this->TaskDialog->MainIcon = tdiWarning;
-	this->TaskDialog->CommonButtons = TTaskDialogCommonButtons() << tcbYes << tcbNo;
-	this->TaskDialog->DefaultButton = tcbNo;
 
 	this->FileOpenDialog->InitialDir = GetCurrentDir();
 
@@ -136,12 +142,13 @@ void __fastcall TFrmLabelAssignment::btnImportClick(TObject *Sender)
 	{
 		unique_ptr<TStringList> Message(new TStringList());
 
-		Message->Add(L"A importação ocorrerá a partir da célula atualmente selecionada.");
+		Message->Add(L"A importaï¿½ï¿½o ocorrerï¿½ a partir da cï¿½lula atualmente selecionada.");
 		Message->Add(L"");
 		Message->Add(L"Gostaria de continuar?");
 
 		TaskDialog->Text = Message->Text;
-		if (TaskDialog->Execute() == mrNo)
+		TaskDialog->Execute();
+		if (TaskDialog->ModalResult == mrNo)
 			return;
 
 		if (!FileOpenDialog->Execute())

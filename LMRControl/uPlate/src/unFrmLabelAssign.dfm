@@ -82,4 +82,14 @@ object FrmLabelAssignment: TFrmLabelAssignment
     Left = 208
     Top = 432
   end
+  object TaskDialog: TTaskDialog
+    Buttons = <>
+    CommonButtons = []
+    DefaultButton = tcbNo
+    MainIcon = 1
+    RadioButtons = <>
+    Title = 'Importa'#231#227'o de R'#243'tulos'
+    Left = 552
+    Top = 432
+  end
 end
