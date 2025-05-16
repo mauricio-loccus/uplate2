@@ -103,19 +103,31 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawWell(int ACol, int ARow, TRect
 
 void __fastcall TFrmLabelAssignment::FormCreate(TObject *Sender)
 {
-
 	this->FileOpenDialog->InitialDir = GetCurrentDir();
 
 	this->wellMatrixSelected = &(*wellMatrixListRef)[0];
-
 	if (wellMatrixListRef->size() <= 0)
 		return;
 
-	std::vector<TWellMatrix>::iterator iterator = this->wellMatrixListRef->begin();
+	std::vector<TWellMatrix>::iterator iterator;
+
+	int largest = 0;
+	iterator = this->wellMatrixListRef->begin();
+	while( iterator != this->wellMatrixListRef->end() )
+	{
+		int length = iterator->Name.Length();
+		largest = (largest > length) ? largest : length;
+		iterator++;
+	}
+
+	iterator = this->wellMatrixListRef->begin();
 	while( iterator != this->wellMatrixListRef->end() )
 	{
 		String Name = iterator->Name;
-		tsPlates->Tabs->Add(iterator->Name);
+
+		String padding = "";
+		padding = String(std::string((largest - Name.Length()) / 2 + 2, ' ').c_str());
+		tsPlates->Tabs->Add(padding + Name + padding);
 		++iterator;
 	}
 	tsPlates->TabIndex = 0;
