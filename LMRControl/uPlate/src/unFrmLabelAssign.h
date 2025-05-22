@@ -19,11 +19,12 @@
 class TFrmLabelAssignment : public TForm
 {
 __published:	// IDE-managed Components
-	TButton*     btnClose;
-	TButton*     btnImport;
-	TStringGrid* LabelGrid;
-	TTabSet*     tsPlates;
-	TOpenTextFileDialog *FileOpenDialog;
+	TButton*             btnClose;
+	TButton*             btnImport;
+	TStringGrid*         LabelGrid;
+	TTabSet*             tsPlates;
+	TOpenTextFileDialog* FileOpenDialog;
+	TTaskDialog*         TaskDialog;
 
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall btnCloseClick(TObject *Sender);
