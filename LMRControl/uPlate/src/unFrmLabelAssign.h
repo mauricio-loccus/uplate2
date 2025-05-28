@@ -33,16 +33,15 @@ __published:	// IDE-managed Components
 	void __fastcall LabelGridSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect);
 	void __fastcall tsPlatesChange(TObject *Sender, int NewTab, bool &AllowChange);
 
-private:	// User declarations
-  WellMatrixList* wellMatrixListRef;
-  TWellMatrix*    wellMatrixSelected;
-
   void __fastcall InputData(std::vector<String>, int Row, int Column);
   void __fastcall LabelGridDrawWell(int ACol, int ARow, TRect &Rect, TWell& well);
 
 public:		// User declarations
 	__fastcall TFrmLabelAssignment(TComponent* Owner, WellMatrixList&);
 
+private:	// User declarations
+	WellMatrixList* wellMatrixListRef;
+	TWellMatrix*    wellMatrixSelected;
 };
 
 //---------------------------------------------------------------------------
