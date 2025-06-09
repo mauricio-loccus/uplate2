@@ -63,6 +63,7 @@ void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int R
 
 
 void __fastcall LabelGridDrawWellFlavorOne(TStringGrid* LabelGrid, int ACol, int ARow, TRect &Rect, TWell& well)
+void __fastcall TFrmLabelAssignment::tsPlatesChange(TObject *Sender, int NewTab, bool &AllowChange)
 {
 	TCanvas* canvas = LabelGrid->Canvas;
 
@@ -70,6 +71,7 @@ void __fastcall LabelGridDrawWellFlavorOne(TStringGrid* LabelGrid, int ACol, int
 		return;
 
 	canvas->TextOut(Rect.Left + 10, Rect.Top + 10, "abc");
+	LabelGrid->Invalidate();
 }
 
 
@@ -236,13 +238,7 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol
 	this->LabelGridDrawWell(ACol, ARow, Rect, wellMatrixListRef->at(tsPlates->TabIndex)[ARow - 1][ACol - 1]);
 }
 
-//---------------------------------------------------------------------------
-
-void __fastcall TFrmLabelAssignment::tsPlatesChange(TObject *Sender, int NewTab, bool &AllowChange)
-{
-	//ShowMessage(String(NewTab));
-	LabelGrid->Invalidate();
-}
 
 //---------------------------------------------------------------------------
+
 

@@ -29,9 +29,9 @@ __published:	// IDE-managed Components
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall btnCloseClick(TObject *Sender);
 	void __fastcall btnImportClick(TObject *Sender);
+	void __fastcall tsPlatesChange(TObject *Sender, int NewTab, bool &AllowChange);
 	void __fastcall LabelGridDrawCell(TObject *Sender, int ACol, int ARow, TRect &Rect, TGridDrawState State);
 	void __fastcall LabelGridSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect);
-	void __fastcall tsPlatesChange(TObject *Sender, int NewTab, bool &AllowChange);
 
 public:		// User declarations
 	__fastcall TFrmLabelAssignment(TComponent* Owner, WellMatrixList&);
