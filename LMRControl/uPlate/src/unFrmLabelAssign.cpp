@@ -203,6 +203,7 @@ void __fastcall TFrmLabelAssignment::LabelGridSelectCell(TObject *Sender, int AC
 
 
 void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol, int ARow, TRect &Rect, TGridDrawState State)
+void __fastcall TFrmLabelAssignment::LabelGridSetEditText(TObject *Sender, int ACol, int ARow, const UnicodeString Value)
 {
 	String   content;
 	TCanvas* canvas = LabelGrid->Canvas;
@@ -236,6 +237,7 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol
 	}
 
 	this->LabelGridDrawWell(ACol, ARow, Rect, wellMatrixListRef->at(tsPlates->TabIndex)[ARow - 1][ACol - 1]);
+	wellMatrixListRef->at(tsPlates->TabIndex)[ARow - 1][ACol - 1].Label = Value;
 }
 
 

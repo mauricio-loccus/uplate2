@@ -32,6 +32,7 @@ __published:	// IDE-managed Components
 	void __fastcall tsPlatesChange(TObject *Sender, int NewTab, bool &AllowChange);
 	void __fastcall LabelGridDrawCell(TObject *Sender, int ACol, int ARow, TRect &Rect, TGridDrawState State);
 	void __fastcall LabelGridSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect);
+	void __fastcall LabelGridSetEditText(TObject *Sender, int ACol, int ARow, const UnicodeString Value);
 
 public:		// User declarations
 	__fastcall TFrmLabelAssignment(TComponent* Owner, WellMatrixList&);

@@ -59,6 +59,7 @@ object FrmLabelAssignment: TFrmLabelAssignment
     TabOrder = 0
     OnDrawCell = LabelGridDrawCell
     OnSelectCell = LabelGridSelectCell
+    OnSetEditText = LabelGridSetEditText
   end
   object btnImport: TButton
     Left = 16
