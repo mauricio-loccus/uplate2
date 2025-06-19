@@ -62,32 +62,9 @@ void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int R
 //---------------------------------------------------------------------------
 
 
-void __fastcall LabelGridDrawWellFlavorOne(TStringGrid* LabelGrid, int ACol, int ARow, TRect &Rect, TWell& well)
 void __fastcall TFrmLabelAssignment::tsPlatesChange(TObject *Sender, int NewTab, bool &AllowChange)
 {
-	TCanvas* canvas = LabelGrid->Canvas;
-
-	if (well.Type == TWellType::wlEmpty)
-		return;
-
-	canvas->TextOut(Rect.Left + 10, Rect.Top + 10, "abc");
 	LabelGrid->Invalidate();
-}
-
-
-//---------------------------------------------------------------------------
-
-
-void __fastcall LabelGridDrawWellFlavor2(TStringGrid* LabelGrid, int ACol, int ARow, TRect &Rect, TWell& well)
-{
-	TCanvas* canvas = LabelGrid->Canvas;
-
-	if (well.Type == TWellType::wlEmpty)
-		return;
-
-	canvas->Brush->Color = clLime;
-	canvas->FillRect(Rect);
-	//canvas->TextOut(Rect.Left + 10, Rect.Top + 10, "abc");
 }
 
 
@@ -96,7 +73,7 @@ void __fastcall LabelGridDrawWellFlavor2(TStringGrid* LabelGrid, int ACol, int A
 
 void __fastcall TFrmLabelAssignment::LabelGridDrawWell(int ACol, int ARow, TRect &Rect, TWell& well)
 {
-	LabelGridDrawWellFlavor2(this->LabelGrid, ACol, ARow, Rect, well);
+
 }
 
 
@@ -202,41 +179,8 @@ void __fastcall TFrmLabelAssignment::LabelGridSelectCell(TObject *Sender, int AC
 //---------------------------------------------------------------------------
 
 
-void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol, int ARow, TRect &Rect, TGridDrawState State)
 void __fastcall TFrmLabelAssignment::LabelGridSetEditText(TObject *Sender, int ACol, int ARow, const UnicodeString Value)
 {
-	String   content;
-	TCanvas* canvas = LabelGrid->Canvas;
-
-	canvas = LabelGrid->Canvas;
-
-	if (State.Contains(gdFixed))
-	{
-		if (ACol == 0 && ARow >= 1)
-			content = AnsiChar('A' + ARow - 1);
-
-		if (ARow == 0 && ACol >= 1)
-			content = IntToStr(ACol);
-
-
-		canvas->Font->Style = TFontStyles() << fsBold;
-		canvas->Font->Size  = 12;
-
-		canvas->Brush->Color = LabelGrid->FixedColor;
-		canvas->FillRect(Rect);
-
-		Integer pixelsTextWidth = canvas->TextWidth(content);
-		Integer pixelsTextHeight = canvas->TextHeight(content);
-
-		Integer textPosX = (Rect.Width() / 2 - pixelsTextWidth / 2);
-		Integer textPosY = (Rect.Height() / 2 - pixelsTextHeight / 2);
-
-		canvas->TextOut(Rect.Left + textPosX, Rect.Top + textPosY, content);
-
-		return;
-	}
-
-	this->LabelGridDrawWell(ACol, ARow, Rect, wellMatrixListRef->at(tsPlates->TabIndex)[ARow - 1][ACol - 1]);
 	wellMatrixListRef->at(tsPlates->TabIndex)[ARow - 1][ACol - 1].Label = Value;
 }
 
