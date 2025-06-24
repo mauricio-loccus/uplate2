@@ -25,7 +25,7 @@ __fastcall TFrmLabelAssignment::TFrmLabelAssignment(TComponent* Owner, WellMatri
 	button->ModalResult = mrYes;
 
 	button = TaskDialog->Buttons->Add();
-	button->Caption = "N�o";
+	button->Caption = "Não";
 	button->ModalResult = mrNo;
 
 
