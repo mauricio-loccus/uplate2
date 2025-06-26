@@ -71,6 +71,47 @@ void __fastcall TFrmLabelAssignment::tsPlatesChange(TObject *Sender, int NewTab,
 //---------------------------------------------------------------------------
 
 
+
+void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol, int ARow, TRect& Rect, TGridDrawState State)
+{
+	String   content;
+	TCanvas* canvas = LabelGrid->Canvas;
+
+	canvas = LabelGrid->Canvas;
+
+	if (State.Contains(gdFixed))
+	{
+		if (ACol == 0 && ARow >= 1)
+			content = AnsiChar('A' + ARow - 1);
+
+		if (ARow == 0 && ACol >= 1)
+			content = IntToStr(ACol);
+
+
+		canvas->Font->Style = TFontStyles() << fsBold;
+		canvas->Font->Size  = 12;
+
+		canvas->Brush->Color = LabelGrid->FixedColor;
+		canvas->FillRect(Rect);
+
+		Integer pixelsTextWidth = canvas->TextWidth(content);
+		Integer pixelsTextHeight = canvas->TextHeight(content);
+
+		Integer textPosX = (Rect.Width() / 2 - pixelsTextWidth / 2);
+		Integer textPosY = (Rect.Height() / 2 - pixelsTextHeight / 2);
+
+		canvas->TextOut(Rect.Left + textPosX, Rect.Top + textPosY, content);
+
+		return;
+	}
+
+	this->LabelGridDrawWell(ACol, ARow, Rect, wellMatrixListRef->at(tsPlates->TabIndex)[ARow - 1][ACol - 1]);
+}
+
+
+//---------------------------------------------------------------------------
+
+
 void __fastcall TFrmLabelAssignment::LabelGridDrawWell(int ACol, int ARow, TRect &Rect, TWell& well)
 {
 
