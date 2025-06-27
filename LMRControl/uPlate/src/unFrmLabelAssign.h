@@ -44,6 +44,8 @@ private:	// User declarations
 	void __fastcall InputData(std::vector<String>, int Row, int Column);
 	void __fastcall LabelGridDrawWell(int ACol, int ARow, TRect &Rect, TWell& well);
 
+	void __fastcall LabelGridDrawWellFlavor_1    (TStringGrid* LabelGrid, int ACol, int ARow, TRect &Rect, TWell&);
+
 };
 
 //---------------------------------------------------------------------------

@@ -114,7 +114,7 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol
 
 void __fastcall TFrmLabelAssignment::LabelGridDrawWell(int ACol, int ARow, TRect &Rect, TWell& well)
 {
-
+    this->LabelGridDrawWellFlavor_1(this->LabelGrid, ACol, ARow, Rect, well);
 }
 
 
@@ -227,5 +227,16 @@ void __fastcall TFrmLabelAssignment::LabelGridSetEditText(TObject *Sender, int A
 
 
 //---------------------------------------------------------------------------
+
+
+void __fastcall TFrmLabelAssignment::LabelGridDrawWellFlavor_1(TStringGrid* LabelGrid, int ACol, int ARow, TRect &Rect, TWell& well)
+{
+	TCanvas* canvas = LabelGrid->Canvas;
+
+	if (well.Type == TWellType::wlEmpty)
+		return;
+
+	canvas->TextOut(Rect.Left + 10, Rect.Top + 10, "abc");
+}
 
 
