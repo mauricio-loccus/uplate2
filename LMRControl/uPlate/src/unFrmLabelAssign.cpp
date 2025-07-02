@@ -114,7 +114,7 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol
 
 void __fastcall TFrmLabelAssignment::LabelGridDrawWell(int ACol, int ARow, TRect &Rect, TWell& well)
 {
-    this->LabelGridDrawWellFlavor_1(this->LabelGrid, ACol, ARow, Rect, well);
+	this->LabelGridDrawWellFlavor_2(this->LabelGrid, ACol, ARow, Rect, well);
 }
 
 
@@ -229,6 +229,141 @@ void __fastcall TFrmLabelAssignment::LabelGridSetEditText(TObject *Sender, int A
 //---------------------------------------------------------------------------
 
 
+void __fastcall TFrmLabelAssignment::LabelGridDrawUnknownWell_2_1(TStringGrid* LabelGrid, TRect& Rect, int id, String label)
+{
+	struct TRow {
+		String  content;
+		WORD    height;
+		int     spacing;
+	};
+
+	TColor  background;
+	TColor  foreground;
+	Integer height;
+	Integer padding;
+	TRow    rows[3] = {
+		{       "DC", 0, 1 },
+		{ String(id), 0, 2 },
+		{      label, 0, 0 }
+	};
+
+	background = (TColor)RGB(0xde,0x41,0x7b);
+	foreground = clWhite;
+
+	TCanvas* canvas = LabelGrid->Canvas;
+
+	//rows[3].content = label;
+	rows[0].height = canvas->TextHeight("DC");
+	rows[1].height = canvas->TextHeight(String(id));
+
+	height = rows[0].height + rows[0].spacing + rows[1].height;
+	if ( !label.IsEmpty() )
+	{
+		rows[2].height = canvas->TextHeight(label);
+		height += rows[1].spacing + rows[2].height;
+	}
+
+	Rect.Inflate(-1, -1);
+	padding = (Rect.Height() - height) / 2;
+
+	canvas->Brush->Color = background;
+	canvas->Pen->Color = clGray;
+	canvas->RoundRect(Rect.Left-1, Rect.Top+1, Rect.Right-2, Rect.Bottom-1, 11, 15);
+
+	Integer textPosY = padding;
+	for(int i = 0; i < 3; i++)
+	{
+		if ( rows[i].content.IsEmpty() )
+			continue;
+
+		Integer textPosX = (Rect.Width() - canvas->TextWidth(rows[i].content)) / 2;
+		canvas->TextOut(Rect.Left + textPosX, Rect.Top + textPosY, rows[i].content);
+		textPosY += rows[i].height + rows[i].spacing;
+	}
+}
+
+
+//---------------------------------------------------------------------------
+
+
+void __fastcall TFrmLabelAssignment::LabelGridDrawGeneric_2(TStringGrid* LabelGrid, TRect& Rect, TColor background, TColor foreground, String content)
+{
+	TCanvas* canvas = LabelGrid->Canvas;
+
+	Rect.Inflate(-2,-4);
+
+	canvas->Brush->Color = background;
+	canvas->Pen->Color = clGray;
+	canvas->RoundRect(Rect.Left-1, Rect.Top+1, Rect.Right-2, Rect.Bottom-1, 11, 15);
+
+	canvas->Font->Color = foreground;
+	Integer textPosX = (Rect.Width()  - canvas->TextWidth (content)) / 2;
+	Integer textPosY = (Rect.Height() - canvas->TextHeight(content)) / 2;
+
+	canvas->TextOut(Rect.Left + textPosX, Rect.Top + textPosY, content);
+}
+
+
+//---------------------------------------------------------------------------
+
+
+void __fastcall TFrmLabelAssignment::LabelGridDrawWellFlavor_2(TStringGrid* LabelGrid, int ACol, int ARow, TRect &Rect, TWell& well)
+{
+	String   content;
+	TColor   background;
+	TColor   foreground;
+
+
+	if (well.Type == TWellType::wlEmpty)
+		return;
+
+	if (well.Type == TWellType::wlUnknown)
+	{
+		this->LabelGridDrawUnknownWell_2_1(LabelGrid, Rect, well.ID, well.Label);
+		return;
+	}
+
+	switch (well.Type)
+	{
+		case TWellType::wlEmpty:
+			content = "";
+			background = (TColor)RGB(0x00,0x30,0x00);
+			foreground = clWhite;
+			break;
+
+		case TWellType::wlBlank:
+			content = "BR";
+			background =  TColor(0xffffff);
+			foreground = clBlack;
+			break;
+
+		case TWellType::wlNegativeControl:
+			content = "CN";
+			background =  TColor(0x9c5163);
+			foreground = clWhite;
+			break;
+
+		case TWellType::wlPositiveControl:
+			content = "CP";
+			background =  (TColor)RGB(0xff,0xcc,0x29);
+			foreground = clBlack;
+			break;
+
+		case TWellType::wlConcentrationStd:
+			content = "STD \n" + IntToStr(well.ID);
+			background =  TColor(0x0055ff);
+			foreground = clWhite;
+			break;
+
+	}
+
+	this->LabelGridDrawGeneric_2(LabelGrid, Rect, background, foreground, content);
+}
+
+
+//---------------------------------------------------------------------------
+
+
 void __fastcall TFrmLabelAssignment::LabelGridDrawWellFlavor_1(TStringGrid* LabelGrid, int ACol, int ARow, TRect &Rect, TWell& well)
 {
 	TCanvas* canvas = LabelGrid->Canvas;
@@ -238,5 +373,13 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawWellFlavor_1(TStringGrid* Labe
 
 	canvas->TextOut(Rect.Left + 10, Rect.Top + 10, "abc");
 }
+
+
+//---------------------------------------------------------------------------
+
+
+
+
+
 
 
