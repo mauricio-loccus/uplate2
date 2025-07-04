@@ -52,6 +52,45 @@ void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int R
 //---------------------------------------------------------------------------
 
 
+void __fastcall LabelGridDrawWellFlavorOne(TStringGrid* LabelGrid, int ACol, int ARow, TRect &Rect, TWell& well)
+{
+	TCanvas* canvas = LabelGrid->Canvas;
+
+	if (well.Type == TWellType::wlEmpty)
+		return;
+
+	canvas->TextOut(Rect.Left + 10, Rect.Top + 10, "abc");
+}
+
+
+//---------------------------------------------------------------------------
+
+
+void __fastcall LabelGridDrawWellFlavor2(TStringGrid* LabelGrid, int ACol, int ARow, TRect &Rect, TWell& well)
+{
+	TCanvas* canvas = LabelGrid->Canvas;
+
+	if (well.Type == TWellType::wlEmpty)
+		return;
+
+	canvas->Brush->Color = clLime;
+	canvas->FillRect(Rect);
+	//canvas->TextOut(Rect.Left + 10, Rect.Top + 10, "abc");
+}
+
+
+//---------------------------------------------------------------------------
+
+
+void __fastcall TFrmLabelAssignment::LabelGridDrawWell(int ACol, int ARow, TRect &Rect, TWell& well)
+{
+	LabelGridDrawWellFlavor2(this->LabelGrid, ACol, ARow, Rect, well);
+}
+
+
+//---------------------------------------------------------------------------
+
+
 void __fastcall TFrmLabelAssignment::FormCreate(TObject *Sender)
 {
 	this->TaskDialog->Caption = L"Importação de Rótulos";
@@ -69,7 +108,7 @@ void __fastcall TFrmLabelAssignment::FormCreate(TObject *Sender)
 	std::vector<TWellMatrix>::iterator iterator = this->wellMatrixListRef->begin();
 	while( iterator != this->wellMatrixListRef->end() )
 	{
-	    String Name = iterator->Name;
+		String Name = iterator->Name;
 		tsPlates->Tabs->Add(iterator->Name);
 		++iterator;
 	}
@@ -174,13 +213,16 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol
 
 		return;
 	}
+
+	this->LabelGridDrawWell(ACol, ARow, Rect, wellMatrixListRef->at(tsPlates->TabIndex)[ARow - 1][ACol - 1]);
 }
 
 //---------------------------------------------------------------------------
 
 void __fastcall TFrmLabelAssignment::tsPlatesChange(TObject *Sender, int NewTab, bool &AllowChange)
 {
-	ShowMessage(String(NewTab));
+	//ShowMessage(String(NewTab));
+	LabelGrid->Invalidate();
 }
 
 //---------------------------------------------------------------------------

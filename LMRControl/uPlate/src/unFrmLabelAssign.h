@@ -40,9 +40,11 @@ private:	// User declarations
   TTaskDialog*    TaskDialog;
 
   void __fastcall InputData(std::vector<String>, int Row, int Column);
+  void __fastcall LabelGridDrawWell(int ACol, int ARow, TRect &Rect, TWell& well);
 
 public:		// User declarations
 	__fastcall TFrmLabelAssignment(TComponent* Owner, WellMatrixList&);
+
 };
 
 //---------------------------------------------------------------------------
