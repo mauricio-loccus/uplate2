@@ -229,6 +229,64 @@ void __fastcall TFrmLabelAssignment::LabelGridSetEditText(TObject *Sender, int A
 //---------------------------------------------------------------------------
 
 
+void __fastcall TFrmLabelAssignment::LabelGridDrawUnknownWell_2_2(TStringGrid* LabelGrid, TRect& Rect, int id, String label)
+{
+	struct TRow {
+		String  content;
+		WORD    height;
+		int     spacing;
+	};
+
+	TColor  background;
+	TColor  foreground;
+	Integer height;
+	Integer padding;
+	TRow    rows[2] = {
+		{       "DC", 0, 4 },
+		{ String(id), 0, 0 },
+	};
+
+	background = (TColor)RGB(0xde,0x41,0x7b);
+	foreground = clWhite;
+
+	TCanvas* canvas = LabelGrid->Canvas;
+
+	if ( !label.IsEmpty() )
+	{
+		rows[0].content = rows[0].content + " " + rows[1].content;
+		rows[1].content = label;
+	}
+
+	rows[0].height = canvas->TextHeight(rows[0].content);
+	rows[1].height = canvas->TextHeight(rows[1].content);
+
+	height = rows[0].height + 3 + rows[1].height;
+
+	Rect.Inflate(-1, -1);
+	padding = (Rect.Height() - height) / 2;
+
+	canvas->Brush->Color = background;
+	canvas->Pen->Color = clGray;
+	canvas->RoundRect(Rect.Left-1, Rect.Top+1, Rect.Right-2, Rect.Bottom-1, 15, 15);
+
+	Integer textPosY = padding;
+	for(int i = 0; i < 2; i++)
+	{
+		if ( rows[i].content.IsEmpty() )
+			continue;
+
+		Integer textPosX = (Rect.Width() - canvas->TextWidth(rows[i].content)) / 2;
+		canvas->Font->Color = foreground;
+		canvas->TextOut(Rect.Left + textPosX, Rect.Top + textPosY, rows[i].content);
+
+		textPosY += rows[i].height + rows[i].spacing;
+	}
+}
+
+
+//---------------------------------------------------------------------------
+
+
 void __fastcall TFrmLabelAssignment::LabelGridDrawUnknownWell_2_1(TStringGrid* LabelGrid, TRect& Rect, int id, String label)
 {
 	struct TRow {
@@ -319,7 +377,7 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawWellFlavor_2(TStringGrid* Labe
 
 	if (well.Type == TWellType::wlUnknown)
 	{
-		this->LabelGridDrawUnknownWell_2_1(LabelGrid, Rect, well.ID, well.Label);
+		this->LabelGridDrawUnknownWell_2_2(LabelGrid, Rect, well.ID, well.Label);
 		return;
 	}
 
