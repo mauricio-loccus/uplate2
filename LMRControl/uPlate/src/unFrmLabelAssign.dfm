@@ -58,6 +58,7 @@ object FrmLabelAssignment: TFrmLabelAssignment
     ScrollBars = ssNone
     TabOrder = 0
     OnDrawCell = LabelGridDrawCell
+    OnGetEditText = LabelGridGetEditText
     OnSelectCell = LabelGridSelectCell
     OnSetEditText = LabelGridSetEditText
   end

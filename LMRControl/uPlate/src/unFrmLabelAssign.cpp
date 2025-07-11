@@ -194,7 +194,11 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol
 		return;
 	}
 
-	this->LabelGridDrawWell(ACol, ARow, Rect, wellMatrixListRef->at(tsPlates->TabIndex)[ARow - 1][ACol - 1]);
+	int plate = tsPlates->TabIndex + 1;
+	if (plate < 1 || plate > wellMatrixListRef->size())
+		return;
+
+	this->LabelGridDrawWell(ACol, ARow, Rect, wellMatrixListRef->at(plate - 1)[ARow - 1][ACol - 1]);
 }
 
 
@@ -212,7 +216,31 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawWell(int ACol, int ARow, TRect
 
 void __fastcall TFrmLabelAssignment::LabelGridSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect)
 {
-	CanSelect = true;
+	try
+	{
+		if (this->inEditor)
+		{
+			LabelGrid->EditorMode = false;
+			this->inEditor = false;
+		}
+
+		if (ACol < 1 || ARow < 1)
+		{
+			 CanSelect = false;
+			 return;
+		}
+
+		int plate = tsPlates->TabIndex + 1;
+		if (plate < 1 || plate > wellMatrixListRef->size())
+			return;
+
+		TWell well = wellMatrixListRef->at(plate - 1)[ARow - 1][ACol - 1];
+		CanSelect = (well.Type == TWellType::wlUnknown);
+	}
+	catch (...)
+	{
+
+	}
 }
 
 
@@ -221,7 +249,30 @@ void __fastcall TFrmLabelAssignment::LabelGridSelectCell(TObject *Sender, int AC
 
 void __fastcall TFrmLabelAssignment::LabelGridSetEditText(TObject *Sender, int ACol, int ARow, const UnicodeString Value)
 {
-	wellMatrixListRef->at(tsPlates->TabIndex)[ARow - 1][ACol - 1].Label = Value;
+	this->inEditor = LabelGrid->EditorMode;
+	if (this->inEditor)
+		return;
+
+	LabelGrid->Cells[ACol][ARow] = "";
+
+	int plate = tsPlates->TabIndex + 1;
+	if (plate < 1 || plate > wellMatrixListRef->size())
+		return;
+
+	wellMatrixListRef->at(plate - 1)[ARow - 1][ACol - 1].Label = Value;
+}
+
+
+//---------------------------------------------------------------------------
+
+
+void __fastcall TFrmLabelAssignment::LabelGridGetEditText(TObject *Sender, int ACol, int ARow, UnicodeString &Value)
+{
+	int plate = tsPlates->TabIndex + 1;
+	if (plate < 1 || plate > wellMatrixListRef->size())
+		return;
+
+	Value = wellMatrixListRef->at(plate - 1)[ARow - 1][ACol - 1].Label;
 }
 
 
