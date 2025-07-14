@@ -50,8 +50,8 @@ private:	// User declarations
 	void __fastcall LabelGridDrawUnknownWell_2_2 (TStringGrid*, TRect&, int id, String);
 	void __fastcall LabelGridDrawUnknownWell_2_1 (TStringGrid*, TRect&, int id, String);
 	void __fastcall LabelGridDrawGeneric_2       (TStringGrid*, TRect& Rect, TColor, TColor foreground, String content);
-	void __fastcall LabelGridDrawWellFlavor_2    (TStringGrid*, int ACol, int ARow, TRect &Rect, TWell& well);
-	void __fastcall LabelGridDrawWellFlavor_1    (TStringGrid* LabelGrid, int ACol, int ARow, TRect &Rect, TWell&);
+	void __fastcall LabelGridDrawWellFlavor_2    (TStringGrid*, int ACol, int ARow, TRect &Rect, TWell&);
+	void __fastcall LabelGridDrawWellFlavor_1    (TStringGrid*, int ACol, int ARow, TRect &Rect, TWell&);
 
 };
 
