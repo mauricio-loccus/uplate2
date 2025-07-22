@@ -36,6 +36,54 @@ __fastcall TFrmLabelAssignment::TFrmLabelAssignment(TComponent* Owner, WellMatri
 //---------------------------------------------------------------------------
 
 
+void __fastcall TFrmLabelAssignment::Next()
+{
+	int row;
+	int col;
+
+
+	int plate = tsPlates->TabIndex + 1;
+	if (plate < 1 || plate > wellMatrixListRef->size())
+		return;
+
+	TWellMatrix& wellMatrix = wellMatrixListRef->at(plate - 1);
+
+	row = LabelGrid->Row - 1;
+	col = LabelGrid->Col - 1;
+
+	int colCount = wellMatrix[row].size();
+	while (col < colCount)
+	{
+		TWellType type;
+
+		while ( row < wellMatrix.Rows )
+		{
+			type = wellMatrix[row][col].Type;
+			if (type == TWellType::wlUnknown)
+				break;
+
+			row++;
+		}
+
+		type = wellMatrix[row][col].Type;
+		if (wellMatrix[row][col].Type == TWellType::wlUnknown)
+			break;
+
+		row = 0;
+		col++;
+	}
+
+	if (row < (LabelGrid->RowCount - 1) && col < (LabelGrid->ColCount - 1))
+	{
+		LabelGrid->Row = row + 1;
+		LabelGrid->Col = col + 1;
+	}
+
+}
+
+
+//---------------------------------------------------------------------------
+
 void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int Row, int Column)
 {
 	String Values;
@@ -486,8 +534,14 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawWellFlavor_1(TStringGrid* Labe
 //---------------------------------------------------------------------------
 
 
+void __fastcall TFrmLabelAssignment::FormShow(TObject *Sender)
+{
+	 LabelGrid->SetFocus();
+	 Next();
+}
 
 
+//---------------------------------------------------------------------------
 
 
 
