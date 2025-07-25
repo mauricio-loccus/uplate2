@@ -84,11 +84,72 @@ void __fastcall TFrmLabelAssignment::Next()
 
 //---------------------------------------------------------------------------
 
+
 void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int Row, int Column)
 {
-	String Values;
+	int row;
+	int col;
+	int lastID;
+
+
+	int plate = tsPlates->TabIndex + 1;
+	if (plate < 1 || plate > wellMatrixListRef->size())
+		return;
+
+	TWellMatrix& wellMatrix = wellMatrixListRef->at(plate - 1);
+
+	row = LabelGrid->Row - 1;
+	col = LabelGrid->Col - 1;
 
 	std::vector<String>::iterator iterator = labels.begin();
+
+	int colCount = wellMatrix[row].size();
+	while (col < colCount)
+	{
+		TWellType type;
+
+		while ( row < wellMatrix.Rows )
+		{
+			type = wellMatrix[row][col].Type;
+			if (type == TWellType::wlUnknown)
+			{
+				lastID = wellMatrix[row][col].ID;
+				break;
+			}
+
+
+			row++;
+		}
+
+		while ( row < wellMatrix.Rows && iterator != labels.end() )
+		{
+			type = wellMatrix[row][col].Type;
+			if (wellMatrix[row][col].Type == TWellType::wlEmpty)
+			{
+				wellMatrix[row][col].Type = TWellType::wlUnknown;
+				wellMatrix[row][col].ID = lastID;
+			}
+
+			type = wellMatrix[row][col].Type;
+			if (wellMatrix[row][col].Type == TWellType::wlUnknown)
+			{
+				if ( iterator != labels.end() )
+				{
+					wellMatrix[row][col].Label = *iterator;
+					iterator++;
+				}
+			}
+
+			row++;
+		}
+
+		row = 0;
+		col++;
+	}
+
+	LabelGrid->Invalidate();
+
+	/*
 	while(iterator != labels.end())
 	{
 		 LabelGrid->Cells[Column][Row] = *iterator;
