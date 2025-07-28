@@ -148,23 +148,6 @@ void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int R
 	}
 
 	LabelGrid->Invalidate();
-
-	/*
-	while(iterator != labels.end())
-	{
-		 LabelGrid->Cells[Column][Row] = *iterator;
-		 Row++;
-		 if (Row >= LabelGrid->RowCount)
-		 {
-			Row = 1;
-			Column++;
-			if (Column >= LabelGrid->ColCount)
-			{
-				break;
-			}
-		 }
-		 ++iterator;
-	}
 }
 
 
