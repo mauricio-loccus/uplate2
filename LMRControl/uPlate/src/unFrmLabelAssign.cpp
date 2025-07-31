@@ -36,20 +36,21 @@ __fastcall TFrmLabelAssignment::TFrmLabelAssignment(TComponent* Owner, WellMatri
 //---------------------------------------------------------------------------
 
 
-void __fastcall TFrmLabelAssignment::Next()
+bool __fastcall TFrmLabelAssignment::NextAllowed(int plate, int& ARow, int& ACol, int options = 0)
 {
-	int row;
-	int col;
+	int  row;
+	int  col;
+	bool found;
 
 
-	int plate = tsPlates->TabIndex + 1;
-	if (plate < 1 || plate > wellMatrixListRef->size())
-		return;
+	if (plate < 0 || plate > wellMatrixListRef->size() - 1)
+		return False;
 
-	TWellMatrix& wellMatrix = wellMatrixListRef->at(plate - 1);
+	TWellMatrix& wellMatrix = wellMatrixListRef->at(plate);
 
-	row = LabelGrid->Row - 1;
-	col = LabelGrid->Col - 1;
+	row = ARow;
+	col = ACol;
+	found = False;
 
 	int colCount = wellMatrix[row].size();
 	while (col < colCount)
@@ -60,32 +61,68 @@ void __fastcall TFrmLabelAssignment::Next()
 		{
 			type = wellMatrix[row][col].Type;
 			if (type == TWellType::wlUnknown)
+			{
+				found = True;
 				break;
+			}
 
 			row++;
 		}
 
 		type = wellMatrix[row][col].Type;
 		if (wellMatrix[row][col].Type == TWellType::wlUnknown)
+		{
+			found = True;
 			break;
+		}
+
 
 		row = 0;
 		col++;
 	}
 
+	/*
 	if (row < (LabelGrid->RowCount - 1) && col < (LabelGrid->ColCount - 1))
 	{
 		LabelGrid->Row = row + 1;
 		LabelGrid->Col = col + 1;
 	}
+	*/
 
+	return found;
 }
 
 
 //---------------------------------------------------------------------------
 
 
-void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int& index)
+bool __fastcall TFrmLabelAssignment::ImportAllowed(int plate, int ARow, int ACol)
+{
+	TWellType type;
+
+	if (plate < 0 || plate > wellMatrixListRef->size() - 1)
+		return False;
+
+	/*
+	int plate = tsPlates->TabIndex + 1;
+	if (plate < 1 || plate > wellMatrixListRef->size())
+		return False;
+	*/
+
+	TWellMatrix& wellMatrix = wellMatrixListRef->at(plate);  // Referencia a placa escolhida no parâmetro
+
+	type = wellMatrix[ARow][ACol].Type;
+	if (type == TWellType::wlUnknown)
+	{
+		return True;
+	}
+}
+
+
+//---------------------------------------------------------------------------
+
+
+void __fastcall TFrmLabelAssignment::InputDataOld(std::vector<String> labels, int& index)
 {
 	int row;
 	int col;
@@ -99,8 +136,7 @@ void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int& 
 	TWellMatrix& wellMatrix = wellMatrixListRef->at(plate - 1);
 	lastID = wellMatrix.getMaxWellTypeCount(TWellType::wlUnknown).ID;
 
-	row = LabelGrid->Row - 1;
-	col = LabelGrid->Col - 1;
+	//Next(LabelGrid->Row - 1,LabelGrid->Col - 1);
 
 	std::vector<String>::iterator iterator = labels.begin() + index;
 
@@ -109,7 +145,7 @@ void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int& 
 	{
 		TWellType type;
 
-		// Procura o primeira do tipe 'DC' na coluna atual
+		// Procura o primeira do tipo 'DC' na coluna atual
 		while ( row < wellMatrix.Rows )
 		{
 			type = wellMatrix[row][col].Type;
@@ -150,9 +186,18 @@ void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int& 
 		row = 0;
 		col++;
 	}
-    index = std::distance(labels.begin(), iterator);
+	index = std::distance(labels.begin(), iterator);
 
 	LabelGrid->Invalidate();
+}
+
+
+//---------------------------------------------------------------------------
+
+
+void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int& index)
+{
+
 }
 
 
@@ -221,6 +266,7 @@ void __fastcall TFrmLabelAssignment::btnImportClick(TObject *Sender)
 	{
 		unique_ptr<TStringList> Message(new TStringList());
 
+		Message->Clear();
 		Message->Add(L"A importa��o ocorrer� a partir da c�lula atualmente selecionada.");
 		Message->Add(L"");
 		Message->Add(L"Gostaria de continuar?");
@@ -230,6 +276,10 @@ void __fastcall TFrmLabelAssignment::btnImportClick(TObject *Sender)
 		if (TaskDialog->ModalResult == mrNo)
 			return;
 
+		/*
+		if (this->QuestionDialog(Message.get()) == mrNo)
+			return;
+		*/
 		if (!FileOpenDialog->Execute())
 			return;
 
@@ -252,21 +302,24 @@ void __fastcall TFrmLabelAssignment::btnImportClick(TObject *Sender)
 			if (position >= labels.size())         // Se  não houver dados importados remanescentes
 				break;
 
+			if (tsPlates->Tabs->Count - 1 <= tsPlates->TabIndex)
+				break;
+
 			Message->Clear();
 			Message->Add(L"Ainda há dados importados não utilizados...");
 			Message->Add(L"");
 			Message->Add(L"Gostaria de continuar na próxima placa?");
 
 			TaskDialog->Text = Message->Text;
-
-			TaskDialog->ModalResult = mrNone;
 			if (!TaskDialog->Execute())
 				break;
 
 			if (TaskDialog->ModalResult == mrNo)
 				return;
 
-
+			tsPlates->TabIndex++;
+			LabelGrid->Row = 1;
+			LabelGrid->Col = 1;
 		}
 	}
 
@@ -327,6 +380,29 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawCell(TObject *Sender, int ACol
 void __fastcall TFrmLabelAssignment::LabelGridDrawWell(int ACol, int ARow, TRect &Rect, TWell& well)
 {
 	this->LabelGridDrawWellFlavor_2(this->LabelGrid, ACol, ARow, Rect, well);
+}
+
+
+//---------------------------------------------------------------------------
+
+
+TModalResult __fastcall TFrmLabelAssignment::QuestionDialog(TStringList* Message)
+{
+	TTaskDialog* TaskDialog;
+	TModalResult result;
+
+	TaskDialog = new TTaskDialog(this);
+
+	TaskDialog->Caption = this->TaskDialog->Caption;
+	TaskDialog->Text = Message->Text;
+
+	if (!TaskDialog->Execute())
+		return mrNone;
+
+
+
+
+	return TaskDialog->ModalResult;
 }
 
 
@@ -608,11 +684,10 @@ void __fastcall TFrmLabelAssignment::LabelGridDrawWellFlavor_1(TStringGrid* Labe
 void __fastcall TFrmLabelAssignment::FormShow(TObject *Sender)
 {
 	 LabelGrid->SetFocus();
-	 Next();
+	 //Next(LabelGrid->Row - 1,LabelGrid->Col - 1);
 }
 
 
 //---------------------------------------------------------------------------
-
 
 

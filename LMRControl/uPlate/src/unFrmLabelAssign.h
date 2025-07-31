@@ -24,7 +24,8 @@ __published:	// IDE-managed Components
 	TStringGrid*         LabelGrid;
 	TTabSet*             tsPlates;
 	TOpenTextFileDialog* FileOpenDialog;
-	TTaskDialog*         TaskDialog;
+	TTaskDialog *TaskDialog;
+	TButton *Button1;
 
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall btnCloseClick(TObject *Sender);
@@ -45,9 +46,13 @@ private:	// User declarations
 	TWellMatrix*    wellMatrixSelected;
 	bool            inEditor;
 
-	void __fastcall Next();
+	bool __fastcall NextAllowed  (int plate, int& ARow, int& ACol, int options);
+	bool __fastcall ImportAllowed(int plate, int  ARow, int  ACol);
+	void __fastcall InputDataOld(std::vector<String>, int& index);
 	void __fastcall InputData(std::vector<String>, int& index);
 	void __fastcall LabelGridDrawWell(int ACol, int ARow, TRect &Rect, TWell& well);
+
+	TModalResult __fastcall QuestionDialog(TStringList* Message);
 
 	void __fastcall LabelGridDrawUnknownWell_2_2 (TStringGrid*, TRect&, int id, String);
 	void __fastcall LabelGridDrawUnknownWell_2_1 (TStringGrid*, TRect&, int id, String);

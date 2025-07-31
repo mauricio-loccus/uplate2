@@ -78,6 +78,14 @@ object FrmLabelAssignment: TFrmLabelAssignment
     TabOrder = 1
     OnClick = btnImportClick
   end
+  object Button1: TButton
+    Left = 328
+    Top = 440
+    Width = 75
+    Height = 25
+    Caption = 'Button1'
+    TabOrder = 4
+  end
   object FileOpenDialog: TOpenTextFileDialog
     Filter = 
       'Todos os arquivos|*.*|Arquivo Texto (*.txt)|*.txt|Arquivo CSV (*' +
@@ -87,10 +95,12 @@ object FrmLabelAssignment: TFrmLabelAssignment
   end
   object TaskDialog: TTaskDialog
     Buttons = <>
-    CommonButtons = []
+    Caption = 'Teste'
+    CommonButtons = [tcbYes]
     DefaultButton = tcbNo
     MainIcon = 1
     RadioButtons = <>
+    Text = 'Teste'
     Title = 'Importa'#231#227'o de R'#243'tulos'
     Left = 552
     Top = 432
