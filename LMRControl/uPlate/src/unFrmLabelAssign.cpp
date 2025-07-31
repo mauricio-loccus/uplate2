@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+﻿//---------------------------------------------------------------------------
 
 #include <vcl.h>
 #include <Vcl.Dialogs.hpp>
@@ -85,7 +85,7 @@ void __fastcall TFrmLabelAssignment::Next()
 //---------------------------------------------------------------------------
 
 
-void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int Row, int Column)
+void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int& index)
 {
 	int row;
 	int col;
@@ -97,26 +97,24 @@ void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int R
 		return;
 
 	TWellMatrix& wellMatrix = wellMatrixListRef->at(plate - 1);
+	lastID = wellMatrix.getMaxWellTypeCount(TWellType::wlUnknown).ID;
 
 	row = LabelGrid->Row - 1;
 	col = LabelGrid->Col - 1;
 
-	std::vector<String>::iterator iterator = labels.begin();
+	std::vector<String>::iterator iterator = labels.begin() + index;
 
 	int colCount = wellMatrix[row].size();
 	while (col < colCount)
 	{
 		TWellType type;
 
+		// Procura o primeira do tipe 'DC' na coluna atual
 		while ( row < wellMatrix.Rows )
 		{
 			type = wellMatrix[row][col].Type;
 			if (type == TWellType::wlUnknown)
-			{
-				lastID = wellMatrix[row][col].ID;
 				break;
-			}
-
 
 			row++;
 		}
@@ -127,7 +125,7 @@ void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int R
 			if (wellMatrix[row][col].Type == TWellType::wlEmpty)
 			{
 				wellMatrix[row][col].Type = TWellType::wlUnknown;
-				wellMatrix[row][col].ID = lastID;
+				wellMatrix[row][col].ID = ++lastID;
 			}
 
 			type = wellMatrix[row][col].Type;
@@ -136,16 +134,23 @@ void __fastcall TFrmLabelAssignment::InputData(std::vector<String> labels, int R
 				if ( iterator != labels.end() )
 				{
 					wellMatrix[row][col].Label = *iterator;
+					LabelGrid->Row = row + 1;
+					LabelGrid->Col = col + 1;
+					LabelGrid->Invalidate();
+
+					Application->ProcessMessages();
+					Sleep(400);
+
 					iterator++;
 				}
 			}
-
 			row++;
 		}
 
 		row = 0;
 		col++;
 	}
+    index = std::distance(labels.begin(), iterator);
 
 	LabelGrid->Invalidate();
 }
@@ -240,7 +245,29 @@ void __fastcall TFrmLabelAssignment::btnImportClick(TObject *Sender)
 		}
 		reader->Close();
 
-		this->InputData(labels, LabelGrid->Row, LabelGrid->Col);
+		int position = 0;
+		while (true)
+		{
+			this->InputData(labels, position);
+			if (position >= labels.size())         // Se  não houver dados importados remanescentes
+				break;
+
+			Message->Clear();
+			Message->Add(L"Ainda há dados importados não utilizados...");
+			Message->Add(L"");
+			Message->Add(L"Gostaria de continuar na próxima placa?");
+
+			TaskDialog->Text = Message->Text;
+
+			TaskDialog->ModalResult = mrNone;
+			if (!TaskDialog->Execute())
+				break;
+
+			if (TaskDialog->ModalResult == mrNo)
+				return;
+
+
+		}
 	}
 
 	catch(Exception& exception)

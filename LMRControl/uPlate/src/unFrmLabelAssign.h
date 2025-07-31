@@ -46,7 +46,7 @@ private:	// User declarations
 	bool            inEditor;
 
 	void __fastcall Next();
-	void __fastcall InputData(std::vector<String>, int Row, int Column);
+	void __fastcall InputData(std::vector<String>, int& index);
 	void __fastcall LabelGridDrawWell(int ACol, int ARow, TRect &Rect, TWell& well);
 
 	void __fastcall LabelGridDrawUnknownWell_2_2 (TStringGrid*, TRect&, int id, String);
