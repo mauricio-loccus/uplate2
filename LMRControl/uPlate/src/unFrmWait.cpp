@@ -79,3 +79,13 @@ void __fastcall TFrmWait::FormClose(TObject *Sender, TCloseAction &Action)
 }
 //---------------------------------------------------------------------------
 
+void __fastcall TFrmWait::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+
+{
+	 if (Key == VK_ESCAPE)
+	 {
+		 Close();
+	 }
+}
+//---------------------------------------------------------------------------
+

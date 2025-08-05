@@ -39,6 +39,7 @@ __published:	// IDE-managed Components
 	void __fastcall tmrTimeoutTimer(TObject *Sender);
 	void __fastcall FormShow(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
+	void __fastcall FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
 
 private:	// User declarations
 	Longint mGoalTime, mTimeToGoal;
