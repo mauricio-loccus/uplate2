@@ -273,12 +273,14 @@
             <BuildOrder>43</BuildOrder>
         </CppCompile>
         <CppCompile Include="unFrmAbout.cpp">
+            <VirtualFolder>{A08290D7-C1D5-43E7-9E39-116A9A76193A}</VirtualFolder>
             <Form>FrmAbout</Form>
             <FormType>dfm</FormType>
             <DependentOn>unFrmAbout.h</DependentOn>
             <BuildOrder>35</BuildOrder>
         </CppCompile>
         <CppCompile Include="unFrmAppLogin.cpp">
+            <VirtualFolder>{A08290D7-C1D5-43E7-9E39-116A9A76193A}</VirtualFolder>
             <Form>FrmAppLogin</Form>
             <FormType>dfm</FormType>
             <DependentOn>unFrmAppLogin.h</DependentOn>
@@ -291,60 +293,70 @@
             <BuildOrder>16</BuildOrder>
         </CppCompile>
         <CppCompile Include="unFrmEditUnities.cpp">
+            <VirtualFolder>{A08290D7-C1D5-43E7-9E39-116A9A76193A}</VirtualFolder>
             <Form>FrmEditUnities</Form>
             <FormType>dfm</FormType>
             <DependentOn>unFrmEditUnities.h</DependentOn>
             <BuildOrder>17</BuildOrder>
         </CppCompile>
         <CppCompile Include="unFrmEditUserData.cpp">
+            <VirtualFolder>{A08290D7-C1D5-43E7-9E39-116A9A76193A}</VirtualFolder>
             <Form>FrmEditUserData</Form>
             <FormType>dfm</FormType>
             <DependentOn>unFrmEditUserData.h</DependentOn>
             <BuildOrder>18</BuildOrder>
         </CppCompile>
         <CppCompile Include="unFrmFiltersEdit.cpp">
+            <VirtualFolder>{A08290D7-C1D5-43E7-9E39-116A9A76193A}</VirtualFolder>
             <Form>FrmFiltersEdit</Form>
             <FormType>dfm</FormType>
             <DependentOn>unFrmFiltersEdit.h</DependentOn>
             <BuildOrder>19</BuildOrder>
         </CppCompile>
         <CppCompile Include="unFrmKineticStatus.cpp">
+            <VirtualFolder>{A08290D7-C1D5-43E7-9E39-116A9A76193A}</VirtualFolder>
             <Form>FrmKineticStatus</Form>
             <FormType>dfm</FormType>
             <DependentOn>unFrmKineticStatus.h</DependentOn>
             <BuildOrder>20</BuildOrder>
         </CppCompile>
         <CppCompile Include="unFrmLabelAssign.cpp">
+            <VirtualFolder>{A08290D7-C1D5-43E7-9E39-116A9A76193A}</VirtualFolder>
             <Form>FrmLabelAssignment</Form>
             <FormType>dfm</FormType>
             <DependentOn>unFrmLabelAssign.h</DependentOn>
             <BuildOrder>44</BuildOrder>
         </CppCompile>
         <CppCompile Include="unFrmMain.cpp">
+            <VirtualFolder>{A08290D7-C1D5-43E7-9E39-116A9A76193A}</VirtualFolder>
             <Form>MainForm</Form>
             <FormType>dfm</FormType>
             <DependentOn>unFrmMain.h</DependentOn>
             <BuildOrder>2</BuildOrder>
         </CppCompile>
         <CppCompile Include="unFrmProtocol.cpp">
+            <VirtualFolder>{A08290D7-C1D5-43E7-9E39-116A9A76193A}</VirtualFolder>
             <Form>FrmProtocol</Form>
             <FormType>dfm</FormType>
             <DependentOn>unFrmProtocol.h</DependentOn>
             <BuildOrder>22</BuildOrder>
         </CppCompile>
         <CppCompile Include="unFrmSimulatedValues.cpp">
+            <VirtualFolder>{A08290D7-C1D5-43E7-9E39-116A9A76193A}</VirtualFolder>
             <Form>FrmSimulatedValues</Form>
             <FormType>dfm</FormType>
             <DependentOn>unFrmSimulatedValues.h</DependentOn>
             <BuildOrder>39</BuildOrder>
         </CppCompile>
         <CppCompile Include="unfrmSplash.cpp">
+            <VirtualFolder>{A08290D7-C1D5-43E7-9E39-116A9A76193A}</VirtualFolder>
             <Form>FrmSplash</Form>
             <FormType>dfm</FormType>
             <DependentOn>unfrmSplash.h</DependentOn>
             <BuildOrder>23</BuildOrder>
         </CppCompile>
         <CppCompile Include="unFrmWait.cpp">
+            <VirtualFolder>{A08290D7-C1D5-43E7-9E39-116A9A76193A}</VirtualFolder>
             <Form>FrmWait</Form>
             <FormType>dfm</FormType>
             <DependentOn>unFrmWait.h</DependentOn>
@@ -470,6 +482,9 @@
                     <Excluded_Packages Name="$(BDSBIN)\bcboffice2k210.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\bcbofficexp210.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
                 </Excluded_Packages>
+                <VFOLDERS>
+                    <VFOLDER ID="{A08290D7-C1D5-43E7-9E39-116A9A76193A}" name="Forms"/>
+                </VFOLDERS>
             </CPlusPlusBuilder.Personality>
             <Deployment Version="4">
                 <DeployFile LocalName="Singleton.inl" Configuration="Debug" Class="ProjectFile">
@@ -897,11 +912,11 @@
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="ProjectOSXDebug">
-                    <Platform Name="OSXARM64">
+                    <Platform Name="OSX64">
                         <RemoteDir>..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
-                    <Platform Name="OSX64">
+                    <Platform Name="OSXARM64">
                         <RemoteDir>..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
