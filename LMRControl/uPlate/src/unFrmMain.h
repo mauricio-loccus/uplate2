@@ -172,9 +172,7 @@ __published:	// IDE-managed Components
 	TLMDGridTextColumn *colUnknownWellID;
 	TLMDTabSheet *tabReadRAW;
 	TLMDGrid *ReadRawGrid;
-	TLMDGridTextColumn *colReadRawCoord;
-	TLMDGridTextColumn *colReadRawType;
-	TLMDGridFloatColumn *colReadRawValue;
+
 	TfrxReport *frxReportRawResult;
 	TfrxUserDataSet *frxUserDataSetResults;
 	TfrxPDFExport *frxPDFExport;
@@ -193,10 +191,7 @@ __published:	// IDE-managed Components
 	TChart *QualitativeZoneChart;
 	TLineSeries *QZone1;
 	TLineSeries *QZone2;
-	TLMDGridTextColumn *colUnknownInterpretValue;
-	TLMDGridTextColumn *colReadRawInterpretValue;
-	TLMDGridFloatColumn *colUnknownConcentrationValue;
-	TLMDGridFloatColumn *colReadRawBlankReducedValue;
+
 	TRadioButton *rbFilterSingle;
 	TRadioButton *rbFilterDouble;
 	TComboBox *cbCalcMethod;
@@ -287,9 +282,7 @@ __published:	// IDE-managed Components
 	TLMDGridFloatColumn *colStdDeviation;
 	TLMDGridFloatColumn *colCoefVariation;
 	TLMDTaskDialog *AskDialog;
-	TLMDGridTextColumn *colUnknownCoord;
-	TLMDGridFloatColumn *colUnknownStdDev;
-	TLMDGridFloatColumn *colUnknownCoefVar;
+
 	TMainMenu *MainMenu;
 	TMenuItem *File1;
 	TMenuItem *OptUserLogin;
@@ -342,6 +335,20 @@ __published:	// IDE-managed Components
 	TComboBox *chbShakeMode;
 	TComboBox *chbReadSpeed;
 	TLabel *lblReadSpeed;
+
+	TLMDGridTextColumn*  colReadRawCoord;
+	TLMDGridTextColumn*  colReadRawType;
+	TLMDGridFloatColumn* colReadRawValue;
+	TLMDGridTextColumn*  colReadRawInterpretValue;
+	TLMDGridFloatColumn* colReadRawBlankReducedValue;
+	TLMDGridTextColumn*  colReadRawLabel;
+	TLMDGridTextColumn*  colUnknownCoord;
+	TLMDGridFloatColumn* colUnknownStdDev;
+	TLMDGridFloatColumn* colUnknownCoefVar;
+	TLMDGridTextColumn*  colUnknownInterpretValue;
+	TLMDGridFloatColumn* colUnknownConcentrationValue;
+	TLMDGridTextColumn*  colUnknownLabel;
+
 	void __fastcall actExitExecute(TObject *Sender);
 	void __fastcall FormCloseQuery(TObject *Sender, bool &CanClose);
 	void __fastcall FormShow(TObject *Sender);
