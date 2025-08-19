@@ -5358,5 +5358,39 @@ void __fastcall TMainForm::FormActivate(TObject *Sender)
         FrmSplash->SetFocus();
 	}
 }
+
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::FormKeyUp(TObject *Sender, WORD &Key, TShiftState Shift)
+
+{
+	if ( toupper(Key) == 'P' && Shift.Contains(ssAlt) )
+	{
+		 actProgramRunExecute(Sender);
+	}
+
+	if ( toupper(Key) == 'I' && Shift.Contains(ssAlt) )
+	{
+		 actLabelAssignment(Sender);
+	}
+}
+
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::AppMessage(tagMSG &Msg, bool &Handled)
+{
+	if (Msg.message == WM_KEYDOWN && Msg.wParam == 'A')
+	{
+		bool ctrl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
+		bool alt  = (GetKeyState(VK_MENU)    & 0x8000) != 0;
+
+		if (ctrl && alt)
+		{
+
+			Handled = true; // opcional: evita propaga��o
+		}
+	}
+}
+
 //---------------------------------------------------------------------------
 

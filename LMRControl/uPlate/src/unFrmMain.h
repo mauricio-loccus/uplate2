@@ -449,7 +449,8 @@ __published:	// IDE-managed Components
 	void __fastcall chbShakeModeChange(TObject *Sender);
 	void __fastcall chbReadSpeedChange(TObject *Sender);
 	void __fastcall FormActivate(TObject *Sender);
-
+	void __fastcall FormKeyUp(TObject *Sender, WORD &Key, TShiftState Shift);
+	void __fastcall AppMessage(tagMSG &Msg, bool &Handled);
 
 public:
 	void __fastcall LoginRequest();
