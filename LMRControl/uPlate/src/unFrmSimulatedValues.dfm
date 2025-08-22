@@ -2,12 +2,11 @@ object FrmSimulatedValues: TFrmSimulatedValues
   AlignWithMargins = True
   Left = 0
   Top = 0
-  AutoSize = True
   BorderIcons = []
-  BorderStyle = bsToolWindow
+  BorderStyle = bsSingle
   Caption = 'Valores'
-  ClientHeight = 275
-  ClientWidth = 848
+  ClientHeight = 290
+  ClientWidth = 872
   Color = clBtnFace
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -21,47 +20,71 @@ object FrmSimulatedValues: TFrmSimulatedValues
   TextHeight = 15
   object btnRandom: TButton
     AlignWithMargins = True
-    Left = 3
-    Top = 247
-    Width = 131
-    Height = 25
-    Caption = 'Valores Aleat'#243'rios'
+    Left = 16
+    Top = 242
+    Width = 191
+    Height = 33
+    Caption = '&Valores Aleat'#243'rios'
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -15
+    Font.Name = 'Arial'
+    Font.Style = []
+    ParentFont = False
     TabOrder = 0
     OnClick = btnRandomClick
   end
   object btnClearValues: TButton
-    Left = 144
-    Top = 247
-    Width = 131
-    Height = 25
-    Caption = 'Zerar Valores'
+    Left = 213
+    Top = 242
+    Width = 191
+    Height = 33
+    Caption = '&Zerar Valores'
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -15
+    Font.Name = 'Arial'
+    Font.Style = []
+    ParentFont = False
     TabOrder = 1
     OnClick = btnClearValuesClick
   end
   object btnClose: TButton
-    Left = 709
-    Top = 247
-    Width = 131
-    Height = 25
-    Caption = 'Fechar'
+    Left = 665
+    Top = 242
+    Width = 191
+    Height = 33
+    Cancel = True
+    Caption = '&Fechar'
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -15
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
     TabOrder = 2
     OnClick = btnCloseClick
   end
   object btnLoadCSV: TButton
-    Left = 281
-    Top = 247
-    Width = 175
-    Height = 25
+    Left = 410
+    Top = 242
+    Width = 191
+    Height = 33
     Caption = 'Carregar valores via CSV'
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -15
+    Font.Name = 'Arial'
+    Font.Style = []
+    ParentFont = False
     TabOrder = 3
     OnClick = btnLoadCSVClick
   end
   object RawValuesGrid: TStringGrid
-    Left = 0
-    Top = 0
-    Width = 848
-    Height = 233
-    Align = alTop
+    Left = 16
+    Top = 16
+    Width = 840
+    Height = 217
     ColCount = 13
     RowCount = 9
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goEditing]
@@ -77,7 +100,7 @@ object FrmSimulatedValues: TFrmSimulatedValues
   object RandGen: TRandGen
     HighBorder = 6.000000000000000000
     Resolution = 100
-    Left = 8
-    Top = 32
+    Left = 616
+    Top = 248
   end
 end
