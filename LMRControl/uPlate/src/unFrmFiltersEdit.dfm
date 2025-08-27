@@ -4,8 +4,8 @@ object FrmFiltersEdit: TFrmFiltersEdit
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Configura'#231#227'o dos Filtros'
-  ClientHeight = 253
-  ClientWidth = 288
+  ClientHeight = 264
+  ClientWidth = 292
   Color = clBtnFace
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -18,8 +18,8 @@ object FrmFiltersEdit: TFrmFiltersEdit
   PixelsPerInch = 96
   TextHeight = 15
   object filtersEditGrid: TLMDGrid
-    Left = 8
-    Top = 8
+    Left = 12
+    Top = 12
     Width = 191
     Height = 237
     Style.EmptyBannerFont.Charset = DEFAULT_CHARSET
@@ -54,17 +54,18 @@ object FrmFiltersEdit: TFrmFiltersEdit
     end
   end
   object btnSave: TButton
-    Left = 205
-    Top = 8
+    Left = 209
+    Top = 12
     Width = 75
     Height = 25
     Caption = '&Salvar'
+    Default = True
     ModalResult = 1
     TabOrder = 1
   end
   object btnCancel: TButton
-    Left = 205
-    Top = 48
+    Left = 209
+    Top = 43
     Width = 75
     Height = 25
     Cancel = True
