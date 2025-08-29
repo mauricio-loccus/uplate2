@@ -2,11 +2,10 @@ object FrmKineticStatus: TFrmKineticStatus
   AlignWithMargins = True
   Left = 0
   Top = 0
-  AutoSize = True
   BorderIcons = []
   BorderStyle = bsToolWindow
   Caption = 'Cin'#233'tica'
-  ClientHeight = 134
+  ClientHeight = 144
   ClientWidth = 382
   Color = clBtnFace
   Font.Charset = ANSI_CHARSET
@@ -25,7 +24,7 @@ object FrmKineticStatus: TFrmKineticStatus
     Left = 3
     Top = 3
     Width = 376
-    Height = 46
+    Height = 33
     Align = alTop
     Alignment = taCenter
     Caption = 'Leitura 1/99'
@@ -35,13 +34,14 @@ object FrmKineticStatus: TFrmKineticStatus
     Font.Name = 'Calibri'
     Font.Style = [fsBold, fsItalic]
     ParentFont = False
+    ExplicitWidth = 138
   end
   object lbTimestamp: TLabel
     AlignWithMargins = True
     Left = 3
-    Top = 55
+    Top = 42
     Width = 376
-    Height = 35
+    Height = 26
     Align = alTop
     Alignment = taCenter
     Font.Charset = ANSI_CHARSET
@@ -50,6 +50,7 @@ object FrmKineticStatus: TFrmKineticStatus
     Font.Name = 'Calibri'
     Font.Style = []
     ParentFont = False
+    ExplicitWidth = 5
   end
   object btnCancel: TButton
     AlignWithMargins = True
@@ -59,6 +60,7 @@ object FrmKineticStatus: TFrmKineticStatus
     Height = 35
     Cancel = True
     Caption = 'Cancelar'
+    Default = True
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -19
