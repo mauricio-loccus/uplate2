@@ -395,10 +395,8 @@ __published:	// IDE-managed Components
 	void __fastcall cbKineticChangeTimeTypeChange(TObject *Sender);
 	void __fastcall acFiltersConfigExecute(TObject *Sender);
 	void __fastcall tabAbsorbanceScrollBoxMouseWheel(TObject *Sender, TShiftState Shift, int WheelDelta, TPoint &MousePos, bool &Handled);
-	void __fastcall tabConcentrationScrollBoxMouseWheel(TObject *Sender, TShiftState Shift, int WheelDelta, TPoint &MousePos,
-		  bool &Handled);
-	void __fastcall tabQualitativeScrollBoxMouseWheel(TObject *Sender, TShiftState Shift, int WheelDelta, TPoint &MousePos,
-		  bool &Handled);
+	void __fastcall tabConcentrationScrollBoxMouseWheel(TObject *Sender, TShiftState Shift, int WheelDelta, TPoint &MousePos, bool &Handled);
+	void __fastcall tabQualitativeScrollBoxMouseWheel(TObject *Sender, TShiftState Shift, int WheelDelta, TPoint &MousePos, bool &Handled);
 	void __fastcall FormMouseWheel(TObject *Sender, TShiftState Shift, int WheelDelta, TPoint &MousePos, bool &Handled);
 	void __fastcall toolbarButtons0Click(TObject *Sender, int index);
 	void __fastcall toolbarButtons1Click(TObject *Sender, int index);
