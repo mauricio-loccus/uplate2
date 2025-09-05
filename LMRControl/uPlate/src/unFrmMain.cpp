@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+ï»¿//---------------------------------------------------------------------------
 #include <vcl.h>
 #include <System.SysUtils.hpp>
 #include <System.IOUtils.hpp>
@@ -588,8 +588,8 @@ void __fastcall TMainForm::registerForDevicesMessages()
 
 void __fastcall TMainForm::OnDeviceChange(TMessage& m)
 {
-	// Este bloco servirá para a detecção de um device USB pluggado.
-	// No caso específico, servirá para mostrar o cursor do mouse sempre que
+	// Este bloco servirÃ¡ para a detecÃ§Ã£o de um device USB pluggado.
+	// No caso especÃ­fico, servirÃ¡ para mostrar o cursor do mouse sempre que
 	// for detectado o inserimento de um mouse usb.
 
 	switch (m.WParam)
@@ -632,7 +632,7 @@ void __fastcall TMainForm::OnDeviceChange(TMessage& m)
 
 				UpdateUi(False);
 
-				throw Exception(TEXT("Comunicação interrompida, perda de comunicação com a leitora."));
+				throw Exception(TEXT("ComunicaÃ§Ã£o interrompida, perda de comunicaÃ§Ã£o com a leitora."));
 			}
 
 			UpdateUi(False);
@@ -763,15 +763,15 @@ void __fastcall TMainForm::actConnectExecute(TObject *Sender)
 		if (!m_deviceSimulated)
 			FrmWait->Show();
 
-		// Escrever código para tornar o botão toggle e conectar ou desconectar o equipamento
-		m_elisaDevice->Connect(AnsiString(commName.c_str()));
+		// Escrever cÃ³digo para tornar o botÃ£o toggle e conectar ou desconectar o equipamento
+		AnsiString commName;
 
 		if (!m_elisaDevice->isAuthenticated)
 		{
 			if (!m_deviceSimulated)
 				FrmWait->Close();
 
-			MessageDlg(_T("µPlate - Nenhum equipamento compatível encontrado."),
+			MessageDlg(_T("ÂµPlate - Nenhum equipamento compatÃ­vel encontrado."),
 					   mtWarning, TMsgDlgButtons() << mbOK, 0);
 
 			actConnect->Enabled = False;
@@ -786,7 +786,7 @@ void __fastcall TMainForm::actConnectExecute(TObject *Sender)
 			if (!m_deviceSimulated)
 			FrmWait->Close();
 
-			MessageDlg(System::Sysutils::Format(_T("Não foi possível conectar ao equipamento.\n Verifique as conexões e tente novamente"),
+			MessageDlg(System::Sysutils::Format(_T("NÃ£o foi possÃ­vel conectar ao equipamento.\n Verifique as conexÃµes e tente novamente"),
 							  ARRAYOFCONST((AnsiString(commName.c_str())))),
 					   mtError, TMsgDlgButtons() << mbOK, 0);
 
@@ -912,7 +912,7 @@ void __fastcall TMainForm::DoProcessBlanks()
 		{
 			TWellMatrix& refMatrix = wellMatrixListRef[i];
 
-			for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)       //exibe corretamente os dados linha/coluna após leitura
+			for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)       //exibe corretamente os dados linha/coluna apï¿½s leitura
 			{
 				WellList& wlRef = refMatrix[row];
 
@@ -939,7 +939,7 @@ void __fastcall TMainForm::DoProcessBlanks()
 	{
 		TWellMatrix& refMatrix = wellMatrixListRef[i];
 
-		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)  //exibe corretamente os dados linha/coluna após leitura
+		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)  //exibe corretamente os dados linha/coluna apï¿½s leitura
 		{
 			for (WellList::iterator it = refMatrix[row].begin(); it != refMatrix[row].end(); it++)
 			{
@@ -1022,13 +1022,13 @@ void __fastcall TMainForm::DoProcessCPnCNs()
 	this->NextDoProcessCPnCNs(kind, wellMatrixListRef);
 	//this->PreviousDoProcessCPnCNs(kind, wellMatrixListRef);
 
-	// Cálculo do limite 1
+	// CÃ¡lculo do limite 1
 	loccusEval.SetExpression(edZone1Limit->Text.w_str());
 	loccusEval.Evaluate();
 	limit1Val = loccusEval.GetCurrValue();
 	lbZone1Limit->Caption = Sysutils::Format(L"Limite Zona 1: %5.5f", ARRAYOFCONST((limit1Val)));
 
-	// Cálculo do limite 2
+	// CÃ¡lculo do limite 2
 	loccusEval.SetExpression(edZone2Limit->Text.w_str());
 	loccusEval.Evaluate();
 	limit2Val = loccusEval.GetCurrValue();
@@ -1038,7 +1038,7 @@ void __fastcall TMainForm::DoProcessCPnCNs()
 	{
 		TWellMatrix& refMatrix = wellMatrixListRef[i];
 
-		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)          //exibe corretamente os dados linha/coluna após leitura
+		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)          //exibe corretamente os dados linha/coluna apï¿½s leitura
 		{
 			TWell& w = refMatrix[row].front();
 
@@ -1131,7 +1131,7 @@ void __fastcall TMainForm::NextDoProcessCPnCNs(TValueKind kind, WellMatrixList& 
 			Summarizes[item->first] = this->WellSummarize(item->second, summarization, kind);
 		}
 
-		// Start : Trecho para debug provisório das variáveis selecionadas
+		// Start : Trecho para debug provisÃ³rio das variÃ¡veis selecionadas
 		String message = "";
 		for(std::map<String, WellListPointers>::iterator item = Wells.begin(); item != Wells.end(); ++item)
 		{
@@ -1234,7 +1234,7 @@ void __fastcall TMainForm::PreviousDoProcessCPnCNs(TValueKind kind, WellMatrixLi
 	Single limit2Val = 0;
 	Double cpAvg = 0, cnAvg = 0, stdAvg = 0;
 
-	// Cálculo de CP
+	// CÃ¡lculo de CP
 	if (!cpWells.empty())
 	{
 		accumulated = 0;
@@ -1248,7 +1248,7 @@ void __fastcall TMainForm::PreviousDoProcessCPnCNs(TValueKind kind, WellMatrixLi
 		cpAvg = accumulated / (Double)cpWells.size();
 	}
 
-	// Cálculo de CN
+	// CÃ¡lculo de CN
 	if (!cnWells.empty())
 	{
 		accumulated = 0;
@@ -1262,7 +1262,7 @@ void __fastcall TMainForm::PreviousDoProcessCPnCNs(TValueKind kind, WellMatrixLi
 		cnAvg = accumulated / (Double)cnWells.size();
 	}
 
-	// Cálculo de STD (Padrões)
+	// CÃ¡lculo de STD (PadrÃµes)
 	if (!stdWells.empty())
 	{
 		accumulated = 0;
@@ -1287,7 +1287,7 @@ void __fastcall TMainForm::PreviousDoProcessCPnCNs(TValueKind kind, WellMatrixLi
 		stdAvg = accumulated / (Double)stdWells.size();
 	}
 
-	// Adicionar variáveis no loccusEval e calcular limites
+	// Adicionar variÃ¡veis no loccusEval e calcular limites
 	if (!cpWells.empty() && !cnWells.empty())
 	{
 		loccusEval.AddVariable(LME::Variable(TEXT("CP"), cpAvg));
@@ -1295,13 +1295,13 @@ void __fastcall TMainForm::PreviousDoProcessCPnCNs(TValueKind kind, WellMatrixLi
 		if (!stdWells.empty())
 			loccusEval.AddVariable(LME::Variable(TEXT("STD"), stdAvg));
 
-		// Cálculo do limite 1
+		// CÃ¡lculo do limite 1
 		loccusEval.SetExpression(edZone1Limit->Text.w_str());
 		loccusEval.Evaluate();
 		limit1Val = loccusEval.GetCurrValue();
 		lbZone1Limit->Caption = Format(_T("Limite Zona 1: %5.5f"), ARRAYOFCONST((limit1Val)));
 
-		// Cálculo do limite 2
+		// CÃ¡lculo do limite 2
 		loccusEval.SetExpression(edZone2Limit->Text.w_str());
 		loccusEval.Evaluate();
 		limit2Val = loccusEval.GetCurrValue();
@@ -1343,7 +1343,7 @@ void __fastcall TMainForm::OldDoProcessCPnCNs()
 	Single limit2Val = 0;
 	Double cpAvg = 0, cnAvg = 0, stdAvg = 0;
 
-	// Cálculo de CP
+	// CÃ¡lculo de CP
 	if (!cpWells.empty())
 	{
 		accumulated = 0;
@@ -1357,7 +1357,7 @@ void __fastcall TMainForm::OldDoProcessCPnCNs()
 		cpAvg = accumulated / (Double)cpWells.size();
 	}
 
-	// Cálculo de CN
+	// CÃ¡lculo de CN
 	if (!cnWells.empty())
 	{
 		accumulated = 0;
@@ -1371,7 +1371,7 @@ void __fastcall TMainForm::OldDoProcessCPnCNs()
 		cnAvg = accumulated / (Double)cnWells.size();
 	}
 
-	// Cálculo de STD (Padrões)
+	// CÃ¡lculo de STD (PadrÃµes)
 	if (!stdWells.empty())
 	{
 		accumulated = 0;
@@ -1385,7 +1385,7 @@ void __fastcall TMainForm::OldDoProcessCPnCNs()
 		stdAvg = accumulated / (Double)stdWells.size();
 	}
 
-	// Adicionar variáveis no loccusEval e calcular limites
+	// Adicionar variÃ¡veis no loccusEval e calcular limites
 	if (!cpWells.empty() && !cnWells.empty())
 	{
 		loccusEval.AddVariable(LME::Variable(TEXT("CP"), cpAvg));
@@ -1393,13 +1393,13 @@ void __fastcall TMainForm::OldDoProcessCPnCNs()
 		if (!stdWells.empty())
 			loccusEval.AddVariable(LME::Variable(TEXT("STD"), stdAvg));
 
-		// Cálculo do limite 1
+		// CÃ¡lculo do limite 1
 		loccusEval.SetExpression(edZone1Limit->Text.w_str());
 		loccusEval.Evaluate();
 		limit1Val = loccusEval.GetCurrValue();
 		lbZone1Limit->Caption = Format(_T("Limite Zona 1: %5.5f"), ARRAYOFCONST((limit1Val)));
 
-		// Cálculo do limite 2
+		// Cï¿½lculo do limite 2
 		loccusEval.SetExpression(edZone2Limit->Text.w_str());
 		loccusEval.Evaluate();
 		limit2Val = loccusEval.GetCurrValue();
@@ -1613,9 +1613,8 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 	m_elisaDeviceParams->Filter2 = cbFilter2->ItemIndex;if ((m_elisaDeviceParams->ReadMode == TElisaReadMode::MultiWaveLength) &&
 		(m_elisaDeviceParams->Filter2 == -1 || (m_elisaDeviceParams->Filter1 == m_elisaDeviceParams->Filter2)))
 	{
-		TaskMessageDlg(TEXT("Atenção"),
-
-					   TEXT("O \"Filtro 2\" deve ser selecionado e deve ser diferente do \"Filtro 1\""),
+		TaskMessageDlg(L"AtenÃ§Ã£o",
+					   L"O \"Filtro 2\" deve ser selecionado e deve ser diferente do \"Filtro 1\"",
 					   mtWarning,
 					   TMsgDlgButtons() << mbOK, 0);
 		return;
@@ -1623,8 +1622,8 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 
 	if (chkbShake->Checked && meShakeDuration->Text.IsEmpty())
 	{
-		TaskMessageDlg(TEXT("Atenção"),
-					   TEXT("O tempo de duração é obrigatório quando a \"Agitação\" está ativada."),
+		TaskMessageDlg(L"AtenÃ§Ã£o",
+					   L"O tempo de duraÃ§Ã£o Ã© obrigatÃ³rio quando a \"AgitaÃ§Ã£o\" estÃ¡ ativada.",
 					   mtWarning,
 					   TMsgDlgButtons() << mbOK, 0);
 		return;
@@ -1633,8 +1632,8 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 	TTime t;
 	if (chkbShake->Checked && !StringToTime(meShakeDuration->Text, t))
 	{
-		TaskMessageDlg(TEXT("Atenção"),
-					   TEXT("Valor para o tempo de agitação inválido"),
+		TaskMessageDlg(L"AtenÃ§Ã£o",
+					   L"Valor para o tempo de agitaÃ§Ã£o invÃ¡lido",
 					   mtWarning,
 					   TMsgDlgButtons() << mbOK, 0);
 		return;
@@ -1643,8 +1642,8 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 	TTime w;
 //	if (!StringToTime(meWaitDuration->Text, w))
 //	{
-//		TaskMessageDlg(TEXT("Atenção"),
-//					   TEXT("Valor para o tempo de espera inválido"),
+//		TaskMessageDlg(TEXT("Atenï¿½ï¿½o"),
+//					   TEXT("Valor para o tempo de espera invï¿½lido"),
 //					   mtWarning,
 //					   TMsgDlgButtons() << mbOK, 0);
 //		return;
@@ -1674,7 +1673,7 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 	{
 		TWellMatrix& wlp = wellMatrixListRef[i];
 
-		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)    //exibe corretamente os dados linha/coluna após leitura
+		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)    //exibe corretamente os dados linha/coluna apï¿½s leitura
 		{
 			TWell& w = wlp[row][0];
 
@@ -1695,9 +1694,9 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 	wellMatrixListRef[0].filterWellsByType(TWellType::wlEmpty, wlEmpty);
 	if (wlEmpty.size() == m_elisaDeviceParams->PlateRows * m_elisaDeviceParams->PlateCols)
 	{
-		TaskMessageDlg(TEXT("Atenção"),
-					   TEXT("Placa vazia! Para realizar um experimento, "
-							"é necessário designar os tipos de leituras na janela \"Placas\"."),
+		TaskMessageDlg(L"AtenÃ§Ã£o",
+					   L"Placa vazia! Para realizar um experimento, "
+					   L"Ã© necessÃ¡rio designar os tipos de leituras na janela \"Placas\".",
 					   mtWarning,
 					   TMsgDlgButtons() << mbOK, 0);
 
@@ -1714,9 +1713,9 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 
 		if (!total)
 		{
-			TaskMessageDlg(TEXT("Atenção"),
-						   TEXT("Foram designados padrões, porém nenhum valor foi adicionado.\n"
-								"Por favor insira os valores antes de continuar."),
+			TaskMessageDlg(L"AtenÃ§Ã£o",
+						   L"Foram designados padrÃµes, porÃ©m nenhum valor foi adicionado.\n"
+						   L"Por favor insira os valores antes de continuar.",
 						   mtWarning,
 						   TMsgDlgButtons() << mbOK, 0);
 
@@ -1727,10 +1726,10 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 	{
 		if (!stdWells.empty())
 		{
-			TaskMessageDlg(TEXT("Atenção"),
-						   TEXT("Não é permitido ler uma placa caso hajam \"Padrões\""
-								" designados e uma curva importada de outro experimento.\n"
-								"Para continuar, primeiro remova os padrões ou inicie um novo Protocolo."),
+			TaskMessageDlg(L"AtenÃ§Ã£o",
+						   L"NÃ£o Ã© permitido ler uma placa caso hajam \"PadrÃµes\""
+						   L" designados e uma curva importada de outro experimento.\n"
+						   L"Para continuar, primeiro remova os padrÃµes ou inicie um novo Protocolo.",
 						   mtWarning,
 						   TMsgDlgButtons() << mbOK, 0);
 
@@ -1744,9 +1743,9 @@ void __fastcall TMainForm::actProgramRunExecute(TObject *Sender)
 		{
 			if (lvKineticTimes->Items->Count < 1)
 			{
-				TaskMessageDlg(TEXT("Atenção"),
-							   TEXT("É necessário ao menos um elemento inserido na lista de "
-									"intervalos de tempo, quando a leitura cinética está selecionada."),
+				TaskMessageDlg(L"AtenÃ§Ã£o",
+							   L"Ã‰ necessÃ¡rio ao menos um elemento inserido na lista de "
+							   L"intervalos de tempo, quando a leitura cinÃ©tica estÃ¡ selecionada.",
 							   mtWarning,
 							   TMsgDlgButtons() << mbOK, 0);
 
@@ -1809,13 +1808,13 @@ void __fastcall TMainForm::DoProcessResults()
 	}
 
 	/**//*************************************
-	 * Lógica para blank
+	 * LÃ³gica para blank
 	 *****************************************/
 	DoProcessBlanks();
 	CalculateForReplicas(TWellType::wlBlank);
 
 	/**//*************************************
-	 * Lógica para Padrões
+	 * LÃ³gica para Padrï¿½es
 	 *****************************************/
 	WellListPointers conclp = wellMatrixListRef.front().filterWellsPointersByType(TWellType::wlConcentrationStd);
 	if (!conclp.empty() || mCurveImported)
@@ -1874,13 +1873,13 @@ void __fastcall TMainForm::DoProcessResults()
 	}
 
 	/**//************************************************
-	 * Lógica para Controle Positivo e Controle Negativo
+	 * LÃ³gica para Controle Positivo e Controle Negativo
 	 ****************************************************/
 	if (!unknownWells.empty())
 		DoProcessCPnCNs();
 
 	/**//*************************************
-	 * Lógica para Quality Control
+	 * LÃ³gica para Quality Control
 	 *****************************************/
 	if (!unknownWells.empty())
 		DoProcessQCs(unknownWells);
@@ -1918,7 +1917,7 @@ for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; ++col)
             if ((*cit)->PlateNumber > i)
                 break;
 
-            // Verifica se o poço atual é o que estamos processando
+			// Verifica se o poÃ§o atual Ã© o que estamos processando
             if ((*cit)->Row == row && (*cit)->Col == col)
 			{
                 String wellInfo;
@@ -1933,7 +1932,7 @@ for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; ++col)
                 unknownsGrid->Cells[colUnknownCoefVar->Position][rowPos] = (*cit)->CoefVariation;
                 unknownsGrid->Cells[colUnknownInterpretValue->Position][rowPos] = (*cit)->Interpret;
 
-				rowPos++; // Incrementa a posição somente após adicionar o poço correspondente
+				rowPos++; // Incrementa a posiÃ§Ã£o somente apÃ³s adicionar o poÃ§o correspondente
             }
         }
     }
@@ -1942,7 +1941,7 @@ for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; ++col)
 	unknownsGrid->EndUpdate();
 
 	/**//*************************************
-	 * Normaliza as réplicas
+	 * Normaliza as rÃ©plicas
 	 *****************************************/
 	rowPos = plateIdx = 0;
 
@@ -1954,7 +1953,7 @@ for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; ++col)
 	ReadRawGrid->BeginUpdate();
 	for (Integer plateNumber = 0; plateNumber < wellMatrixListRef.size(); plateNumber++, plateIdx++)
 	{
-		for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++)      //verificar se há problema no linha/coluna
+		for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; col++)      //verificar se hï¿½ problema no linha/coluna
 		{
 			for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++, rowPos++)
 			{
@@ -2009,10 +2008,11 @@ void __fastcall TMainForm::cbFilter2Change(TObject *Sender)
 {
 	if (cbFilter2->ItemIndex == cbFilter1->ItemIndex)
 	{
-		TaskMessageDlg(TEXT("Valor não permitido"),
-						   TEXT("O Filtro 2 deve ser diferente do Filtro 1!"),
+		TaskMessageDlg(L"Valor nÃ£o permitido",
+					   L"O Filtro 2 deve ser diferente do Filtro 1!",
 						   mtError,
 						   TMsgDlgButtons() << mbCancel, 0);
+
 		cbFilter2->ItemIndex = -1;
 		return;
 	}
@@ -2033,7 +2033,7 @@ void __fastcall TMainForm::OnLMR96ReadDone(TObject *Sender, const RawDataMatrix&
 {
 	TWellMatrix& refMatrix = (*TWellMatrixSingleton::instance())[currMatrix];
 
-	for (RawDataMatrix::size_type row = 0; row < m_elisaDeviceParams->PlateRows; row++)     //exibe corretamente os dados linha/coluna após leitura
+	for (RawDataMatrix::size_type row = 0; row < m_elisaDeviceParams->PlateRows; row++)     //exibe corretamente os dados linha/coluna apï¿½s leitura
 	{
         WellList::iterator it = refMatrix[row].begin();
 
@@ -2079,11 +2079,11 @@ void __fastcall TMainForm::tabStandardsBeforeShowPage(TObject *Sender)
 {
 	stdValuesGrid->Cells[0][0] = "Placa #";
 	stdValuesGrid->ColWidths[0] = 100;
-	stdValuesGrid->Cells[1][0] = "Padrão";
+	stdValuesGrid->Cells[1][0] = "PadrÃ£o";
 	stdValuesGrid->ColWidths[1] = 50;
 	stdValuesGrid->Cells[2][0] = "Valor";
 	stdValuesGrid->ColWidths[2] = 80;
-	stdValuesGrid->Cells[3][0] = "Absorbância";
+	stdValuesGrid->Cells[3][0] = "AbsorbÃ¢ncia";
 	stdValuesGrid->ColWidths[3] = 80;
 
 	lmdstdValuesGrid->DataRowCount = 0;
@@ -2100,7 +2100,7 @@ void __fastcall TMainForm::tabStandardsBeforeShowPage(TObject *Sender)
 
 		Integer row = 0;
 
-		for (cit = mCalibrationCurve->stdValues.begin(); cit != mCalibrationCurve->stdValues.end(); ++cit, row++)  //exibe corretamente os dados linha/coluna após leitura
+		for (cit = mCalibrationCurve->stdValues.begin(); cit != mCalibrationCurve->stdValues.end(); ++cit, row++)  //exibe corretamente os dados linha/coluna apï¿½s leitura
 		{
 			lmdstdValuesGrid->Cells[colStdValue->Position][row]  = cit->second;
 			lmdstdValuesGrid->Cells[colAbsorbance->Position][row] = cit->first;
@@ -2130,7 +2130,7 @@ void __fastcall TMainForm::tabStandardsBeforeShowPage(TObject *Sender)
 		lmdstdValuesGrid->DataRowCount += wl.size();
 		stdValuesGrid->RowCount += wl.size()-1;
 
-		for (WellList::const_iterator cit = wl.begin(); cit != wl.end(); ++cit, row++)   //exibe corretamente os dados linha/coluna após leitura
+		for (WellList::const_iterator cit = wl.begin(); cit != wl.end(); ++cit, row++)   //exibe corretamente os dados linha/coluna apï¿½s leitura
 		{
 			stdValuesGrid->Cells[0][row+1] = getNode(matIndex+101)->Text;
 			stdValuesGrid->Cells[1][row+1] = cit->ID;
@@ -2153,7 +2153,7 @@ void __fastcall TMainForm::colStdValueParse(TObject *Grid, TLMDGridColumn *Colum
 		return;
 
 	if (!ParsedOk)
-		throw new Exception("Valor inserido inválido.");
+		throw new Exception("Valor inserido invï¿½lido.");
 
 	WellMatrixList& wellMatrixListRef = *TWellMatrixSingleton::instance();
 
@@ -2486,11 +2486,11 @@ void __fastcall TMainForm::cbChartScaleChange(TObject *Sender)
 				{
 					String reason;
 
-					reason.sprintf(TEXT("Para curva Logarítmica os eixos Y (%5.3f) e "
-										"X (%5.3f) devem conter valore maiores de 0."),
+					reason.sprintf(L"Para curva Logarï¿½tmica os eixos Y (%5.3f) e "
+								   L"X (%5.3f) devem conter valore maiores de 0.",
 										stdCurveChart->LeftAxis->Minimum, stdCurveChart->LeftAxis->Maximum);
 
-					TaskMessageDlg(TEXT("Atenção"),
+					TaskMessageDlg(L"AtenÃ§Ã£o",
 								   reason,
                                    mtWarning,
                                    TMsgDlgButtons() << mbOK, 0);
@@ -2516,11 +2516,11 @@ void __fastcall TMainForm::cbChartScaleChange(TObject *Sender)
 				{
 					String reason;
 
-					reason.sprintf(TEXT("Para curva Logarítmica os eixos Y (%5.3f) e "
-										"X (%5.3f) devem conter valore maiores de 0."),
+					reason.sprintf(L"Para curva LogarÃ­tmica os eixos Y (%5.3f) e "
+								   L"X (%5.3f) devem conter valore maiores de 0.",
 										stdCurveChart->LeftAxis->Minimum, stdCurveChart->LeftAxis->Maximum);
 
-					TaskMessageDlg(TEXT("Atenção"),
+					TaskMessageDlg(L"AtenÃ§Ã£o",
 								   reason,
                                    mtWarning,
                                    TMsgDlgButtons() << mbOK, 0);
@@ -3111,7 +3111,7 @@ void __fastcall TMainForm::OptUserLoginClick(TObject *Sender)
 {
 	if (UserLogged())
 	{
-		MessageDlg("Existe um usuário ainda logado. Por favor, faça \"Logoff\" antes.",
+		MessageDlg("Existe um usuï¿½rio ainda logado. Por favor, faï¿½a \"Logoff\" antes.",
 				   mtInformation, TMsgDlgButtons() << mbOK, 0);
 
 		return;
@@ -3189,7 +3189,7 @@ void __fastcall TMainForm::LoadSetupBranch(_di_IXMLNode ProtoNode)
     if (!ReadModeNode || !ReadModeNode->HasChildNodes)
     {
         TaskMessageDlg("Carregamento de Protocolo",
-                       "Formato do arquivo inválido ou corrompido. Tag \"ReadMode\" não encontrada.",
+                       "Formato do arquivo invï¿½lido ou corrompido. Tag \"ReadMode\" nï¿½o encontrada.",
                        mtError,
                        TMsgDlgButtons() << mbOK, 0);
 
@@ -3268,21 +3268,21 @@ _di_IXMLNode FiltersNode = ProtoNode->ChildNodes->FindNode("Filters");
 
 if (FiltersNode && FiltersNode->HasChildNodes)
 {
-    // Configurar o estado dos botões primeiro
+    // Configurar o estado dos botÃµes primeiro
     xmlNode = FiltersNode->ChildNodes->FindNode("Single");
     rbFilterSingle->Checked = xmlNode && xmlNode->NodeValue == "true";
 
     xmlNode = FiltersNode->ChildNodes->FindNode("Double");
     rbFilterDouble->Checked = xmlNode && xmlNode->NodeValue == "true";
 
-    // Chamar o evento correspondente para garantir a configuração correta
+    // Chamar o evento correspondente para garantir a configuraÃ§Ã£o correta
     if (rbFilterDouble->Checked)
     {
-        rbFilterDoubleClick(this); // Garante que o modo Double é ativado corretamente
+        rbFilterDoubleClick(this); // Garante que o modo Double Ã© ativado corretamente
     }
     else if (rbFilterSingle->Checked)
     {
-        rbFilterSingleClick(this); // Configura o modo Single, se necessário
+        rbFilterSingleClick(this); // Configura o modo Single, se necessÃ¡rio
     }
 
     // Preencher os comboboxes
@@ -3607,7 +3607,7 @@ void __fastcall TMainForm::LoadPlatesBranch(_di_IXMLNode PlatesNode)
 
 		_di_IXMLNode wellNode = layoutNode->ChildNodes->FindNode("Well");
 
-		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows;  row++)      //iteração para preencher std values do experimento
+		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows;  row++)      //iteraï¿½ï¿½o para preencher std values do experimento
 		{
 			WellList& wl = refWellMatrix[row];
 
@@ -3699,7 +3699,7 @@ void __fastcall TMainForm::OneShotTimerTimer(TObject *Sender)
 
 	if (commNames.empty())
 	{
-		MessageDlg(_T("µPlate - Nenhum equipamento compatível encontrado."),
+		MessageDlg(_T("ÂµPlate - Nenhum equipamento compatÃ­vel encontrado."),
 				   mtWarning, TMsgDlgButtons() << mbOK, 0);
 
 		toolbar->Buttons->Items[0]->Enabled = False;
@@ -3772,7 +3772,7 @@ void __fastcall TMainForm::LoadResultsBranch(_di_IXMLNode ResultsNode)
 		return;
     }
 
-	// Configurações de formato para garantir o ponto como separador decimal
+	// Configuraï¿½ï¿½es de formato para garantir o ponto como separador decimal
     TFormatSettings fs;
     GetLocaleFormatSettings(LOCALE_USER_DEFAULT, fs);
     fs.DecimalSeparator = '.';
@@ -3794,7 +3794,7 @@ void __fastcall TMainForm::LoadResultsBranch(_di_IXMLNode ResultsNode)
                 {
 						String rawValueStr = rawValueNode->NodeValue;
 
-// Normaliza o separador decimal conforme a configuração do software
+// Normaliza o separador decimal conforme a configuraï¿½ï¿½o do software
 if (fs.DecimalSeparator == ',')
 {
     rawValueStr = StringReplace(rawValueStr, ".", ",", TReplaceFlags() << rfReplaceAll);
@@ -3811,7 +3811,7 @@ try
 					catch (const EConvertError& e)
 					{
 						ShowMessage("Erro ao converter RawValue: " + rawValueNode->NodeValue);
-						it->RawValue = 0.0; // Define um valor padrão em caso de erro
+						it->RawValue = 0.0; // Define um valor padrï¿½o em caso de erro
                     }
 				}
 
@@ -3899,7 +3899,7 @@ void __fastcall TMainForm::FillResultsList()
     for (Integer i = 0; i < tabAbsorbanceScrollBox->ControlCount; i++)
     {
         TPicture *resultImg = ResultPlateToImage(dynamic_cast<TWellResult *>(tabAbsorbanceScrollBox->Controls[i]));
-        ResultPair pair = std::make_pair<String, TPicture *>(TEXT("Absorbância"), resultImg);
+        ResultPair pair = std::make_pair<String, TPicture *>(TEXT("Absorbï¿½ncia"), resultImg);
 
         mResultsList.push_back(pair);
     }
@@ -3907,7 +3907,7 @@ void __fastcall TMainForm::FillResultsList()
     for (Integer i = 0; i < tabConcentrationScrollBox->ControlCount; i++)
     {
         TPicture *resultImg = ResultPlateToImage(dynamic_cast<TWellResult *>(tabConcentrationScrollBox->Controls[i]));
-        ResultPair pair = std::make_pair<String, TPicture *>(TEXT("Concentração"), resultImg);
+        ResultPair pair = std::make_pair<String, TPicture *>(TEXT("Concentraï¿½ï¿½o"), resultImg);
 
         mResultsList.push_back(pair);
     }
@@ -4237,7 +4237,7 @@ void __fastcall TMainForm::frxUserDataSetUnknowsGetValue(const UnicodeString Var
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::acResultUnknowsExecute(TObject *Sender)      // exportar Relatório de Desconhecidos
+void __fastcall TMainForm::acResultUnknowsExecute(TObject *Sender)      // exportar Relatï¿½rio de Desconhecidos
 {
 	frxUserDataSetUnknows->RangeEndCount = unknownsGrid->DataRowCount;
 	frxReportUnknows->PrepareReport();
@@ -4367,9 +4367,9 @@ void __fastcall TMainForm::acExperimentImportCalibrationExecute(TObject *Sender)
 
     if (!wl.empty())
     {
-		TaskMessageDlg(TEXT("Carregamento da curva de calibração"),
-					   TEXT("Não é permitido importar a curva de calibração em placas que contenham \"Padrões\".\n")
-                       TEXT("Para continuar, remova os padrões da placa e tente novamente."),
+		TaskMessageDlg(L"Carregamento da curva de calibraÃ§Ã£o",
+					   L"NÃ£o Ã© permitido importar a curva de calibraÃ§Ã£o em placas que contenham \"PadrÃµes\".\n"
+					   L"Para continuar, remova os padrÃµes da placa e tente novamente.",
                        mtWarning,
                        TMsgDlgButtons() << mbOK, 0);
 
@@ -4401,7 +4401,7 @@ void __fastcall TMainForm::acExperimentImportCalibrationExecute(TObject *Sender)
 
 	TOpenTextFileDialog *FileOpenDialog = new TOpenTextFileDialog(this);
 
-	FileOpenDialog->Title = TEXT("Carregar curva de calibração.");
+	FileOpenDialog->Title = TEXT("Carregar curva de calibraï¿½ï¿½o.");
 	FileOpenDialog->Filter = TEXT("Arquivo de experimento (*.expr)|*.expr");
 	FileOpenDialog->DefaultExt = TEXT(".expr");
 	FileOpenDialog->InitialDir = AppDataDir;
@@ -4424,8 +4424,8 @@ void __fastcall TMainForm::acExperimentImportCalibrationExecute(TObject *Sender)
 
 	if (!ExperimentNode)
 	{
-		TaskMessageDlg(TEXT("Carregamento da curva de calibração"),
-					   TEXT("Formato do arquivo inválido ou corrompido. Tag \"Experiment\" não encontrada."),
+		TaskMessageDlg(L"Carregamento da curva de calibraÃ§Ã£o",
+					   L"Formato do arquivo invÃ¡lido ou corrompido. Tag \"Experiment\" nÃ£o encontrada.",
 					   mtError,
 					   TMsgDlgButtons() << mbOK, 0);
 
@@ -4436,8 +4436,8 @@ void __fastcall TMainForm::acExperimentImportCalibrationExecute(TObject *Sender)
 
 	if (!CalibrationNode)
 	{
-		TaskMessageDlg(TEXT("Carregamento da curva de calibração"),
-					   TEXT("O experimento não contém curva de calibração."),
+		TaskMessageDlg(L"Carregamento da curva de calibraÃ§Ã£o",
+					   L"O experimento nÃ£o contÃ©m curva de calibraÃ§Ã£o.",
 					   mtError,
 					   TMsgDlgButtons() << mbOK, 0);
 
@@ -4448,18 +4448,18 @@ void __fastcall TMainForm::acExperimentImportCalibrationExecute(TObject *Sender)
 
 	if (!TimestampNode)
 	{
-		TaskMessageDlg(TEXT("Carregamento da curva de calibração"),
-					   TEXT("Formato do arquivo inválido ou corrompido. Tag \"CreationDate\" não encontrada."),
+		TaskMessageDlg(L"Carregamento da curva de calibraÃ§Ã£o",
+					   L"Formato do arquivo invï¿½lido ou corrompido. Tag \"CreationDate\" nÃ£o encontrada.",
 					   mtError,
 					   TMsgDlgButtons() << mbOK, 0);
 
 		return;
 	}
 
-	AskDialog->Title = TEXT("Carregamento da curva de calibração");
-	AskDialog->Content = TEXT("A curva de calibração que está sendo importada foi criada em ") +
+	AskDialog->Title   = L"Carregamento da curva de calibraÃ§Ã£o";
+	AskDialog->Content = L"A curva de calibraÃ§Ã£o que estÃ¡ sendo importada foi criada em " +
 						 TimestampNode->Text +
-						 TEXT(".\nOs resultados correm o risco de não serem precisos, deseja continuar?");
+						 L".\nOs resultados correm o risco de nÃ£o serem precisos, deseja continuar?";
 
 	AskDialog->Execute();
 
@@ -4518,8 +4518,8 @@ Boolean __fastcall TMainForm::LoadCurveBranch(_di_IXMLNode Node)
 	_di_IXMLNode creationNode = Node->ChildNodes->FindNode("CreationDate");
     if (!TryStrToDateTime(creationNode->Text, mCalibrationCurve->timestamp))
     {
-		TaskMessageDlg(TEXT("Carregamento de curva de calibração"),
-					   TEXT("Formato do arquivo inválido ou corrompido. Tag \"CreationDate\" inválido."),
+		TaskMessageDlg(TEXT("Carregamento de curva de calibraï¿½ï¿½o"),
+					   TEXT("Formato do arquivo invï¿½lido ou corrompido. Tag \"CreationDate\" invï¿½lido."),
                        mtError,
                        TMsgDlgButtons() << mbOK, 0);
 
@@ -4641,7 +4641,7 @@ void __fastcall TMainForm::acLoadExperimentExecute(TObject *Sender)
     if (!ExperimentNode)
     {
 		TaskMessageDlg("Carregamento de Experimento",
-                       "Formato do arquivo inválido ou corrompido. Tag \"Experiment\" não encontrada.",
+                       "Formato do arquivo invï¿½lido ou corrompido. Tag \"Experiment\" nï¿½o encontrada.",
                        mtError,
                        TMsgDlgButtons() << mbOK, 0);
 
@@ -4653,7 +4653,7 @@ void __fastcall TMainForm::acLoadExperimentExecute(TObject *Sender)
     if (!ProtoNode)
     {
 		TaskMessageDlg("Carregamento de Experimento",
-                       "Formato do arquivo inválido ou corrompido. Tag \"Protocol\" não encontrada.",
+                       "Formato do arquivo invï¿½lido ou corrompido. Tag \"Protocol\" nï¿½o encontrada.",
                        mtError,
                        TMsgDlgButtons() << mbOK, 0);
 
@@ -4768,7 +4768,7 @@ void __fastcall TMainForm::acLoadProtocolExecute(TObject *Sender)
 	if (!ProtoNode)
 	{
 		TaskMessageDlg("Carregamento de Protocolo",
-					   "Formato do arquivo inválido ou corrompido. Tag \"Protocol\" não encontrada.",
+					   "Formato do arquivo invï¿½lido ou corrompido. Tag \"Protocol\" nï¿½o encontrada.",
 					   mtError,
 					   TMsgDlgButtons() << mbOK, 0);
 
@@ -4987,17 +4987,25 @@ void __fastcall TMainForm::acExperimentExportCsvExecute(TObject *Sender)
 	csvStringList->Delimiter = ';';
 	csvStringList->QuoteChar = '"';
 
-	if (mpAppConfig->HeadersInCsv)         // configurações de exportação - RESULTADOS DE LEITURA
+	if (mpAppConfig->HeadersInCsv)         // configuraï¿½ï¿½es de exportaï¿½ï¿½o - RESULTADOS DE LEITURA
+	if (mpAppConfig->HeadersInCsv)         // configuraÃ§Ãµes de exportaÃ§Ã£o - RESULTADOS DE LEITURA
 	{
 		csvStringList->Add("Placa");
-		csvStringList->Add("Posição");
+		csvStringList->Add("Posiï¿½ï¿½o");
+		csvStringList->Add("PosiÃ§Ã£o");
 		csvStringList->Add("Tipo");
-		csvStringList->Add("Absorbância Bruta");
-		csvStringList->Add("Absorbância Processada");
-		csvStringList->Add("Concentração");
-		csvStringList->Add("Desvio Padrão");
-		csvStringList->Add("Coef. Variação");
-		csvStringList->Add("Interpretação");
+		csvStringList->Add("Absorbï¿½ncia Bruta");
+		csvStringList->Add("Absorbï¿½ncia Processada");
+		csvStringList->Add("Concentraï¿½ï¿½o");
+		csvStringList->Add("Desvio Padrï¿½o");
+		csvStringList->Add("Coef. Variaï¿½ï¿½o");
+		csvStringList->Add("Interpretaï¿½ï¿½o");
+		csvStringList->Add("AbsorbÃ¢ncia Bruta");
+		csvStringList->Add("AbsorbÃ¢ncia Processada");
+		csvStringList->Add("ConcentraÃ§Ã£o");
+		csvStringList->Add("Desvio PadrÃ£o");
+		csvStringList->Add("Coef. VariaÃ§Ã£o");
+		csvStringList->Add("InterpretaÃ§Ã£o");
 		csvStringList->Add("Momento Leitura");
 
 		vectCSVList.push_back(csvStringList->DelimitedText);
@@ -5022,14 +5030,15 @@ void __fastcall TMainForm::acExperimentExportCsvExecute(TObject *Sender)
 				  wellInfo.sprintf(TEXT("%c%d"), row + 'A', col + 1);
 
 				  csvStringList->Add(getNode(plateIdx + 101)->Text); // Nome da placa
-				  csvStringList->Add(wellInfo);                     // Informação da posição
-				  csvStringList->Add(w.typeToString());             // Tipo do poço
-				  csvStringList->Add(FloatToStrF(w.RawValue, ffFixed, 6, 3)); // Absorbância Bruta
-				  csvStringList->Add(FloatToStrF(w.RawBlankReducedValue, ffFixed, 6, 3)); // Absorbância Processada
-				  csvStringList->Add(FloatToStrF(w.ConcentrationValue, ffFixed, 6, 3)); // Concentração
-				  csvStringList->Add(FloatToStrF(w.StdDeviation, ffFixed, 6, 3));       // Desvio Padrão
-				  csvStringList->Add(FloatToStrF(w.CoefVariation, ffFixed, 3, 2));     // Coef. Variação
-				  csvStringList->Add(VarToStr(w.Interpret));                           // Interpretação
+				  csvStringList->Add(wellInfo);                                           // InformaÃ§Ã£o da posiÃ§Ã£o
+				  csvStringList->Add(w.typeToString());                                   // Tipo do poÃ§o
+				  csvStringList->Add(w.Label);                                            // RÃ³tulo do poÃ§o     (Sample ID) 
+				  csvStringList->Add(FloatToStrF(w.RawValue, ffFixed, 6, 3));             // AbsorbÃ¢ncia Bruta
+				  csvStringList->Add(FloatToStrF(w.RawBlankReducedValue, ffFixed, 6, 3)); // AbsorbÃ¢ncia Processada
+				  csvStringList->Add(FloatToStrF(w.ConcentrationValue, ffFixed, 6, 3));   // ConcentraÃ§Ã£o
+				  csvStringList->Add(FloatToStrF(w.StdDeviation, ffFixed, 6, 3));         // Desvio PadrÃ£o
+				  csvStringList->Add(FloatToStrF(w.CoefVariation, ffFixed, 3, 2));        // Coef. VariaÃ§Ã£o
+				  csvStringList->Add(VarToStr(w.Interpret));                              // InterpretaÃ§Ã£o
 				  csvStringList->Add(FormatDateTime("hh:nn:ss", w.Timestamp));         // Momento de Leitura
 
             vectCSVList.push_back(csvStringList->DelimitedText);
@@ -5094,11 +5103,11 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 
 	LongWord fmOption = fmCreate | fmShareDenyWrite;
 
-	// Se o arquivo já existe, deletamos para evitar sobrescrita errada
+	// Se o arquivo jï¿½ existe, deletamos para evitar sobrescrita errada
 	if (FileExists(rawFileName))
 		DeleteFile(rawFileName);
 
-	// Abrir o arquivo uma única vez em modo de adição (fmOpenWrite | fmShareDenyWrite)
+	// Abrir o arquivo uma ï¿½nica vez em modo de adiï¿½ï¿½o (fmOpenWrite | fmShareDenyWrite)
 	TStreamWriter *fStream = new TStreamWriter(new TFileStream(rawFileName, fmCreate | fmShareDenyWrite), TEncoding::Unicode, 1024);
 
 	WideChar decSeparator = FormatSettings.DecimalSeparator;
@@ -5136,7 +5145,7 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 			csvStringList->Clear();
 		}
 
-		// Adiciona as informações extras após a tabela
+		// Adiciona as informaï¿½ï¿½es extras apï¿½s a tabela
 		String plateName = StringReplace(getNode(plateIdx + 101)->Text, " ", "_", TReplaceFlags() << rfReplaceAll);
 		String author = mpAppConfig->UserLogin;
 		String filter1 = "";
@@ -5158,14 +5167,14 @@ void __fastcall TMainForm::acExportRawValuesExecute(TObject *Sender)
 		vectCSVList.push_back(TEXT("Data: ") + tStamp.FormatString("yyyy/MM/dd"));
 		vectCSVList.push_back(TEXT("Hora: ") + tStamp.FormatString("hh:nn:ss"));
 
-		// Escreve no arquivo (sem reabrir em cada iteração!)
+		// Escreve no arquivo (sem reabrir em cada iteraï¿½ï¿½o!)
 		for (std::vector<String>::size_type i = 0; i < vectCSVList.size(); i++)
 			fStream->WriteLine(vectCSVList[i]);
 
 		vectCSVList.clear();
 	}
 
-	// Fecha o arquivo após todo o loop
+	// Fecha o arquivo apï¿½s todo o loop
 	fStream->Close();
 	fStream->BaseStream->Free();
 	fStream->Free();
@@ -5314,7 +5323,7 @@ void __fastcall TMainForm::stdValuesGridSetEditText(TObject *Sender, int ACol, i
 		}
 		catch (const EConvertError& e)
 		{
-			TaskMessageDlg(TEXT("Valor não permitido"),
+			TaskMessageDlg(TEXT("Valor nï¿½o permitido"),
 						   TEXT("Por favor verifique o separador decimal configurado."),
 						   mtError,
 						   TMsgDlgButtons() << mbOK, 0);
