@@ -330,6 +330,8 @@ __published:	// IDE-managed Components
 	TAction *acExperimentImportCalibration;
 	TAction *actExit;
 	TAction *acExportRawValues;
+	TAction *actInputLabels;
+
 	TStringGrid *stdValuesGrid;
 	TLabel *lblShakeMode;
 	TComboBox *chbShakeMode;
@@ -398,11 +400,7 @@ __published:	// IDE-managed Components
 	void __fastcall tabConcentrationScrollBoxMouseWheel(TObject *Sender, TShiftState Shift, int WheelDelta, TPoint &MousePos, bool &Handled);
 	void __fastcall tabQualitativeScrollBoxMouseWheel(TObject *Sender, TShiftState Shift, int WheelDelta, TPoint &MousePos, bool &Handled);
 	void __fastcall FormMouseWheel(TObject *Sender, TShiftState Shift, int WheelDelta, TPoint &MousePos, bool &Handled);
-	void __fastcall toolbarButtons0Click(TObject *Sender, int index);
-	void __fastcall toolbarButtons1Click(TObject *Sender, int index);
-	void __fastcall toolbarButtons2Click(TObject *Sender, int index);
-	void __fastcall toolbarButtons3Click(TObject *Sender, int index);
-	void __fastcall toolbarButtons4Click(TObject *Sender, int index);
+	void __fastcall toolbarButtonsClick(TObject *Sender, int index);
 	void __fastcall OptUserLoginClick(TObject *Sender);
 	void __fastcall OptUserLogoffClick(TObject *Sender);
 	void __fastcall OneShotTimerTimer(TObject *Sender);
@@ -509,11 +507,11 @@ private:	// User declarations
 	Boolean __fastcall UserLogon();
 	Boolean __fastcall UserLogoff();
 
-	void __fastcall treeviewAddPlateNode(TTreeNodes *Node);
-	void __fastcall treeviewRemovePlateNode(TTreeNode *Node);
-	TTreeNode * __fastcall getNode(Integer index, TTreeNode *parent = NULL) const;
-	TTreeNode * __fastcall getNode(String name, TTreeNode *parent = NULL) const;
-	void __fastcall setNodeEnabled(TTreeNode *node, Boolean enabled = True);
+	void       __fastcall treeviewAddPlateNode(TTreeNodes *Node);
+	void       __fastcall treeviewRemovePlateNode(TTreeNode *Node);
+	TTreeNode* __fastcall getNode(Integer index, TTreeNode *parent = NULL) const;
+	TTreeNode* __fastcall getNode(String name, TTreeNode *parent = NULL) const;
+	void       __fastcall setNodeEnabled(TTreeNode *node, Boolean enabled = True);
 
 	void __fastcall UpdatePlatesNames();
 
@@ -542,9 +540,9 @@ private:	// User declarations
 		return mpAppConfig->UserID != -1;
 	}
 
-    void __fastcall WndProc(TMessage& message);
+	void __fastcall WndProc(TMessage& message);
 
-    void __fastcall FillResultsList();
+	void __fastcall FillResultsList();
 
 	void __fastcall registerForDevicesMessages();
 	virtual void __fastcall OnDeviceChange(TMessage& m);
@@ -554,8 +552,8 @@ private:	// User declarations
 
 	void __fastcall InitAll();
 
-    void __fastcall FillUnitiesComboBox();
-    void __fastcall FillFiltersComboBox();
+	void __fastcall FillUnitiesComboBox();
+	void __fastcall FillFiltersComboBox();
 
 	void __fastcall InitSetup();
 	void __fastcall LoadSetupBranch(_di_IXMLNode ProtoNode);
@@ -565,7 +563,7 @@ private:	// User declarations
 	void __fastcall CreatePlatesBranch(_di_IXMLNode PatesNode);
 
 	void __fastcall CreateCurveBranch(_di_IXMLNode Node);
-    Boolean __fastcall LoadCurveBranch(_di_IXMLNode Node);
+	Boolean __fastcall LoadCurveBranch(_di_IXMLNode Node);
 
 	void __fastcall InitLayout();
 
@@ -574,7 +572,7 @@ private:	// User declarations
 	void __fastcall LoadResultsBranch(_di_IXMLNode ResultsNode);
 	void __fastcall CreateResultsBranch(_di_IXMLNode ResultsNode);
 
-    void __fastcall CalculateForReplicas(const TWellType type);
+	void __fastcall CalculateForReplicas(const TWellType type);
 
 public:		// User declarations
 	__fastcall TMainForm(TComponent* Owner);

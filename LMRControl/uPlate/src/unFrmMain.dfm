@@ -1668,7 +1668,7 @@ object MainForm: TMainForm
     ParentColor = True
     Buttons = <
       item
-        Hint = 'Connectar ao equipamento (Ctrl-C)'
+        Hint = 'Connectar ao equipamento (Ctrl+C)'
         ParentFont = False
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -1681,7 +1681,7 @@ object MainForm: TMainForm
         ImageList = MyDataModule.pngImageList
         ImageIndex = 30
         ListIndex = 0
-        OnClick = toolbarButtons0Click
+        OnClick = toolbarButtonsClick
         UsePngGlyph = False
         Width = 54
         Height = 53
@@ -1702,14 +1702,14 @@ object MainForm: TMainForm
         ImageList = MyDataModule.pngImageList
         ImageIndex = 31
         ListIndex = 0
-        OnClick = toolbarButtons1Click
+        OnClick = toolbarButtonsClick
         UsePngGlyph = False
         Width = 54
         Height = 53
         Margin = 1
       end
       item
-        Hint = 'Executa uma leitura (Ctrl-R)'
+        Hint = 'Executa uma leitura (Ctrl+R)'
         Enabled = False
         ParentFont = False
         Font.Charset = DEFAULT_CHARSET
@@ -1723,14 +1723,14 @@ object MainForm: TMainForm
         ImageList = MyDataModule.pngImageList
         ImageIndex = 32
         ListIndex = 0
-        OnClick = toolbarButtons2Click
+        OnClick = toolbarButtonsClick
         UsePngGlyph = False
         Width = 54
         Height = 53
         Margin = 1
       end
       item
-        Hint = 'Abre/Fecha porta frontal.'
+        Hint = 'Alterma abertura porta frontal (Ctrl+P)'
         Enabled = False
         ParentFont = False
         Font.Charset = DEFAULT_CHARSET
@@ -1744,14 +1744,14 @@ object MainForm: TMainForm
         ImageList = MyDataModule.pngImageList
         ImageIndex = 33
         ListIndex = 0
-        OnClick = toolbarButtons3Click
+        OnClick = toolbarButtonsClick
         UsePngGlyph = False
         Width = 54
         Height = 53
         Margin = 1
       end
       item
-        Hint = 'Inicia entrada de R'#243'tulos'
+        Hint = 'Inicia entrada de Sample ID'#39's'
         ParentFont = False
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -1764,7 +1764,7 @@ object MainForm: TMainForm
         ImageList = MyDataModule.pngImageList
         ImageIndex = 3
         ListIndex = 0
-        OnClick = toolbarButtons4Click
+        OnClick = toolbarButtonsClick
         UsePngGlyph = False
         Width = 54
         Height = 53
@@ -8849,8 +8849,8 @@ object MainForm: TMainForm
     object actOpenCloseDoor: TAction
       Caption = 'Open/Close Door'
       Enabled = False
-      Hint = 'Abre/Fecha porta frontal.'
       ImageIndex = 33
+      ShortCut = 16464
       OnExecute = actOpenCloseDoorExecute
     end
     object acFiltersConfig: TAction
@@ -8894,6 +8894,11 @@ object MainForm: TMainForm
     object acExportRawValues: TAction
       Caption = 'Exportar Valores Brutos'
       OnExecute = acExportRawValuesExecute
+    end
+    object actInputLabels: TAction
+      Caption = 'Entrada de R'#243'tulos'
+      ImageIndex = 3
+      ShortCut = 16457
     end
   end
 end

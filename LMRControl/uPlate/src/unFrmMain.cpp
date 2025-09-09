@@ -3025,33 +3025,38 @@ TPicture * __fastcall TMainForm::ResultPlateToImage(TWellResult *pWellResult)
 	return picture;
 }
 
-void __fastcall TMainForm::toolbarButtons0Click(TObject *Sender, int index)
-{
-	actConnectExecute(Sender);
-}
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::toolbarButtons1Click(TObject *Sender, int index)
+void __fastcall TMainForm::toolbarButtonsClick(TObject *Sender, int index)
 {
+	switch (index)
+	{
+
+		case 0:
+			actConnectExecute(Sender);
+			break;
+
+		case 1:
 	actDisconnectExecute(Sender);
-}
-//---------------------------------------------------------------------------
+			break;
 
-void __fastcall TMainForm::toolbarButtons2Click(TObject *Sender, int index)
-{
+		case 2:
 	actProgramRunExecute(Sender);
-}
-//---------------------------------------------------------------------------
+			break;
 
-void __fastcall TMainForm::toolbarButtons3Click(TObject *Sender, int index)
-{
+		case 3:
 	actOpenCloseDoorExecute(Sender);
-}
-//---------------------------------------------------------------------------
+			break;
 
-void __fastcall TMainForm::toolbarButtons4Click(TObject *Sender, int index)
-{
+		case 4:
 	actLabelAssignment(Sender);
+			break;
+
+		default:
+			break;
+
+	}
+
 }
 
 //---------------------------------------------------------------------------
