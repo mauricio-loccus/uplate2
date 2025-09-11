@@ -19,16 +19,17 @@
 class TFrmLabelAssignment : public TForm
 {
 __published:	// IDE-managed Components
-	TButton*             btnClose;
+	TButton*             bApply;
+	TButton*             bRevert;
 	TButton*             btnImport;
 	TStringGrid*         LabelGrid;
 	TTabSet*             tsPlates;
 	TOpenTextFileDialog* FileOpenDialog;
-	TTaskDialog *TaskDialog;
-	TButton *Button1;
+	TTaskDialog*         TaskDialog;
 
 	void __fastcall FormCreate(TObject *Sender);
-	void __fastcall btnCloseClick(TObject *Sender);
+	void __fastcall bApplyClick(TObject *Sender);
+	void __fastcall bRevertClick(TObject *Sender);
 	void __fastcall btnImportClick(TObject *Sender);
 	void __fastcall tsPlatesChange(TObject *Sender, int NewTab, bool &AllowChange);
 
@@ -36,20 +37,37 @@ __published:	// IDE-managed Components
 	void __fastcall LabelGridSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect);
 	void __fastcall LabelGridSetEditText(TObject *Sender, int ACol, int ARow, const UnicodeString Value);
 	void __fastcall LabelGridGetEditText(TObject *Sender, int ACol, int ARow, UnicodeString &Value);
+	void __fastcall LabelGridExitEditor(TObject *Sender);
 	void __fastcall FormShow(TObject *Sender);
+	void __fastcall LabelGridMouseMove(TObject *Sender, TShiftState Shift, int X, int Y);
+	void __fastcall FormKeyPress(TObject *Sender, System::WideChar &Key);
 
 public:		// User declarations
 	__fastcall TFrmLabelAssignment(TComponent* Owner, WellMatrixList&);
 
 private:	// User declarations
+	struct  TStatus
+	{
+		int       plate;
+		int       row;
+		int       col;
+		TWellType type;
+		String    label;
+
+		TStatus(int plate, int row, int col, TWellType type, const String& label);
+	};
+
+	std::vector<TStatus> Changes;
+
 	WellMatrixList* wellMatrixListRef;
 	TWellMatrix*    wellMatrixSelected;
 	bool            inEditor;
 
-	bool __fastcall NextAllowed  (int plate, int& ARow, int& ACol, int options);
-	bool __fastcall ImportAllowed(int plate, int  ARow, int  ACol);
+	//bool __fastcall NextAllowed  (int plate, int& ARow, int& ACol, int options);
+	//bool __fastcall ImportAllowed(int plate, int  ARow, int  ACol);
 	void __fastcall InputDataOld(std::vector<String>, int& index);
-	void __fastcall InputData(std::vector<String>, int& index);
+	void __fastcall InputData(std::vector<String>, int& index, int plate, int row, int col);
+	String __fastcall GetEllipsis(String text, TCanvas* canvas, int width);
 	void __fastcall LabelGridDrawWell(int ACol, int ARow, TRect &Rect, TWell& well);
 
 	TModalResult __fastcall QuestionDialog(TStringList* Message);
@@ -59,6 +77,8 @@ private:	// User declarations
 	void __fastcall LabelGridDrawGeneric_2       (TStringGrid*, TRect& Rect, TColor, TColor foreground, String content);
 	void __fastcall LabelGridDrawWellFlavor_2    (TStringGrid*, int ACol, int ARow, TRect &Rect, TWell&);
 	void __fastcall LabelGridDrawWellFlavor_1    (TStringGrid*, int ACol, int ARow, TRect &Rect, TWell&);
+
+	void __fastcall MoveNextUnknown();
 
 };
 

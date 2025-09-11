@@ -2,28 +2,34 @@ object FrmLabelAssignment: TFrmLabelAssignment
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu, biMaximize]
-  BorderStyle = bsSingle
   Caption = 'R'#243'tulos'
-  ClientHeight = 478
-  ClientWidth = 873
+  ClientHeight = 468
+  ClientWidth = 880
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  KeyPreview = True
   OldCreateOrder = False
   Position = poOwnerFormCenter
   OnCreate = FormCreate
+  OnKeyPress = FormKeyPress
   OnShow = FormShow
+  DesignSize = (
+    880
+    468)
   PixelsPerInch = 96
   TextHeight = 13
-  object btnClose: TButton
-    Left = 726
-    Top = 430
+  object bApply: TButton
+    Left = 741
+    Top = 422
     Width = 131
-    Height = 34
-    Caption = 'Fechar'
+    Height = 38
+    Anchors = [akRight, akBottom]
+    Caption = 'Aplicar'
+    Default = True
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -15
@@ -31,14 +37,15 @@ object FrmLabelAssignment: TFrmLabelAssignment
     Font.Style = []
     ParentFont = False
     TabOrder = 3
-    OnClick = btnCloseClick
+    OnClick = bApplyClick
   end
   object tsPlates: TTabSet
     AlignWithMargins = True
     Left = 16
     Top = 388
-    Width = 841
+    Width = 848
     Height = 28
+    Anchors = [akLeft, akTop, akRight, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -15
@@ -52,23 +59,28 @@ object FrmLabelAssignment: TFrmLabelAssignment
     Top = 16
     Width = 848
     Height = 372
+    Anchors = [akLeft, akTop, akRight, akBottom]
     ColCount = 13
     DefaultRowHeight = 40
     RowCount = 9
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goEditing]
+    ParentShowHint = False
     ScrollBars = ssNone
+    ShowHint = True
     TabOrder = 0
     OnDrawCell = LabelGridDrawCell
     OnGetEditText = LabelGridGetEditText
+    OnMouseMove = LabelGridMouseMove
     OnSelectCell = LabelGridSelectCell
     OnSetEditText = LabelGridSetEditText
   end
   object btnImport: TButton
     Left = 16
-    Top = 430
+    Top = 422
     Width = 131
-    Height = 34
-    Caption = 'Importar...'
+    Height = 38
+    Anchors = [akLeft, akBottom]
+    Caption = '&Importar...'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -15
@@ -78,13 +90,21 @@ object FrmLabelAssignment: TFrmLabelAssignment
     TabOrder = 1
     OnClick = btnImportClick
   end
-  object Button1: TButton
-    Left = 328
-    Top = 440
-    Width = 75
-    Height = 25
-    Caption = 'Button1'
+  object bRevert: TButton
+    Left = 597
+    Top = 422
+    Width = 131
+    Height = 38
+    Anchors = [akRight, akBottom]
+    Caption = 'Reverter'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -15
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
     TabOrder = 4
+    OnClick = bRevertClick
   end
   object FileOpenDialog: TOpenTextFileDialog
     Filter = 
@@ -96,13 +116,13 @@ object FrmLabelAssignment: TFrmLabelAssignment
   object TaskDialog: TTaskDialog
     Buttons = <>
     Caption = 'Teste'
-    CommonButtons = [tcbYes]
+    CommonButtons = []
     DefaultButton = tcbNo
     MainIcon = 1
     RadioButtons = <>
     Text = 'Teste'
     Title = 'Importa'#231#227'o de R'#243'tulos'
-    Left = 552
+    Left = 320
     Top = 432
   end
 end

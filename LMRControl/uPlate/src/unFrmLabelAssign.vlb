@@ -1,7 +1,7 @@
-﻿[btnClose]
-Coordinates=124,10,65,58
-
-[]
+﻿[]
 Coordinates=10,78,64,36
 Visible=True
+
+[bApply]
+Coordinates=124,10,65,58
 
