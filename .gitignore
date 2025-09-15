@@ -1,5 +1,6 @@
 *.dsk
 *.~dsk
+temp/
 bin/
 Build/
 __history/
