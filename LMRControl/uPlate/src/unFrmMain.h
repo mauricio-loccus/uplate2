@@ -577,6 +577,8 @@ private:	// User declarations
 public:		// User declarations
 	__fastcall TMainForm(TComponent* Owner);
 
+	void __fastcall UpdateLabels();
+
 	static Boolean __fastcall AlreadyRunning();
 
 BEGIN_MESSAGE_MAP

@@ -1785,6 +1785,13 @@ void __fastcall TMainForm::actLabelAssignment(TObject *Sender)
 }
 
 
+void __fastcall TMainForm::UpdateLabels()
+{
+	DoProcessResults();
+	return;
+}
+
+
 void __fastcall TMainForm::DoProcessResults()
 {
 	using System::Sysutils::Format;
