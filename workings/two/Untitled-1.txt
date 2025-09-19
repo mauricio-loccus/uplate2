@@ -1,0 +1,6 @@
+	String portNames = "";
+	for(StlStringList::const_iterator port = names.begin(); port != names.end(); ++port)
+	{
+		portNames += String(port->c_str()) + '\n';
+	}
+	ShowMessage(portNames);

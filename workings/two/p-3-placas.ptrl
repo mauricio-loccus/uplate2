@@ -1,0 +1,1783 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Protocol>
+  <ReadMode>
+    <EndPoint>1</EndPoint>
+    <Kinnectic>0</Kinnectic>
+    <Type>0</Type>
+    <TimeType>0</TimeType>
+    <Window>0</Window>
+    <Trend>0</Trend>
+    <ReadOrder>0</ReadOrder>
+    <ChangeThreshold>1</ChangeThreshold>
+    <ChangeTimeType>0</ChangeTimeType>
+    <BaselineReadings>1</BaselineReadings>
+  </ReadMode>
+  <Shake/>
+  <Filters>
+    <Single>true</Single>
+    <Double>false</Double>
+    <Position1>0</Position1>
+    <Position2>-1</Position2>
+    <CalcMethod>-1</CalcMethod>
+    <FiltersValues>404 nm</FiltersValues>
+  </Filters>
+  <WaveLenghts>
+    <Single>true</Single>
+    <Double>false</Double>
+    <Lambda1>230</Lambda1>
+    <Lambda2>230</Lambda2>
+    <CalcMethod>-1</CalcMethod>
+  </WaveLenghts>
+  <ShakeIntervals/>
+  <CurveType>0</CurveType>
+  <QCParameters/>
+  <Unity>2</Unity>
+  <Plates>
+    <Plate Name="Placa #1">
+      <Height>8</Height>
+      <Width>12</Width>
+      <Layout>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>1</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>2</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>3</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>4</Col>
+          <Type>8</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>5</Col>
+          <Type>8</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>6</Col>
+          <Type>8</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>7</Col>
+          <Type>12</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>8</Col>
+          <Type>12</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>9</Col>
+          <Type>12</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>1</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>2</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>3</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>4</Col>
+          <Type>8</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>5</Col>
+          <Type>8</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>6</Col>
+          <Type>8</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>7</Col>
+          <Type>12</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>8</Col>
+          <Type>12</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>9</Col>
+          <Type>12</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>1</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>2</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>3</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="1">
+          <Row>4</Row>
+          <Col>1</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="3">
+          <Row>4</Row>
+          <Col>2</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>3</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="2">
+          <Row>5</Row>
+          <Col>1</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="4">
+          <Row>5</Row>
+          <Col>2</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>3</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>1</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>2</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="5">
+          <Row>6</Row>
+          <Col>3</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>1</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>2</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="6">
+          <Row>7</Row>
+          <Col>3</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="7">
+          <Row>7</Row>
+          <Col>4</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>1</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>2</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>3</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+      </Layout>
+    </Plate>
+    <Plate Name="Placa #2">
+      <Height>8</Height>
+      <Width>12</Width>
+      <Layout>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>1</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>2</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>3</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>4</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>5</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>6</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>7</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>8</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>9</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>10</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>11</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>12</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>1</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>2</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="1">
+          <Row>2</Row>
+          <Col>3</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>1</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="2">
+          <Row>3</Row>
+          <Col>2</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="3">
+          <Row>3</Row>
+          <Col>3</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="4">
+          <Row>4</Row>
+          <Col>1</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="5">
+          <Row>4</Row>
+          <Col>2</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="6">
+          <Row>4</Row>
+          <Col>3</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="7">
+          <Row>5</Row>
+          <Col>1</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>2</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>3</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="8">
+          <Row>6</Row>
+          <Col>1</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>2</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>3</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="9">
+          <Row>7</Row>
+          <Col>1</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>2</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>3</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="10">
+          <Row>8</Row>
+          <Col>1</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>2</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>3</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+      </Layout>
+    </Plate>
+    <Plate Name="Placa #3">
+      <Height>8</Height>
+      <Width>12</Width>
+      <Layout>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>1</Col>
+          <Type>4</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>2</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>3</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>1</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>1</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="1">
+          <Row>2</Row>
+          <Col>2</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>3</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>2</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>1</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="2">
+          <Row>3</Row>
+          <Col>2</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>3</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>3</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>1</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="3">
+          <Row>4</Row>
+          <Col>2</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>3</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>4</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>1</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="4">
+          <Row>5</Row>
+          <Col>2</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>3</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>5</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>1</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="5">
+          <Row>6</Row>
+          <Col>2</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>3</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>6</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>1</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="6">
+          <Row>7</Row>
+          <Col>2</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>3</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>7</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>1</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="7">
+          <Row>8</Row>
+          <Col>2</Col>
+          <Type>24</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>3</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>4</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>5</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>6</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>7</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>8</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>9</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>10</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>11</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+        <Well ID="0">
+          <Row>8</Row>
+          <Col>12</Col>
+          <Type>0</Type>
+          <StdValue>0</StdValue>
+        </Well>
+      </Layout>
+    </Plate>
+  </Plates>
+</Protocol>
