@@ -3044,19 +3044,19 @@ void __fastcall TMainForm::toolbarButtonsClick(TObject *Sender, int index)
 			break;
 
 		case 1:
-	actDisconnectExecute(Sender);
+			actDisconnectExecute(Sender);
 			break;
 
 		case 2:
-	actProgramRunExecute(Sender);
+			actProgramRunExecute(Sender);
 			break;
 
 		case 3:
-	actOpenCloseDoorExecute(Sender);
+			actOpenCloseDoorExecute(Sender);
 			break;
 
 		case 4:
-	actLabelAssignment(Sender);
+	        actLabelAssignment(Sender);
 			break;
 
 		default:

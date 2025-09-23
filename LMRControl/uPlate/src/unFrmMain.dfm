@@ -968,7 +968,7 @@ object MainForm: TMainForm
           Left = 837
           Top = 3
           Width = 64
-          Height = 16
+          Height = 499
           Align = alRight
           Anchors = [akTop, akRight]
           Caption = 'R2 = 0.000'
@@ -980,6 +980,7 @@ object MainForm: TMainForm
           Font.Style = [fsBold]
           ParentColor = False
           ParentFont = False
+          ExplicitHeight = 16
         end
         object curveSerie: TFastLineSeries
           Legend.Visible = False
@@ -1751,7 +1752,7 @@ object MainForm: TMainForm
         Margin = 1
       end
       item
-        Hint = 'Inicia entrada de Sample ID'#39's'
+        Hint = 'Inicia entrada de Sample ID'#39's (Ctrl+I)'
         ParentFont = False
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -1779,6 +1780,7 @@ object MainForm: TMainForm
     ImageList = MyDataModule.pngImageList
     TabOrder = 2
     TransparentBorder = True
+    ExplicitTop = -2
   end
   object StatusBar: TStatusBar
     Left = 0
@@ -8899,6 +8901,7 @@ object MainForm: TMainForm
       Caption = 'Entrada de R'#243'tulos'
       ImageIndex = 3
       ShortCut = 16457
+      OnExecute = actLabelAssignment
     end
   end
 end
