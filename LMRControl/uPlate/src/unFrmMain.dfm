@@ -8694,14 +8694,14 @@ object MainForm: TMainForm
     Left = 96
     Top = 456
     object File1: TMenuItem
-      Caption = 'Arquivo'
+      Caption = '&Arquivo'
       object OptUserLogin: TMenuItem
-        Caption = 'Login...'
+        Caption = 'Log&in...'
         Hint = 'Habilita um usu'#225'rio a acessar a aplica'#231#227'o.'
         OnClick = OptUserLoginClick
       end
       object OptUserLogoff: TMenuItem
-        Caption = 'Logoff'
+        Caption = 'Log&off'
         Enabled = False
         Hint = 'Desabilita um usu'#225'rio a acessar a aplica'#231#227'o.'
       end
@@ -8838,7 +8838,6 @@ object MainForm: TMainForm
     object actProgramRun: TAction
       Caption = 'Executar'
       Enabled = False
-      Hint = 'Executa uma leitura'
       ImageIndex = 32
       ShortCut = 16466
       OnExecute = actProgramRunExecute
