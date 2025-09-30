@@ -5007,11 +5007,6 @@ void __fastcall TMainForm::acExperimentExportCsvExecute(TObject *Sender)
 		csvStringList->Add("Posição");
 		csvStringList->Add("Tipo");
 		csvStringList->Add("Absorb�ncia Bruta");
-		csvStringList->Add("Absorb�ncia Processada");
-		csvStringList->Add("Concentra��o");
-		csvStringList->Add("Desvio Padr�o");
-		csvStringList->Add("Coef. Varia��o");
-		csvStringList->Add("Interpreta��o");
 		csvStringList->Add("Absorbância Bruta");
 		csvStringList->Add("Absorbância Processada");
 		csvStringList->Add("Concentração");
@@ -5044,7 +5039,6 @@ void __fastcall TMainForm::acExperimentExportCsvExecute(TObject *Sender)
 				  csvStringList->Add(getNode(plateIdx + 101)->Text); // Nome da placa
 				  csvStringList->Add(wellInfo);                                           // Informação da posição
 				  csvStringList->Add(w.typeToString());                                   // Tipo do poço
-				  csvStringList->Add(w.Label);                                            // Rótulo do poço     (Sample ID) 
 				  csvStringList->Add(FloatToStrF(w.RawValue, ffFixed, 6, 3));             // Absorbância Bruta
 				  csvStringList->Add(FloatToStrF(w.RawBlankReducedValue, ffFixed, 6, 3)); // Absorbância Processada
 				  csvStringList->Add(FloatToStrF(w.ConcentrationValue, ffFixed, 6, 3));   // Concentração
