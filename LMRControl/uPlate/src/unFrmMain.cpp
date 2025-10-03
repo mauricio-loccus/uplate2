@@ -1969,16 +1969,17 @@ for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; ++col)
 				String wellInfo;
 				wellInfo.sprintf(TEXT("%c%2.2d"), w.Row+'A', w.Col+1);
 
-				ReadRawGrid->Cells[colReadRawPlateName->Position][rowPos] = getNode(plateIdx+101)->Text;
-				ReadRawGrid->Cells[colReadRawCoord->Position][rowPos] = wellInfo;
-				ReadRawGrid->Cells[colReadWellID->Position][rowPos] = Format(TEXT("%2.2d"), ARRAYOFCONST((w.ID)));
-				ReadRawGrid->Cells[colReadRawType->Position][rowPos]  = w.typeToString();
-				ReadRawGrid->Cells[colReadRawValue->Position][rowPos] = w.RawValue;
+				ReadRawGrid->Cells[colReadRawPlateName->Position][rowPos]         = getNode(plateIdx+101)->Text;
+				ReadRawGrid->Cells[colReadRawCoord->Position][rowPos]             = wellInfo;
+				ReadRawGrid->Cells[colReadWellID->Position][rowPos]               = Format(TEXT("%2.2d"), ARRAYOFCONST((w.ID)));
+				ReadRawGrid->Cells[colReadRawType->Position][rowPos]              = w.typeToString();
+				ReadRawGrid->Cells[colReadRawValue->Position][rowPos]             = w.RawValue;
+				ReadRawGrid->Cells[colReadRawLabel->Position][rowPos]             = w.Label;
 				ReadRawGrid->Cells[colReadRawBlankReducedValue->Position][rowPos] = w.RawBlankReducedValue;
-				ReadRawGrid->Cells[colPostprocessedValue->Position][rowPos] = (Double)w.ConcentrationValue;
-				ReadRawGrid->Cells[colStdDeviation->Position][rowPos] = w.StdDeviation;
-				ReadRawGrid->Cells[colCoefVariation->Position][rowPos] = w.CoefVariation;
-				ReadRawGrid->Cells[colReadRawInterpretValue->Position][rowPos] = w.Interpret;
+				ReadRawGrid->Cells[colPostprocessedValue->Position][rowPos]       = (Double)w.ConcentrationValue;
+				ReadRawGrid->Cells[colStdDeviation->Position][rowPos]             = w.StdDeviation;
+				ReadRawGrid->Cells[colCoefVariation->Position][rowPos]            = w.CoefVariation;
+				ReadRawGrid->Cells[colReadRawInterpretValue->Position][rowPos]    = w.Interpret;
 
 				if (w.Timestamp != TTime(0))
 					ReadRawGrid->Cells[colReadRawTimestampValue->Position][rowPos] = FormatDateTime("hh:nn:ss", w.Timestamp);
@@ -5047,10 +5048,10 @@ void __fastcall TMainForm::acExperimentExportCsvExecute(TObject *Sender)
 				  csvStringList->Add(VarToStr(w.Interpret));                              // Interpretação
 				  csvStringList->Add(FormatDateTime("hh:nn:ss", w.Timestamp));         // Momento de Leitura
 
-            vectCSVList.push_back(csvStringList->DelimitedText);
-            csvStringList->Clear();
-        }
-    }
+			vectCSVList.push_back(csvStringList->DelimitedText);
+			csvStringList->Clear();
+		}
+	}
 }
 
 	LongWord fmOption = fmCreate | fmShareDenyWrite;

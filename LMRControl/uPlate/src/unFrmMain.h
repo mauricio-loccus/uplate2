@@ -169,14 +169,12 @@ __published:	// IDE-managed Components
 	TComboBox *chbShakeIntensity;
 	TLMDGrid *unknownsGrid;
 	TLMDTabSheet *tabQuality;
-	TLMDGridTextColumn *colUnknownWellID;
 	TLMDTabSheet *tabReadRAW;
 	TLMDGrid *ReadRawGrid;
 
 	TfrxReport *frxReportRawResult;
 	TfrxUserDataSet *frxUserDataSetResults;
 	TfrxPDFExport *frxPDFExport;
-	TLMDGridFloatColumn *colPostprocessedValue;
 	TPopupMenu *treeviewMenu;
 	TMenuItem *AddPlateMenuItem;
 	TMenuItem *RemovePlateMenuItem;
@@ -187,7 +185,7 @@ __published:	// IDE-managed Components
 	TMenuItem *RenamePlateMenuItem;
 	TComboBox *cbChartScale;
 	TLMDGridTextColumn *colUnknownPlateName;
-	TLMDGridTextColumn *colReadRawPlateName;
+
 	TChart *QualitativeZoneChart;
 	TLineSeries *QZone1;
 	TLineSeries *QZone2;
@@ -221,7 +219,6 @@ __published:	// IDE-managed Components
 	TComboBox *cbKineticChangeTimeType;
 	TLMDFloatRangeValidator *ThresholdFloatRangeValidator;
 	TLMDHintErrorProvider *ThresholdHintErrorProvider;
-	TLMDGridTextColumn *colReadRawTimestampValue;
 	TLMDTabSheet *tabResults;
 	TLMDPageControl *tabResultPageControl;
 	TLMDTabSheet *tabResultAbsorbance;
@@ -279,8 +276,6 @@ __published:	// IDE-managed Components
 	TLMDTaskDialog *QuitAppDialog;
 	TFastLineSeries *curveSerie;
 	TPointSeries *pointsSerie;
-	TLMDGridFloatColumn *colStdDeviation;
-	TLMDGridFloatColumn *colCoefVariation;
 	TLMDTaskDialog *AskDialog;
 
 	TMainMenu *MainMenu;
@@ -338,18 +333,27 @@ __published:	// IDE-managed Components
 	TComboBox *chbReadSpeed;
 	TLabel *lblReadSpeed;
 
+	TLMDGridTextColumn*  colReadRawPlateName;
 	TLMDGridTextColumn*  colReadRawCoord;
+
 	TLMDGridTextColumn*  colReadRawType;
-	TLMDGridFloatColumn* colReadRawValue;
-	TLMDGridTextColumn*  colReadRawInterpretValue;
-	TLMDGridFloatColumn* colReadRawBlankReducedValue;
 	TLMDGridTextColumn*  colReadRawLabel;
+	TLMDGridFloatColumn* colReadRawValue;
+	TLMDGridFloatColumn* colReadRawBlankReducedValue;
+	TLMDGridFloatColumn* colPostprocessedValue;
+	TLMDGridFloatColumn* colStdDeviation;
+	TLMDGridFloatColumn* colCoefVariation;
+	TLMDGridTextColumn*  colReadRawInterpretValue;
+	TLMDGridTextColumn*  colReadRawTimestampValue;
+
+	TLMDGridTextColumn*  colUnknownWellID;
 	TLMDGridTextColumn*  colUnknownCoord;
 	TLMDGridFloatColumn* colUnknownStdDev;
 	TLMDGridFloatColumn* colUnknownCoefVar;
 	TLMDGridTextColumn*  colUnknownInterpretValue;
 	TLMDGridFloatColumn* colUnknownConcentrationValue;
-	TLMDGridTextColumn*  colUnknownLabel;
+
+	TMenuItem *MapadaPlaca1;
 
 	void __fastcall actExitExecute(TObject *Sender);
 	void __fastcall FormCloseQuery(TObject *Sender, bool &CanClose);

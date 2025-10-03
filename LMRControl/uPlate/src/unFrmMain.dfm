@@ -1528,9 +1528,12 @@ object MainForm: TMainForm
         Style.EmptyBannerFont.Height = -11
         Style.EmptyBannerFont.Name = 'Tahoma'
         Style.EmptyBannerFont.Style = []
-        Options = [opHeaderVertLine, opIndicatorHorzLine, opVertLine, opHorzLine, opRangeSelect, opDrawFocusSelected, opColSizing, opThumbTracking, opShowIndicator, opShowHeader, opConfirmDeleteRow, opCancelOnExit, opHighlightHeaders]
+        ThemeMode = ttmNative
+        Options = [opHeaderVertLine, opIndicatorHorzLine, opVertLine, opHorzLine, opRangeSelect, opRowSelect, opDrawFocusSelected, opColSizing, opThumbTracking, opShowIndicator, opShowHeader, opConfirmDeleteRow, opCancelOnExit, opHighlightHeaders]
         Align = alClient
         ParentColor = True
+        ParentShowHint = False
+        ShowHint = False
         TabOrder = 0
         object colReadRawPlateName: TLMDGridTextColumn
           Width = 104
@@ -1549,10 +1552,16 @@ object MainForm: TMainForm
           Mask = '>L00;0;_'
         end
         object colReadWellID: TLMDGridTextColumn
+          Width = 50
           Position = 2
           SortingAllowed = False
-          Alignment = taCenter
-          Title.Caption = 'ID'
+          Alignment = taLeftJustify
+          Title.Caption = '  ID'
+          Title.Font.Charset = ANSI_CHARSET
+          Title.Font.Color = clBlack
+          Title.Font.Height = -13
+          Title.Font.Name = 'Calibri'
+          Title.Font.Style = []
           ReadOnly = True
           Mask = '!#0;0;0'
         end
@@ -1563,9 +1572,17 @@ object MainForm: TMainForm
           Title.Caption = 'Tipo'
           ReadOnly = True
         end
+        object colReadRawLabel: TLMDGridTextColumn
+          Width = 160
+          Position = 4
+          Title.Caption = '  Sample ID'
+          ReadOnly = True
+          Color = clWindow
+          DefaultColor = False
+        end
         object colReadRawValue: TLMDGridFloatColumn
           Width = 120
-          Position = 4
+          Position = 5
           SortingAllowed = False
           Alignment = taRightJustify
           Title.Caption = 'Absorb'#226'ncia Bruta'
@@ -1581,7 +1598,7 @@ object MainForm: TMainForm
         end
         object colReadRawBlankReducedValue: TLMDGridFloatColumn
           Width = 150
-          Position = 5
+          Position = 6
           SortingAllowed = False
           Alignment = taRightJustify
           Title.Caption = 'Absorb'#226'ncia Processada'
@@ -1596,7 +1613,7 @@ object MainForm: TMainForm
         end
         object colPostprocessedValue: TLMDGridFloatColumn
           Width = 100
-          Position = 6
+          Position = 7
           SortingAllowed = False
           Alignment = taRightJustify
           Title.Caption = 'Concentra'#231#227'o'
@@ -1611,7 +1628,7 @@ object MainForm: TMainForm
         end
         object colStdDeviation: TLMDGridFloatColumn
           Width = 65
-          Position = 7
+          Position = 8
           SortingAllowed = False
           Alignment = taRightJustify
           Title.Caption = 'Desv. Pad.'
@@ -1625,7 +1642,7 @@ object MainForm: TMainForm
             end>
         end
         object colCoefVariation: TLMDGridFloatColumn
-          Position = 8
+          Position = 9
           SortingAllowed = False
           Alignment = taRightJustify
           Title.Caption = 'CV'
@@ -1641,7 +1658,7 @@ object MainForm: TMainForm
         end
         object colReadRawInterpretValue: TLMDGridTextColumn
           Width = 100
-          Position = 9
+          Position = 10
           SortingAllowed = False
           Alignment = taCenter
           Title.Caption = 'Interpreta'#231#227'o'
@@ -1649,7 +1666,7 @@ object MainForm: TMainForm
         end
         object colReadRawTimestampValue: TLMDGridTextColumn
           Width = 100
-          Position = 10
+          Position = 11
           SortingAllowed = False
           Alignment = taCenter
           Title.Caption = 'Momento Leitura'
@@ -1780,7 +1797,6 @@ object MainForm: TMainForm
     ImageList = MyDataModule.pngImageList
     TabOrder = 2
     TransparentBorder = True
-    ExplicitTop = -2
   end
   object StatusBar: TStatusBar
     Left = 0
@@ -8764,6 +8780,9 @@ object MainForm: TMainForm
       end
       object ResultadodaLeitura: TMenuItem
         Action = acResultsRaw
+      end
+      object MapadaPlaca1: TMenuItem
+        Caption = '&Mapa da Placa...'
       end
     end
     object Configuraes1: TMenuItem
