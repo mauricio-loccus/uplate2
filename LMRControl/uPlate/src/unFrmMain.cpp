@@ -413,8 +413,6 @@ void __fastcall TMainForm::FormCreate(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TMainForm::FormShow(TObject *Sender)
 {
-
-
 	if (mpAppConfig->ElisaSimulated)
 	{
 		PElisaDevice pDev = DeviceFactorySingleton::instance()->CreateDevice(ElisaDeviceTypeEnum::ElisaDeviceLRM96Simulator);
@@ -5000,14 +4998,12 @@ void __fastcall TMainForm::acExperimentExportCsvExecute(TObject *Sender)
 	csvStringList->Delimiter = ';';
 	csvStringList->QuoteChar = '"';
 
-	if (mpAppConfig->HeadersInCsv)         // configura��es de exporta��o - RESULTADOS DE LEITURA
 	if (mpAppConfig->HeadersInCsv)         // configurações de exportação - RESULTADOS DE LEITURA
 	{
 		csvStringList->Add("Placa");
-		csvStringList->Add("Posi��o");
 		csvStringList->Add("Posição");
 		csvStringList->Add("Tipo");
-		csvStringList->Add("Absorb�ncia Bruta");
+		csvStringList->Add("Sample ID");
 		csvStringList->Add("Absorbância Bruta");
 		csvStringList->Add("Absorbância Processada");
 		csvStringList->Add("Concentração");
@@ -5040,6 +5036,7 @@ void __fastcall TMainForm::acExperimentExportCsvExecute(TObject *Sender)
 				  csvStringList->Add(getNode(plateIdx + 101)->Text); // Nome da placa
 				  csvStringList->Add(wellInfo);                                           // Informação da posição
 				  csvStringList->Add(w.typeToString());                                   // Tipo do poço
+				  csvStringList->Add(w.Label);                                            // Rótulo do poço     (Sample ID)
 				  csvStringList->Add(FloatToStrF(w.RawValue, ffFixed, 6, 3));             // Absorbância Bruta
 				  csvStringList->Add(FloatToStrF(w.RawBlankReducedValue, ffFixed, 6, 3)); // Absorbância Processada
 				  csvStringList->Add(FloatToStrF(w.ConcentrationValue, ffFixed, 6, 3));   // Concentração
