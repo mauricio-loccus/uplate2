@@ -968,7 +968,7 @@ object MainForm: TMainForm
           Left = 837
           Top = 3
           Width = 64
-          Height = 499
+          Height = 16
           Align = alRight
           Anchors = [akTop, akRight]
           Caption = 'R2 = 0.000'
@@ -980,7 +980,6 @@ object MainForm: TMainForm
           Font.Style = [fsBold]
           ParentColor = False
           ParentFont = False
-          ExplicitHeight = 16
         end
         object curveSerie: TFastLineSeries
           Legend.Visible = False
@@ -1310,7 +1309,7 @@ object MainForm: TMainForm
         Style.EmptyBannerFont.Height = -11
         Style.EmptyBannerFont.Name = 'Tahoma'
         Style.EmptyBannerFont.Style = []
-        Options = [opHeaderVertLine, opIndicatorHorzLine, opVertLine, opHorzLine, opRangeSelect, opDrawFocusSelected, opColSizing, opEditing, opThumbTracking, opShowIndicator, opShowHeader, opConfirmDeleteRow, opCancelOnExit, opHighlightHeaders]
+        Options = [opHeaderVertLine, opIndicatorHorzLine, opVertLine, opHorzLine, opRangeSelect, opRowSelect, opColSizing, opEditing, opThumbTracking, opShowIndicator, opShowHeader, opConfirmDeleteRow, opCancelOnExit, opHighlightHeaders]
         Align = alClient
         ParentColor = True
         TabOrder = 0
@@ -1338,12 +1337,19 @@ object MainForm: TMainForm
           Title.Caption = 'ID'
           ReadOnly = True
         end
+        object colUnknownLabel: TLMDGridTextColumn
+          Width = 150
+          Position = 3
+          SortingAllowed = False
+          Title.Caption = ' Sample ID'
+        end
         object colUnknownPosProcessValue: TLMDGridFloatColumn
           Width = 100
-          Position = 3
+          Position = 4
           SortingAllowed = False
           Alignment = taRightJustify
           Title.Caption = 'Absorb'#226'ncias'
+          Title.Alignment = taCenter
           ReadOnly = True
           FloatFormat = '######0.000'
           IsCurrencyMode = False
@@ -1354,10 +1360,11 @@ object MainForm: TMainForm
         end
         object colUnknownConcentrationValue: TLMDGridFloatColumn
           Width = 100
-          Position = 4
+          Position = 5
           SortingAllowed = False
           Alignment = taRightJustify
           Title.Caption = 'Concentra'#231#245'es'
+          Title.Alignment = taCenter
           ReadOnly = True
           FloatFormat = '######0.000'
           IsCurrencyMode = False
@@ -1368,7 +1375,7 @@ object MainForm: TMainForm
         end
         object colUnknownStdDev: TLMDGridFloatColumn
           Width = 65
-          Position = 5
+          Position = 6
           SortingAllowed = False
           Alignment = taRightJustify
           Title.Caption = 'Desv. Pad.'
@@ -1383,7 +1390,7 @@ object MainForm: TMainForm
         end
         object colUnknownCoefVar: TLMDGridFloatColumn
           Width = 60
-          Position = 6
+          Position = 7
           SortingAllowed = False
           Alignment = taRightJustify
           Title.Caption = 'CV%'
@@ -1400,7 +1407,7 @@ object MainForm: TMainForm
         end
         object colUnknownInterpretValue: TLMDGridTextColumn
           Width = 120
-          Position = 7
+          Position = 8
           SortingAllowed = False
           Alignment = taCenter
           Title.Caption = 'Interpreta'#231#227'o'
@@ -1552,10 +1559,8 @@ object MainForm: TMainForm
           Mask = '>L00;0;_'
         end
         object colReadWellID: TLMDGridTextColumn
-          Width = 50
           Position = 2
           SortingAllowed = False
-          Alignment = taLeftJustify
           Title.Caption = '  ID'
           Title.Font.Charset = ANSI_CHARSET
           Title.Font.Color = clBlack

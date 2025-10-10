@@ -179,12 +179,11 @@ __published:	// IDE-managed Components
 	TMenuItem *AddPlateMenuItem;
 	TMenuItem *RemovePlateMenuItem;
 	TChart *stdCurveChart;
-	TLMDGridFloatColumn *colUnknownPosProcessValue;
+
 	TLabel *lbR2;
 	TLMDGridTextColumn *colPlateName;
 	TMenuItem *RenamePlateMenuItem;
 	TComboBox *cbChartScale;
-	TLMDGridTextColumn *colUnknownPlateName;
 
 	TChart *QualitativeZoneChart;
 	TLineSeries *QZone1;
@@ -335,7 +334,6 @@ __published:	// IDE-managed Components
 
 	TLMDGridTextColumn*  colReadRawPlateName;
 	TLMDGridTextColumn*  colReadRawCoord;
-
 	TLMDGridTextColumn*  colReadRawType;
 	TLMDGridTextColumn*  colReadRawLabel;
 	TLMDGridFloatColumn* colReadRawValue;
@@ -346,14 +344,19 @@ __published:	// IDE-managed Components
 	TLMDGridTextColumn*  colReadRawInterpretValue;
 	TLMDGridTextColumn*  colReadRawTimestampValue;
 
-	TLMDGridTextColumn*  colUnknownWellID;
+	TLMDGridTextColumn*  colUnknownPlateName;
 	TLMDGridTextColumn*  colUnknownCoord;
+	TLMDGridTextColumn*  colUnknownWellID;
+	TLMDGridTextColumn*  colUnknownLabel;
+	TLMDGridFloatColumn* colUnknownPosProcessValue;
+	TLMDGridFloatColumn* colUnknownConcentrationValue;
 	TLMDGridFloatColumn* colUnknownStdDev;
 	TLMDGridFloatColumn* colUnknownCoefVar;
 	TLMDGridTextColumn*  colUnknownInterpretValue;
-	TLMDGridFloatColumn* colUnknownConcentrationValue;
+
 
 	TMenuItem *MapadaPlaca1;
+
 
 	void __fastcall actExitExecute(TObject *Sender);
 	void __fastcall FormCloseQuery(TObject *Sender, bool &CanClose);

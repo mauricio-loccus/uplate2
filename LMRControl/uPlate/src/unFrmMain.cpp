@@ -1928,14 +1928,15 @@ for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; ++col)
                 String wellInfo;
                 wellInfo.sprintf(TEXT("%c%2.2d"), row + 'A', col + 1);
 
-                unknownsGrid->Cells[colUnknownPlateName->Position][rowPos] = getNode(plateIdx + 101)->Text;
-                unknownsGrid->Cells[colUnknownCoord->Position][rowPos] = wellInfo;
-                unknownsGrid->Cells[colUnknownWellID->Position][rowPos] = Format(TEXT("%2.2d"), ARRAYOFCONST(((*cit)->ID)));
-                unknownsGrid->Cells[colUnknownPosProcessValue->Position][rowPos] = (*cit)->RawBlankReducedValue;
-                unknownsGrid->Cells[colUnknownConcentrationValue->Position][rowPos] = (*cit)->ConcentrationValue;
-                unknownsGrid->Cells[colUnknownStdDev->Position][rowPos] = (*cit)->StdDeviation;
-                unknownsGrid->Cells[colUnknownCoefVar->Position][rowPos] = (*cit)->CoefVariation;
-                unknownsGrid->Cells[colUnknownInterpretValue->Position][rowPos] = (*cit)->Interpret;
+				unknownsGrid->Cells[colUnknownPlateName->Position][rowPos]          = getNode(plateIdx + 101)->Text;
+				unknownsGrid->Cells[colUnknownCoord->Position][rowPos]              = wellInfo;
+				unknownsGrid->Cells[colUnknownWellID->Position][rowPos]             = Format(TEXT("%2.2d"), ARRAYOFCONST(((*cit)->ID)));
+				unknownsGrid->Cells[colUnknownLabel->Position][rowPos]              = (*cit)->Label;
+				unknownsGrid->Cells[colUnknownPosProcessValue->Position][rowPos]    = (*cit)->RawBlankReducedValue;
+				unknownsGrid->Cells[colUnknownConcentrationValue->Position][rowPos] = (*cit)->ConcentrationValue;
+				unknownsGrid->Cells[colUnknownStdDev->Position][rowPos]             = (*cit)->StdDeviation;
+				unknownsGrid->Cells[colUnknownCoefVar->Position][rowPos]            = (*cit)->CoefVariation;
+				unknownsGrid->Cells[colUnknownInterpretValue->Position][rowPos]     = (*cit)->Interpret;
 
 				rowPos++; // Incrementa a posição somente após adicionar o poço correspondente
             }
@@ -3745,7 +3746,6 @@ void __fastcall TMainForm::CreateResultsBranch(_di_IXMLNode ResultsNode)
 		{
 			for (Integer Col = 0; Col < m_elisaDeviceParams->PlateCols; Col++)
 			{
-
                 TWell& w = refMatrix[Row][Col];
 
                 _di_IXMLNode xmlWell = plate->AddChild("Well");
