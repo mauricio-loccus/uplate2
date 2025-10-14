@@ -3746,92 +3746,107 @@ void __fastcall TMainForm::CreateResultsBranch(_di_IXMLNode ResultsNode)
 		{
 			for (Integer Col = 0; Col < m_elisaDeviceParams->PlateCols; Col++)
 			{
-                TWell& w = refMatrix[Row][Col];
+				TWell& w = refMatrix[Row][Col];
 
-                _di_IXMLNode xmlWell = plate->AddChild("Well");
-                xmlWell->SetAttribute("ID", w.ID);
+				_di_IXMLNode xmlWell = plate->AddChild("Well");
+				xmlWell->SetAttribute("ID", w.ID);
 
-                _di_IXMLNode node = xmlWell->AddChild("Row");
-                node->SetNodeValue(w.Row+1);
+				_di_IXMLNode node = xmlWell->AddChild("Row");
+				node->SetNodeValue(w.Row+1);
 
-                node = xmlWell->AddChild("Col");
+				node = xmlWell->AddChild("Col");
 				node->SetNodeValue(w.Col+1);
 
 				node = xmlWell->AddChild("Type");
 				node->SetNodeValue(static_cast<Integer>(w.Type));
 
+				if (!w.Label.IsEmpty())
+				{
+					node = xmlWell->AddChild("Label");
+					node->SetNodeValue(w.Label);
+				}
+
 				node = xmlWell->AddChild("RawValue");
 				node->SetNodeValue(w.RawValue);
-            }
-        }
-    }
+			}
+		}
+	}
 }
 
 void __fastcall TMainForm::LoadResultsBranch(_di_IXMLNode ResultsNode)
 {
-    WellMatrixList& wellMatrixListRef = *TWellMatrixSingleton::instance();
+	WellMatrixList& wellMatrixListRef = *TWellMatrixSingleton::instance();
 
-    _di_IXMLNode PlatesNode = ResultsNode->ChildNodes->FindNode("Plates");
-    _di_IXMLNode PlateNode = PlatesNode->ChildNodes->First();
+	_di_IXMLNode PlatesNode = ResultsNode->ChildNodes->FindNode("Plates");
+	_di_IXMLNode PlateNode = PlatesNode->ChildNodes->First();
 
 	if (!PlateNode)
-    {
+	{
 		TaskMessageDlg(TEXT("Carregar experimento"),
 					   TEXT("Erro durante o carregamento dos resultados, arquivo incompleto ou corrompido."),
-                       mtError,
+					   mtError,
 					   TMsgDlgButtons() << mbOK, 0);
 		return;
-    }
+	}
 
 	// Configura��es de formato para garantir o ponto como separador decimal
-    TFormatSettings fs;
-    GetLocaleFormatSettings(LOCALE_USER_DEFAULT, fs);
-    fs.DecimalSeparator = '.';
+	TFormatSettings fs;
+	GetLocaleFormatSettings(LOCALE_USER_DEFAULT, fs);
+	fs.DecimalSeparator = '.';
 	fs.ThousandSeparator = '\0'; // Desabilita separador de milhar
 
-    do
-    {
-        Integer PlateNum = PlateNode->GetAttribute("Number");
+	do
+	{
+		Integer PlateNum = PlateNode->GetAttribute("Number");
 
-        TWellMatrix& refMatrix = wellMatrixListRef[PlateNum - 1];
-        _di_IXMLNode wellNode = PlateNode->ChildNodes->First();
+		TWellMatrix& refMatrix = wellMatrixListRef[PlateNum - 1];
+		_di_IXMLNode wellNode = PlateNode->ChildNodes->First();
 
 		for (Integer row = 0; row < m_elisaDeviceParams->PlateRows; row++)
 		{
-            for (WellList::iterator it = refMatrix[row].begin(); it != refMatrix[row].end(); it++)
-            {
-                _di_IXMLNode rawValueNode = wellNode->ChildNodes->FindNode("RawValue");
+			for (WellList::iterator it = refMatrix[row].begin(); it != refMatrix[row].end(); it++)
+			{
+
+
+				_di_IXMLNode rawValueNode = wellNode->ChildNodes->FindNode("RawValue");
 				if (rawValueNode)
-                {
-						String rawValueStr = rawValueNode->NodeValue;
+				{
+					String rawValueStr = rawValueNode->NodeValue;
 
-// Normaliza o separador decimal conforme a configura��o do software
-if (fs.DecimalSeparator == ',')
-{
-    rawValueStr = StringReplace(rawValueStr, ".", ",", TReplaceFlags() << rfReplaceAll);
-}
-else
-{
-    rawValueStr = StringReplace(rawValueStr, ",", ".", TReplaceFlags() << rfReplaceAll);
-}
+					// Normaliza o separador decimal conforme a configura��o do software
+					if (fs.DecimalSeparator == ',')
+					{
+						rawValueStr = StringReplace(rawValueStr, ".", ",", TReplaceFlags() << rfReplaceAll);
+					}
+					else
+					{
+						rawValueStr = StringReplace(rawValueStr, ",", ".", TReplaceFlags() << rfReplaceAll);
+					}
 
-try
-{
-	it->RawValue = StrToFloat(rawValueStr, fs);
+					try
+					{
+						it->RawValue = StrToFloat(rawValueStr, fs);
 					}
 					catch (const EConvertError& e)
 					{
 						ShowMessage("Erro ao converter RawValue: " + rawValueNode->NodeValue);
 						it->RawValue = 0.0; // Define um valor padr�o em caso de erro
-                    }
+					}
+				}
+
+				_di_IXMLNode labelNode = wellNode->ChildNodes->FindNode("Label");
+				if (labelNode)
+				{
+                    it->Label = labelNode->NodeValue;
 				}
 
 				wellNode = wellNode->NextSibling();
-            }
-        }
+			}
+		}
 
 		PlateNode = PlateNode->NextSibling();
-	} while (PlateNode);
+	}
+	while (PlateNode);
 }
 
 
@@ -3839,7 +3854,7 @@ void __fastcall TMainForm::acConfPrefsExecute(TObject *Sender)
 {
 	FrmAppConfig = new TFrmAppConfig(this);
 	FrmAppConfig->ShowModal();
-    FrmAppConfig->Free();
+	FrmAppConfig->Free();
 	FrmAppConfig = NULL;
 }
 //---------------------------------------------------------------------------
@@ -4610,7 +4625,7 @@ void __fastcall TMainForm::acLoadExperimentExecute(TObject *Sender)
 
     ForceCurrentDirectory = False;
 
-    TStringList *encodings = new TStringList();
+	TStringList *encodings = new TStringList();
     encodings->AddObject("Ascii", TEncoding::ASCII);
     encodings->AddObject("Unicode", TEncoding::Unicode);
     encodings->AddObject("UTF-8", TEncoding::UTF8);
