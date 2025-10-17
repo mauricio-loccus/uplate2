@@ -4231,6 +4231,13 @@ void __fastcall TMainForm::frxUserDataSetUnknowsGetValue(const UnicodeString Var
 		return;
 	}
 
+	if ("Label" == VarName)
+	{
+	    // O espaço no início do conteúdo visa melhorar o alinhamento com os cabeçalhos
+		Value = " " + unknownsGrid->Cells[colUnknownLabel->Position][frxUserDataSetUnknows->RecNo];
+		return;
+	}
+
 	if ("Absorbance" == VarName)
 	{
 		Value = unknownsGrid->Cells[colUnknownPosProcessValue->Position][frxUserDataSetUnknows->RecNo];
@@ -4269,6 +4276,7 @@ void __fastcall TMainForm::acResultUnknowsExecute(TObject *Sender)      // expor
 	frxReportUnknows->PrepareReport();
 	frxReportUnknows->ShowPreparedReport();
 }
+
 //---------------------------------------------------------------------------
 
 void __fastcall TMainForm::lmdstdValuesGridChange(TObject *Sender, TLMDGridChangeFlags AChangedFlags)
