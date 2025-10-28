@@ -4152,6 +4152,12 @@ void __fastcall TMainForm::frxUserDataSetResultsRawGetValue(const UnicodeString 
 		return;
 	}
 
+	if ("Label" == VarName)
+	{
+		Value = ReadRawGrid->Cells[colReadRawLabel->Position][frxUserDataSetResultsRaw->RecNo];
+		return;
+	}
+
 	if ("RawType" == VarName)
 	{
 		Value = ReadRawGrid->Cells[colReadRawType->Position][frxUserDataSetResultsRaw->RecNo];
