@@ -791,6 +791,8 @@ object MainForm: TMainForm
         ParentColor = True
         TabOrder = 0
         OnChange = lmdstdValuesGridChange
+        ExplicitLeft = -3
+        ExplicitTop = -32
         object colPlateName: TLMDGridTextColumn
           Width = 100
           Position = 0
@@ -1834,8 +1836,8 @@ object MainForm: TMainForm
       'begin'
       ''
       'end.')
-    Left = 352
-    Top = 320
+    Left = 264
+    Top = 248
     Datasets = <
       item
         DataSet = frxUserDataSetResults
@@ -3795,8 +3797,8 @@ object MainForm: TMainForm
       'ResultType'
       'ResultImage')
     OnGetValue = frxUserDataSetResultsGetValue
-    Left = 472
-    Top = 320
+    Left = 392
+    Top = 248
   end
   object frxPDFExport: TfrxPDFExport
     UseFileCache = True
@@ -3825,14 +3827,14 @@ object MainForm: TMainForm
     PdfA = False
     PDFStandard = psNone
     PDFVersion = pv17
-    Left = 232
-    Top = 320
+    Left = 952
+    Top = 192
   end
   object treeviewMenu: TPopupMenu
     MenuAnimation = [maTopToBottom, maBottomToTop]
     OnPopup = treeviewMenuPopup
-    Left = 96
-    Top = 560
+    Left = 56
+    Top = 328
     object AddPlateMenuItem: TMenuItem
       Caption = 'Adicionar Placa'
       OnClick = AddPlateMenuItemClick
@@ -3893,8 +3895,8 @@ object MainForm: TMainForm
     CommonButtons = []
     DefaultButton = 201
     ThemeGlobalMode = True
-    Left = 840
-    Top = 322
+    Left = 632
+    Top = 10
   end
   object frxReportResultsRaw: TfrxReport
     Version = '2022.2.10'
@@ -3951,6 +3953,8 @@ object MainForm: TMainForm
         Height = 52.912350000000000000
         Top = 18.897650000000000000
         Width = 1046.929810000000000000
+        KeepChild = True
+        StartNewPage = True
         object Memo20: TfrxMemoView
           Align = baCenter
           AllowVectorExport = True
@@ -3992,7 +3996,7 @@ object MainForm: TMainForm
         object Line3: TfrxLineView
           Align = baWidth
           AllowVectorExport = True
-          Top = 49.132350000000000000
+          Top = 49.133858267716500000
           Width = 1046.929810000000000000
           Color = clBlack
           Frame.Typ = [ftTop]
@@ -5783,7 +5787,7 @@ object MainForm: TMainForm
           TransparentColor = clWhite
         end
       end
-      object MasterData1: TfrxMasterData
+      object MasterData: TfrxMasterData
         FillType = ftBrush
         FillGap.Top = 0
         FillGap.Left = 0
@@ -5800,6 +5804,7 @@ object MainForm: TMainForm
         object Memo2: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
+          Top = -0.006970000000000000
           Width = 75.590000000000000000
           Height = 18.897650000000000000
           DataField = 'PlateName'
@@ -5819,6 +5824,7 @@ object MainForm: TMainForm
           Align = baLeft
           AllowVectorExport = True
           Left = 75.590000000000000000
+          Top = -0.006970000000000000
           Width = 41.574830000000000000
           Height = 18.897650000000000000
           DataField = 'RawCoord'
@@ -5839,7 +5845,8 @@ object MainForm: TMainForm
           Align = baLeft
           AllowVectorExport = True
           Left = 117.164830000000000000
-          Width = 30.236240000000000000
+          Top = -0.006970000000000000
+          Width = 34.015748031496100000
           Height = 18.897650000000000000
           DataField = 'WellID'
           DataSet = frxUserDataSetResultsRaw
@@ -5858,8 +5865,9 @@ object MainForm: TMainForm
         object Memo8: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
-          Left = 147.401070000000000000
-          Width = 162.519790000000000000
+          Left = 151.180578031496100000
+          Top = -0.006970000000000000
+          Width = 124.728930000000000000
           Height = 18.897650000000000000
           DataField = 'RawType'
           DataSet = frxUserDataSetResultsRaw
@@ -5877,14 +5885,15 @@ object MainForm: TMainForm
         object Memo10: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
-          Left = 309.920860000000000000
-          Width = 71.811070000000000000
+          Left = 404.409060000000000000
+          Top = -0.006970000000000000
+          Width = 83.149606300000000000
           Height = 18.897650000000000000
           DataSet = frxUserDataSetResultsRaw
           DataSetName = 'ResultsRaw'
           DisplayFormat.DecimalSeparator = ','
           DisplayFormat.ThousandSeparator = '.'
-          DisplayFormat.FormatStr = '%2.3n'
+          DisplayFormat.FormatStr = '%2.3n '
           DisplayFormat.Kind = fkNumeric
           Font.Charset = ANSI_CHARSET
           Font.Color = clBlack
@@ -5900,14 +5909,15 @@ object MainForm: TMainForm
         object Memo12: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
-          Left = 381.731930000000000000
-          Width = 68.031540000000000000
+          Left = 487.558666300000000000
+          Top = -0.006970000000000000
+          Width = 83.149606300000000000
           Height = 18.897650000000000000
           DataSet = frxUserDataSetResultsRaw
           DataSetName = 'ResultsRaw'
           DisplayFormat.DecimalSeparator = ','
           DisplayFormat.ThousandSeparator = '.'
-          DisplayFormat.FormatStr = '%2.3n'
+          DisplayFormat.FormatStr = '%2.3n '
           DisplayFormat.Kind = fkNumeric
           Font.Charset = ANSI_CHARSET
           Font.Color = clBlack
@@ -5923,8 +5933,9 @@ object MainForm: TMainForm
         object Memo14: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
-          Left = 449.763470000000000000
-          Width = 71.811070000000000000
+          Left = 570.708272600000000000
+          Top = -0.006970000000000000
+          Width = 83.149606299212600000
           Height = 18.897650000000000000
           DataSet = frxUserDataSetResultsRaw
           DataSetName = 'ResultsRaw'
@@ -5946,8 +5957,9 @@ object MainForm: TMainForm
         object Memo16: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
-          Left = 710.551040000000000000
-          Width = 170.078850000000000000
+          Left = 820.157091499212600000
+          Top = -0.006970000000000000
+          Width = 128.503937010000000000
           Height = 18.897650000000000000
           DataField = 'RawInterpreted'
           DataSet = frxUserDataSetResultsRaw
@@ -5958,7 +5970,7 @@ object MainForm: TMainForm
           Font.Name = 'Calibri'
           Font.Style = []
           Frame.Typ = []
-          HAlign = haCenter
+          HAlign = haRight
           Memo.UTF8W = (
             '[ResultsRaw."RawInterpreted"]')
           ParentFont = False
@@ -5966,8 +5978,9 @@ object MainForm: TMainForm
         object Memo18: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
-          Left = 880.629890000000000000
-          Width = 86.929190000000000000
+          Left = 948.661028509212600000
+          Top = -0.006970000000000000
+          Width = 98.267716535433100000
           Height = 18.897650000000000000
           DataField = 'RawTimeStamp'
           DataSet = frxUserDataSetResultsRaw
@@ -5994,15 +6007,16 @@ object MainForm: TMainForm
         object Memo26: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
-          Left = 521.574540000000000000
-          Width = 94.488250000000000000
+          Left = 653.857878899212600000
+          Top = -0.006970000000000000
+          Width = 83.149606300000000000
           Height = 18.897650000000000000
           DataField = 'StdDeviation'
           DataSet = frxUserDataSetResultsRaw
           DataSetName = 'ResultsRaw'
           DisplayFormat.DecimalSeparator = ','
           DisplayFormat.ThousandSeparator = '.'
-          DisplayFormat.FormatStr = '%2.3n'
+          DisplayFormat.FormatStr = '%2.3n '
           DisplayFormat.Kind = fkNumeric
           Font.Charset = ANSI_CHARSET
           Font.Color = clBlack
@@ -6018,8 +6032,9 @@ object MainForm: TMainForm
         object Memo27: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
-          Left = 616.062790000000000000
-          Width = 94.488250000000000000
+          Left = 737.007485199212600000
+          Top = -0.006970000000000000
+          Width = 83.149606300000000000
           Height = 18.897650000000000000
           DataField = 'CoefVariation'
           DataSet = frxUserDataSetResultsRaw
@@ -6039,8 +6054,21 @@ object MainForm: TMainForm
             '[ResultsRaw."CoefVariation"]')
           ParentFont = False
         end
+        object Label: TfrxMemoView
+          AllowVectorExport = True
+          Left = 272.130000000000000000
+          Top = -0.006970000000000004
+          Width = 132.279060000000000000
+          Height = 18.897650000000000000
+          DataField = 'Label'
+          DataSet = frxUserDataSetResultsRaw
+          DataSetName = 'ResultsRaw'
+          Frame.Typ = []
+          Memo.UTF8W = (
+            '[ResultsRaw."Label"]')
+        end
       end
-      object PageFooter1: TfrxPageFooter
+      object PageFooter: TfrxPageFooter
         FillType = ftBrush
         FillGap.Top = 0
         FillGap.Left = 0
@@ -6050,51 +6078,20 @@ object MainForm: TMainForm
         Height = 22.677180000000000000
         Top = 264.567100000000000000
         Width = 1046.929810000000000000
-        object PageNumber: TfrxMemoView
+        object Paging: TfrxMemoView
           Align = baRight
           AllowVectorExport = True
-          Left = 952.441560000000000000
-          Width = 37.795300000000000000
+          Left = 959.999060000000000000
+          Width = 86.930750000000000000
           Height = 18.897650000000000000
           AutoWidth = True
           Frame.Typ = []
           HAlign = haRight
           Memo.UTF8W = (
-            '[Page#]')
-        end
-        object Memo22: TfrxMemoView
-          Align = baRight
-          AllowVectorExport = True
-          Left = 990.236860000000000000
-          Width = 7.559060000000000000
-          Height = 18.897650000000000000
-          AutoWidth = True
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clBlack
-          Font.Height = -13
-          Font.Name = 'Arial'
-          Font.Style = []
-          Frame.Typ = []
-          HAlign = haCenter
-          Memo.UTF8W = (
-            '/')
-          ParentFont = False
-          VAlign = vaCenter
-        end
-        object TotalPages: TfrxMemoView
-          Align = baRight
-          AllowVectorExport = True
-          Left = 997.795920000000000000
-          Width = 49.133890000000000000
-          Height = 18.897650000000000000
-          AutoWidth = True
-          Frame.Typ = []
-          HAlign = haRight
-          Memo.UTF8W = (
-            '[TotalPages#]')
+            '[Page#]/[TotalPages#]')
         end
       end
-      object PageHeader1: TfrxPageHeader
+      object PageHeader: TfrxPageHeader
         FillType = ftBrush
         FillGap.Top = 0
         FillGap.Left = 0
@@ -6107,13 +6104,14 @@ object MainForm: TMainForm
         object Memo3: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
+          Top = -0.008250000000000000
           Width = 75.590000000000000000
-          Height = 30.236240000000000000
+          Height = 30.231750000000000000
           Font.Charset = ANSI_CHARSET
           Font.Color = clBlack
-          Font.Height = -12
-          Font.Name = 'Calibri'
-          Font.Style = []
+          Font.Height = -13
+          Font.Name = 'Arial Narrow'
+          Font.Style = [fsBold]
           Frame.Typ = []
           Memo.UTF8W = (
             'Placa')
@@ -6124,13 +6122,14 @@ object MainForm: TMainForm
           Align = baLeft
           AllowVectorExport = True
           Left = 75.590000000000000000
-          Width = 41.574830000000000000
-          Height = 30.236240000000000000
+          Top = -0.008250000000000000
+          Width = 45.354330710000000000
+          Height = 30.231750000000000000
           Font.Charset = ANSI_CHARSET
           Font.Color = clBlack
-          Font.Height = -12
-          Font.Name = 'Calibri'
-          Font.Style = []
+          Font.Height = -13
+          Font.Name = 'Arial Narrow'
+          Font.Style = [fsBold]
           Frame.Typ = []
           Memo.UTF8W = (
             'Posi'#231#227'o')
@@ -6140,14 +6139,15 @@ object MainForm: TMainForm
         object Memo7: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
-          Left = 117.164830000000000000
+          Left = 120.944330710000000000
+          Top = -0.008250000000000000
           Width = 30.236240000000000000
-          Height = 30.236240000000000000
+          Height = 30.231750000000000000
           Font.Charset = ANSI_CHARSET
           Font.Color = clBlack
-          Font.Height = -12
-          Font.Name = 'Calibri'
-          Font.Style = []
+          Font.Height = -13
+          Font.Name = 'Arial Narrow'
+          Font.Style = [fsBold]
           Frame.Typ = []
           HAlign = haCenter
           Memo.UTF8W = (
@@ -6158,7 +6158,7 @@ object MainForm: TMainForm
         object Line1: TfrxLineView
           Align = baWidth
           AllowVectorExport = True
-          Top = 30.236240000000000000
+          Top = 34.015748031496100000
           Width = 1046.929810000000000000
           Color = clBlack
           Frame.Typ = [ftTop]
@@ -6166,14 +6166,15 @@ object MainForm: TMainForm
         object Memo9: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
-          Left = 147.401070000000000000
-          Width = 162.519790000000000000
-          Height = 30.236240000000000000
+          Left = 151.180570710000000000
+          Top = -0.008250000000000000
+          Width = 124.728930000000000000
+          Height = 30.231750000000000000
           Font.Charset = ANSI_CHARSET
           Font.Color = clBlack
-          Font.Height = -12
-          Font.Name = 'Calibri'
-          Font.Style = []
+          Font.Height = -13
+          Font.Name = 'Arial Narrow'
+          Font.Style = [fsBold]
           Frame.Typ = []
           Memo.UTF8W = (
             'Tipo')
@@ -6183,14 +6184,15 @@ object MainForm: TMainForm
         object Memo11: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
-          Left = 309.920860000000000000
-          Width = 71.811070000000000000
-          Height = 30.236240000000000000
+          Left = 404.413464570000000000
+          Top = -0.008250000000000000
+          Width = 83.149606300000000000
+          Height = 30.231750000000000000
           Font.Charset = ANSI_CHARSET
           Font.Color = clBlack
-          Font.Height = -12
-          Font.Name = 'Calibri'
-          Font.Style = []
+          Font.Height = -13
+          Font.Name = 'Arial Narrow'
+          Font.Style = [fsBold]
           Frame.Typ = []
           HAlign = haCenter
           Memo.UTF8W = (
@@ -6202,14 +6204,15 @@ object MainForm: TMainForm
         object Memo13: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
-          Left = 381.731930000000000000
-          Width = 68.031540000000000000
-          Height = 30.236240000000000000
+          Left = 487.563070870000000000
+          Top = -0.008250000000000000
+          Width = 83.149606300000000000
+          Height = 30.231750000000000000
           Font.Charset = ANSI_CHARSET
           Font.Color = clBlack
-          Font.Height = -12
-          Font.Name = 'Calibri'
-          Font.Style = []
+          Font.Height = -13
+          Font.Name = 'Arial Narrow'
+          Font.Style = [fsBold]
           Frame.Typ = []
           HAlign = haCenter
           Memo.UTF8W = (
@@ -6218,17 +6221,18 @@ object MainForm: TMainForm
           ParentFont = False
           VAlign = vaCenter
         end
-        object Memo15: TfrxMemoView
+        object headerConcentration: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
-          Left = 449.763470000000000000
-          Width = 71.811070000000000000
+          Left = 570.712677170000000000
+          Top = -0.008250000000000000
+          Width = 83.149606300000000000
           Height = 30.236240000000000000
           Font.Charset = ANSI_CHARSET
           Font.Color = clBlack
-          Font.Height = -12
-          Font.Name = 'Calibri'
-          Font.Style = []
+          Font.Height = -13
+          Font.Name = 'Arial Narrow'
+          Font.Style = [fsBold]
           Frame.Typ = []
           HAlign = haCenter
           Memo.UTF8W = (
@@ -6239,14 +6243,15 @@ object MainForm: TMainForm
         object Memo17: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
-          Left = 710.551040000000000000
-          Width = 170.078850000000000000
-          Height = 30.236240000000000000
+          Left = 820.161496069212600000
+          Top = -0.008250000000000000
+          Width = 128.498031490000000000
+          Height = 30.231750000000000000
           Font.Charset = ANSI_CHARSET
           Font.Color = clBlack
-          Font.Height = -12
-          Font.Name = 'Calibri'
-          Font.Style = []
+          Font.Height = -13
+          Font.Name = 'Arial Narrow'
+          Font.Style = [fsBold]
           Frame.Typ = []
           HAlign = haCenter
           Memo.UTF8W = (
@@ -6257,14 +6262,15 @@ object MainForm: TMainForm
         object Memo19: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
-          Left = 880.629890000000000000
-          Width = 86.929190000000000000
-          Height = 30.236240000000000000
+          Left = 948.659527559212600000
+          Top = -0.008250000000000000
+          Width = 98.220000000000000000
+          Height = 30.231750000000000000
           Font.Charset = ANSI_CHARSET
           Font.Color = clBlack
-          Font.Height = -12
-          Font.Name = 'Calibri'
-          Font.Style = []
+          Font.Height = -13
+          Font.Name = 'Arial Narrow'
+          Font.Style = [fsBold]
           Frame.Typ = []
           HAlign = haCenter
           Memo.UTF8W = (
@@ -6275,14 +6281,15 @@ object MainForm: TMainForm
         object Memo24: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
-          Left = 521.574540000000000000
-          Width = 94.488250000000000000
-          Height = 30.236240000000000000
+          Left = 653.862283470000000000
+          Top = -0.008250000000000000
+          Width = 83.149606299212600000
+          Height = 30.231750000000000000
           Font.Charset = ANSI_CHARSET
           Font.Color = clBlack
-          Font.Height = -12
-          Font.Name = 'Calibri'
-          Font.Style = []
+          Font.Height = -13
+          Font.Name = 'Arial Narrow'
+          Font.Style = [fsBold]
           Frame.Typ = []
           HAlign = haCenter
           Memo.UTF8W = (
@@ -6293,18 +6300,36 @@ object MainForm: TMainForm
         object Memo25: TfrxMemoView
           Align = baLeft
           AllowVectorExport = True
-          Left = 616.062790000000000000
-          Width = 94.488250000000000000
-          Height = 30.236240000000000000
+          Left = 737.011889769212600000
+          Top = -0.008250000000000000
+          Width = 83.149606300000000000
+          Height = 30.231750000000000000
           Font.Charset = ANSI_CHARSET
           Font.Color = clBlack
-          Font.Height = -12
-          Font.Name = 'Calibri'
-          Font.Style = []
+          Font.Height = -13
+          Font.Name = 'Arial Narrow'
+          Font.Style = [fsBold]
           Frame.Typ = []
           HAlign = haCenter
           Memo.UTF8W = (
             'Coeficiente de Varia'#231#227'o')
+          ParentFont = False
+          VAlign = vaCenter
+        end
+        object headerLabel: TfrxMemoView
+          AllowVectorExport = True
+          Left = 272.130000000000000000
+          Top = -0.008250000000000000
+          Width = 132.283464570000000000
+          Height = 30.230000000000000000
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Arial Narrow'
+          Font.Style = [fsBold]
+          Frame.Typ = []
+          Memo.UTF8W = (
+            ' Sample ID')
           ParentFont = False
           VAlign = vaCenter
         end
@@ -6348,8 +6373,8 @@ object MainForm: TMainForm
       'begin'
       ''
       'end.')
-    Left = 248
-    Top = 552
+    Left = 608
+    Top = 176
     Datasets = <
       item
         DataSet = frxUserDataSetUnknows
@@ -8710,8 +8735,8 @@ object MainForm: TMainForm
       'CoefVariation'
       'Interpret')
     OnGetValue = frxUserDataSetUnknowsGetValue
-    Left = 392
-    Top = 552
+    Left = 728
+    Top = 176
   end
   object QuitAppDialog: TLMDTaskDialog
     Title = 'Sair da aplica'#231#227'o?'
@@ -8732,8 +8757,8 @@ object MainForm: TMainForm
     CommonButtons = []
     DefaultButton = 201
     ThemeGlobalMode = True
-    Left = 832
-    Top = 242
+    Left = 544
+    Top = 10
   end
   object AskDialog: TLMDTaskDialog
     MainIcon = tdiQuestion
@@ -8752,12 +8777,12 @@ object MainForm: TMainForm
     CommonButtons = []
     DefaultButton = 201
     ThemeGlobalMode = True
-    Left = 928
-    Top = 258
+    Left = 720
+    Top = 10
   end
   object MainMenu: TMainMenu
-    Left = 96
-    Top = 456
+    Left = 400
+    Top = 8
     object File1: TMenuItem
       Caption = '&Arquivo'
       object OptUserLogin: TMenuItem
