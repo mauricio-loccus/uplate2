@@ -584,9 +584,9 @@ private:	// User declarations
 public:		// User declarations
 	__fastcall TMainForm(TComponent* Owner);
 
+	static Boolean __fastcall AlreadyRunning();
 	void __fastcall UpdateLabels();
 
-	static Boolean __fastcall AlreadyRunning();
 
 BEGIN_MESSAGE_MAP
 	MESSAGE_HANDLER(WM_DEVICECHANGE, TMessage, OnDeviceChange)

@@ -452,6 +452,26 @@ void __fastcall TMainForm::FormShow(TObject *Sender)
 
 //---------------------------------------------------------------------------
 
+Boolean __fastcall TMainForm::AlreadyRunning()
+{
+	Boolean alreadyRunning = False;
+
+	singletonEventHandle = OpenMutex(MUTEX_ALL_ACCESS, 0, APPMUTEXNAME);
+
+	if (!singletonEventHandle)
+	{
+		singletonEventHandle = CreateMutex(0, 0, APPMUTEXNAME);
+
+		alreadyRunning = (::GetLastError() == ERROR_ALREADY_EXISTS ||
+						  ::GetLastError() == ERROR_ACCESS_DENIED);
+	}
+	else
+		alreadyRunning = True;
+
+	return alreadyRunning;
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TMainForm::InitAll()
 {
 	currMatrix = 0;
@@ -4098,32 +4118,6 @@ void __fastcall TMainForm::tabPlatesScrollBoxResize(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-Boolean __fastcall TMainForm::AlreadyRunning()
-{
-	Boolean alreadyRunning = False;
-
-	singletonEventHandle = OpenMutex(MUTEX_ALL_ACCESS, 0, APPMUTEXNAME);
-
-	if (!singletonEventHandle)
-	{
-		singletonEventHandle = CreateMutex(0, 0, APPMUTEXNAME);
-
-		alreadyRunning = (::GetLastError() == ERROR_ALREADY_EXISTS ||
-						  ::GetLastError() == ERROR_ACCESS_DENIED);
-	}
-	else
-		alreadyRunning = True;
-
-	return alreadyRunning;
-}
-
-void __fastcall TMainForm::acResultsRawExecute(TObject *Sender)                 // Resultado da leitura
-{
-	frxUserDataSetResultsRaw->RangeEndCount = ReadRawGrid->DataRowCount;
-	frxReportResultsRaw->PrepareReport();
-	frxReportResultsRaw->ShowPreparedReport();
-}
-//---------------------------------------------------------------------------
 
 void __fastcall TMainForm::frxUserDataSetResultsRawCheckEOF(TObject *Sender, bool &Eof)
 {
