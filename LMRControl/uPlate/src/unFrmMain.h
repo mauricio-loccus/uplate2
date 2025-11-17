@@ -295,7 +295,7 @@ __published:	// IDE-managed Components
 	TMenuItem *ImportarCurvadeCalibrao1;
 	TMenuItem *N1;
 	TMenuItem *Exit1;
-	TMenuItem *Relatrios1;
+	TMenuItem *mReports;
 	TMenuItem *ResultadoPorPlaca;
 	TMenuItem *RelatriodeDesconhecidos;
 	TMenuItem *ResultadodaLeitura;
@@ -353,9 +353,10 @@ __published:	// IDE-managed Components
 	TLMDGridFloatColumn* colUnknownStdDev;
 	TLMDGridFloatColumn* colUnknownCoefVar;
 	TLMDGridTextColumn*  colUnknownInterpretValue;
-
-
-	TMenuItem *MapadaPlaca1;
+	TMenuItem *mPlatesMap;
+	TfrxReport *frxReportPlateMap;
+	TfrxUserDataSet *frxUserDataSetPlateMap;
+	TAction *acPlatesMap;
 
 
 	void __fastcall actExitExecute(TObject *Sender);
@@ -427,6 +428,8 @@ __published:	// IDE-managed Components
 	void __fastcall tabQualitativeScrollBoxResize(TObject *Sender);
 	void __fastcall tabPlatesScrollBoxResize(TObject *Sender);
 	void __fastcall acResultsRawExecute(TObject *Sender);
+    void __fastcall acResultUnknowsExecute(TObject *Sender);
+	void __fastcall acPlatesMapExecute(TObject *Sender);
 	void __fastcall frxUserDataSetResultsRawCheckEOF(TObject *Sender, bool &Eof);
 	void __fastcall frxUserDataSetResultsRawGetValue(const UnicodeString VarName, Variant &Value);
 	void __fastcall frxUserDataSetUnknowsCheckEOF(TObject *Sender, bool &Eof);

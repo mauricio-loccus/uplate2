@@ -2022,6 +2022,7 @@ for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; ++col)
 	acRawResult->Enabled = True;
 	acResultsRaw->Enabled = True;
 	acResultUnknows->Enabled = True;
+	acPlatesMap->Enabled = True;
     OptExperimentSave->Enabled = True;
 	OptExperimentExportCSV->Enabled = True;
 	OptExportarValoresBrutos->Enabled = True;
@@ -3884,6 +3885,33 @@ void __fastcall TMainForm::cbUnityChange(TObject *Sender)
 {
     mpAppConfig->ProtocolUnity = cbUnity->Items->Strings[cbUnity->ItemIndex];
 }
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::acResultsRawExecute(TObject *Sender)                 // Resultado da leitura
+{
+	frxUserDataSetResultsRaw->RangeEndCount = ReadRawGrid->DataRowCount;
+	frxReportResultsRaw->PrepareReport();
+	frxReportResultsRaw->ShowPreparedReport();
+}
+
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::acResultUnknowsExecute(TObject *Sender)      // exportar Relat�rio de Desconhecidos
+{
+	frxUserDataSetUnknows->RangeEndCount = unknownsGrid->DataRowCount;
+	frxReportUnknows->PrepareReport();
+	frxReportUnknows->ShowPreparedReport();
+}
+
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::acPlatesMapExecute(TObject *Sender)
+{
+	frxUserDataSetPlateMap->RangeEndCount = ReadRawGrid->DataRowCount;
+	frxReportPlateMap->PrepareReport();
+	frxReportPlateMap->ShowPreparedReport();
+}
+
 //---------------------------------------------------------------------------
 
 void __fastcall TMainForm::frxReportRawResultBeforePrint(TfrxReportComponent *Sender)

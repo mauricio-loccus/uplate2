@@ -8844,7 +8844,7 @@ object MainForm: TMainForm
         Action = actExit
       end
     end
-    object Relatrios1: TMenuItem
+    object mReports: TMenuItem
       Caption = '&Relat'#243'rios'
       object ResultadoPorPlaca: TMenuItem
         Action = acRawResult
@@ -8855,8 +8855,9 @@ object MainForm: TMainForm
       object ResultadodaLeitura: TMenuItem
         Action = acResultsRaw
       end
-      object MapadaPlaca1: TMenuItem
-        Caption = '&Mapa da Placa...'
+      object mPlatesMap: TMenuItem
+        Action = acPlatesMap
+        Caption = 'Mapa da Placa...'
       end
     end
     object Configuraes1: TMenuItem
@@ -8952,11 +8953,13 @@ object MainForm: TMainForm
       OnExecute = acFiltersConfigExecute
     end
     object acResultsRaw: TAction
+      Category = 'Reports'
       Caption = 'Resultado da Leitura'
       Enabled = False
       OnExecute = acResultsRawExecute
     end
     object acResultUnknows: TAction
+      Category = 'Reports'
       Caption = 'Relat'#243'rio de Desconhecidos'
       Enabled = False
       OnExecute = acResultUnknowsExecute
