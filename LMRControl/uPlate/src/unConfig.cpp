@@ -90,6 +90,14 @@ void __fastcall AppConfig::setUserName(String userName)
 	mUserName = userName;
 }
 
+void __fastcall AppConfig::setUserGroup(String value)
+{
+	if (mUserGroup == value)
+		return;
+
+	mUserGroup = value;
+}
+
 void __fastcall AppConfig::setIsRoot(Boolean isRoot)
 {
 	if (mIsRoot == isRoot)

@@ -175,7 +175,7 @@ object DBModule: TDBModule
         ParamType = ptInput
       end>
     SQL.Strings = (
-      'select ID, LOGIN, PASSWORD, SUPERUSER'
+      'select ID, LOGIN, PASSWORD, SUPERUSER, name, surname, dept '
       '   from USER'
       '  where LOGIN = :pLogin')
     SQLConnection = Lmr96Connection

@@ -206,6 +206,7 @@ void __fastcall TMainForm::LoginRequest()
 			return False;
 
 		mpAppConfig->UserName = FrmAppLogin->UserName;
+		mpAppConfig->UserGroup = FrmAppLogin->UserGroup;
 		mpAppConfig->UserID = FrmAppLogin->UserID;
 		mpAppConfig->UserLogin = FrmAppLogin->UserLogin;
 		mpAppConfig->IsSuperUser = FrmAppLogin->IsSuperUser;

@@ -24,6 +24,12 @@ void __fastcall TDBModule::DataModuleCreate(TObject *Sender)
 
 	String DatabasePath = Lmr96Connection->Params->Strings[keyIndex];
     String CurrentDirectory = GetCurrentDir();
+
+
+	if (UserSQLQuery->SQL->Count > 0)
+	{
+		UserSQLQuery->SQL->Delete(UserSQLQuery->SQL->Count - 1);
+	}
 }
 //---------------------------------------------------------------------------
 

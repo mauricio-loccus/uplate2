@@ -21,6 +21,7 @@ class AppConfig : public TComponent
 		__property System::Largeint UserID = {read = mUserID, write = setUserID};
 		__property String UserLogin = {read = mUserLogin, write = setUserLogin};
 		__property String UserName = {read = mUserName, write = setUserName};
+		__property String UserGroup = {read = mUserGroup, write = setUserGroup};
 		__property Boolean IsSuperUser = {read = mIsRoot, write = setIsRoot};
 		__property String ProtocolUnity = {read = mProtoUnity, write = setProtocolUnity};
 		__property Boolean HeadersInCsv = {read = mHeadersInCsv, write = setHeadersInCsv};
@@ -34,6 +35,7 @@ class AppConfig : public TComponent
 		void __fastcall setUserID(System::Largeint userID);
 		void __fastcall setUserLogin(String userLogin);
 		void __fastcall setUserName(String userName);
+		void __fastcall setUserGroup(String userGroup);
 		void __fastcall setIsRoot(Boolean isRoot);
 		void __fastcall setProtocolUnity(const String& unity);
 		void __fastcall setHeadersInCsv(Boolean set);
@@ -46,6 +48,7 @@ class AppConfig : public TComponent
 		System::Largeint mUserID;
 		String mUserLogin;
 		String mUserName;
+		String mUserGroup;
 		Boolean mIsRoot;
 		String mProtoUnity;
 		Boolean mHeadersInCsv;

@@ -52,6 +52,7 @@ void __fastcall TFrmAppLogin::btnLogarClick(TObject *Sender)
 
 	userID = DBModule->UserQuery->FieldByName("ID")->AsInteger;
 	userLogin = DBModule->UserQuery->FieldByName("LOGIN")->AsString;
+	userGroup = DBModule->UserQuery->FieldByName("DEPT")->AsString;
 	isRoot = DBModule->UserQuery->FieldByName("SUPERUSER")->AsInteger;
 
 	DBModule->UserQuery->Close();

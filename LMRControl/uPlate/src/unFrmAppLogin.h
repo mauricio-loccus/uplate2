@@ -37,6 +37,7 @@ private:	// User declarations
 	Integer userID;
     String userLogin;
     String userName;
+	String userGroup;
     Boolean isRoot;
 
 public:		// User declarations
@@ -45,6 +46,7 @@ public:		// User declarations
 	__property Integer UserID = {read = userID};
     __property String UserLogin = {read = userLogin};
     __property String UserName = {read = userName};
+	__property String UserGroup = {read = userGroup};
     __property Boolean IsSuperUser = {read = isRoot};
 };
 
