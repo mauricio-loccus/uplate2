@@ -783,7 +783,8 @@ void __fastcall TMainForm::actConnectExecute(TObject *Sender)
 			FrmWait->Show();
 
 		// Escrever código para tornar o botão toggle e conectar ou desconectar o equipamento
-		AnsiString commName;
+		m_elisaDevice->Connect(AnsiString(commName.c_str()));
+		//AnsiString commName;
 
 		if (!m_elisaDevice->isAuthenticated)
 		{
