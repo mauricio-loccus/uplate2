@@ -4774,6 +4774,8 @@ void __fastcall TMainForm::acLoadExperimentExecute(TObject *Sender)
 		pNode = pNode->NextSibling();
 	}
 
+	_di_IXMLNode CreationDate = ExperimentNode->ChildNodes->FindNode("CreationDate");
+
 	OptExperimentExportCSV->Enabled = True;
 	OptExportarValoresBrutos->Enabled = True;
 }
