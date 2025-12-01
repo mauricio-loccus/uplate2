@@ -95,6 +95,9 @@
 #include <VclTee.TeeGDIPlus.hpp>
 #include <VCLTee.TeEngine.hpp>
 #include <VCLTee.TeeProcs.hpp>
+#include "frxDMPExport.hpp"
+#include <Data.DB.hpp>
+#include <Datasnap.DBClient.hpp>
 
 #include <boost/functional.hpp>
 #include <list>
@@ -434,7 +437,6 @@ __published:	// IDE-managed Components
 	void __fastcall frxUserDataSetResultsRawGetValue(const UnicodeString VarName, Variant &Value);
 	void __fastcall frxUserDataSetUnknowsCheckEOF(TObject *Sender, bool &Eof);
 	void __fastcall frxUserDataSetUnknowsGetValue(const UnicodeString VarName, Variant &Value);
-	void __fastcall acResultUnknowsExecute(TObject *Sender);
 	void __fastcall lmdstdValuesGridChange(TObject *Sender, TLMDGridChangeFlags AChangedFlags);
 	void __fastcall cbCurveTypesChange(TObject *Sender);
 	void __fastcall acAboutExecute(TObject *Sender);
@@ -457,6 +459,16 @@ __published:	// IDE-managed Components
 	void __fastcall FormActivate(TObject *Sender);
 	void __fastcall FormKeyUp(TObject *Sender, WORD &Key, TShiftState Shift);
 	void __fastcall AppMessage(tagMSG &Msg, bool &Handled);
+	void __fastcall frxUserDataSetPlateBeforePrint(TfrxReportComponent *Sender)                 ;
+
+	void __fastcall frxUserDataSetPlateMapFirst(TObject *Sender);
+	void __fastcall frxUserDataSetPlateMapNext(TObject *Sender);
+	void __fastcall frxUserDataSetPlateMapCheckEOF(TObject *Sender, bool &Eof);
+	void __fastcall frxUserDataSetPlateMapGetValue(const UnicodeString VarName, Variant &Value);
+
+
+
+
 
 public:
 	void __fastcall LoginRequest();
@@ -513,6 +525,7 @@ private:	// User declarations
 	std::unique_ptr<CalibrationData> mCalibrationCurve;
 
 	Integer m_editingCol, m_editingRow;
+	int position;                           // Usado no relat�rio 'Mapa da Placa' - Representa o registro corrente pedido pelo relat�rio
 
 	Boolean __fastcall UserLogon();
 	Boolean __fastcall UserLogoff();

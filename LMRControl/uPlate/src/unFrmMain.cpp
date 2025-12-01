@@ -126,6 +126,7 @@
 #pragma link "Vcl.StdActns"
 #pragma link "Vcl.PlatformDefaultStyleActnCtrls"
 
+#pragma link "frxDMPExport"
 #pragma resource "*.dfm"
 
 #define APPMUTEXNAME TEXT("LMR96.0")
@@ -258,6 +259,8 @@ Boolean __fastcall TMainForm::UserLogoff()
 
 	SMenuExperiment->Enabled = False;
 	SMenuProtocol->Enabled = False;
+
+	return True;
 }
 
 //---------------------------------------------------------------------------
@@ -478,7 +481,7 @@ void __fastcall TMainForm::InitAll()
 	currMatrix = 0;
 	mCurveTypes = 0;
 	cbChartScale->ItemIndex = 0;
-    mCurveImported = False;
+	mCurveImported = False;
 	mCalibrationCurve.reset(new CalibrationData());
 	lbR2->Caption = "";
 //	stdCurveChart->SubTitle->Text->SetText(TEXT(""));
@@ -872,8 +875,8 @@ void __fastcall TMainForm::actConnectExecute(TObject *Sender)
 
 		UpdateUi(UserLogged());
 
-		if (!m_deviceSimulated)
-			FrmWait->Close();
+			if (!m_deviceSimulated)
+				FrmWait->Close();
 	}
 	catch (Exception& e)
 	{
@@ -1947,7 +1950,7 @@ for (Integer col = 0; col < m_elisaDeviceParams->PlateCols; ++col)
 			// Verifica se o poço atual é o que estamos processando
             if ((*cit)->Row == row && (*cit)->Col == col)
 			{
-                String wellInfo;
+				String wellInfo;
                 wellInfo.sprintf(TEXT("%c%2.2d"), row + 'A', col + 1);
 
 				unknownsGrid->Cells[colUnknownPlateName->Position][rowPos]          = getNode(plateIdx + 101)->Text;
@@ -2238,7 +2241,7 @@ void __fastcall TMainForm::treeviewAddPlateNode(TTreeNodes *Node)
 
 	WellMatrixList& wellMatrixListRef = *TWellMatrixSingleton::instance();
 
-    size_t matrixCount = wellMatrixListRef.size();
+	size_t matrixCount = wellMatrixListRef.size();
 
 	TTreeNode *plateNode = Node->AddChildObject(node, String("Placa #") + matrixCount, NULL);
 	plateNode->SelectedIndex = node->SelectedIndex + matrixCount;
@@ -2316,7 +2319,7 @@ TTreeNode * __fastcall TMainForm::getNode(String name, TTreeNode *node) const
 			TTreeNode *child = getNode(name, node->getFirstChild());
 
             while (child != NULL)
-            {
+			{
                 if (child->Text == name)
                     return child;
 
@@ -2511,7 +2514,7 @@ void __fastcall TMainForm::cbChartScaleChange(TObject *Sender)
 
         case 1:
             try
-            {
+			{
 				if (0 > stdCurveChart->LeftAxis->Minimum || 0 > stdCurveChart->LeftAxis->Maximum)
 				{
 					String reason;
@@ -3252,7 +3255,7 @@ void __fastcall TMainForm::LoadSetupBranch(_di_IXMLNode ProtoNode)
         cbKineticRateTypeChange(this);
 
         xmlNode = ReadModeNode->ChildNodes->FindNode("Window");
-        cbKineticWindowType->ItemIndex = xmlNode->NodeValue;
+		cbKineticWindowType->ItemIndex = xmlNode->NodeValue;
         cbKineticWindowTypeChange(this);
 
         xmlNode = ReadModeNode->ChildNodes->FindNode("Trend");
@@ -3310,7 +3313,7 @@ if (FiltersNode && FiltersNode->HasChildNodes)
     xmlNode = FiltersNode->ChildNodes->FindNode("Double");
     rbFilterDouble->Checked = xmlNode && xmlNode->NodeValue == "true";
 
-    // Chamar o evento correspondente para garantir a configuração correta
+	// Chamar o evento correspondente para garantir a configuração correta
     if (rbFilterDouble->Checked)
     {
         rbFilterDoubleClick(this); // Garante que o modo Double é ativado corretamente
@@ -3322,17 +3325,17 @@ if (FiltersNode && FiltersNode->HasChildNodes)
 
     // Preencher os comboboxes
     xmlNode = FiltersNode->ChildNodes->FindNode("Position1");
-    if (xmlNode)
+	if (xmlNode)
     {
         int pos1 = StrToInt(xmlNode->NodeValue);
         if (pos1 >= 0 && pos1 < cbFilter1->Items->Count)
         {
             cbFilter1->ItemIndex = pos1;
         }
-    }
+	}
 
     xmlNode = FiltersNode->ChildNodes->FindNode("Position2");
-    if (xmlNode)
+	if (xmlNode)
     {
 		int pos2 = StrToInt(xmlNode->NodeValue);
 		if (pos2 >= 0 && pos2 < cbFilter2->Items->Count)
@@ -3408,7 +3411,7 @@ if (FiltersNode && FiltersNode->HasChildNodes)
         xmlNode = sessionNode->ChildNodes->FindNode("Interpret");
         edZone2Interpret->Text = xmlNode->NodeValue;
 
-        xmlNode = sessionNode->ChildNodes->FindNode("Limit");
+		xmlNode = sessionNode->ChildNodes->FindNode("Limit");
         edZone2Limit->Text = xmlNode->NodeValue;
 
         sessionNode = QCParameters->ChildNodes->FindNode("Session3");
@@ -3525,7 +3528,7 @@ void __fastcall TMainForm::CreateSetupBranch(_di_IXMLNode ProtoNode)
     _di_IXMLNode WavesNode = ProtoNode->AddChild("WaveLenghts");
 
     xmlNode = WavesNode->AddChild("Single");
-    xmlNode->SetNodeValue(rbSimpleLambda->Checked);
+	xmlNode->SetNodeValue(rbSimpleLambda->Checked);
 
     xmlNode = WavesNode->AddChild("Double");
     xmlNode->SetNodeValue(rbDoubleLambda->Checked);
@@ -3885,7 +3888,7 @@ void __fastcall TMainForm::acConfPrefsExecute(TObject *Sender)
 
 void __fastcall TMainForm::cbUnityChange(TObject *Sender)
 {
-    mpAppConfig->ProtocolUnity = cbUnity->Items->Strings[cbUnity->ItemIndex];
+	mpAppConfig->ProtocolUnity = cbUnity->Items->Strings[cbUnity->ItemIndex];
 }
 //---------------------------------------------------------------------------
 
@@ -3921,32 +3924,32 @@ void __fastcall TMainForm::frxReportRawResultBeforePrint(TfrxReportComponent *Se
 	TfrxMemoView *frxMemo = dynamic_cast<TfrxMemoView *>(frxReportRawResult->FindObject("ResultTypeTitle"));
 
 	if (!frxMemo)
-    {
-        TaskMessageDlg("Invalid Reference",
+	{
+		TaskMessageDlg("Invalid Reference",
 					   "Invalid reference to report object \"ResultTypeTitle\"",
-                       mtError,
-                       TMsgDlgButtons() << mbOK, 0);
+					   mtError,
+					   TMsgDlgButtons() << mbOK, 0);
 
-        return;
-    }
+		return;
+	}
 
 	ResultPair pair = mResultsList[frxUserDataSetResults->RecNo];
 
-    frxMemo->Text = pair.first;
+	frxMemo->Text = pair.first;
 
 	TfrxPictureView *frxPic = dynamic_cast<TfrxPictureView *>(frxReportRawResult->FindObject("ResultPicture"));
 
-    if (!frxPic)
-    {
-        TaskMessageDlg("Invalid Reference",
+	if (!frxPic)
+	{
+		TaskMessageDlg("Invalid Reference",
 					   "Invalid reference to report object \"ResultPicture\"",
-                       mtError,
-                       TMsgDlgButtons() << mbOK, 0);
+					   mtError,
+					   TMsgDlgButtons() << mbOK, 0);
 
-        return;
-    }
+		return;
+	}
 
-    frxPic->Picture->Assign(pair.second);
+	frxPic->Picture->Assign(pair.second);
 }
 //---------------------------------------------------------------------------
 
@@ -3955,46 +3958,142 @@ void __fastcall TMainForm::frxUserDataSetResultsCheckEOF(TObject *Sender, bool &
 	if (frxUserDataSetResults->RecNo >= frxUserDataSetResults->RangeEndCount)
 		Eof = True;
 }
+
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::frxUserDataSetResultsRawCheckEOF(TObject *Sender, bool &Eof)
+{
+	if (frxUserDataSetResultsRaw->RecNo >= frxUserDataSetResultsRaw->RangeEndCount)
+		Eof = True;
+}
+
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::frxUserDataSetResultsRawGetValue(const UnicodeString VarName, Variant &Value)  //adicionar sample ID e subject ID
+{
+	if (VarName == "PlateName")
+	{
+		Value = ReadRawGrid->Cells[colReadRawPlateName->Position][frxUserDataSetResultsRaw->RecNo];
+		return;
+	}
+
+	if ("RawCoord" == VarName)
+	{
+		Value = ReadRawGrid->Cells[colReadRawCoord->Position][frxUserDataSetResultsRaw->RecNo];
+		return;
+	}
+
+	if ("WellID" == VarName)
+	{
+		Value = ReadRawGrid->Cells[colReadWellID->Position][frxUserDataSetResultsRaw->RecNo];
+		return;
+	}
+
+	if ("Label" == VarName)
+	{
+		Value = ReadRawGrid->Cells[colReadRawLabel->Position][frxUserDataSetResultsRaw->RecNo];
+		return;
+	}
+
+	if ("RawType" == VarName)
+	{
+		Value = ReadRawGrid->Cells[colReadRawType->Position][frxUserDataSetResultsRaw->RecNo];
+		return;
+	}
+
+	if ("RawValue" == VarName)
+	{
+		Value = ReadRawGrid->Cells[colReadRawValue->Position][frxUserDataSetResultsRaw->RecNo];
+		return;
+	}
+
+	if ("RawBlankReduced" == VarName)
+	{
+		Value = ReadRawGrid->Cells[colReadRawBlankReducedValue->Position][frxUserDataSetResultsRaw->RecNo];
+		return;
+	}
+
+	if ("PostProcessedValue" == VarName)
+	{
+		Value = ReadRawGrid->Cells[colPostprocessedValue->Position][frxUserDataSetResultsRaw->RecNo];
+		return;
+	}
+
+	if ("StdDeviation" == VarName)
+	{
+		Value = ReadRawGrid->Cells[colStdDeviation->Position][frxUserDataSetResultsRaw->RecNo];
+		return;
+	}
+
+	if ("CoefVariation" == VarName)
+	{
+		Value = ReadRawGrid->Cells[colCoefVariation->Position][frxUserDataSetResultsRaw->RecNo];
+		return;
+	}
+
+	if ("RawInterpreted" == VarName)
+	{
+		Value = ReadRawGrid->Cells[colReadRawInterpretValue->Position][frxUserDataSetResultsRaw->RecNo];
+		return;
+	}
+
+	if ("RawTimeStamp" == VarName)
+	{
+		if (ReadRawGrid->Cells[colReadRawTimestampValue->Position][frxUserDataSetResultsRaw->RecNo].IsNull())
+			return;
+
+		Value = ReadRawGrid->Cells[colReadRawTimestampValue->Position][frxUserDataSetResultsRaw->RecNo].IsNull();
+	}
+}
+
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::frxUserDataSetUnknowsCheckEOF(TObject *Sender, bool &Eof)
+{
+	if (frxUserDataSetUnknows->RecNo >= frxUserDataSetUnknows->RangeEndCount)
+		Eof = True;
+}
+
 //---------------------------------------------------------------------------
 
 void __fastcall TMainForm::FillResultsList()
 {
 	if (!mResultsList.empty())
-    {
-        for (ResultsVector::size_type i = 0; i < mResultsList.size(); i++)
-        {
-            ResultPair pair = mResultsList[i];
-            TPicture *pic = pair.second;
+	{
+		for (ResultsVector::size_type i = 0; i < mResultsList.size(); i++)
+		{
+			ResultPair pair = mResultsList[i];
+			TPicture *pic = pair.second;
 
-            pic->Free();
-        }
+			pic->Free();
+		}
 
-        mResultsList.clear();
-    }
+		mResultsList.clear();
+	}
 
-    for (Integer i = 0; i < tabAbsorbanceScrollBox->ControlCount; i++)
-    {
-        TPicture *resultImg = ResultPlateToImage(dynamic_cast<TWellResult *>(tabAbsorbanceScrollBox->Controls[i]));
-        ResultPair pair = std::make_pair<String, TPicture *>(TEXT("Absorb�ncia"), resultImg);
+	for (Integer i = 0; i < tabAbsorbanceScrollBox->ControlCount; i++)
+	{
+		TPicture *resultImg = ResultPlateToImage(dynamic_cast<TWellResult *>(tabAbsorbanceScrollBox->Controls[i]));
+		ResultPair pair = std::make_pair<String, TPicture *>(TEXT("Absorb�ncia"), resultImg);
 
-        mResultsList.push_back(pair);
-    }
+		mResultsList.push_back(pair);
+	}
 
-    for (Integer i = 0; i < tabConcentrationScrollBox->ControlCount; i++)
-    {
-        TPicture *resultImg = ResultPlateToImage(dynamic_cast<TWellResult *>(tabConcentrationScrollBox->Controls[i]));
-        ResultPair pair = std::make_pair<String, TPicture *>(TEXT("Concentra��o"), resultImg);
+	for (Integer i = 0; i < tabConcentrationScrollBox->ControlCount; i++)
+	{
+		TPicture *resultImg = ResultPlateToImage(dynamic_cast<TWellResult *>(tabConcentrationScrollBox->Controls[i]));
+		ResultPair pair = std::make_pair<String, TPicture *>(TEXT("Concentra��o"), resultImg);
 
-        mResultsList.push_back(pair);
-    }
+		mResultsList.push_back(pair);
+	}
 
-    for (Integer i = 0; i < tabQualitativeScrollBox->ControlCount; i++)
-    {
+	for (Integer i = 0; i < tabQualitativeScrollBox->ControlCount; i++)
+	{
 		TPicture *resultImg = ResultPlateToImage(dynamic_cast<TWellResult *>(tabQualitativeScrollBox->Controls[i]));
-        ResultPair pair = std::make_pair<String, TPicture *>(TEXT("Qualitativo"), resultImg);
+		ResultPair pair = std::make_pair<String, TPicture *>(TEXT("Qualitativo"), resultImg);
 
-        mResultsList.push_back(pair);
-    }
+		mResultsList.push_back(pair);
+	}
 }
 
 void __fastcall TMainForm::frxUserDataSetResultsGetValue(const UnicodeString VarName, Variant &Value)
@@ -4002,70 +4101,70 @@ void __fastcall TMainForm::frxUserDataSetResultsGetValue(const UnicodeString Var
 	ResultPair pair = mResultsList[frxUserDataSetResults->RecNo];
 
 	if (VarName == "ResultType")
-    {
-        Value = pair.first;
+	{
+		Value = pair.first;
 
 		TfrxPictureView *frxPic = dynamic_cast<TfrxPictureView *>(frxReportRawResult->FindObject("ResultPicture"));
 
-        if (!frxPic)
-        {
-            TaskMessageDlg("Invalid Reference",
+		if (!frxPic)
+		{
+			TaskMessageDlg("Invalid Reference",
 						   "Invalid reference to report object \"ResultPicture\"",
-                           mtError,
-                           TMsgDlgButtons() << mbOK, 0);
+						   mtError,
+						   TMsgDlgButtons() << mbOK, 0);
 
-            return;
-        }
+			return;
+		}
 
-        frxPic->Picture->Assign(pair.second);
-    }
+		frxPic->Picture->Assign(pair.second);
+	}
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TMainForm::spLambda1Change(TObject *Sender)
 {
 	using System::Sysutils::Format;
-    StlString valueString = loccus::ToString(spLambda1->Value);
+	StlString valueString = loccus::ToString(spLambda1->Value);
 
 	if ((spLambda1->Value > spLambda1->MaxValue ||
-    	 spLambda1->Value < spLambda1->MinValue) &&
-         static_cast<Integer>(valueString.length()) >= spLambda1->MaxLength)
-    {
-        String msg = Format("Valor do comprimento de onda deve estar entre %d e %d",
-        					ARRAYOFCONST((spLambda1->MinValue, spLambda1->MaxValue)));
-        MessageDlg(msg, mtInformation, TMsgDlgButtons() << mbOK, 0);
-        spLambda1->SetFocus();
-    }
+		 spLambda1->Value < spLambda1->MinValue) &&
+		 static_cast<Integer>(valueString.length()) >= spLambda1->MaxLength)
+	{
+		String msg = Format("Valor do comprimento de onda deve estar entre %d e %d",
+							ARRAYOFCONST((spLambda1->MinValue, spLambda1->MaxValue)));
+		MessageDlg(msg, mtInformation, TMsgDlgButtons() << mbOK, 0);
+		spLambda1->SetFocus();
+	}
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TMainForm::spLambda2Change(TObject *Sender)
 {
 	using System::Sysutils::Format;
-    StlString valueString = loccus::ToString(spLambda2->Value);
+	StlString valueString = loccus::ToString(spLambda2->Value);
 
 	if ((spLambda2->Value > spLambda2->MaxValue ||
-    	 spLambda2->Value < spLambda2->MinValue) &&
-         static_cast<Integer>(valueString.length()) >= spLambda2->MaxLength)
-    {
-        String msg = Format("Valor do comprimento de onda deve estar entre %d e %d",
-        					ARRAYOFCONST((spLambda2->MinValue, spLambda2->MaxValue)));
-        MessageDlg(msg, mtInformation, TMsgDlgButtons() << mbOK, 0);
-        spLambda2->SetFocus();
-    }
+		 spLambda2->Value < spLambda2->MinValue) &&
+		 static_cast<Integer>(valueString.length()) >= spLambda2->MaxLength)
+	{
+		String msg = Format("Valor do comprimento de onda deve estar entre %d e %d",
+							ARRAYOFCONST((spLambda2->MinValue, spLambda2->MaxValue)));
+		MessageDlg(msg, mtInformation, TMsgDlgButtons() << mbOK, 0);
+		spLambda2->SetFocus();
+	}
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TMainForm::rbSimpleLambdaClick(TObject *Sender)
 {
-    spLambda2->Enabled = False;
-    cbCalcMethod2->Enabled = False;
+	spLambda2->Enabled = False;
+	cbCalcMethod2->Enabled = False;
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TMainForm::rbDoubleLambdaClick(TObject *Sender)
 {
-    spLambda2->Enabled = True;
+	spLambda2->Enabled = True;
 	cbCalcMethod2->Enabled = True;
 }
 //---------------------------------------------------------------------------
@@ -4148,171 +4247,10 @@ void __fastcall TMainForm::tabPlatesScrollBoxResize(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-
-void __fastcall TMainForm::frxUserDataSetResultsRawCheckEOF(TObject *Sender, bool &Eof)
-{
-	if (frxUserDataSetResultsRaw->RecNo >= frxUserDataSetResultsRaw->RangeEndCount)
-		Eof = True;
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TMainForm::frxUserDataSetResultsRawGetValue(const UnicodeString VarName, Variant &Value)  //adicionar sample ID e subject ID
-{
-	if (VarName == "PlateName")
-	{
-		Value = ReadRawGrid->Cells[colReadRawPlateName->Position][frxUserDataSetResultsRaw->RecNo];
-		return;
-	}
-
-	if ("RawCoord" == VarName)
-	{
-		Value = ReadRawGrid->Cells[colReadRawCoord->Position][frxUserDataSetResultsRaw->RecNo];
-		return;
-	}
-
-	if ("WellID" == VarName)
-	{
-		Value = ReadRawGrid->Cells[colReadWellID->Position][frxUserDataSetResultsRaw->RecNo];
-		return;
-	}
-
-	if ("Label" == VarName)
-	{
-		Value = ReadRawGrid->Cells[colReadRawLabel->Position][frxUserDataSetResultsRaw->RecNo];
-		return;
-	}
-
-	if ("RawType" == VarName)
-	{
-		Value = ReadRawGrid->Cells[colReadRawType->Position][frxUserDataSetResultsRaw->RecNo];
-		return;
-	}
-
-	if ("RawValue" == VarName)
-	{
-		Value = ReadRawGrid->Cells[colReadRawValue->Position][frxUserDataSetResultsRaw->RecNo];
-		return;
-	}
-
-	if ("RawBlankReduced" == VarName)
-	{
-		Value = ReadRawGrid->Cells[colReadRawBlankReducedValue->Position][frxUserDataSetResultsRaw->RecNo];
-		return;
-	}
-
-	if ("PostProcessedValue" == VarName)
-	{
-		Value = ReadRawGrid->Cells[colPostprocessedValue->Position][frxUserDataSetResultsRaw->RecNo];
-		return;
-	}
-
-	if ("StdDeviation" == VarName)
-	{
-		Value = ReadRawGrid->Cells[colStdDeviation->Position][frxUserDataSetResultsRaw->RecNo];
-		return;
-	}
-
-	if ("CoefVariation" == VarName)
-	{
-		Value = ReadRawGrid->Cells[colCoefVariation->Position][frxUserDataSetResultsRaw->RecNo];
-		return;
-	}
-
-	if ("RawInterpreted" == VarName)
-	{
-		Value = ReadRawGrid->Cells[colReadRawInterpretValue->Position][frxUserDataSetResultsRaw->RecNo];
-		return;
-	}
-
-	if ("RawTimeStamp" == VarName)
-	{
-		if (ReadRawGrid->Cells[colReadRawTimestampValue->Position][frxUserDataSetResultsRaw->RecNo].IsNull())
-			return;
-
-		Value = ReadRawGrid->Cells[colReadRawTimestampValue->Position][frxUserDataSetResultsRaw->RecNo].IsNull();
-	}
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TMainForm::frxUserDataSetUnknowsCheckEOF(TObject *Sender, bool &Eof)
-{
-	if (frxUserDataSetUnknows->RecNo >= frxUserDataSetUnknows->RangeEndCount)
-		Eof = True;
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TMainForm::frxUserDataSetUnknowsGetValue(const UnicodeString VarName, Variant &Value)
-{
-	if ("PlateName" == VarName)
-	{
-		Value = unknownsGrid->Cells[colUnknownPlateName->Position][frxUserDataSetUnknows->RecNo];
-		return;
-	}
-
-	if ("Position" == VarName)
-	{
-		Value = unknownsGrid->Cells[colUnknownCoord->Position][frxUserDataSetUnknows->RecNo];
-		return;
-	}
-
-	if ("ID" == VarName)
-	{
-		Value = unknownsGrid->Cells[colUnknownWellID->Position][frxUserDataSetUnknows->RecNo];
-		return;
-	}
-
-	if ("Label" == VarName)
-	{
-	    // O espaço no início do conteúdo visa melhorar o alinhamento com os cabeçalhos
-		Value = " " + unknownsGrid->Cells[colUnknownLabel->Position][frxUserDataSetUnknows->RecNo];
-		return;
-	}
-
-	if ("Absorbance" == VarName)
-	{
-		Value = unknownsGrid->Cells[colUnknownPosProcessValue->Position][frxUserDataSetUnknows->RecNo];
-		return;
-	}
-
-	if ("Concentration" == VarName)
-	{
-		Value = unknownsGrid->Cells[colUnknownConcentrationValue->Position][frxUserDataSetUnknows->RecNo];
-		return;
-	}
-
-	if ("StdDeviation" == VarName)
-	{
-		Value = unknownsGrid->Cells[colUnknownStdDev->Position][frxUserDataSetUnknows->RecNo];
-		return;
-	}
-
-	if ("CoefVariation" == VarName)
-	{
-		Value = unknownsGrid->Cells[colUnknownCoefVar->Position][frxUserDataSetUnknows->RecNo];
-		return;
-	}
-
-	if ("Interpret" == VarName)
-	{
-		Value = unknownsGrid->Cells[colUnknownInterpretValue->Position][frxUserDataSetUnknows->RecNo];
-		return;
-	}
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TMainForm::acResultUnknowsExecute(TObject *Sender)      // exportar Relat�rio de Desconhecidos
-{
-	frxUserDataSetUnknows->RangeEndCount = unknownsGrid->DataRowCount;
-	frxReportUnknows->PrepareReport();
-	frxReportUnknows->ShowPreparedReport();
-}
-
-//---------------------------------------------------------------------------
-
 void __fastcall TMainForm::lmdstdValuesGridChange(TObject *Sender, TLMDGridChangeFlags AChangedFlags)
 {
 	if (colStdValue && lmdstdValuesGrid->CurrentColumn != colStdValue->Position)
-        lmdstdValuesGrid->CurrentColumn = colStdValue->Position;
+		lmdstdValuesGrid->CurrentColumn = colStdValue->Position;
 }
 //---------------------------------------------------------------------------
 
@@ -4320,8 +4258,8 @@ void __fastcall TMainForm::cbCurveTypesChange(TObject *Sender)
 {
 	cbChartScale->ItemIndex = 0;
 
-    if (cbCurveTypes->ItemIndex != mCurveTypes)
-        mCurveTypes = cbCurveTypes->ItemIndex;
+	if (cbCurveTypes->ItemIndex != mCurveTypes)
+		mCurveTypes = cbCurveTypes->ItemIndex;
 }
 //---------------------------------------------------------------------------
 
@@ -4346,32 +4284,32 @@ void __fastcall TMainForm::CalculateForReplicas(const TWellType type)
 	for (WellMatrixList::size_type matIndex = 0; matIndex < wellMatrixListRef.size(); matIndex++)
 	{
 		WellList wl;
-        wellMatrixListRef[matIndex].filterWellsByType(type, wl);
+		wellMatrixListRef[matIndex].filterWellsByType(type, wl);
 
 		if (wl.empty())
 			continue;
 
-	    std::sort(wl.begin(), wl.end());
+		std::sort(wl.begin(), wl.end());
 
-        WellList::size_type unElements = wl.size();
-        WellList::iterator last = std::unique(wl.begin(), wl.end());
+		WellList::size_type unElements = wl.size();
+		WellList::iterator last = std::unique(wl.begin(), wl.end());
 
-        unElements = std::distance(wl.begin(), last);
+		unElements = std::distance(wl.begin(), last);
 
-        wl.resize(unElements);
+		wl.resize(unElements);
 
-        if (unElements < 1)
-            continue;
+		if (unElements < 1)
+			continue;
 
 		for (WellList::iterator cit = wl.begin(); cit != wl.end(); cit++)
 		{
 			WellListPointers wlr = wellMatrixListRef[matIndex].getAllReplicas(*cit);
 
-            Double accumulated = 0;
+			Double accumulated = 0;
 
-            std::unique_ptr<Double> replicasValues(new Double[wlr.size()]);
+			std::unique_ptr<Double> replicasValues(new Double[wlr.size()]);
 
-            for (WellListPointers::iterator it = wlr.begin(); it != wlr.end(); ++it)
+			for (WellListPointers::iterator it = wlr.begin(); it != wlr.end(); ++it)
 			{
 				WellListPointers::size_type idxElement = std::distance(wlr.begin(), it);
 
@@ -4380,22 +4318,22 @@ void __fastcall TMainForm::CalculateForReplicas(const TWellType type)
 				replicasValues.get()[idxElement] = rawBlankReduced;
 			}
 
-            Double avg = accumulated / std::max<Double>(wl.size(), 1.0);
+			Double avg = accumulated / std::max<Double>(wl.size(), 1.0);
 
-            Double stdDeviation = 0, coefVariation = 0;
+			Double stdDeviation = 0, coefVariation = 0;
 
-            if (wlr.size()-1)
+			if (wlr.size()-1)
 			{
 				Integer numElements = std::distance(wlr.begin(), wlr.end());
 
 				stdDeviation = StdDev(replicasValues.get(), numElements-1);
-                coefVariation = stdDeviation / std::max<Double>(avg, 0.00001f);
-            }
+				coefVariation = stdDeviation / std::max<Double>(avg, 0.00001f);
+			}
 
-            std::vector<Double> arrayValues;
+			std::vector<Double> arrayValues;
 
-            for (WellListPointers::size_type i = 0; i < wl.size(); i++)
-                arrayValues.push_back(replicasValues.get()[i]);
+			for (WellListPointers::size_type i = 0; i < wl.size(); i++)
+				arrayValues.push_back(replicasValues.get()[i]);
 
 			Double minValue = 0;
 			Double maxValue = 0;
@@ -4410,35 +4348,35 @@ void __fastcall TMainForm::CalculateForReplicas(const TWellType type)
 					maxValue = std::max(maxValue, tmp);
 				}
 			}
-            for (WellListPointers::iterator it = wlr.begin(); it != wlr.end(); it++)
-            {
-                (*it)->StdDeviation = stdDeviation;
-                (*it)->CoefVariation = coefVariation;
-                (*it)->MinimumValue = minValue;
+			for (WellListPointers::iterator it = wlr.begin(); it != wlr.end(); it++)
+			{
+				(*it)->StdDeviation = stdDeviation;
+				(*it)->CoefVariation = coefVariation;
+				(*it)->MinimumValue = minValue;
 				(*it)->MaximumValue = maxValue;
-            }
-        }
-    }
+			}
+		}
+	}
 }
 
 void __fastcall TMainForm::acExperimentImportCalibrationExecute(TObject *Sender)
 {
 	WellMatrixList& wellMatrixListRef = *TWellMatrixSingleton::instance();
 
-    WellList wl;
+	WellList wl;
 
-    wellMatrixListRef.front().filterWellsByType(TWellType::wlConcentrationStd, wl);
+	wellMatrixListRef.front().filterWellsByType(TWellType::wlConcentrationStd, wl);
 
-    if (!wl.empty())
-    {
+	if (!wl.empty())
+	{
 		TaskMessageDlg(L"Carregamento da curva de calibração",
 					   L"Não é permitido importar a curva de calibração em placas que contenham \"Padrões\".\n"
 					   L"Para continuar, remova os padrões da placa e tente novamente.",
-                       mtWarning,
-                       TMsgDlgButtons() << mbOK, 0);
+					   mtWarning,
+					   TMsgDlgButtons() << mbOK, 0);
 
-        return;
-    }
+		return;
+	}
 
 	const String LoccusDataName("Loccus Biotecnologia");
 	const String AppDataDirName = TPath::GetFileNameWithoutExtension(Application->ExeName);
@@ -4539,58 +4477,58 @@ void __fastcall TMainForm::acExperimentImportCalibrationExecute(TObject *Sender)
 
 	cbCurveTypes->ItemIndex = mCalibrationCurve->curveType;
 
-    mCurveImported = True;
+	mCurveImported = True;
 }
 //---------------------------------------------------------------------------
 
 Boolean __fastcall TMainForm::LoadCurveBranch(_di_IXMLNode Node)
 {
-    mCalibrationCurve->curveType = Node->Attributes[TEXT("Type")];
+	mCalibrationCurve->curveType = Node->Attributes[TEXT("Type")];
 
-    _di_IXMLNode parameters = Node->ChildNodes->FindNode(TEXT("Parameters"));
+	_di_IXMLNode parameters = Node->ChildNodes->FindNode(TEXT("Parameters"));
 
-    _di_IXMLNode qtdParametersNode = parameters->ChildNodes->FindNode(TEXT("Quantity"));
-    mCalibrationCurve->qtdParameters = qtdParametersNode->GetNodeValue();
+	_di_IXMLNode qtdParametersNode = parameters->ChildNodes->FindNode(TEXT("Quantity"));
+	mCalibrationCurve->qtdParameters = qtdParametersNode->GetNodeValue();
 
-    _di_IXMLNode valuesNode = parameters->ChildNodes->FindNode(TEXT("Values"));
+	_di_IXMLNode valuesNode = parameters->ChildNodes->FindNode(TEXT("Values"));
 
-    for (Integer i = 0; i < mCalibrationCurve->qtdParameters; i++)
-    {
-        Double paramValue = valuesNode->ChildValues[i];
+	for (Integer i = 0; i < mCalibrationCurve->qtdParameters; i++)
+	{
+		Double paramValue = valuesNode->ChildValues[i];
 
-        mCalibrationCurve->parameters.push_back(paramValue);
-    }
+		mCalibrationCurve->parameters.push_back(paramValue);
+	}
 
-    _di_IXMLNode stdValuesNode = Node->ChildNodes->FindNode(TEXT("StandardValues"));
-    _di_IXMLNode stdValuePairNode = stdValuesNode->ChildNodes->First();
-    while (stdValuePairNode)
-    {
-        Double stdValue = 0, rawValue = 0;
+	_di_IXMLNode stdValuesNode = Node->ChildNodes->FindNode(TEXT("StandardValues"));
+	_di_IXMLNode stdValuePairNode = stdValuesNode->ChildNodes->First();
+	while (stdValuePairNode)
+	{
+		Double stdValue = 0, rawValue = 0;
 
-        _di_IXMLNode node = stdValuePairNode->ChildNodes->FindNode(TEXT("RawValue"));
-        rawValue = node->GetNodeValue();
+		_di_IXMLNode node = stdValuePairNode->ChildNodes->FindNode(TEXT("RawValue"));
+		rawValue = node->GetNodeValue();
 
-        node = stdValuePairNode->ChildNodes->FindNode(TEXT("StdValue"));
-        stdValue = node->GetNodeValue();
+		node = stdValuePairNode->ChildNodes->FindNode(TEXT("StdValue"));
+		stdValue = node->GetNodeValue();
 
-        std::pair<Double, Double> p(rawValue, stdValue);
-        mCalibrationCurve->stdValues.push_back(p);
+		std::pair<Double, Double> p(rawValue, stdValue);
+		mCalibrationCurve->stdValues.push_back(p);
 
-        stdValuePairNode = stdValuePairNode->NextSibling();
-    }
+		stdValuePairNode = stdValuePairNode->NextSibling();
+	}
 
 	_di_IXMLNode creationNode = Node->ChildNodes->FindNode("CreationDate");
-    if (!TryStrToDateTime(creationNode->Text, mCalibrationCurve->timestamp))
-    {
+	if (!TryStrToDateTime(creationNode->Text, mCalibrationCurve->timestamp))
+	{
 		TaskMessageDlg(TEXT("Carregamento de curva de calibra��o"),
 					   TEXT("Formato do arquivo inv�lido ou corrompido. Tag \"CreationDate\" inv�lido."),
-                       mtError,
-                       TMsgDlgButtons() << mbOK, 0);
+					   mtError,
+					   TMsgDlgButtons() << mbOK, 0);
 
-        return False;
-    }
+		return False;
+	}
 
-    return True;
+	return True;
 }
 
 void __fastcall TMainForm::CreateCurveBranch(_di_IXMLNode Node)
@@ -4618,9 +4556,9 @@ void __fastcall TMainForm::CreateCurveBranch(_di_IXMLNode Node)
 	WellMatrixList& wellMatrixListRef = (*TWellMatrixSingleton::instance());
 
 	WellList conclp;
-    wellMatrixListRef.front().filterWellsByType(TWellType::wlConcentrationStd, conclp);
+	wellMatrixListRef.front().filterWellsByType(TWellType::wlConcentrationStd, conclp);
 
-    std::sort(conclp.begin(), conclp.end());
+	std::sort(conclp.begin(), conclp.end());
 
 	WellList::iterator last = std::unique(conclp.begin(), conclp.end());
 
@@ -4659,34 +4597,34 @@ void __fastcall TMainForm::acLoadExperimentExecute(TObject *Sender)
 //		AppDataDir = PublicAppData + TEXT("\\") + LoccusDataName + TEXT("\\") + AppDataDirName;
 
 	if (!DirectoryExists(AppDataDir))
-        MyDataModule->CreateDirectoryRecursively(AppDataDir);
+		MyDataModule->CreateDirectoryRecursively(AppDataDir);
 
-    ForceCurrentDirectory = False;
+	ForceCurrentDirectory = False;
 
 	TStringList *encodings = new TStringList();
-    encodings->AddObject("Ascii", TEncoding::ASCII);
-    encodings->AddObject("Unicode", TEncoding::Unicode);
-    encodings->AddObject("UTF-8", TEncoding::UTF8);
+	encodings->AddObject("Ascii", TEncoding::ASCII);
+	encodings->AddObject("Unicode", TEncoding::Unicode);
+	encodings->AddObject("UTF-8", TEncoding::UTF8);
 
-    TOpenTextFileDialog *FileOpenDialog = new TOpenTextFileDialog(this);
+	TOpenTextFileDialog *FileOpenDialog = new TOpenTextFileDialog(this);
 
-    FileOpenDialog->Title = TEXT("Carregar Experimento");
-    FileOpenDialog->Filter = TEXT("Arquivo de experimento (*.expr)|*.expr");
-    FileOpenDialog->DefaultExt = TEXT(".expr");
-    FileOpenDialog->InitialDir = AppDataDir;
-    FileOpenDialog->Encodings->Assign(encodings);
+	FileOpenDialog->Title = TEXT("Carregar Experimento");
+	FileOpenDialog->Filter = TEXT("Arquivo de experimento (*.expr)|*.expr");
+	FileOpenDialog->DefaultExt = TEXT(".expr");
+	FileOpenDialog->InitialDir = AppDataDir;
+	FileOpenDialog->Encodings->Assign(encodings);
 
-    if (!FileOpenDialog->Execute(this->Handle))
-    {
-        FileOpenDialog->Free();
-        return;
-    }
+	if (!FileOpenDialog->Execute(this->Handle))
+	{
+		FileOpenDialog->Free();
+		return;
+	}
 
 	m_ExperimentName = FileOpenDialog->FileName;
 
 	FileOpenDialog->Free();
 
-	 WideChar decSeparator = FormatSettings.DecimalSeparator;
+	WideChar decSeparator = FormatSettings.DecimalSeparator;
 	WideChar thSeparator  = FormatSettings.ThousandSeparator;
 
 	if (mpAppConfig->DecimalSeparator != FormatSettings.DecimalSeparator)
@@ -4697,34 +4635,34 @@ void __fastcall TMainForm::acLoadExperimentExecute(TObject *Sender)
 
 	InitAll();
 
-    TXMLDocument *xmlDoc = MyDataModule->XMLDocument;
-    xmlDoc->LoadFromFile(m_ExperimentName);
+	TXMLDocument *xmlDoc = MyDataModule->XMLDocument;
+	xmlDoc->LoadFromFile(m_ExperimentName);
 
 	_di_IXMLNode ExperimentNode = xmlDoc->ChildNodes->FindNode("Experiment");
 
-    if (!ExperimentNode)
-    {
+	if (!ExperimentNode)
+	{
 		TaskMessageDlg("Carregamento de Experimento",
-                       "Formato do arquivo inv�lido ou corrompido. Tag \"Experiment\" n�o encontrada.",
-                       mtError,
-                       TMsgDlgButtons() << mbOK, 0);
+					   "Formato do arquivo inv�lido ou corrompido. Tag \"Experiment\" n�o encontrada.",
+					   mtError,
+					   TMsgDlgButtons() << mbOK, 0);
 
-        return;
-    }
+		return;
+	}
 
-    _di_IXMLNode ProtoNode = ExperimentNode->ChildNodes->FindNode("Protocol");
+	_di_IXMLNode ProtoNode = ExperimentNode->ChildNodes->FindNode("Protocol");
 
-    if (!ProtoNode)
-    {
+	if (!ProtoNode)
+	{
 		TaskMessageDlg("Carregamento de Experimento",
-                       "Formato do arquivo inv�lido ou corrompido. Tag \"Protocol\" n�o encontrada.",
-                       mtError,
-                       TMsgDlgButtons() << mbOK, 0);
+					   "Formato do arquivo inv�lido ou corrompido. Tag \"Protocol\" n�o encontrada.",
+					   mtError,
+					   TMsgDlgButtons() << mbOK, 0);
 
-        return;
-    }
+		return;
+	}
 
-    LoadSetupBranch(ProtoNode);
+	LoadSetupBranch(ProtoNode);
 
 	_di_IXMLNode Results = ExperimentNode->ChildNodes->FindNode("Results");
 	LoadResultsBranch(Results);
@@ -4848,8 +4786,8 @@ void __fastcall TMainForm::acSaveProtocolExecute(TObject *Sender)
 {
 	const String LoccusDataName("Loccus Biotecnologia");
 	const String AppDataDirName = TPath::GetFileNameWithoutExtension(Application->ExeName);
-    String UserAppData = GetEnvironmentVariable("APPDATA");
-    String PublicAppData = GetEnvironmentVariable("PUBLIC");
+	String UserAppData = GetEnvironmentVariable("APPDATA");
+	String PublicAppData = GetEnvironmentVariable("PUBLIC");
 
 	String AppDataDir = PublicAppData + TEXT("\\") + LoccusDataName + TEXT("\\") + AppDataDirName;
 //	String AppDataDir = UserAppData + TEXT("\\") + LoccusDataName + TEXT("\\") + AppDataDirName;
@@ -4864,38 +4802,38 @@ void __fastcall TMainForm::acSaveProtocolExecute(TObject *Sender)
 
 	ForceCurrentDirectory = False;
 
-    TStringList *encodings = new TStringList();
-    encodings->AddObject("Ascii", TEncoding::ASCII);
-    encodings->AddObject("Unicode", TEncoding::Unicode);
-    encodings->AddObject("UTF-8", TEncoding::UTF8);
+	TStringList *encodings = new TStringList();
+	encodings->AddObject("Ascii", TEncoding::ASCII);
+	encodings->AddObject("Unicode", TEncoding::Unicode);
+	encodings->AddObject("UTF-8", TEncoding::UTF8);
 
-    TSaveTextFileDialog *FileSaveDialog = new TSaveTextFileDialog(this);
-    FileSaveDialog->Title = TEXT("Salvar Protocolo");
-    FileSaveDialog->Filter = TEXT("Arquivo de protocolo (*.ptrl)|*.ptrl");
-    FileSaveDialog->DefaultExt = TEXT(".ptrl");
-    FileSaveDialog->InitialDir = AppDataDir;
-    FileSaveDialog->Encodings->Assign(encodings);
+	TSaveTextFileDialog *FileSaveDialog = new TSaveTextFileDialog(this);
+	FileSaveDialog->Title = TEXT("Salvar Protocolo");
+	FileSaveDialog->Filter = TEXT("Arquivo de protocolo (*.ptrl)|*.ptrl");
+	FileSaveDialog->DefaultExt = TEXT(".ptrl");
+	FileSaveDialog->InitialDir = AppDataDir;
+	FileSaveDialog->Encodings->Assign(encodings);
 
-    if (!FileSaveDialog->Execute(this->Handle))
-    {
-        FileSaveDialog->Free();
-        return;
-    }
+	if (!FileSaveDialog->Execute(this->Handle))
+	{
+		FileSaveDialog->Free();
+		return;
+	}
 
-    String protoName = FileSaveDialog->FileName;
+	String protoName = FileSaveDialog->FileName;
 
-    FileSaveDialog->Free();
+	FileSaveDialog->Free();
 
-    TXMLDocument *xmlDoc = MyDataModule->XMLDocument;
-    xmlDoc->XML->Clear();
+	TXMLDocument *xmlDoc = MyDataModule->XMLDocument;
+	xmlDoc->XML->Clear();
 
-    xmlDoc->Active = True;
+	xmlDoc->Active = True;
 	xmlDoc->Version = "1.0";
-    xmlDoc->Encoding = "utf-8";
-    xmlDoc->StandAlone = "yes";
+	xmlDoc->Encoding = "utf-8";
+	xmlDoc->StandAlone = "yes";
 
-    _di_IXMLNode ProtoNode = xmlDoc->CreateElement("Protocol", "");
-    xmlDoc->DocumentElement = ProtoNode;
+	_di_IXMLNode ProtoNode = xmlDoc->CreateElement("Protocol", "");
+	xmlDoc->DocumentElement = ProtoNode;
 
 	CreateSetupBranch(ProtoNode);
 
@@ -4927,7 +4865,7 @@ void __fastcall TMainForm::acSaveExperimentExecute(TObject *Sender)
 {
 	const String LoccusDataName("Loccus Biotecnologia");
 	const String AppDataDirName = TPath::GetFileNameWithoutExtension(Application->ExeName);
-    String UserAppData = GetEnvironmentVariable("APPDATA");
+	String UserAppData = GetEnvironmentVariable("APPDATA");
 	String PublicAppData = GetEnvironmentVariable("PUBLIC");
 
 //    String AppDataDir = UserAppData + TEXT("\\") + LoccusDataName + TEXT("\\") + AppDataDirName;
@@ -4951,16 +4889,16 @@ void __fastcall TMainForm::acSaveExperimentExecute(TObject *Sender)
 	TSaveTextFileDialog *FileSaveDialog = new TSaveTextFileDialog(this);
 
 	FileSaveDialog->Title = TEXT("Salvar Experimento");
-    FileSaveDialog->Filter = TEXT("Arquivo de experimento (*.expr)|*.expr");
-    FileSaveDialog->DefaultExt = TEXT(".expr");
-    FileSaveDialog->InitialDir = AppDataDir;
-    FileSaveDialog->Encodings->Assign(encodings);
+	FileSaveDialog->Filter = TEXT("Arquivo de experimento (*.expr)|*.expr");
+	FileSaveDialog->DefaultExt = TEXT(".expr");
+	FileSaveDialog->InitialDir = AppDataDir;
+	FileSaveDialog->Encodings->Assign(encodings);
 
-    if (!FileSaveDialog->Execute(this->Handle))
-    {
-        FileSaveDialog->Free();
-        return;
-    }
+	if (!FileSaveDialog->Execute(this->Handle))
+	{
+		FileSaveDialog->Free();
+		return;
+	}
 
 	m_ExperimentName = FileSaveDialog->FileName;
 
@@ -4974,23 +4912,23 @@ void __fastcall TMainForm::acSaveExperimentExecute(TObject *Sender)
 
 	if (mpAppConfig->ThousandSeparator != FormatSettings.ThousandSeparator)
 		FormatSettings.ThousandSeparator = mpAppConfig->ThousandSeparator;
-    */
-    TXMLDocument *xmlDoc = MyDataModule->XMLDocument;
-    xmlDoc->XML->Clear();
+	*/
+	TXMLDocument *xmlDoc = MyDataModule->XMLDocument;
+	xmlDoc->XML->Clear();
 
-    xmlDoc->Active = True;
+	xmlDoc->Active = True;
 	xmlDoc->Version = "1.0";
-    xmlDoc->Encoding = "utf-8";
-    xmlDoc->StandAlone = "yes";
+	xmlDoc->Encoding = "utf-8";
+	xmlDoc->StandAlone = "yes";
 
-    _di_IXMLNode ExperimentNode = xmlDoc->CreateElement("Experiment", "");
-    xmlDoc->DocumentElement = ExperimentNode;
+	_di_IXMLNode ExperimentNode = xmlDoc->CreateElement("Experiment", "");
+	xmlDoc->DocumentElement = ExperimentNode;
 
-    _di_IXMLNode ProtoNode = ExperimentNode->AddChild("Protocol");
+	_di_IXMLNode ProtoNode = ExperimentNode->AddChild("Protocol");
 
 	CreateSetupBranch(ProtoNode);
 
-    _di_IXMLNode ResultsNode = ExperimentNode->AddChild("Results");
+	_di_IXMLNode ResultsNode = ExperimentNode->AddChild("Results");
 
 	CreateResultsBranch(ResultsNode);
 
@@ -5415,7 +5353,6 @@ void __fastcall TMainForm::chbReadSpeedChange(TObject *Sender)
 {
 	m_elisaDeviceParams->ReadSpeed = static_cast<TElisaReadSpeed>(chbReadSpeed->ItemIndex);
 }
-//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 
@@ -5423,7 +5360,7 @@ void __fastcall TMainForm::FormActivate(TObject *Sender)
 {
 	if (!Initialized && FrmSplash && FrmSplash->Visible)
 	{
-        FrmSplash->SetFocus();
+		FrmSplash->SetFocus();
 	}
 }
 
@@ -5461,4 +5398,352 @@ void __fastcall TMainForm::AppMessage(tagMSG &Msg, bool &Handled)
 }
 
 //---------------------------------------------------------------------------
+
+void __fastcall TMainForm::frxUserDataSetUnknowsGetValue(const UnicodeString VarName, Variant &Value)
+{
+	if ("PlateName" == VarName)
+	{
+		Value = unknownsGrid->Cells[colUnknownPlateName->Position][frxUserDataSetUnknows->RecNo];
+		return;
+	}
+
+	if ("Position" == VarName)
+	{
+		Value = unknownsGrid->Cells[colUnknownCoord->Position][frxUserDataSetUnknows->RecNo];
+		return;
+	}
+
+	if ("ID" == VarName)
+	{
+		Value = unknownsGrid->Cells[colUnknownWellID->Position][frxUserDataSetUnknows->RecNo];
+		return;
+	}
+
+	if ("Label" == VarName)
+	{
+		// O espaço no início do conteúdo visa melhorar o alinhamento com os cabeçalhos
+		Value = " " + unknownsGrid->Cells[colUnknownLabel->Position][frxUserDataSetUnknows->RecNo];
+		return;
+	}
+
+	if ("Absorbance" == VarName)
+	{
+		Value = unknownsGrid->Cells[colUnknownPosProcessValue->Position][frxUserDataSetUnknows->RecNo];
+		return;
+	}
+
+	if ("Concentration" == VarName)
+	{
+		Value = unknownsGrid->Cells[colUnknownConcentrationValue->Position][frxUserDataSetUnknows->RecNo];
+		return;
+	}
+
+	if ("StdDeviation" == VarName)
+	{
+		Value = unknownsGrid->Cells[colUnknownStdDev->Position][frxUserDataSetUnknows->RecNo];
+		return;
+	}
+
+	if ("CoefVariation" == VarName)
+	{
+		Value = unknownsGrid->Cells[colUnknownCoefVar->Position][frxUserDataSetUnknows->RecNo];
+		return;
+	}
+
+	if ("Interpret" == VarName)
+	{
+		Value = unknownsGrid->Cells[colUnknownInterpretValue->Position][frxUserDataSetUnknows->RecNo];
+		return;
+	}
+}
+
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::frxUserDataSetPlateBeforePrint(TfrxReportComponent* Sender)
+{
+	TfrxMemoView* Memo = dynamic_cast<TfrxMemoView*>(Sender);
+
+
+	if (Sender->Name == "user")
+	{
+		 Memo->Text = " " + mpAppConfig->UserName;
+	}
+
+	if (Sender->Name == "department")
+	{
+		 Memo->Text = " " + mpAppConfig->UserGroup;
+	}
+
+	if (Sender->Name == "Filter1")
+	{
+		 Memo->Text = (cbFilter1->Text == "") ? UnicodeString("(nenhum)") : cbFilter1->Text;
+	}
+
+	if (Sender->Name == "Filter2")
+	{
+		 Memo->Text = (cbFilter2->Text == "") ? UnicodeString("(nenhum)") : cbFilter2->Text;
+	}
+	/*
+	if (Sender->Name == "plate")
+	{
+
+	}
+	*/
+	if (Sender->Name == "expression1")
+	{
+		if (!edZone1Limit->Text.IsEmpty())
+		{
+			Memo->Text = " ABS < " + edZone1Limit->Text;
+		}
+	}
+
+	if (Sender->Name == "expression2")
+	{
+		 if ( !edZone1Limit->Text.IsEmpty() && !edZone2Limit->Text.IsEmpty() )
+		 {
+			 Memo->Text = " " + edZone1Limit->Text + " < ABS < " + edZone2Limit->Text;
+		 }
+	}
+
+	if (Sender->Name == "expression3")
+	{
+		 if (!edZone2Limit->Text.IsEmpty())
+		 {
+			 Memo->Text = " ABS > " + edZone2Limit->Text;;
+		 }
+	}
+
+	if (Sender->Name == "interpretation1")
+	{
+		 Memo->Text = " " + edZone1Interpret->Text;
+	}
+
+	if (Sender->Name == "interpretation2")
+	{
+		 Memo->Text = " " + edZone2Interpret->Text;
+	}
+
+	if (Sender->Name == "interpretation3")
+	{
+		 Memo->Text = " " + edZone3Interpret->Text;
+	}
+
+	if (Sender->Name == "Date")
+	{
+		TFormatSettings settings = TFormatSettings::Create(GetUserDefaultLCID());
+
+		//UnicodeString formatoWindows = settings.ShortDateFormat;     // 2. Captura a string do formato (ex: "dd/mm/yyyy" ou "m/d/yy")
+		TDateTime datetime = TDateTime::CurrentDateTime();
+
+		String format = StringReplace(settings.ShortDateFormat + " " + settings.ShortTimeFormat, ":ss", "", TReplaceFlags() << rfReplaceAll << rfIgnoreCase);
+		WideString dt = FormatDateTime(format, datetime);
+
+		Memo->Text = dt;
+	}
+
+	if (Sender->Name == "Cell")
+	{
+		int row = (this->position % (13*9)) % 9;
+		int col = (this->position % (13*9)) / 9;
+
+		if (col == 0 && row == 0)
+		{
+			Memo->Font->Size = 6;
+			Memo->Width  = 68;
+			Memo->Height = 64;
+			Memo->Frame->Typ = TfrxFrameTypes(15);
+			return;
+		}
+
+		if (col == 0 && row != 0)
+		{
+			Memo->Font->Size = 16;
+			Memo->Width = 64;
+			Memo->HAlign = haRight;
+			Memo->VAlign = Frxclass::vaCenter;
+			Memo->Frame->Typ = TfrxFrameTypes(0);
+
+			return;
+		}
+
+		if (col != 0 && row == 0)
+		{
+			Memo->Font->Size = 16;
+			Memo->Height = 52;
+			Memo->HAlign = haCenter;
+			Memo->VAlign = Frxclass::vaBottom;
+			Memo->Frame->Typ = TfrxFrameTypes(0);
+
+			return;
+		}
+
+		Memo->Height = 66;
+		Memo->Width  = 80;
+		Memo->Font->Size = 6.5;
+		Memo->Font->Style << fsBold;
+		Memo->HAlign = Frxclass::haLeft;
+		Memo->VAlign = Frxclass::vaTop;
+		Memo->Frame->Typ = TfrxFrameTypes(15);
+	}
+}
+
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::frxUserDataSetPlateMapFirst(TObject *Sender)
+{
+	this->position = 0;
+}
+
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::frxUserDataSetPlateMapNext(TObject *Sender)
+{
+	this->position++;
+}
+
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::frxUserDataSetPlateMapCheckEOF(TObject *Sender, bool &Eof)
+{
+	int row = (this->position % (13*9)) % 9;
+	int col = (this->position % (13*9)) / 9;
+
+	int index  = (int)(this->position / (13*9))*96 + (col - 1)*8 + row - 1;
+	int limit  = frxUserDataSetPlateMap->RangeEndCount - 1;
+	bool gthan = (index > 0) && (index > limit);
+	bool gthan1, gthan2;
+	 //Eof = (this->position >= (13*9)*2);
+	gthan1 = (this->position > frxUserDataSetPlateMap->RangeEndCount + 21 + 20);
+	gthan2 = (frxUserDataSetPlateMap->RecNo < frxUserDataSetPlateMap->RangeEndCount);
+
+	Eof = gthan1;
+}
+
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::frxUserDataSetPlateMapGetValue(const UnicodeString VarName, Variant &Value)
+{
+	if (VarName == "plate")
+	{
+	   /*
+	   if (position == 0) {
+		   Value = ReadRawGrid->Cells[colReadRawPlateName->Position ][0];
+		   return;
+	   }
+
+	   if (position == 117) {
+		   Value = ReadRawGrid->Cells[colReadRawPlateName->Position ][96];
+		   return;
+	   }
+
+	   Value = "xpto";
+	   */
+		if (this->position > 0)
+		{
+			int index = ((this->position - 13*9) / (13*9)) * 96;
+			if (index < frxUserDataSetPlateMap->RangeEndCount)
+			{
+				String name = ReadRawGrid->Cells[colReadRawPlateName->Position ][index];
+				Value = " " + name;
+			}
+		}
+
+
+		return;
+	}
+
+	if (VarName != "Data")
+	{
+		 Value = "";
+		 return;
+	}
+
+	int row = (this->position % (13*9)) % 9;
+	int col = (this->position % (13*9)) / 9;
+
+	if (row == 0 && col == 0)
+	{
+		Value = " Posição    ID\n Tipo\n Sample ID\n Absorbância\n Concentração\n Interpretação";
+		return;
+	}
+
+	if (row == 0)
+	{
+		Value = col;
+		return;
+	}
+
+	if (col == 0)
+	{
+		Value = (String)(char)(64 + row) + " ";
+		return;
+	}
+
+	int index = (this->position / (13*9))*96 + (col - 1)*8 + row - 1;
+	if (index > frxUserDataSetPlateMap->RangeEndCount - 1)
+		return;
+
+	String address = (String)(char)(64 + row) + IntToStr(col);
+	String ID      = ReadRawGrid->Cells[colReadWellID->Position ][index];
+	String type    = ReadRawGrid->Cells[colReadRawType->Position][index];
+	String number1 = System::Sysutils::Format(L"%.4n", ARRAYOFCONST(((float)ReadRawGrid->Cells[colReadRawValue->Position      ][index]))) + " ";
+	String number2 = System::Sysutils::Format(L"%.4n", ARRAYOFCONST(((float)ReadRawGrid->Cells[colPostprocessedValue->Position][index])));
+
+	String label   = ReadRawGrid->Cells[colReadRawLabel->Position      ][index];
+	if (label.Length() > 16)
+	{
+			 //label = label.SubString(0,7) + UTF8ToUnicodeString("\xE2\x80\xA6") + label.SubString(label.Length()-5, 5);
+			 label = label.SubString(0,6) + "..." + label.SubString(label.Length()-3, 4);
+	}
+
+	String Data;
+	Data += " " + address + "            ";
+	if (type == "Vazio")
+	{
+		Value = Data;
+		return;
+	}
+
+	if (type == "Desconhecido")
+	{
+		Data += ID + "\n" + " DC";  // + "\n" + " POSITIVO" + "\n";
+	}
+	else if (type == "Controle Positivo")
+	{
+		Data += "\n C. Positivo";
+	}
+	else if (type == "Controle Negativo")
+	{
+		Data += "\n C. Negativo";
+	}
+	else if (type == "Branco")
+	{
+		Data += "\n Branco";
+	}
+	else
+	{
+		Data += ID + "\n" + " " + type;
+	}
+
+	Data += "\n " + label;
+	Data += "\n           " + number1;
+	Data += "\n";
+	if (true)
+	{
+		Data += "           " + number2;
+	}
+
+	if (type == "Desconhecido")
+	{
+		Data += "\n " + ReadRawGrid->Cells[colReadRawInterpretValue->Position][index];
+	}
+
+	Value = Data;
+
+	return;
+}
+
+//---------------------------------------------------------------------------
+
+
 
