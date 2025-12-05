@@ -1154,7 +1154,8 @@ void __fastcall TMainForm::NextDoProcessCPnCNs(TValueKind kind, WellMatrixList& 
 			Summarizes[item->first] = this->WellSummarize(item->second, summarization, kind);
 		}
 
-		// Start : Trecho para debug provisório das variáveis selecionadas
+		// Trecho para debug que mostra as variáveis selecionadas
+		#if defined(_DEBUG)
 		String message = "";
 		for(std::map<String, WellListPointers>::iterator item = Wells.begin(); item != Wells.end(); ++item)
 		{
@@ -1165,7 +1166,7 @@ void __fastcall TMainForm::NextDoProcessCPnCNs(TValueKind kind, WellMatrixList& 
 			message += item;
 		}
 		ShowMessage(message);
-		// Finish
+		#endif
 
 		for(std::map<String, WellListPointers>::iterator item = Wells.begin(); item != Wells.end(); ++item)
 		{
@@ -3172,7 +3173,6 @@ void __fastcall TMainForm::OptUserLoginClick(TObject *Sender)
 
 void __fastcall TMainForm::OptUserLogoffClick(TObject *Sender)
 {
-
 	UserLogoff();
 }
 
@@ -3912,6 +3912,10 @@ void __fastcall TMainForm::acResultUnknowsExecute(TObject *Sender)      // expor
 
 void __fastcall TMainForm::acPlatesMapExecute(TObject *Sender)
 {
+	TWellMatrix& wellMatrix = (*TWellMatrixSingleton::instance()).at(0);  // Procura apenas na primeira placa o STD
+	TWell last = wellMatrix.getMaxWellTypeCount(TWellType::wlConcentrationStd);
+	this->hasSTDonFirstPlate = (last.Type == TWellType::wlConcentrationStd);
+
 	frxUserDataSetPlateMap->RangeEndCount = ReadRawGrid->DataRowCount;
 	frxReportPlateMap->PrepareReport();
 	frxReportPlateMap->ShowPreparedReport();
@@ -5483,12 +5487,7 @@ void __fastcall TMainForm::frxUserDataSetPlateBeforePrint(TfrxReportComponent* S
 	{
 		 Memo->Text = (cbFilter2->Text == "") ? UnicodeString("(nenhum)") : cbFilter2->Text;
 	}
-	/*
-	if (Sender->Name == "plate")
-	{
 
-	}
-	*/
 	if (Sender->Name == "expression1")
 	{
 		if (!edZone1Limit->Text.IsEmpty())
@@ -5543,8 +5542,8 @@ void __fastcall TMainForm::frxUserDataSetPlateBeforePrint(TfrxReportComponent* S
 
 	if (Sender->Name == "Cell")
 	{
-		int row = (this->position % (13*9)) % 9;
-		int col = (this->position % (13*9)) / 9;
+		int row = (frxUserDataSetPlateMap->RecNo % (13*9)) % 9;
+		int col = (frxUserDataSetPlateMap->RecNo % (13*9)) / 9;
 
 		if (col == 0 && row == 0)
 		{
@@ -5589,34 +5588,9 @@ void __fastcall TMainForm::frxUserDataSetPlateBeforePrint(TfrxReportComponent* S
 
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::frxUserDataSetPlateMapFirst(TObject *Sender)
-{
-	this->position = 0;
-}
-
-//---------------------------------------------------------------------------
-
-void __fastcall TMainForm::frxUserDataSetPlateMapNext(TObject *Sender)
-{
-	this->position++;
-}
-
-//---------------------------------------------------------------------------
-
 void __fastcall TMainForm::frxUserDataSetPlateMapCheckEOF(TObject *Sender, bool &Eof)
 {
-	int row = (this->position % (13*9)) % 9;
-	int col = (this->position % (13*9)) / 9;
-
-	int index  = (int)(this->position / (13*9))*96 + (col - 1)*8 + row - 1;
-	int limit  = frxUserDataSetPlateMap->RangeEndCount - 1;
-	bool gthan = (index > 0) && (index > limit);
-	bool gthan1, gthan2;
-	 //Eof = (this->position >= (13*9)*2);
-	gthan1 = (this->position > frxUserDataSetPlateMap->RangeEndCount + 21 + 20);
-	gthan2 = (frxUserDataSetPlateMap->RecNo < frxUserDataSetPlateMap->RangeEndCount);
-
-	Eof = gthan1;
+	Eof = (frxUserDataSetPlateMap->RecNo > frxUserDataSetPlateMap->RangeEndCount + 21*(frxUserDataSetPlateMap->RangeEndCount / 96) - 1);
 }
 
 //---------------------------------------------------------------------------
@@ -5625,30 +5599,8 @@ void __fastcall TMainForm::frxUserDataSetPlateMapGetValue(const UnicodeString Va
 {
 	if (VarName == "plate")
 	{
-	   /*
-	   if (position == 0) {
-		   Value = ReadRawGrid->Cells[colReadRawPlateName->Position ][0];
-		   return;
-	   }
-
-	   if (position == 117) {
-		   Value = ReadRawGrid->Cells[colReadRawPlateName->Position ][96];
-		   return;
-	   }
-
-	   Value = "xpto";
-	   */
-		if (this->position > 0)
-		{
-			int index = ((this->position - 13*9) / (13*9)) * 96;
-			if (index < frxUserDataSetPlateMap->RangeEndCount)
-			{
-				String name = ReadRawGrid->Cells[colReadRawPlateName->Position ][index];
-				Value = " " + name;
-			}
-		}
-
-
+		int page = (int)frxReportPlateMap->Calc("<Page>") - 1;
+		Value = " " + ReadRawGrid->Cells[colReadRawPlateName->Position ][page * 96];
 		return;
 	}
 
@@ -5658,8 +5610,8 @@ void __fastcall TMainForm::frxUserDataSetPlateMapGetValue(const UnicodeString Va
 		 return;
 	}
 
-	int row = (this->position % (13*9)) % 9;
-	int col = (this->position % (13*9)) / 9;
+	int row = (frxUserDataSetPlateMap->RecNo % (13*9)) % 9;
+	int col = (frxUserDataSetPlateMap->RecNo % (13*9)) / 9;
 
 	if (row == 0 && col == 0)
 	{
@@ -5679,7 +5631,7 @@ void __fastcall TMainForm::frxUserDataSetPlateMapGetValue(const UnicodeString Va
 		return;
 	}
 
-	int index = (this->position / (13*9))*96 + (col - 1)*8 + row - 1;
+	int index = (frxUserDataSetPlateMap->RecNo / (13*9))*96 + (col - 1)*8 + row - 1;
 	if (index > frxUserDataSetPlateMap->RangeEndCount - 1)
 		return;
 
@@ -5689,7 +5641,7 @@ void __fastcall TMainForm::frxUserDataSetPlateMapGetValue(const UnicodeString Va
 	String number1 = System::Sysutils::Format(L"%.4n", ARRAYOFCONST(((float)ReadRawGrid->Cells[colReadRawValue->Position      ][index]))) + " ";
 	String number2 = System::Sysutils::Format(L"%.4n", ARRAYOFCONST(((float)ReadRawGrid->Cells[colPostprocessedValue->Position][index])));
 
-	String label   = ReadRawGrid->Cells[colReadRawLabel->Position      ][index];
+	String label   = ReadRawGrid->Cells[colReadRawLabel->Position][index];
 	if (label.Length() > 16)
 	{
 			 //label = label.SubString(0,7) + UTF8ToUnicodeString("\xE2\x80\xA6") + label.SubString(label.Length()-5, 5);
@@ -5706,7 +5658,7 @@ void __fastcall TMainForm::frxUserDataSetPlateMapGetValue(const UnicodeString Va
 
 	if (type == "Desconhecido")
 	{
-		Data += ID + "\n" + " DC";  // + "\n" + " POSITIVO" + "\n";
+		Data += ID + "\n" + " DC";
 	}
 	else if (type == "Controle Positivo")
 	{
@@ -5728,7 +5680,7 @@ void __fastcall TMainForm::frxUserDataSetPlateMapGetValue(const UnicodeString Va
 	Data += "\n " + label;
 	Data += "\n           " + number1;
 	Data += "\n";
-	if (true)
+	if (this->hasSTDonFirstPlate)
 	{
 		Data += "           " + number2;
 	}

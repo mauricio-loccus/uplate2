@@ -791,8 +791,6 @@ object MainForm: TMainForm
         ParentColor = True
         TabOrder = 0
         OnChange = lmdstdValuesGridChange
-        ExplicitLeft = -3
-        ExplicitTop = -32
         object colPlateName: TLMDGridTextColumn
           Width = 100
           Position = 0
@@ -8794,6 +8792,7 @@ object MainForm: TMainForm
         Caption = 'Log&off'
         Enabled = False
         Hint = 'Desabilita um usu'#225'rio a acessar a aplica'#231#227'o.'
+        OnClick = OptUserLogoffClick
       end
       object N2: TMenuItem
         Caption = '-'
@@ -9019,7 +9018,7 @@ object MainForm: TMainForm
     PrintOptions.PrintOnSheet = 0
     ReportOptions.Author = 'Mauricio Lima'
     ReportOptions.CreateDate = 42842.539910150500000000
-    ReportOptions.LastChange = 46010.489685821800000000
+    ReportOptions.LastChange = 46026.686591145830000000
     ReportOptions.VersionBuild = '1'
     ReportOptions.VersionMajor = '0'
     ReportOptions.VersionMinor = '0'
@@ -11160,9 +11159,9 @@ object MainForm: TMainForm
         object Memo1: TfrxMemoView
           AllowVectorExport = True
           Left = 18.897650000000000000
-          Top = 34.021405118110200000
+          Top = 34.022350000000000000
           Width = 54.042350000000000000
-          Height = 3.780000000000000000
+          Height = 3.780944881889800000
           Frame.Typ = []
           Memo.UTF8W = (
             'protocolo')
@@ -11170,9 +11169,9 @@ object MainForm: TMainForm
         object Memo3: TfrxMemoView
           AllowVectorExport = True
           Left = 80.501750000000000000
-          Top = 34.021405118110200000
+          Top = 34.022350000000000000
           Width = 94.488250000000000000
-          Height = 3.780000000000000000
+          Height = 3.780944881889800000
           Frame.Typ = []
           Memo.UTF8W = (
             'XXXXX')
@@ -11399,7 +11398,7 @@ object MainForm: TMainForm
         object labelDepartment: TfrxMemoView
           AllowVectorExport = True
           Left = 1.889763779527560000
-          Top = 37.801405118110200000
+          Top = 37.802350000000000000
           Width = 109.610000000000000000
           Height = 18.897650000000000000
           Font.Charset = DEFAULT_CHARSET
@@ -11416,7 +11415,7 @@ object MainForm: TMainForm
         object department: TfrxMemoView
           AllowVectorExport = True
           Left = 113.385826770000000000
-          Top = 37.801405120000000000
+          Top = 37.802350000000000000
           Width = 162.520000000000000000
           Height = 18.897650000000000000
           Font.Charset = DEFAULT_CHARSET
@@ -11431,7 +11430,7 @@ object MainForm: TMainForm
         object labelUser: TfrxMemoView
           AllowVectorExport = True
           Left = 385.511811023622000000
-          Top = 37.803755120000000000
+          Top = 37.802350000000000000
           Width = 109.228346460000000000
           Height = 18.897650000000000000
           Font.Charset = DEFAULT_CHARSET
@@ -11448,7 +11447,7 @@ object MainForm: TMainForm
         object user: TfrxMemoView
           AllowVectorExport = True
           Left = 491.338582680000000000
-          Top = 37.801405120000000000
+          Top = 37.802350000000000000
           Width = 283.469606300000000000
           Height = 18.897650000000000000
           Font.Charset = DEFAULT_CHARSET
@@ -11480,7 +11479,7 @@ object MainForm: TMainForm
         object Memo8: TfrxMemoView
           AllowVectorExport = True
           Left = 789.920810000000000000
-          Top = 37.804700000000000000
+          Top = 37.802350000000000000
           Width = 94.488250000000000000
           Height = 18.897650000000000000
           Font.Charset = DEFAULT_CHARSET
@@ -11497,7 +11496,7 @@ object MainForm: TMainForm
         object Validator: TfrxMemoView
           AllowVectorExport = True
           Left = 884.410000000000000000
-          Top = 37.801405120000000000
+          Top = 37.802350000000000000
           Width = 143.621496060000000000
           Height = 18.900000000000000000
           Font.Charset = DEFAULT_CHARSET
@@ -11605,8 +11604,6 @@ object MainForm: TMainForm
   object frxUserDataSetPlateMap: TfrxUserDataSet
     UserName = 'PlatesMap'
     OnCheckEOF = frxUserDataSetPlateMapCheckEOF
-    OnFirst = frxUserDataSetPlateMapFirst
-    OnNext = frxUserDataSetPlateMapNext
     Fields.Strings = (
       'Row'
       'Column'

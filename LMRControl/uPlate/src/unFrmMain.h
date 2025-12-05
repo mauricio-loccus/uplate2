@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+﻿//---------------------------------------------------------------------------
 
 #ifndef unFrmMainH
 #define unFrmMainH
@@ -459,16 +459,10 @@ __published:	// IDE-managed Components
 	void __fastcall FormActivate(TObject *Sender);
 	void __fastcall FormKeyUp(TObject *Sender, WORD &Key, TShiftState Shift);
 	void __fastcall AppMessage(tagMSG &Msg, bool &Handled);
-	void __fastcall frxUserDataSetPlateBeforePrint(TfrxReportComponent *Sender)                 ;
 
-	void __fastcall frxUserDataSetPlateMapFirst(TObject *Sender);
-	void __fastcall frxUserDataSetPlateMapNext(TObject *Sender);
+	void __fastcall frxUserDataSetPlateBeforePrint(TfrxReportComponent *Sender)                 ;
 	void __fastcall frxUserDataSetPlateMapCheckEOF(TObject *Sender, bool &Eof);
 	void __fastcall frxUserDataSetPlateMapGetValue(const UnicodeString VarName, Variant &Value);
-
-
-
-
 
 public:
 	void __fastcall LoginRequest();
@@ -525,7 +519,7 @@ private:	// User declarations
 	std::unique_ptr<CalibrationData> mCalibrationCurve;
 
 	Integer m_editingCol, m_editingRow;
-	int position;                           // Usado no relat�rio 'Mapa da Placa' - Representa o registro corrente pedido pelo relat�rio
+    bool    hasSTDonFirstPlate;
 
 	Boolean __fastcall UserLogon();
 	Boolean __fastcall UserLogoff();
