@@ -6,7 +6,7 @@
         <AppType>Application</AppType>
         <MainSource>µPlate.cpp</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Debug with SPEEDY</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>3</TargetedPlatforms>
     </PropertyGroup>
@@ -51,6 +51,12 @@
         <Cfg_2>true</Cfg_2>
         <Base>true</Base>
     </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win64)'!=''">
+        <Cfg_2_Win64>true</Cfg_2_Win64>
+        <CfgParent>Cfg_2</CfgParent>
+        <Cfg_2>true</Cfg_2>
+        <Base>true</Base>
+    </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Debug with SPEEDY' or '$(Cfg_4)'!=''">
         <Cfg_4>true</Cfg_4>
         <CfgParent>Base</CfgParent>
@@ -62,13 +68,18 @@
         <Cfg_4>true</Cfg_4>
         <Base>true</Base>
     </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_4)'=='true') or '$(Cfg_4_Win64)'!=''">
+        <Cfg_4_Win64>true</Cfg_4_Win64>
+        <CfgParent>Cfg_4</CfgParent>
+        <Cfg_4>true</Cfg_4>
+        <Base>true</Base>
+    </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
         <IncludePath>crc\;$(BDSLIB)\SDL\X7;$(CG_BOOST_ROOT);$(BDSINCLUDE)\windows\vcl;$(BDS)\ObjRepos\EN\Cpp\;C:\projetos\libs\win32;C:\projetos\libs\MathEvaluator;C:\projetos\libs\zylserial\include;$(IncludePath)</IncludePath>
-        <BCC_IncludePath>C:\projetos\libs\FastReports\LibD21;$(BCC_IncludePath)</BCC_IncludePath>
         <VerInfo_Keys>CompanyName=Loccus Biotecnologia;FileDescription=Programa para controle remoto da leitora de microplacas ELISA;FileVersion=1.0.0.0;InternalName=µPlate;LegalCopyright=Copyright © 2006-2019 - Loccus do Brasil Ltda;LegalTrademarks=;OriginalFilename=µPlate.exe;ProductName=µPlate;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <VerInfo_Locale>1046</VerInfo_Locale>
-        <ILINK_LibraryPath>crc\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+        <ILINK_LibraryPath>crc\;C:\projetos\libs\zylserial\BPL;C:\projetos\libs\MathEvaluator\LIB;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <SanitizedProjectName>µPlate</SanitizedProjectName>
         <_TCHARMapping>wchar_t</_TCHARMapping>
         <Multithreaded>true</Multithreaded>
@@ -76,16 +87,15 @@
         <ProjectType>CppVCLApplication</ProjectType>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
         <DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
-        <IntermediateOutputDir>.\$(Platform)\$(Config)</IntermediateOutputDir>
-        <FinalOutputDir>.\$(Platform)\$(Config)</FinalOutputDir>
+        <IntermediateOutputDir>..\..\..\Build\$(Config)</IntermediateOutputDir>
+        <FinalOutputDir>..\..\..\bin\$(Config)</FinalOutputDir>
         <BCC_wpar>false</BCC_wpar>
         <BCC_OptimizeForSpeed>true</BCC_OptimizeForSpeed>
         <BCC_ExtendedErrorInfo>true</BCC_ExtendedErrorInfo>
         <ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\release\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
-        <Icon_MainIcon>µPlate_Icon.ico</Icon_MainIcon>
-        <IntermediateOutputDir>.\Build$(Config)</IntermediateOutputDir>
+        <FinalOutputDir>..\..\..\bin\$(Config)</FinalOutputDir>
         <DynamicRTL>false</DynamicRTL>
         <PackageImports>adortl;APogeelib;bcbie;bcbsmp;bindcomp;bindcompdbx;bindcompfmx;bindcompvcl;bindengine;CloudService;CodeSiteExpressPkg;CustomIPTransport;dbexpress;dbrtl;dbxcds;DbxClientDriver;DbxCommonDriver;DBXInterBaseDriver;DBXMySQLDriver;DBXSqliteDriver;dsnap;dsnapcon;dsnapxml;emsclient;emsclientfiredac;FireDAC;FireDACADSDriver;FireDACASADriver;FireDACCommon;FireDACCommonDriver;FireDACIBDriver;FireDACMSAccDriver;FireDACMySQLDriver;FireDACODBCDriver;FireDACPgDriver;FireDACSqliteDriver;flickerNewBkg;fmx;fmxase;fmxdae;fmxFireDAC;fmxobj;FMXTee;FmxTeeUI;frx21;frxADO21;frxDB21;frxDBX21;frxe21;frxIBX21;frxIntIO21;frxIntIOIndy21;fs21;fsADO21;fsDB21;fsIBX21;fsTee21;ibxpress;IndyCore;IndyIPClient;IndyIPCommon;IndyIPServer;IndyProtocols;IndySystem;inet;inetdb;inetdbxpress;Intraweb;lmdrtbar;lmdrtchart;lmdrtchartdb;lmdrtcore;lmdrtdialog;lmdrtdocking;lmdrtfx;lmdrtgrid;lmdrtinspector;lmdrtl;lmdrtplugin;lmdrtprint;lmdrtrtf;lmdrtrtfdb;lmdrtrtlx;lmdrtsearch;lmdrtsearchdb;lmdrtshell;lmdrtstorage;lmdrtsys;lmdrtthemes;lmdrttools;lmdrttoolsdb;lmdrttxt;lmdrttxtdb;lmdrtweb;MetropolisUILiveTile;RESTBackendComponents;RESTComponents;rtl;sdlbasepack_103X7;sdlbasepack_104X7;soapmidas;soaprtl;soapserver;svn;Tee;TeeDB;TeeUI;tethering;vcl;vclactnband;vcldb;vcldsnap;vclFireDAC;vclib;vclie;vclimg;VCLRESTComponents;vclribbon;VclSmp;vcltouch;vclx;xmlrtl;$(PackageImports)</PackageImports>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
@@ -107,6 +117,7 @@
         <UWP_CppLogo150>$(BDS)\bin\Artwork\Windows\UWP\cppreg_UwpDefault_150.png</UWP_CppLogo150>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
+        <BCC_CodeView4DebugInfo>true</BCC_CodeView4DebugInfo>
         <VerInfo_Keys>CompanyName=Loccus Biotecnologia;FileDescription=Programa para controle remoto da leitora de microplacas ELISA;FileVersion=1.1.0.0;InternalName=µPlate;LegalCopyright=Copyright © 2006-2019 - Loccus do Brasil Ltda;LegalTrademarks=;OriginalFilename=µPlate.exe;ProductName=µPlate;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_MinorVer>1</VerInfo_MinorVer>
@@ -120,7 +131,6 @@
         <DCC_Optimize>false</DCC_Optimize>
         <DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
         <Defines>_DEBUG;$(Defines)</Defines>
-        <BCC_InlineFunctionExpansion>false</BCC_InlineFunctionExpansion>
         <BCC_UseRegisterVariables>None</BCC_UseRegisterVariables>
         <DCC_Define>DEBUG</DCC_Define>
         <BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
@@ -133,12 +143,15 @@
         <BCC_DisableFramePtrElimOpt>true</BCC_DisableFramePtrElimOpt>
         <BCC_DisableSpellChecking>true</BCC_DisableSpellChecking>
         <CLANG_UnwindTables>true</CLANG_UnwindTables>
-        <ILINK_LibraryPath>$(BDSLIB)\$(PLATFORM)\debug;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\debug\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <IntermediateOutputDir>..\..\..\Build\$(Config)</IntermediateOutputDir>
+        <FinalOutputDir>..\..\..\bin\$(Config)</FinalOutputDir>
+        <DCC_RunTimeTypeInfo>true</DCC_RunTimeTypeInfo>
+        <DCC_RemoteDebug>true</DCC_RemoteDebug>
+        <BCC_InlineFunctionExpansion>false</BCC_InlineFunctionExpansion>
         <Debugger_CWD>..\..\..\workings\two</Debugger_CWD>
-        <Defines>SPEEDY;$(Defines)</Defines>
         <VerInfo_MinorVer>0</VerInfo_MinorVer>
         <LinkPackageImports>rtl.bpi;vcl.bpi;xmlrtl.bpi;vclactnband.bpi;vclx.bpi;VclSmp.bpi;vclimg.bpi;frx21.bpi;fs21.bpi;frxe21.bpi;lmdrtl.bpi;lmdrtrtlx.bpi;lmdrtcore.bpi;lmdrttools.bpi;lmdrtprint.bpi;lmdrtgrid.bpi;lmdrtthemes.bpi;vclribbon.bpi;vcldb.bpi;dbrtl.bpi;IndySystem.bpi;IndyProtocols.bpi;IndyCore.bpi;dsnap.bpi;dbexpress.bpi;DbxCommonDriver.bpi;DBXSqliteDriver.bpi;lmdrttoolsdb.bpi;Tee.bpi;Teeui.bpi;Tee.bpi</LinkPackageImports>
         <BCC_AllCompatibilityFlags>false</BCC_AllCompatibilityFlags>
@@ -157,7 +170,7 @@
         <BCC_MonitorInlinePtrAccess>true</BCC_MonitorInlinePtrAccess>
         <BCC_MonitorGlobalAndStackData>true</BCC_MonitorGlobalAndStackData>
         <LinkPackageStatics>ZylSerialPortPack.lib;sdlmathpack_rt_103X7.lib;sdlbasepack_rt_103X7.lib;sdlguipack_rt_103X7.lib</LinkPackageStatics>
-        <ILINK_LibraryPath>$(BDS)\ObjRepos\EN\Cpp\;$(BDS)\lib\Win32\debug\;C:\LMD2015\lib\d21\Win32\;C:\projetos\libs\MathEvaluator\LIB;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\X7;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL;crc\;C:\projetos\libs\zylserial\BPL;C:\Program Files (x86)\FastReport VCL RAD\LibD21</ILINK_LibraryPath>
+        <ILINK_LibraryPath>C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\X7;$(BDS)\lib\Win32\debug\;C:\Program Files (x86)\FastReport VCL RAD\LibD21;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <BT_BuildType>Debug</BT_BuildType>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
     </PropertyGroup>
@@ -165,43 +178,70 @@
         <LinkPackageStatics>rtl.lib;vcl.lib;xmlrtl.lib;vclactnband.lib;vclx.lib;VclSmp.lib;vclimg.lib;frx21.lib;fs21.lib;frxe21.lib;lmdrtl.lib;lmdrtrtlx.lib;lmdrtcore.lib;lmdrttools.lib;lmdrtprint.lib;lmdrtgrid.lib;lmdrtthemes.lib;vclribbon.lib;vcldb.lib;dbrtl.lib;IndySystem.lib;IndyProtocols.lib;IndyCore.lib;dsnap.lib;dbexpress.lib;DbxCommonDriver.lib;DBXSqliteDriver.lib;ZylSerialPortPack.lib;lmdrttoolsdb.lib;Tee.lib;Teeui.lib;sdlmathpack_rt_103X7.lib;sdlbasepack_rt_103X7.lib;sdlguipack_rt_103X7.lib</LinkPackageStatics>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
+        <FinalOutputDir>..\..\bin\$(Config)</FinalOutputDir>
         <Defines>NDEBUG;$(Defines)</Defines>
         <TASM_Debugging>None</TASM_Debugging>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-        <IntermediateOutputDir>.\Build$(Config)</IntermediateOutputDir>
-        <FinalOutputDir>..\bin\$(Platform)\$(Config)</FinalOutputDir>
+        <BCC_SmartPCHCache>false</BCC_SmartPCHCache>
+        <Debugger_CWD>..\..\..\workings\two</Debugger_CWD>
+        <IntermediateOutputDir>..\..\..\Build\$(Config)</IntermediateOutputDir>
+        <FinalOutputDir>..\..\..\bin\$(Config)</FinalOutputDir>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <IncludePath>C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\X7;$(IncludePath)</IncludePath>
         <VerInfo_Keys>CompanyName=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
         <BCC_AddProjectDirToIncludePath>true</BCC_AddProjectDirToIncludePath>
-        <BCC_IncludePath>C:\Projetos\Componentes_Loccus\zylserialport;..\..\3rdparty\MathEvaluator;C:\work\vcl;C:\Projetos\Componentes_Loccus\FastReports\LibD21;C:\Projetos\Componentes_Loccus\MathEvaluator;C:\lib\SDL\basepack;$(BCC_IncludePath)</BCC_IncludePath>
         <PackageImports>adortl;APogeelib;bcbie;bcbsmp;bindcomp;bindcompdbx;bindcompfmx;bindcompvcl;bindengine;CloudService;CodeSiteExpressPkg;CustomIPTransport;dbexpress;dbrtl;dbxcds;DbxClientDriver;DbxCommonDriver;DBXInterBaseDriver;DBXMySQLDriver;DBXSqliteDriver;dsnap;dsnapcon;dsnapxml;emsclient;emsclientfiredac;FireDAC;FireDACADSDriver;FireDACASADriver;FireDACCommon;FireDACCommonDriver;FireDACIBDriver;FireDACMSAccDriver;FireDACMySQLDriver;FireDACODBCDriver;FireDACPgDriver;FireDACSqliteDriver;flickerNewBkg;fmx;fmxase;fmxdae;fmxFireDAC;fmxobj;FMXTee;FmxTeeUI;frx21;frxDB21;frxe21;frxTee;ibxpress;IndyCore;IndyIPClient;IndyIPCommon;IndyIPServer;IndyProtocols;IndySystem;inet;inetdb;inetdbxpress;Intraweb;lmdrtbar;lmdrtchart;lmdrtchartdb;lmdrtcore;lmdrtdialog;lmdrtdocking;lmdrtfx;lmdrtgrid;lmdrtinspector;lmdrtl;lmdrtplugin;lmdrtprint;lmdrtrtf;lmdrtrtfdb;lmdrtrtlx;lmdrtsearch;lmdrtsearchdb;lmdrtshell;lmdrtstorage;lmdrtsys;lmdrtthemes;lmdrttools;lmdrttoolsdb;lmdrttxt;lmdrttxtdb;lmdrtweb;MetropolisUILiveTile;RESTBackendComponents;RESTComponents;rtl;soapmidas;soaprtl;soapserver;svn;Tee;TeeDB;TeeUI;tethering;vcl;vclactnband;vcldb;vcldsnap;vclFireDAC;vclib;vclie;vclimg;VCLRESTComponents;vclribbon;VclSmp;vcltouch;vclx;xmlrtl</PackageImports>
-        <ILINK_LibraryPath>$(BDS)\ObjRepos\EN\Cpp\;$(BDS)\lib\Win32\debug\;C:\LMD2015\lib\d21\Win32\;C:\projetos\libs\MathEvaluator\LIB;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\X7;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL;crc\;C:\projetos\libs\zylserial\BPL;C:\Program Files (x86)\FastReport VCL RAD\LibD21</ILINK_LibraryPath>
+        <ILINK_LibraryPath>C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\X7;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL;$(BDS)\lib\Win32\debug\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <LinkPackageStatics>rtl.lib;vcl.lib;xmlrtl.lib;vclactnband.lib;vclx.lib;VclSmp.lib;vclimg.lib;frx21.lib;fs21.lib;frxe21.lib;lmdrtl.lib;lmdrtrtlx.lib;lmdrtcore.lib;lmdrttools.lib;lmdrtprint.lib;lmdrtgrid.lib;lmdrtthemes.lib;vclribbon.lib;vcldb.lib;dbrtl.lib;IndySystem.lib;IndyProtocols.lib;IndyCore.lib;dsnap.lib;dbexpress.lib;DbxCommonDriver.lib;DBXSqliteDriver.lib;ZylSerialPortPack.lib;lmdrttoolsdb.lib;Tee.lib;Teeui.lib;sdlmathpack_rt_103X7.lib;sdlbasepack_rt_103X7.lib;sdlguipack_rt_103X7.lib</LinkPackageStatics>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
     </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
+        <BCC_PCHName_Clang>LRM96PCH.h</BCC_PCHName_Clang>
+    </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_4)'!=''">
+        <BCC_AllCompatibilityFlags>true</BCC_AllCompatibilityFlags>
+        <BCC_OptimizeForSpeed>false</BCC_OptimizeForSpeed>
+        <DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
+        <BCC_CodeView4DebugInfo>true</BCC_CodeView4DebugInfo>
+        <BCC_DisableOptimizations>true</BCC_DisableOptimizations>
+        <BCC_AddProjectDirToIncludePath>true</BCC_AddProjectDirToIncludePath>
+        <BCC_MonitorGlobalAndStackData>true</BCC_MonitorGlobalAndStackData>
+        <BCC_MonitorThis>true</BCC_MonitorThis>
+        <BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
+        <BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
+        <BCC_MonitorInlinePtrAccess>true</BCC_MonitorInlinePtrAccess>
         <ILINK_LibraryPath>$(BDSLIB)\$(PLATFORM)\debug;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <BCC_IncludePath>C:\projetos\libs\zylserial\include;$(BCC_IncludePath)</BCC_IncludePath>
         <FinalOutputDir>..\bin\$(Platform)\$(Config)</FinalOutputDir>
         <Defines>_DEBUG;$(Defines)</Defines>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_4_Win32)'!=''">
+        <IntermediateOutputDir>..\..\..\Build\$(Config)</IntermediateOutputDir>
+        <VerInfo_MinorVer>1</VerInfo_MinorVer>
+        <BCC_InlineFunctionExpansion>false</BCC_InlineFunctionExpansion>
+        <DCC_Optimize>false</DCC_Optimize>
+        <ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
+        <FinalOutputDir>..\..\..\bin\$(Config)</FinalOutputDir>
+        <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+        <BCC_AllCompatibilityFlags>false</BCC_AllCompatibilityFlags>
+        <VerInfo_Keys>CompanyName=;FileVersion=1.1.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
         <Defines>SPEEDY;$(Defines)</Defines>
         <BCC_MonitorThis>true</BCC_MonitorThis>
         <BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
         <BCC_SmartPCHCache>false</BCC_SmartPCHCache>
         <BCC_MonitorInlinePtrAccess>true</BCC_MonitorInlinePtrAccess>
-        <BCC_AllCodeguardOptions>true</BCC_AllCodeguardOptions>
         <BCC_MonitorGlobalAndStackData>true</BCC_MonitorGlobalAndStackData>
-        <Debugger_CWD>..\..\..\..\workings\one</Debugger_CWD>
+        <Debugger_CWD>..\..\..\workings\two</Debugger_CWD>
         <BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
         <DCC_RunTimeTypeInfo>true</DCC_RunTimeTypeInfo>
         <ILINK_LibraryPath>$(BDS)\lib\Win32\debug\;C:\projetos\libs\MathEvaluator\LIB;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL\X7;C:\Program Files (x86)\Embarcadero\Studio\15.0\lib\SDL;C:\projetos\libs\zylserial\BPL;C:\Program Files (x86)\FastReport VCL RAD\LibD21</ILINK_LibraryPath>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <LinkPackageStatics>rtl.lib;vcl.lib;xmlrtl.lib;vclactnband.lib;vclx.lib;VclSmp.lib;vclimg.lib;frx21.lib;fs21.lib;frxe21.lib;lmdrtl.lib;lmdrtrtlx.lib;lmdrtcore.lib;lmdrttools.lib;lmdrtprint.lib;lmdrtgrid.lib;lmdrtthemes.lib;vclribbon.lib;vcldb.lib;dbrtl.lib;IndySystem.lib;IndyProtocols.lib;IndyCore.lib;dsnap.lib;dbexpress.lib;DbxCommonDriver.lib;DBXSqliteDriver.lib;ZylSerialPortPack.lib;lmdrttoolsdb.lib;Tee.lib;Teeui.lib;sdlmathpack_rt_103X7.lib;sdlbasepack_rt_103X7.lib;sdlguipack_rt_103X7.lib</LinkPackageStatics>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_4_Win64)'!=''">
+        <BCC_PCHName_Clang>LRM96PCH.h</BCC_PCHName_Clang>
     </PropertyGroup>
     <ItemGroup>
         <CppCompile Include="crcfast.cpp">
@@ -217,9 +257,11 @@
             <BuildOrder>6</BuildOrder>
         </None>
         <None Include="Elisa.h">
+            <VirtualFolder>{91704E43-5622-4E63-8124-8C8A8488990D}</VirtualFolder>
             <BuildOrder>9</BuildOrder>
         </None>
         <PCHCompile Include="LRM96PCH.h">
+            <VirtualFolder>{91704E43-5622-4E63-8124-8C8A8488990D}</VirtualFolder>
             <BuildOrder>1</BuildOrder>
         </PCHCompile>
         <None Include="memstream.h">
@@ -254,14 +296,17 @@
             <BuildOrder>4</BuildOrder>
         </CppCompile>
         <CppCompile Include="unDeviceFactory.cpp">
+            <VirtualFolder>{91704E43-5622-4E63-8124-8C8A8488990D}</VirtualFolder>
             <DependentOn>unDeviceFactory.h</DependentOn>
             <BuildOrder>38</BuildOrder>
         </CppCompile>
         <CppCompile Include="unElisaDevice.cpp">
+            <VirtualFolder>{91704E43-5622-4E63-8124-8C8A8488990D}</VirtualFolder>
             <DependentOn>unElisaDevice.h</DependentOn>
             <BuildOrder>37</BuildOrder>
         </CppCompile>
         <CppCompile Include="unElisaSimulator.cpp">
+            <VirtualFolder>{91704E43-5622-4E63-8124-8C8A8488990D}</VirtualFolder>
             <DependentOn>unElisaSimulator.h</DependentOn>
             <BuildOrder>37</BuildOrder>
         </CppCompile>
@@ -284,6 +329,7 @@
             <BuildOrder>15</BuildOrder>
         </CppCompile>
         <CppCompile Include="unFrmConfig.cpp">
+            <VirtualFolder>{A08290D7-C1D5-43E7-9E39-116A9A76193A}</VirtualFolder>
             <Form>FrmAppConfig</Form>
             <FormType>dfm</FormType>
             <DependentOn>unFrmConfig.h</DependentOn>
@@ -370,10 +416,12 @@
             <BuildOrder>26</BuildOrder>
         </CppCompile>
         <CppCompile Include="unLMR962023Device.cpp">
+            <VirtualFolder>{91704E43-5622-4E63-8124-8C8A8488990D}</VirtualFolder>
             <DependentOn>unLMR962023Device.h</DependentOn>
             <BuildOrder>41</BuildOrder>
         </CppCompile>
         <CppCompile Include="unLMR96Device.cpp">
+            <VirtualFolder>{91704E43-5622-4E63-8124-8C8A8488990D}</VirtualFolder>
             <DependentOn>unLMR96Device.h</DependentOn>
             <BuildOrder>38</BuildOrder>
         </CppCompile>
@@ -481,10 +529,23 @@
                 </Excluded_Packages>
                 <VFOLDERS>
                     <VFOLDER ID="{A08290D7-C1D5-43E7-9E39-116A9A76193A}" name="Forms"/>
+                    <VFOLDER ID="{91704E43-5622-4E63-8124-8C8A8488990D}" name="devices"/>
                 </VFOLDERS>
             </CPlusPlusBuilder.Personality>
             <Deployment Version="4">
-                <DeployFile LocalName="Singleton.inl" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="crc\crc.c" Configuration="Debug with SPEEDY" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin64\cc64160.dll" Class="DependencyModule">
+                    <Platform Name="Win64">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="..\..\bin\Debug with SPEEDY\µPlate.tds" Configuration="Debug with SPEEDY" Class="DebugSymbols"/>
+                <DeployFile LocalName="Singleton.inl" Configuration="Debug with SPEEDY" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
@@ -502,20 +563,21 @@
                 </DeployFile>
                 <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64160mt.dll" Class="DependencyModule"/>
                 <DeployFile LocalName="Singleton.inl" Configuration="Release" Class="ProjectFile"/>
-                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin\cc32c280mt.dll" Class="DependencyModule"/>
-                <DeployFile LocalName=".\Win32\Debug\µPlate.exe" Configuration="Debug" Class="ProjectOutput"/>
-                <DeployFile LocalName="crc\crc.c" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="..\..\bin\Debug with SPEEDY\µPlate - notebook dell.tds" Configuration="Debug with SPEEDY" Class="DebugSymbols"/>
+                <DeployFile LocalName="..\bin\Win32\Debug\µPlate.tds" Configuration="Debug" Class="DebugSymbols"/>
+                <DeployFile LocalName="..\..\bin\Debug with SPEEDY\µPlate.exe" Configuration="Debug with SPEEDY" Class="ProjectOutput">
                     <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
+                        <RemoteName>µPlate.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName=".\Win32\Debug\µPlate.exe" Configuration="Debug" Class="ProjectOutput"/>
                 <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64160mt.dll" Class="DependencyModule">
                     <Platform Name="Win64">
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32c280.dll" Class="DependencyModule"/>
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin\cc32c280mt.dll" Class="DependencyModule"/>
                 <DeployFile LocalName="Singleton.inl" Configuration="Debug" Class="ProjectFile"/>
                 <DeployFile LocalName=".\Win32\Debug\µPlate.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
@@ -534,7 +596,6 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64280mt.dll" Class="DependencyModule"/>
                 <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32160.dll" Class="DependencyModule">
                     <Platform Name="Win32">
                         <Overwrite>true</Overwrite>
@@ -548,30 +609,32 @@
                 </DeployFile>
                 <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin64\cc64160.dll" Class="DependencyModule"/>
                 <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32160.dll" Class="DependencyModule"/>
-                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin64\cc64280.dll" Class="DependencyModule"/>
-                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32280.dll" Class="DependencyModule"/>
                 <DeployFile LocalName=".\Win32\Release\µPlate.exe" Configuration="Release" Class="ProjectOutput"/>
                 <DeployFile LocalName=".\Win32\Debug\µPlate.tds" Configuration="Debug" Class="DebugSymbols"/>
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64280mt.dll" Class="DependencyModule"/>
                 <DeployFile LocalName="crc\crc.c" Configuration="Release" Class="ProjectFile"/>
-                <DeployFile LocalName=".\Win32\Debug\µPlate.tds" Configuration="Debug" Class="DebugSymbols"/>
-                <DeployFile Condition="'$(DynamicRTL)'=='true'" LocalName="$(BDS)\Redist\osx32\libcgstl.dylib" Class="DependencyModule">
-                    <Platform Name="OSX32">
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="..\bin\Win32\Debug\µPlate.tds" Configuration="Debug" Class="DebugSymbols">
+                <DeployFile LocalName="..\..\..\bin\Debug with SPEEDY\µPlate.tds" Configuration="Debug with SPEEDY" Class="DebugSymbols">
                     <Platform Name="Win32">
                         <RemoteName>µPlate.tds</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="crc\crc.c" Configuration="Debug" Class="ProjectFile"/>
-                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin\cc32280mt.dll" Class="DependencyModule"/>
-                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin64\cc64160.dll" Class="DependencyModule">
-                    <Platform Name="Win64">
+                <DeployFile Condition="'$(DynamicRTL)'=='true'" LocalName="$(BDS)\Redist\osx32\libcgstl.dylib" Class="DependencyModule">
+                    <Platform Name="OSX32">
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName="..\..\..\bin\Debug with SPEEDY\µPlate.exe" Configuration="Debug with SPEEDY" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>µPlate.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="crc\crc.c" Configuration="Debug" Class="ProjectFile"/>
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin64\cc64280.dll" Class="DependencyModule"/>
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32280.dll" Class="DependencyModule"/>
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin\cc32280mt.dll" Class="DependencyModule"/>
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32c280.dll" Class="DependencyModule"/>
                 <DeployClass Required="true" Name="DependencyPackage">
                     <Platform Name="iOSDevice">
                         <Operation>1</Operation>
