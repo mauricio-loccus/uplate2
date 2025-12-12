@@ -1,0 +1,36 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{26D12912-1EA2-4D21-A7A2-44D0BA8D544C}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="report-launcher.cbproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="report-launcher">
+        <MSBuild Projects="report-launcher.cbproj"/>
+    </Target>
+    <Target Name="report-launcher:Clean">
+        <MSBuild Projects="report-launcher.cbproj" Targets="Clean"/>
+    </Target>
+    <Target Name="report-launcher:Make">
+        <MSBuild Projects="report-launcher.cbproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="report-launcher"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="report-launcher:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="report-launcher:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
