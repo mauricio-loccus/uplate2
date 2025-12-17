@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{5FE8C579-2F30-4BD4-9F11-F58591230BAD}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="keycpp.cbproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="td1.cbproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="keycpp">
+        <MSBuild Projects="keycpp.cbproj"/>
+    </Target>
+    <Target Name="keycpp:Clean">
+        <MSBuild Projects="keycpp.cbproj" Targets="Clean"/>
+    </Target>
+    <Target Name="keycpp:Make">
+        <MSBuild Projects="keycpp.cbproj" Targets="Make"/>
+    </Target>
+    <Target Name="td1">
+        <MSBuild Projects="td1.cbproj"/>
+    </Target>
+    <Target Name="td1:Clean">
+        <MSBuild Projects="td1.cbproj" Targets="Clean"/>
+    </Target>
+    <Target Name="td1:Make">
+        <MSBuild Projects="td1.cbproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="keycpp;td1"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="keycpp:Clean;td1:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="keycpp:Make;td1:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
